@@ -55,7 +55,9 @@
   }
   .hud button:hover { background: rgba(34,53,107,.08); }
 
-  .overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(36,49,63,.18); }
+  /* flex + margin:auto keeps a tall card centred but scrollable on short screens */
+  .overlay { position: absolute; inset: 0; display: flex; overflow-y: auto; padding: 16px; background: rgba(36,49,63,.18); }
+  .overlay > .card { margin: auto; }
   .card {
     position: relative; width: min(330px, 100%);
     background: var(--note); color: var(--ink);
@@ -105,6 +107,15 @@
   .skin .tag { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; opacity: .6; }
   .skin[aria-checked="true"] { border: 2px solid var(--ink); background: rgba(255,255,255,.55); }
   .skin:hover { background: rgba(255,255,255,.35); }
+  .card h3 { font-family: var(--display); font-weight: 700; font-size: 20px; margin: 4px 0 -4px; }
+  .trails { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .trail {
+    display: grid; justify-items: center; gap: 3px; padding: 6px 4px;
+    border: 1.5px dashed rgba(34,53,107,.35); border-radius: 8px; font-size: 14px; line-height: 1.05; text-align: center;
+  }
+  .trail.selected { border: 2px solid var(--ink); background: rgba(255,255,255,.55); }
+  .trail canvas { width: 84px; max-width: 100%; height: 30px; }
+  .trail .buy { font-size: 14px; padding: 2px 8px 1px; }
   .bank { font-size: 18px; }
   .bank strong { font-family: var(--display); font-size: 22px; color: #a8740f; font-variant-numeric: tabular-nums; }
   .shop { display: grid; gap: 8px; }
@@ -115,13 +126,13 @@
   .upgrade canvas { width: 44px; height: 44px; }
   .upgrade .info { display: grid; gap: 2px; min-width: 0; font-size: 15px; line-height: 1.15; }
   .upgrade .info strong { font-family: var(--display); font-size: 18px; }
-  .upgrade .buy {
+  .buy {
     font-family: var(--display); font-weight: 700; font-size: 16px; white-space: nowrap;
     color: var(--paper); background: var(--ink); border: 2px solid var(--ink); border-radius: 8px 6px 9px 7px;
     padding: 4px 10px 2px; cursor: pointer;
   }
-  .upgrade .buy:disabled { color: var(--ink); background: transparent; opacity: .55; cursor: default; }
-  .upgrade .buy.owned { opacity: 1; border-style: dashed; }
+  .buy:disabled { color: var(--ink); background: transparent; opacity: .55; cursor: default; }
+  .buy.owned { opacity: 1; border-style: dashed; }
   .card .play:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 rgba(34,53,107,.35); }
   .card .play:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(34,53,107,.35); }
   button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
@@ -134,7 +145,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v15</div>
+    <div class="version" id="version">v16</div>
 
     <div class="hud">
       <div>
@@ -158,7 +169,7 @@
           <li>Tap or click a side of the screen, or press <kbd>←</kbd> <kbd>→</kbd> (<kbd>A</kbd> <kbd>D</kbd>), to drift that way</li>
           <li>Press the other side once to fall straight, twice to drift back. Hold a side for a sharp turn</li>
           <li>The deeper you fall, the faster you go. Gliding sideways slows you down</li>
-          <li>Gold stars give +25 m and can be spent in the Shop · <kbd>P</kbd> pauses</li>
+          <li>Collect gold stars to spend in the Shop · <kbd>P</kbd> pauses</li>
         </ul>
         <div class="actions">
           <button class="play" id="startBtn" type="button">Throw it</button>
@@ -178,7 +189,10 @@
         <h2>Shop</h2>
         <p>Spend the stars you collect on upgrades. You keep them forever.</p>
         <div class="bank">You have <strong id="bankCount">★ 0</strong></div>
+        <h3>Upgrades</h3>
         <div class="shop" id="shopList"></div>
+        <h3>Trails</h3>
+        <div class="trails" id="trailList"></div>
         <button class="play" id="shopDone" type="button">Done</button>
       </div>
 
@@ -211,7 +225,6 @@
   // ---------- constants & helpers ----------
   const W = 400;              // logical playfield width; height follows the screen
   const PX_PER_M = 30;        // world units per metre of depth
-  const STAR_BONUS = 25;
   const SIDE_SLOWDOWN = 0.4;  // at full sideways speed the plane falls 40% slower
   const COL = {
     paper: '#fbf9f1', rule: '#bcd3ea', margin: '#e7a1a1', ink: '#22356b',
@@ -325,7 +338,9 @@
       '√144 = 12', 'A = π r²', 'P = 2(l + w)', '2⁵ = 32', '−3 · (−4) = 12',
       '2x + 3 = 11  →  x = 4', 'x/4 = 5  →  x = 20', '3/4 = 0.75', '1/3 + 1/3 = 2/3', '50% of 64 = 32',
       '10% of 250 = 25', '√81 = 9', '3² + 4² = 25', '10³ = 1000', '5! = 120', 'C = 2πr', 'A = ½ b h',
-      '(−2)³ = −8', '0.2 × 0.3 = 0.06', '5x − 7 = 18  →  x = 5', 'a/b ÷ c/d = ad / bc', '7/8 − 3/8 = 1/2'
+      '(−2)³ = −8', '0.2 × 0.3 = 0.06', '5x − 7 = 18  →  x = 5', 'a/b ÷ c/d = ad / bc', '7/8 − 3/8 = 1/2',
+      // first physics
+      'v = d / t', 'ρ = m / V', 'P = F / A', 'W = F · d', 'a = Δv / Δt'
     ],
     [ // algebra, geometry, trig
       'x = (−b ± √(b² − 4ac)) / 2a', 'a² + b² = c²', '(a + b)² = a² + 2ab + b²', 'sin²θ + cos²θ = 1',
@@ -333,7 +348,11 @@
       '(a − b)² = a² − 2ab + b²', 'a² − b² = (a + b)(a − b)', 'sin 30° = 1/2', 'cos 60° = 1/2', 'tan 45° = 1',
       'sin 2θ = 2 sin θ cos θ', 'cos 2θ = cos²θ − sin²θ', 'log(ab) = log a + log b', 'logₐ aˣ = x',
       'x² − 5x + 6 = (x − 2)(x − 3)', 'd = √((x₂ − x₁)² + (y₂ − y₁)²)', 'm = (y₂ − y₁) / (x₂ − x₁)',
-      'Sₙ = n(a₁ + aₙ) / 2', 'aₙ = a₁ rⁿ⁻¹', 'a / sin A = b / sin B', 'c² = a² + b² − 2ab cos C', '180° = π rad'
+      'Sₙ = n(a₁ + aₙ) / 2', 'aₙ = a₁ rⁿ⁻¹', 'a / sin A = b / sin B', 'c² = a² + b² − 2ab cos C', '180° = π rad',
+      // mechanics and circuits
+      'F = ma', 'p = mv', 'KE = ½ m v²', 'PE = m g h', 'V = I R', 'P = I V', 'λ = v / f', 'T = 2π √(L / g)',
+      // engineering basics: stress, strain, moments, resistors
+      'σ = F / A', 'ε = ΔL / L₀', 'σ = E ε', 'M = F · d', 'R = R₁ + R₂'
     ],
     [ // calculus
       'd/dx xⁿ = n xⁿ⁻¹', '∫ x² dx = x³/3 + C', 'lim x→0  sin x / x = 1', 'd/dx eˣ = eˣ',
@@ -341,7 +360,12 @@
       'd/dx sin x = cos x', 'd/dx cos x = −sin x', 'd/dx ln x = 1/x', 'd/dx tan x = sec²x', '∫ cos x dx = sin x + C',
       '∫ eˣ dx = eˣ + C', '∫₀^π sin x dx = 2', "(f/g)′ = (f′g − fg′) / g²", "(f ∘ g)′ = f′(g(x)) · g′(x)",
       'lim n→∞ (1 + 1/n)ⁿ = e', '∫ u dv = uv − ∫ v du', "∫ₐᵇ f′(x) dx = f(b) − f(a)", 'd/dx arctan x = 1 / (1 + x²)',
-      'lim x→0 (eˣ − 1) / x = 1', '∫ 1/(1 + x²) dx = arctan x + C', '∂/∂x (x²y) = 2xy', '∫₀¹ x² dx = 1/3'
+      'lim x→0 (eˣ − 1) / x = 1', '∫ 1/(1 + x²) dx = arctan x + C', '∂/∂x (x²y) = 2xy', '∫₀¹ x² dx = 1/3',
+      // physics: springs, rotation, motion, optics, fields
+      'F = −kx', 'τ = r F sin θ', 'a = v² / r', 'v² = u² + 2as', 's = ut + ½at²', 'n₁ sin θ₁ = n₂ sin θ₂',
+      'F = qE', 'F = q v × B',
+      // engineering: circuits, drives, flow, beams, wind
+      '1/R = 1/R₁ + 1/R₂', 'τ = RC', 'P = τ ω', 'Q = A v', 'δ = FL³ / (3EI)', 'σ = M y / I', 'P = ½ ρ A v³'
     ],
     [ // series, complex numbers, linear algebra
       'e^(iπ) + 1 = 0', '∑ 1/n² = π²/6', 'eˣ = ∑ xⁿ / n!', '∫ e^(−x²) dx = √π', 'det(A − λI) = 0',
@@ -349,7 +373,12 @@
       '∑ₙ₌₁^∞ 1/2ⁿ = 1', '∑ₖ₌₁ⁿ k = n(n+1)/2', '∑ₖ₌₁ⁿ k² = n(n+1)(2n+1)/6', 'sin x = x − x³/3! + x⁵/5! − …',
       'cos x = 1 − x²/2! + x⁴/4! − …', 'ln(1 + x) = x − x²/2 + x³/3 − …', '1/(1 − x) = ∑ xⁿ,  |x| < 1', 'i² = −1',
       '|a + bi| = √(a² + b²)', '(cos θ + i sin θ)ⁿ = cos nθ + i sin nθ', 'det [[a, b], [c, d]] = ad − bc',
-      '(AB)ᵀ = BᵀAᵀ', 'A A⁻¹ = I', 'Γ(1/2) = √π', '∏ₚ (1 − 1/p²) = 6/π²', '∑ 1/n diverges', 'φ = (1 + √5) / 2'
+      '(AB)ᵀ = BᵀAᵀ', 'A A⁻¹ = I', 'Γ(1/2) = √π', '∏ₚ (1 − 1/p²) = 6/π²', '∑ 1/n diverges', 'φ = (1 + √5) / 2',
+      // physics: rotation, heat, capacitors, induction
+      'L = Iω', 'Q = m c ΔT', 'η = 1 − T_c / T_h', 'E = ½ C V²', 'Φ = B A cos θ', 'ε = −dΦ/dt', 'U = ½ k x²',
+      // engineering: fluids, heat flow, buckling, AC circuits
+      'P + ½ρv² + ρgh = const', 'Re = ρ v L / μ', 'q = −k ∇T', 'P_cr = π² E I / (K L)²', 'f = 1 / (2π √(LC))',
+      'X_C = 1 / (2π f C)', 'Z = R + jX'
     ],
     [ // physics and the scary stuff
       'iℏ ∂Ψ/∂t = ĤΨ', 'ζ(s) = ∑ 1/nˢ', '∇ × B = μ₀J + μ₀ε₀ ∂E/∂t', '∇ · E = ρ / ε₀',
@@ -357,7 +386,12 @@
       'P = NP ?',
       'E = mc²', 'F = G m₁m₂ / r²', '∇ · B = 0', '∇ × E = −∂B/∂t', 'E = hν', 'Δx Δp ≥ ℏ/2', 'S = k ln W',
       'PV = nRT', 'dS ≥ δQ / T', '∂u/∂t = α ∇²u', '∂²u/∂t² = c² ∇²u', '(iγ^μ ∂_μ − m) ψ = 0', '∮ B · dl = μ₀ I',
-      'L = T − V', 'd/dt (∂L/∂q̇) = ∂L/∂q', 'N(t) = N₀ e^(−λt)'
+      'L = T − V', 'd/dt (∂L/∂q̇) = ∂L/∂q', 'N(t) = N₀ e^(−λt)',
+      // physics: Doppler, relativity, matter waves
+      'f′ = f (v + v_o) / (v − v_s)', 'γ = 1 / √(1 − v²/c²)', 'λ = h / p',
+      // engineering: control systems, signals, pipe flow, convection
+      'H(s) = Y(s) / X(s)', 'ℒ{f′(t)} = s F(s) − f(0)', 'G(s) = ωₙ² / (s² + 2ζωₙs + ωₙ²)',
+      'Δp = f (L/D) (ρv² / 2)', 'Nu = h L / k'
     ]
   ];
   const formulaFont = size => `${size}px Kalam, "Cambria Math", "Segoe UI Symbol", cursive`;
@@ -440,10 +474,21 @@
     { id: 'magnet', name: 'Star magnet', price: 10, desc: 'Stars near your plane fly straight to it.' }
   ];
   const MAGNET_RANGE = 120;
+  const TRAILS = [
+    { id: 'pencil', name: 'Pencil', price: 0 },
+    { id: 'ink', name: 'Ink', price: 5 },
+    { id: 'dots', name: 'Dots', price: 5 },
+    { id: 'crayon', name: 'Crayon', price: 10 },
+    { id: 'rainbow', name: 'Rainbow', price: 15 },
+    { id: 'sparkle', name: 'Sparkles', price: 20 }
+  ];
   let bank = +store.get('nosedive-bank') || 0;
   let owned = {};
   try { owned = JSON.parse(store.get('nosedive-upgrades') || '{}') || {}; } catch (e) { owned = {}; }
   const has = id => owned[id] === true;
+  const ownsTrail = t => t.price === 0 || has('trail-' + t.id);
+  let trailStyle = store.get('nosedive-trail') || 'pencil';
+  if (!TRAILS.some(t => t.id === trailStyle && ownsTrail(t))) trailStyle = 'pencil';
   let titleTime = 0;
 
   // One control scheme for every device (tap/click a screen side, or press an arrow key):
@@ -472,10 +517,10 @@
   const difficulty = () => 1 - Math.exp(-depthM() / 600);
   const baseFallSpeed = () => 150 + 11 * Math.sqrt(depthM());
   const maxSideSpeed = () => 300 + 0.4 * (baseFallSpeed() - 150);
-  const score = () => Math.floor(dist / PX_PER_M) + stars * STAR_BONUS;
+  const score = () => Math.floor(dist / PX_PER_M);   // stars are Shop money, not metres
 
   function reset() {
-    plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: has('life') ? 1 : 0, invuln: 0 };
+    plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: has('life') ? 1 : 0, invuln: 0, soggy: 0 };
     obstacles = []; pickups = []; particles = []; floaters = []; trail = [];
     dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
     nextRowY = H + 140;
@@ -487,6 +532,10 @@
   const TACK_COLORS = ['#d9443a', '#2f8f5b', '#2f6fd1', '#e0a21a', '#8a4fc2'];
   const CLIP_COLORS = ['#8d96a3', '#d9443a', '#2f6fd1', '#2f8f5b', '#e0a21a'];
   const PEN_COLORS = ['#1f3fa8', '#c0392b', '#1d1d1d', '#2f8f5b'];
+  const NOTE_COLORS = ['#fde58a', '#f7a8c4', '#b9e3a8', '#a8d4f2'];
+  const SCISSOR_COLORS = ['#f07f1e', '#2f8f5b', '#8a4fc2', '#2f6fd1', '#d9443a'];
+  const SOGGY_TIME = 2.5;          // seconds a coffee soaking lasts
+  const blobShape = n => Array.from({ length: n }, () => rand(0.8, 1.1));
   const make = {
     gate(y, d) {           // two rulers leaving a gap
       const gapW = lerp(170, 98, d) + rand(-10, 10);
@@ -505,7 +554,7 @@
     scissors(y, d) {
       obstacles.push({ type: 'scissors', y, x: rand(90, W - 90), rot: rand(0, 6.28),
         spin: (Math.random() < 0.5 ? -1 : 1) * rand(0.8, 1.4 + 1.3 * d), open: 0.3,
-        ph: rand(0, 6.28), vx: rand(-35, 35) });
+        ph: rand(0, 6.28), vx: rand(-35, 35), col: SCISSOR_COLORS[ri(0, SCISSOR_COLORS.length - 1)] });
     },
     blots(y, d) {
       const n = 1 + (Math.random() < 0.4 + 0.4 * d ? 1 : 0) + (d > 0.5 && Math.random() < 0.4 ? 1 : 0);
@@ -585,17 +634,57 @@
     },
     cutter(y, d) {         // a snap-off cutter on one edge: the blade shoots out, holds, then slides back
       obstacles.push({ type: 'cutter', y, side: Math.random() < 0.5 ? -1 : 1, ext: 0,
-        maxExt: rand(W * 0.4, W * 0.6), period: lerp(2.4, 1.6, d), t: rand(0, 2) });
+        maxExt: rand(W * 0.22, W * 0.38), period: lerp(2.4, 1.6, d), t: rand(0, 2) });
     },
     pen(y, d) {            // a pen inks a solid line across the page, stopping short of the far edge
       obstacles.push({ type: 'pen', y, side: Math.random() < 0.5 ? -1 : 1,
         len: W - rand(lerp(140, 95, d), lerp(170, 120, d)), drawn: 0, v: 0, active: false, wave: rand(0, 6),
         col: PEN_COLORS[ri(0, PEN_COLORS.length - 1)] });
     },
-    stylus(y, d) {         // a tablet stylus hovering over the page; every tap sends out an expanding ripple
-      obstacles.push({ type: 'stylus', y, x: rand(70, W - 70), vx: (Math.random() < 0.5 ? -1 : 1) * rand(30, 60 + 50 * d),
-        rings: [], timer: rand(0.3, 0.9), every: lerp(1.5, 1.0, d), tap: 0, maxR: lerp(75, 95, d) });
+    stamp(y, d) {          // a rubber stamp: its shadow warns where it will land, then it slams down
+      obstacles.push({ type: 'stamp', y, x: rand(60, W - 60), phase: 'warn', t: 0, warn: lerp(1.2, 0.75, d), marks: [] });
+      return 40;
+    },
+    sharpener(y, d) {      // a pencil sharpener that sucks the plane sideways toward it
+      obstacles.push({ type: 'sharpener', y, x: rand(80, W - 80), R: 150, force: lerp(500, 800, d), t: rand(0, 5) });
+      return 40;
+    },
+    coffee(y, d) {         // a coffee spill: flying through it soaks the plane (falls faster, steers worse)
+      const r = rand(40, 58);
+      obstacles.push({ type: 'coffee', y, x: rand(r + 10, W - r - 10), r, pts: blobShape(14),
+        drops: Array.from({ length: 5 }, () => [rand(0, 6.28), rand(1.2, 1.6), rand(2, 5)]),
+        ring: Math.random() < 0.6 ? { a: rand(0, 6.28), r: rand(20, 26) } : null });
+      if (d > 0.35) {      // and a tack waiting below the spill for a soggy plane
+        obstacles.push({ type: 'tack', x: rand(30, W - 30), y: y + rand(90, 120), r: 10,
+          col: TACK_COLORS[ri(0, TACK_COLORS.length - 1)] });
+        return 110;
+      }
+      return 30;
+    },
+    whiteout(y, d) {       // a dab of correction fluid hiding tacks or ink until the plane is close
+      const r = rand(70, 92), x = rand(r + 6, W - r - 6);
+      const n = d > 0.4 ? 3 : 2;
+      for (let i = 0; i < n; i++) {   // hidden hazards go first so the whiteout draws on top of them
+        const a = rand(0, 6.28), k = rand(0, 0.55) * r;
+        const hx = x + Math.cos(a) * k, hy = y + Math.sin(a) * k;
+        if (Math.random() < 0.6) obstacles.push({ type: 'tack', x: hx, y: hy, r: 10, col: TACK_COLORS[ri(0, TACK_COLORS.length - 1)] });
+        else {
+          const br = rand(13, 18);
+          obstacles.push({ type: 'blot', x: hx, y: hy, r: br, drops: [],
+            bumps: Array.from({ length: 6 }, (_, j) => ({ t: j / 6 * 6.28, d: br * 0.7, r: br * 0.4 })) });
+        }
+      }
+      obstacles.push({ type: 'whiteout', y, x, r, pts: blobShape(16), streaks: Array.from({ length: 4 }, () => rand(-0.6, 0.6)) });
       return 60;
+    },
+    notes(y, d) {          // sticky notes fluttering down the page, swaying side to side
+      const n = d > 0.4 ? 3 : 2;
+      for (let i = 0; i < n; i++) {
+        obstacles.push({ type: 'note', y: y + rand(-30, 30), bx: (i + 0.5) * W / n + rand(-25, 25), x: 0, rot: 0,
+          amp: rand(25, 55), f: rand(1.2, 2.2), ph: rand(0, 6.28), fall: rand(0.3, 0.45),
+          col: NOTE_COLORS[ri(0, NOTE_COLORS.length - 1)], scribble: rand(0.4, 0.9) });
+      }
+      return 80;
     }
   };
 
@@ -624,7 +713,11 @@
     if (d > 0.05) pool.push(['pen', 1.3]);
     if (d > 0.1) pool.push(['glue', 1.2]);
     if (d > 0.15) pool.push(['cutter', 1.3]);
-    if (d > 0.25) pool.push(['stylus', 1.2]);
+    if (d > 0.06) pool.push(['notes', 1.2]);
+    if (d > 0.1) pool.push(['coffee', 1.1]);
+    if (d > 0.18) pool.push(['sharpener', 1.2]);
+    if (d > 0.2) pool.push(['whiteout', 1.1]);
+    if (d > 0.22) pool.push(['stamp', 1.3]);
     const choices = pool.filter(p => p[0] !== lastType);   // never the same obstacle twice in a row
     let r = Math.random() * choices.reduce((s, p) => s + p[1], 0), type = choices[0][0];
     for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
@@ -702,11 +795,10 @@
         if (o.drawn > 2) out.push({ k: 'b', x: x0 + i * o.drawn / 2, y: o.y, hw: o.drawn / 2, hh: 4.5, a: 0 });
         return out;
       }
-      case 'stylus': {
-        const out = [{ k: 'b', x: o.x, y: o.y - 36 + o.tap * 6, hw: 34, hh: 6, a: Math.PI / 2 }];
-        for (const ring of o.rings) if (ring.R < o.maxR * 0.85) out.push({ k: 'r', x: ring.x, y: o.y, R: ring.R, t: 2.5 });
-        return out;
-      }
+      case 'stamp': return o.phase === 'down' ? [{ k: 'b', x: o.x, y: o.y, hw: 32, hh: 24, a: 0 }] : [];
+      case 'sharpener': return [{ k: 'b', x: o.x, y: o.y, hw: 17, hh: 14, a: 0 }];
+      case 'note': return [{ k: 'b', x: o.x, y: o.y, hw: 21, hh: 21, a: o.rot }];
+      // coffee and whiteout never crash the plane
     }
     return [];
   }
@@ -714,7 +806,6 @@
   function circleHits(cx, cy, r, s) {
     const dx = cx - s.x, dy = cy - s.y;
     if (s.k === 'c') { const rr = r + s.r; return dx * dx + dy * dy < rr * rr; }
-    if (s.k === 'r') return Math.abs(Math.hypot(dx, dy) - s.R) < r + s.t;   // thin ring
     const c = Math.cos(s.a), sn = Math.sin(s.a);
     const lx = dx * c + dy * sn, ly = -dx * sn + dy * c;
     const ex = lx - clamp(lx, -s.hw, s.hw), ey = ly - clamp(ly, -s.hh, s.hh);
@@ -791,24 +882,34 @@
         }
         if (o.active) o.drawn = Math.min(o.len, o.drawn + o.v * dt);
         break;
-      case 'stylus':
-        o.x += o.vx * dt;
-        if (o.x < 50) o.vx = Math.abs(o.vx);
-        if (o.x > W - 50) o.vx = -Math.abs(o.vx);
-        if (o.y - dist < H + 20) {
-          o.timer -= dt;
-          if (o.timer <= 0) { o.timer = o.every; o.tap = 1; o.rings.push({ x: o.x, R: 4 }); }
+      case 'stamp':        // warn (shadow grows) -> down (deadly) -> lift -> warn again somewhere else
+        if (o.y - dist < H + 40) {
+          o.t += dt;
+          if (o.phase === 'warn' && o.t >= o.warn) {
+            o.phase = 'down'; o.t = 0;
+            o.marks.push({ x: o.x, rot: rand(-0.3, 0.3) });
+            if (o.marks.length > 4) o.marks.shift();
+            if (o.y - dist < H) tone(140, 60, 0.12, 'square', 0.05);
+          } else if (o.phase === 'down' && o.t >= 0.3) {
+            o.phase = 'lift'; o.t = 0;
+          } else if (o.phase === 'lift' && o.t >= 0.45) {
+            o.phase = 'warn'; o.t = 0; o.x = rand(60, W - 60);
+          }
         }
-        o.tap = Math.max(0, o.tap - 5 * dt);
-        for (const ring of o.rings) ring.R += 95 * dt;
-        o.rings = o.rings.filter(ring => ring.R < o.maxR);
+        break;
+      case 'sharpener': o.t += dt; break;
+      case 'note':
+        o.ph += o.f * dt;
+        o.x = clamp(o.bx + Math.sin(o.ph) * o.amp, 26, W - 26);
+        o.rot = Math.sin(o.ph) * 0.35;
+        if (o.y - dist < H + 30) o.y += speed * o.fall * dt;   // drifts down, slower than the plane
         break;
     }
   }
 
   function steer(dt) {
     let target = 0;
-    const maxV = maxSideSpeed();
+    const maxV = maxSideSpeed() * (plane.soggy > 0 ? 0.6 : 1);   // a coffee-soaked plane steers sluggishly
     if (holdSide && performance.now() - holdStart > HOLD_MS) {
       drift = holdSide;
       target = holdSide * maxV;
@@ -823,6 +924,10 @@
     const py = dist + planeScreenY();
     for (const o of obstacles) {
       if (o.type === 'fan' && Math.abs(o.y - py) < o.band / 2) plane.vx += -o.side * o.force * dt;
+      if (o.type === 'sharpener') {   // pulls harder the closer the plane gets
+        const dx = o.x - plane.x, dd = Math.hypot(dx, o.y - py);
+        if (dd < o.R) plane.vx += Math.sign(dx) * o.force * (1 - dd / o.R) * dt;
+      }
     }
     plane.x += plane.vx * dt;
     if (plane.x < 16) { plane.x = 16; plane.vx = Math.max(0, plane.vx); }
@@ -870,7 +975,20 @@
     // gliding sideways trades fall speed for horizontal speed
     const sideways = Math.min(1, Math.abs(plane.vx) / maxSideSpeed());
     speed = baseFallSpeed() * (1 - SIDE_SLOWDOWN * sideways);
+    if (plane.soggy > 0) speed *= 1.25;          // wet paper drops faster
     dist += speed * dt;
+    // flying through a coffee spill soaks the plane
+    plane.soggy = Math.max(0, plane.soggy - dt);
+    const planeY = dist + planeScreenY();
+    for (const o of obstacles) {
+      if (o.type !== 'coffee' || Math.hypot(plane.x - o.x, planeY - o.y) > o.r * 0.85) continue;
+      if (plane.soggy <= 0) floaters.push({ x: clamp(plane.x, 50, W - 50), y: planeY - 30, text: 'Soggy!', life: 1.2, col: '#7a4a22' });
+      plane.soggy = SOGGY_TIME;
+    }
+    if (plane.soggy > 0 && Math.random() < dt * 8) {   // coffee drips
+      particles.push({ kind: 'spark', col: '#7a4a22', x: plane.x + rand(-8, 8), y: planeY - 4, vx: rand(-20, 20), vy: -rand(20, 60),
+        g: 0, rot: 0, vr: 0, life: 1, ttl: 0.6, size: rand(2, 3.5) });
+    }
     const targetAng = Math.atan2(plane.vx, speed + 60);
     plane.ang += (targetAng - plane.ang) * Math.min(1, 12 * dt);
     updateTrail();
@@ -894,7 +1012,7 @@
       if (circles.some(c => (c.x - p.x) ** 2 + (c.y - p.y) ** 2 < (c.r + p.r + 4) ** 2)) {
         pickups.splice(i, 1);
         stars++;
-        floaters.push({ x: p.x, y: p.y, text: '+' + STAR_BONUS + ' m', life: 1 });
+        floaters.push({ x: p.x, y: p.y, text: '+1 ★', life: 1 });   // stars are Shop money; they no longer add metres
         for (let k = 0; k < 8; k++) particles.push(spark(p.x, p.y));
         sfx.star();
       }
@@ -1100,7 +1218,21 @@
     ctx.restore();
   }
 
+  // scissors: curved steel blades with a bevelled cutting edge, chunky plastic handles, brass pivot
+  function bladePath() {
+    ctx.beginPath();
+    ctx.moveTo(-4, -5);
+    ctx.quadraticCurveTo(38, -7, 67, 0);   // curved back of the blade
+    ctx.lineTo(-4, 4);                      // straight cutting edge
+    ctx.closePath();
+  }
+  function handlePath(oval) {
+    ctx.beginPath();
+    if (oval) ctx.ellipse(-23, 0, 12.5, 8.5, 0, 0, Math.PI * 2);   // finger loop
+    else ctx.arc(-21, 0, 9.5, 0, Math.PI * 2);                    // thumb loop
+  }
   function drawScissors(o, sy) {
+    const col = o.col || '#f07f1e';
     for (const pass of ['shadow', 'main']) {
       ctx.save();
       if (pass === 'shadow') ctx.translate(o.x + 5, sy + 8); else ctx.translate(o.x, sy);
@@ -1108,22 +1240,29 @@
         ctx.save();
         ctx.rotate(o.rot + s * o.open / 2);
         if (pass === 'shadow') {
-          ctx.fillStyle = 'rgba(34,53,107,.13)';
-          ctx.beginPath(); ctx.moveTo(-6, -5); ctx.lineTo(66, 0); ctx.lineTo(-6, 5); ctx.closePath(); ctx.fill();
-          ctx.beginPath(); ctx.arc(-22, 0, 10, 0, Math.PI * 2); ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(34,53,107,.13)'; ctx.stroke();
+          ctx.fillStyle = 'rgba(34,53,107,.13)'; bladePath(); ctx.fill();
+          handlePath(s > 0); ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(34,53,107,.13)'; ctx.stroke();
         } else {
-          ctx.fillStyle = s < 0 ? '#d5dae2' : '#c3c9d3';
-          ctx.beginPath(); ctx.moveTo(-6, -5); ctx.lineTo(66, 0); ctx.lineTo(-6, 5); ctx.closePath(); ctx.fill();
-          inkStroke(1.2);
-          ctx.beginPath(); ctx.moveTo(2, 0); ctx.lineTo(58, 0); ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1; ctx.stroke();
-          ctx.beginPath(); ctx.arc(-22, 0, 10, 0, Math.PI * 2);
-          ctx.strokeStyle = COL.ink; ctx.lineWidth = 7.5; ctx.stroke();
-          ctx.strokeStyle = '#c8463b'; ctx.lineWidth = 5; ctx.stroke();
+          const g = ctx.createLinearGradient(0, -6, 0, 5);
+          g.addColorStop(0, '#f1f3f7'); g.addColorStop(0.55, s < 0 ? '#c4cad4' : '#b3bac6'); g.addColorStop(1, '#8e97a5');
+          ctx.fillStyle = g; bladePath(); ctx.fill(); inkStroke(1.1);
+          ctx.beginPath(); ctx.moveTo(2, 2.4); ctx.lineTo(60, 0.6);
+          ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1; ctx.stroke();       // bevel glint
+          // plastic neck and loop
+          ctx.fillStyle = col;
+          ctx.beginPath(); roundRectPath(-14, -4, 13, 8, 3); ctx.fill(); inkStroke(1.1);
+          handlePath(s > 0);
+          ctx.strokeStyle = COL.ink; ctx.lineWidth = 8.5; ctx.stroke();
+          ctx.strokeStyle = col; ctx.lineWidth = 6; ctx.stroke();
+          ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5; ctx.stroke();   // plastic sheen
         }
         ctx.restore();
       }
-      if (pass === 'main') {
-        ctx.fillStyle = '#8d939e'; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill(); inkStroke(1);
+      if (pass === 'main') {   // brass pivot screw
+        ctx.fillStyle = '#c9a54a'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill(); inkStroke(1);
+        ctx.save(); ctx.rotate(o.rot);
+        ctx.beginPath(); ctx.moveTo(-2.5, 0); ctx.lineTo(2.5, 0); inkStroke(1.2);
+        ctx.restore();
       }
       ctx.restore();
     }
@@ -1387,28 +1526,133 @@
     }
   }
 
-  function drawStylus(o, sy) {
-    // ripples from each tap, fading as they spread
-    for (const ring of o.rings) {
-      const k = ring.R / o.maxR;
-      ctx.strokeStyle = `rgba(56,168,216,${(1 - k) * 0.9})`; ctx.lineWidth = 2.5;
-      ctx.beginPath(); ctx.arc(ring.x, sy, ring.R, 0, Math.PI * 2); ctx.stroke();
-      ctx.strokeStyle = `rgba(56,168,216,${(1 - k) * 0.35})`; ctx.lineWidth = 6;
-      ctx.beginPath(); ctx.arc(ring.x, sy, Math.max(0, ring.R - 6), 0, Math.PI * 2); ctx.stroke();
+  // a smooth, lumpy blob: curves through the midpoints between radius samples
+  function blobPath(x, y, r, pts, squash = 1) {
+    const p = pts.map((k, i) => {
+      const a = i / pts.length * Math.PI * 2;
+      return [x + Math.cos(a) * r * k, y + Math.sin(a) * r * k * squash];
+    });
+    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    ctx.beginPath();
+    const start = mid(p[p.length - 1], p[0]);
+    ctx.moveTo(start[0], start[1]);
+    p.forEach((q, i) => {
+      const m = mid(q, p[(i + 1) % p.length]);
+      ctx.quadraticCurveTo(q[0], q[1], m[0], m[1]);
+    });
+    ctx.closePath();
+  }
+
+  function drawStamp(o, sy) {
+    // "A+" marks left by earlier landings
+    for (const m of o.marks) {
+      ctx.save();
+      ctx.translate(m.x, sy); ctx.rotate(m.rot);
+      ctx.strokeStyle = 'rgba(200,40,40,.65)'; ctx.fillStyle = 'rgba(200,40,40,.65)'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); roundRectPath(-27, -19, 54, 38, 6); ctx.stroke();
+      ctx.font = '700 22px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('A+', 0, 2);
+      ctx.restore();
     }
-    const dip = o.tap * 6;
-    ctx.fillStyle = 'rgba(34,53,107,.15)';
-    ctx.beginPath(); ctx.ellipse(o.x + 3, sy + 3, 6 + o.tap * 3, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+    // h: how high the stamp is (1 = up by the viewer, 0 = on the page)
+    const h = o.phase === 'warn' ? 1 - Math.min(1, o.t / o.warn) ** 2 : o.phase === 'down' ? 0 : Math.min(1, o.t / 0.45);
+    const near = 1 - h;
+    ctx.fillStyle = `rgba(34,53,107,${0.08 + 0.25 * near})`;
+    ctx.beginPath(); ctx.ellipse(o.x, sy, 30 + 14 * h, 22 + 10 * h, 0, 0, Math.PI * 2); ctx.fill();
+    if (o.phase === 'warn') {           // dashed red target where it is about to land
+      ctx.save();
+      ctx.strokeStyle = `rgba(200,50,40,${0.3 + 0.55 * near})`; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+      ctx.beginPath(); ctx.ellipse(o.x, sy, 36, 28, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
     ctx.save();
-    ctx.translate(o.x, sy - 8 + dip);
-    ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(1, -64, 11, 60);
-    ctx.fillStyle = '#c9ced6';                                                // tip cone
-    ctx.beginPath(); ctx.moveTo(-5.5, -10); ctx.lineTo(0, 0); ctx.lineTo(5.5, -10); ctx.closePath(); ctx.fill(); inkStroke(1.1);
-    ctx.fillStyle = '#3b3f47';                                                // barrel
-    ctx.beginPath(); roundRectPath(-5.5, -68, 11, 58, 5); ctx.fill(); inkStroke(1.2);
-    ctx.fillStyle = '#5b6474'; ctx.fillRect(-5.5, -46, 11, 3);                // seam
-    ctx.fillStyle = '#7b8494'; ctx.fillRect(4, -40, 2.5, 10);                 // side button
-    ctx.fillStyle = '#38a8d8'; ctx.beginPath(); ctx.arc(0, -60, 1.8, 0, Math.PI * 2); ctx.fill();   // status light
+    ctx.translate(o.x - 16 * h, sy - 34 * h);
+    ctx.scale(1 + 0.25 * h, 1 + 0.25 * h);
+    ctx.fillStyle = '#b07a45';                                   // wooden block
+    ctx.beginPath(); roundRectPath(-32, -24, 64, 48, 7); ctx.fill(); inkStroke(1.4);
+    ctx.strokeStyle = 'rgba(90,55,25,.5)'; ctx.lineWidth = 1;
+    ctx.beginPath(); roundRectPath(-26, -18, 52, 36, 5); ctx.stroke();
+    ctx.fillStyle = '#8a5a2e';                                   // handle knob
+    ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
+    ctx.fillStyle = 'rgba(255,255,255,.3)';
+    ctx.beginPath(); ctx.arc(-5, -5, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawSharpener(o, sy) {
+    ctx.save();
+    // its reach, and pencil shavings spiralling in
+    ctx.strokeStyle = 'rgba(176,122,69,.18)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 8]);
+    ctx.beginPath(); ctx.arc(o.x, sy, o.R, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#b07a45'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    for (let k = 0; k < 8; k++) {
+      const ph = (o.t * 0.6 + k / 8) % 1, rr = o.R * (1 - ph), a = k * 0.8 + ph * 5;
+      ctx.globalAlpha = Math.min(1, ph * 1.5) * 0.8;
+      ctx.beginPath(); ctx.arc(o.x + Math.cos(a) * rr, sy + Math.sin(a) * rr * 0.8, 3.5, a, a + 4); ctx.stroke();
+    }
+    ctx.restore();
+    ctx.fillStyle = 'rgba(34,53,107,.15)'; ctx.fillRect(o.x - 13, sy - 8, 34, 28);
+    ctx.fillStyle = '#2f6fd1';
+    ctx.beginPath(); roundRectPath(o.x - 17, sy - 14, 34, 28, 5); ctx.fill(); inkStroke(1.4);
+    ctx.fillStyle = '#c3c9d3'; ctx.fillRect(o.x - 12, sy - 11, 24, 9);   // blade plate
+    ctx.beginPath(); ctx.rect(o.x - 12, sy - 11, 24, 9); inkStroke(1);
+    ctx.fillStyle = '#1d2027';
+    ctx.beginPath(); ctx.arc(o.x, sy + 5, 6.5, 0, Math.PI * 2); ctx.fill();   // the hole
+    ctx.fillStyle = '#5b6474'; ctx.beginPath(); ctx.arc(o.x + 8, sy - 6.5, 1.8, 0, Math.PI * 2); ctx.fill();   // screw
+  }
+
+  function drawCoffee(o, sy) {
+    ctx.fillStyle = 'rgba(122,74,34,.42)';
+    blobPath(o.x, sy, o.r, o.pts); ctx.fill();
+    ctx.strokeStyle = 'rgba(95,55,22,.55)'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = 'rgba(122,74,34,.5)';
+    for (const [a, k, r] of o.drops) {
+      ctx.beginPath(); ctx.arc(o.x + Math.cos(a) * o.r * k, sy + Math.sin(a) * o.r * k, r, 0, Math.PI * 2); ctx.fill();
+    }
+    if (o.ring) {                        // the mug's ring
+      ctx.strokeStyle = 'rgba(95,55,22,.45)'; ctx.lineWidth = 3;
+      const cx = o.x + Math.cos(o.ring.a) * o.r * 0.9, cy = sy + Math.sin(o.ring.a) * o.r * 0.9;
+      ctx.beginPath(); ctx.arc(cx, cy, o.ring.r, 0.3, Math.PI * 2 - 0.4); ctx.stroke();
+    }
+  }
+
+  function drawWhiteout(o, sy) {
+    // opaque until the plane gets close; reveals sooner the faster the plane falls
+    const dy = o.y - (dist + planeScreenY());
+    const reveal = 70 + speed * 0.45;
+    const alpha = clamp((dy - 30) / reveal, 0, 1);
+    if (alpha <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = 'rgba(34,53,107,.1)';
+    blobPath(o.x + 4, sy + 6, o.r, o.pts, 0.85); ctx.fill();
+    ctx.fillStyle = '#fdfdfb';
+    blobPath(o.x, sy, o.r, o.pts, 0.85); ctx.fill();
+    ctx.strokeStyle = 'rgba(150,150,150,.55)'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = 'rgba(215,215,210,1)'; ctx.lineWidth = 6; ctx.lineCap = 'round';   // brush streaks
+    o.streaks.forEach((k, i) => {
+      const yy = sy + (i - 1.5) * o.r * 0.32;
+      ctx.beginPath(); ctx.moveTo(o.x - o.r * 0.55, yy + k * 6); ctx.lineTo(o.x + o.r * 0.5, yy - k * 6); ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  function drawNote(o, sy) {
+    ctx.save();
+    ctx.translate(o.x, sy); ctx.rotate(o.rot);
+    ctx.fillStyle = 'rgba(34,53,107,.14)'; ctx.fillRect(-18, -16, 44, 44);
+    ctx.fillStyle = o.col; ctx.fillRect(-22, -22, 44, 44);
+    ctx.fillStyle = 'rgba(0,0,0,.06)'; ctx.fillRect(-22, -22, 44, 9);       // sticky strip
+    ctx.fillStyle = 'rgba(255,255,255,.35)';                                 // curled corner
+    ctx.beginPath(); ctx.moveTo(22, 12); ctx.lineTo(22, 22); ctx.lineTo(12, 22); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.rect(-22, -22, 44, 44); inkStroke(1.1);
+    ctx.strokeStyle = 'rgba(85,88,94,.55)'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-14, -3); ctx.lineTo(-14 + 28 * o.scribble, -3);
+    ctx.moveTo(-14, 5); ctx.lineTo(10, 5);
+    ctx.moveTo(-14, 13); ctx.lineTo(-14 + 22 * o.scribble, 13);
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -1499,6 +1743,10 @@
     if (plane.invuln > 0) ctx.globalAlpha = Math.floor(plane.invuln * 12) % 2 ? 0.3 : 1;
     if (plane.lives > 0) paintLifeOutline(ctx);
     paintPlane(ctx, skin, clamp(plane.vx / 400, -1, 1));
+    if (plane.soggy > 0) {                     // coffee stain soaking into the paper
+      ctx.globalAlpha *= 0.5 * Math.min(1, plane.soggy / 0.6);
+      ctx.fillStyle = '#8a5a2e'; planeOutline(); ctx.fill();
+    }
     ctx.restore();
   }
 
@@ -1517,14 +1765,58 @@
   }
 
   function drawTrail() {
-    if (trail.length < 2) return;
-    ctx.save();
-    ctx.setLineDash([5, 7]);
-    ctx.strokeStyle = skin.trail || 'rgba(85,88,94,.45)'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
-    ctx.beginPath();
-    trail.forEach((p, i) => i ? ctx.lineTo(p.x, p.y - dist) : ctx.moveTo(p.x, p.y - dist));
-    ctx.stroke();
-    ctx.restore();
+    paintTrail(ctx, trail.map(p => ({ x: p.x, y: p.y - dist })), trailStyle, titleTime + time);
+  }
+
+  // trail styles from the Shop; pts run oldest (furthest behind the plane) to newest
+  function paintTrail(c, pts, style, t) {
+    if (pts.length < 2) return;
+    c.save();
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    const path = (jitter = 0) => {
+      c.beginPath();
+      pts.forEach((p, i) => {
+        const j = jitter ? Math.sin(i * 2.3) * jitter : 0;
+        i ? c.lineTo(p.x + j, p.y) : c.moveTo(p.x + j, p.y);
+      });
+    };
+    switch (style) {
+      case 'ink':
+        c.strokeStyle = 'rgba(31,63,168,.75)'; c.lineWidth = 2.2; path(); c.stroke();
+        break;
+      case 'dots':
+        c.fillStyle = skin.trail || 'rgba(85,88,94,.5)';
+        for (let i = 0; i < pts.length; i += 2) {
+          c.beginPath(); c.arc(pts[i].x, pts[i].y, 1.2 + 2 * i / pts.length, 0, Math.PI * 2); c.fill();
+        }
+        break;
+      case 'crayon':
+        c.strokeStyle = 'rgba(217,68,58,.4)'; c.lineWidth = 5.5; path(); c.stroke();
+        c.strokeStyle = 'rgba(217,68,58,.35)'; c.lineWidth = 2; path(1.6); c.stroke();
+        break;
+      case 'rainbow':
+        c.lineWidth = 3.2;
+        for (let i = 1; i < pts.length; i++) {
+          c.strokeStyle = `hsla(${(i * 14 + t * 120) % 360}, 85%, 55%, .8)`;
+          c.beginPath(); c.moveTo(pts[i - 1].x, pts[i - 1].y); c.lineTo(pts[i].x, pts[i].y); c.stroke();
+        }
+        break;
+      case 'sparkle':
+        c.strokeStyle = 'rgba(242,181,58,.35)'; c.lineWidth = 1.2; path(); c.stroke();
+        c.fillStyle = '#f2b53a';
+        for (let i = pts.length - 1; i >= 0; i -= 3) {
+          const s = Math.max(0.6, 2 + 1.6 * Math.sin(t * 9 + i)), { x, y } = pts[i];
+          c.beginPath();
+          c.moveTo(x, y - 2 * s); c.lineTo(x + s * 0.5, y - s * 0.5); c.lineTo(x + 2 * s, y); c.lineTo(x + s * 0.5, y + s * 0.5);
+          c.lineTo(x, y + 2 * s); c.lineTo(x - s * 0.5, y + s * 0.5); c.lineTo(x - 2 * s, y); c.lineTo(x - s * 0.5, y - s * 0.5);
+          c.closePath(); c.fill();
+        }
+        break;
+      default:                       // pencil: the original dashed graphite line
+        c.setLineDash([5, 7]);
+        c.strokeStyle = skin.trail || 'rgba(85,88,94,.45)'; c.lineWidth = 1.4; path(); c.stroke();
+    }
+    c.restore();
   }
 
   function render() {
@@ -1560,7 +1852,11 @@
         case 'glue': drawGlue(o, sy); break;
         case 'cutter': drawCutter(o, sy); break;
         case 'pen': drawPen(o, sy); break;
-        case 'stylus': drawStylus(o, sy); break;
+        case 'stamp': drawStamp(o, sy); break;
+        case 'sharpener': drawSharpener(o, sy); break;
+        case 'coffee': drawCoffee(o, sy); break;
+        case 'whiteout': drawWhiteout(o, sy); break;
+        case 'note': drawNote(o, sy); break;
       }
     }
     for (const p of pickups) drawStar(p, p.y - dist);
@@ -1674,13 +1970,12 @@
   }
   function gameOver() {
     state = 'over';
-    const s = score(), depth = Math.floor(dist / PX_PER_M);
+    const s = score();
     const record = s > best;
     if (record) { best = s; store.set('nosedive-best', String(best)); }
     ui.overTitle.textContent = 'Crumpled at ' + fmt(s) + ' m';
-    ui.overDetail.textContent = fmt(depth) + ' m of falling' +
-      (stars ? ' + ' + stars + (stars === 1 ? ' star' : ' stars') + ' (' + fmt(stars * STAR_BONUS) + ' m)' : '') +
-      ' in ' + time.toFixed(1) + ' s.';
+    ui.overDetail.textContent = 'You fell for ' + time.toFixed(1) + ' s' +
+      (stars ? ' and caught ' + stars + (stars === 1 ? ' star.' : ' stars.') : '.');
     ui.overBest.textContent = record ? 'That is your deepest dive yet.' : 'Your best is ' + fmt(best) + ' m.';
     ui.stamp.hidden = !record;
     if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
@@ -1803,6 +2098,56 @@
       row.append(cv, info, btn);
       list.append(row);
     }
+    renderTrails(pr);
+  }
+
+  // trails: buy once with stars, then pick which one to use
+  function renderTrails(pr) {
+    const list = $('trailList');
+    list.replaceChildren();
+    const sample = Array.from({ length: 24 }, (_, i) => ({ x: 4 + i * 3.4, y: 15 + Math.sin(i * 0.45) * 7 }));
+    for (const t of TRAILS) {
+      const tile = document.createElement('div');
+      tile.className = 'trail' + (t.id === trailStyle ? ' selected' : '');
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(84 * pr); cv.height = Math.round(30 * pr);
+      const c = cv.getContext('2d'); c.scale(pr, pr);
+      paintTrail(c, sample, t.id, 0.4);
+      const name = document.createElement('span'); name.textContent = t.name;
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'buy'; btn.dataset.trail = t.id;
+      if (t.id === trailStyle) {
+        btn.textContent = 'In use'; btn.disabled = true; btn.classList.add('owned');
+      } else if (ownsTrail(t)) {
+        btn.textContent = 'Use';
+        btn.setAttribute('aria-label', 'Use the ' + t.name + ' trail');
+        btn.addEventListener('click', () => chooseTrail(t));
+      } else {
+        btn.textContent = '★ ' + t.price;
+        btn.disabled = bank < t.price;
+        btn.setAttribute('aria-label', bank < t.price
+          ? `${t.name} trail costs ${t.price} stars. You need ${t.price - bank} more.`
+          : `Buy the ${t.name} trail for ${t.price} stars`);
+        btn.addEventListener('click', () => chooseTrail(t));
+      }
+      tile.append(cv, name, btn);
+      list.append(tile);
+    }
+  }
+  function chooseTrail(t) {
+    if (!ownsTrail(t)) {
+      if (bank < t.price) return;
+      bank -= t.price;
+      owned['trail-' + t.id] = true;
+      store.set('nosedive-bank', String(bank));
+      store.set('nosedive-upgrades', JSON.stringify(owned));
+      sfx.buy();
+    }
+    trailStyle = t.id;
+    store.set('nosedive-trail', t.id);
+    renderShop();
+    const btn = $('trailList').querySelector(`[data-trail="${t.id}"]`);
+    if (btn) btn.focus({ preventScroll: true });
   }
   $('shopBtn').addEventListener('click', openShop);
   $('shopBtnOver').addEventListener('click', openShop);
