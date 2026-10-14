@@ -37,7 +37,7 @@
     position: absolute; inset: 0 0 auto 0;
     display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
     padding: max(10px, env(safe-area-inset-top, 0px)) 12px 18px 64px;
-    background: linear-gradient(var(--paper) 55%, rgba(251,249,241,0));
+    background: linear-gradient(var(--page, var(--paper)) 55%, transparent);
     pointer-events: none;
   }
   .hud .depth { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
@@ -117,7 +117,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v7</div>
+    <div class="version" id="version">v8</div>
 
     <div class="hud">
       <div>
@@ -285,28 +285,49 @@
       () => { const a = ri(10, 30), b = ri(1, 9); return `${a} − ${b} = ${a - b}`; },
       () => { const a = ri(2, 9), b = ri(2, 9); return `${a} × ${b} = ${a * b}`; },
       () => { const b = ri(2, 9), q = ri(2, 9); return `${b * q} ÷ ${b} = ${q}`; },
-      '1/2 + 1/4 = 3/4', '100 − 37 = 63'
+      '1/2 + 1/4 = 3/4', '100 − 37 = 63',
+      '12 + 15 = 27', '9 + 9 = 18', '45 − 18 = 27', '6 × 7 = 42', '81 ÷ 9 = 9', '3 × 3 × 3 = 27',
+      '50 + 50 = 100', '1000 − 1 = 999', '0.5 + 0.25 = 0.75', '12 × 12 = 144', '7 + 8 + 9 = 24',
+      '64 ÷ 8 = 8', '11 × 11 = 121', '2 + 2 = 4', '99 + 1 = 100', '15 × 4 = 60'
     ],
     [ // fractions, percentages, first algebra
       'x + 7 = 12  →  x = 5', '3x = 21  →  x = 7', '2/3 + 1/6 = 5/6', '25% of 80 = 20',
-      '√144 = 12', 'A = π r²', 'P = 2(l + w)', '2⁵ = 32', '−3 · (−4) = 12'
+      '√144 = 12', 'A = π r²', 'P = 2(l + w)', '2⁵ = 32', '−3 · (−4) = 12',
+      '2x + 3 = 11  →  x = 4', 'x/4 = 5  →  x = 20', '3/4 = 0.75', '1/3 + 1/3 = 2/3', '50% of 64 = 32',
+      '10% of 250 = 25', '√81 = 9', '3² + 4² = 25', '10³ = 1000', '5! = 120', 'C = 2πr', 'A = ½ b h',
+      '(−2)³ = −8', '0.2 × 0.3 = 0.06', '5x − 7 = 18  →  x = 5', 'a/b ÷ c/d = ad / bc', '7/8 − 3/8 = 1/2'
     ],
     [ // algebra, geometry, trig
       'x = (−b ± √(b² − 4ac)) / 2a', 'a² + b² = c²', '(a + b)² = a² + 2ab + b²', 'sin²θ + cos²θ = 1',
-      'y = mx + b', 'log₂ 8 = 3', 'aᵐ · aⁿ = aᵐ⁺ⁿ', 'V = 4/3 π r³', 'tan θ = sin θ / cos θ'
+      'y = mx + b', 'log₂ 8 = 3', 'aᵐ · aⁿ = aᵐ⁺ⁿ', 'V = 4/3 π r³', 'tan θ = sin θ / cos θ',
+      '(a − b)² = a² − 2ab + b²', 'a² − b² = (a + b)(a − b)', 'sin 30° = 1/2', 'cos 60° = 1/2', 'tan 45° = 1',
+      'sin 2θ = 2 sin θ cos θ', 'cos 2θ = cos²θ − sin²θ', 'log(ab) = log a + log b', 'logₐ aˣ = x',
+      'x² − 5x + 6 = (x − 2)(x − 3)', 'd = √((x₂ − x₁)² + (y₂ − y₁)²)', 'm = (y₂ − y₁) / (x₂ − x₁)',
+      'Sₙ = n(a₁ + aₙ) / 2', 'aₙ = a₁ rⁿ⁻¹', 'a / sin A = b / sin B', 'c² = a² + b² − 2ab cos C', '180° = π rad'
     ],
     [ // calculus
       'd/dx xⁿ = n xⁿ⁻¹', '∫ x² dx = x³/3 + C', 'lim x→0  sin x / x = 1', 'd/dx eˣ = eˣ',
-      '∫₀¹ x dx = 1/2', "f′(x) = lim h→0 (f(x+h) − f(x)) / h", "(fg)′ = f′g + fg′", '∫ 1/x dx = ln|x| + C'
+      '∫₀¹ x dx = 1/2', "f′(x) = lim h→0 (f(x+h) − f(x)) / h", "(fg)′ = f′g + fg′", '∫ 1/x dx = ln|x| + C',
+      'd/dx sin x = cos x', 'd/dx cos x = −sin x', 'd/dx ln x = 1/x', 'd/dx tan x = sec²x', '∫ cos x dx = sin x + C',
+      '∫ eˣ dx = eˣ + C', '∫₀^π sin x dx = 2', "(f/g)′ = (f′g − fg′) / g²", "(f ∘ g)′ = f′(g(x)) · g′(x)",
+      'lim n→∞ (1 + 1/n)ⁿ = e', '∫ u dv = uv − ∫ v du', "∫ₐᵇ f′(x) dx = f(b) − f(a)", 'd/dx arctan x = 1 / (1 + x²)',
+      'lim x→0 (eˣ − 1) / x = 1', '∫ 1/(1 + x²) dx = arctan x + C', '∂/∂x (x²y) = 2xy', '∫₀¹ x² dx = 1/3'
     ],
     [ // series, complex numbers, linear algebra
       'e^(iπ) + 1 = 0', '∑ 1/n² = π²/6', 'eˣ = ∑ xⁿ / n!', '∫ e^(−x²) dx = √π', 'det(A − λI) = 0',
-      'e^(iθ) = cos θ + i sin θ', 'Γ(n) = (n − 1)!', '∑ (−1)ⁿ / (2n+1) = π/4'
+      'e^(iθ) = cos θ + i sin θ', 'Γ(n) = (n − 1)!', '∑ (−1)ⁿ / (2n+1) = π/4',
+      '∑ₙ₌₁^∞ 1/2ⁿ = 1', '∑ₖ₌₁ⁿ k = n(n+1)/2', '∑ₖ₌₁ⁿ k² = n(n+1)(2n+1)/6', 'sin x = x − x³/3! + x⁵/5! − …',
+      'cos x = 1 − x²/2! + x⁴/4! − …', 'ln(1 + x) = x − x²/2 + x³/3 − …', '1/(1 − x) = ∑ xⁿ,  |x| < 1', 'i² = −1',
+      '|a + bi| = √(a² + b²)', '(cos θ + i sin θ)ⁿ = cos nθ + i sin nθ', 'det [[a, b], [c, d]] = ad − bc',
+      '(AB)ᵀ = BᵀAᵀ', 'A A⁻¹ = I', 'Γ(1/2) = √π', '∏ₚ (1 − 1/p²) = 6/π²', '∑ 1/n diverges', 'φ = (1 + √5) / 2'
     ],
     [ // physics and the scary stuff
       'iℏ ∂Ψ/∂t = ĤΨ', 'ζ(s) = ∑ 1/nˢ', '∇ × B = μ₀J + μ₀ε₀ ∂E/∂t', '∇ · E = ρ / ε₀',
       'ρ(∂u/∂t + u·∇u) = −∇p + μ∇²u', 'Gμν + Λgμν = (8πG/c⁴) Tμν', 'f̂(ξ) = ∫ f(x) e^(−2πixξ) dx',
-      'P = NP ?'
+      'P = NP ?',
+      'E = mc²', 'F = G m₁m₂ / r²', '∇ · B = 0', '∇ × E = −∂B/∂t', 'E = hν', 'Δx Δp ≥ ℏ/2', 'S = k ln W',
+      'PV = nRT', 'dS ≥ δQ / T', '∂u/∂t = α ∇²u', '∂²u/∂t² = c² ∇²u', '(iγ^μ ∂_μ − m) ψ = 0', '∮ B · dl = μ₀ I',
+      'L = T − V', 'd/dt (∂L/∂q̇) = ∂L/∂q', 'N(t) = N₀ e^(−λt)'
     ]
   ];
   const formulaFont = size => `${size}px Kalam, "Cambria Math", "Segoe UI Symbol", cursive`;
@@ -736,9 +757,28 @@
   }
 
   // ---------- drawing ----------
+  // every 100 m the page turns the next rainbow colour; the first 100 m stay plain paper.
+  // Boundaries line up with the plane, so the colour changes as the depth counter passes 100, 200, ...
+  const PAGE_M = 100;
+  const RAINBOW = ['#fde2de', '#fee8d2', '#fcf3c6', '#e1f3d8', '#d9eaf9', '#e0def6', '#eedff5'];
+  const pageIndexAt = wy => Math.floor((wy - planeScreenY()) / (PAGE_M * PX_PER_M));
+  const pageTop = k => k * PAGE_M * PX_PER_M + planeScreenY();
+  const pageColor = k => (k < 1 ? COL.paper : RAINBOW[(k - 1) % RAINBOW.length]);
+
+  let hudPage = '';
+  function syncHudPage() {         // the HUD's fade matches the page colour behind it
+    const c = pageColor(pageIndexAt(dist + 40));
+    if (c !== hudPage) { hudPage = c; wrap.style.setProperty('--page', c); }
+  }
+
   function drawPaper() {
-    ctx.fillStyle = COL.paper;
-    ctx.fillRect(-20, -20, W + 40, H + 40);
+    const top = dist - 20, bottom = dist + H + 20;
+    for (let k = pageIndexAt(top), y = top; y < bottom; k++) {
+      const next = Math.min(bottom, pageTop(k + 1));
+      ctx.fillStyle = pageColor(k);
+      ctx.fillRect(-20, y - dist, W + 40, next - y);
+      y = next;
+    }
     // ruled lines
     const gap = 30;
     ctx.strokeStyle = COL.rule; ctx.lineWidth = 1;
@@ -764,6 +804,16 @@
       ctx.restore();
     }
     ctx.restore();
+    // pencilled marker where each new colour starts
+    for (let k = Math.max(1, pageIndexAt(dist - 20) + 1), y; (y = pageTop(k) - dist) < H + 20; k++) {
+      ctx.save();
+      ctx.strokeStyle = COL.graphite; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.3; ctx.setLineDash([8, 6]);
+      ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(W, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = COL.graphite; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = 'right';
+      ctx.fillText(fmt(k * PAGE_M) + ' m', W - 10, y - 6);
+      ctx.restore();
+    }
     // punched holes
     const hg = 250;
     for (let y = hg / 2 - (dist % hg) - hg; y < H + hg; y += hg) {
@@ -1198,6 +1248,7 @@
     }
     ctx.globalAlpha = 1;
     if (state === 'play') drawSteerHints();
+    syncHudPage();
   }
 
   // chevrons in the bottom corners show which way the plane is drifting
