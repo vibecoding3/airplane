@@ -148,7 +148,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v18</div>
+    <div class="version" id="version">v19</div>
 
     <div class="hud">
       <div>
@@ -319,6 +319,7 @@
     star: () => { tone(880, 1320, 0.12, 'sine', 0.1); tone(1320, 1760, 0.15, 'sine', 0.08, 0.08); },
     crash: () => { crunch(); tone(220, 60, 0.4, 'sawtooth', 0.04); },
     save: () => { crunch(); tone(330, 990, 0.35, 'triangle', 0.1); },
+    twang: () => { tone(180, 420, 0.08, 'triangle', 0.09); tone(420, 160, 0.3, 'triangle', 0.07, 0.07); },
     buy: () => { tone(660, 990, 0.1, 'sine', 0.1); tone(990, 1480, 0.18, 'sine', 0.08, 0.09); }
   };
 
@@ -548,6 +549,12 @@
   const NOTE_COLORS = ['#fde58a', '#f7a8c4', '#b9e3a8', '#a8d4f2'];
   const SCISSOR_COLORS = ['#f07f1e', '#2f8f5b', '#8a4fc2', '#2f6fd1', '#d9443a'];
   const SOGGY_TIME = 2.5;          // seconds a coffee soaking lasts
+  const BAND_COLORS = ['#c0392b', '#e0a21a', '#2f6fd1', '#2f8f5b', '#b07a45'];
+  const CAT_COLORS = ['#e8913a', '#9a9a9a', '#4a4a4a', '#efe2c8'];
+  // the classic green of school geometry sets: translucent plastic, darker edge, white markings
+  const GEO = { fill: 'rgba(0,135,85,.55)', edge: '#00573a', mark: 'rgba(255,255,255,.92)' };
+  const PAW_SWEEP = 0.55;          // the cat paw swings this far (radians) above and below level
+  const PAW_TIMES = { rest: 0.6, swipe: 0.38, retract: 0.3 };
   const blobShape = n => Array.from({ length: n }, () => rand(0.8, 1.1));
   const make = {
     gate(y, d) {           // two rulers leaving a gap
@@ -693,6 +700,34 @@
           col: NOTE_COLORS[ri(0, NOTE_COLORS.length - 1)], scribble: rand(0.4, 0.9) });
       }
       return 80;
+    },
+    setsquare(y, d) {      // a green set square (45° or 30°/60°) spinning slowly as it drifts across
+      const is45 = Math.random() < 0.5;
+      const a = is45 ? 88 : 62, b = is45 ? 88 : 62 * Math.sqrt(3);     // the two legs
+      // right angle at the first vertex; centre the triangle on its centroid so it spins in place
+      const verts = [[0, 0], [b, 0], [0, -a]].map(([x, y]) => [x - b / 3, y + a / 3]);
+      const R = Math.max(...verts.map(([x, y]) => Math.hypot(x, y)));
+      obstacles.push({ type: 'setsquare', y, x: rand(R + 8, W - R - 8), verts, R, rot: rand(0, 6.28),
+        spin: (Math.random() < 0.5 ? -1 : 1) * rand(0.35, 0.8 + 0.6 * d),
+        vx: (Math.random() < 0.5 ? -1 : 1) * rand(15, 45 + 30 * d) });
+      return 50;
+    },
+    magnifier(y, d) {      // a magnifying glass whose burning sun spot slides toward the plane
+      obstacles.push({ type: 'magnifier', y, x: rand(60, W - 60), v: lerp(70, 130, d), t: 0, burnT: 0, scorch: [] });
+      return 40;
+    },
+    band(y, d) {           // a rubber band between two tacks: the band bounces you, the tacks don't forgive
+      const len = rand(130, 200), cx = rand(len / 2 + 20, W - len / 2 - 20), tilt = rand(-0.15, 0.15);
+      const hx = Math.cos(tilt) * len / 2, hy = Math.sin(tilt) * len / 2;
+      obstacles.push({ type: 'band', y, x1: cx - hx, y1: y - hy, x2: cx + hx, y2: y + hy,
+        col: BAND_COLORS[ri(0, BAND_COLORS.length - 1)], wob: 0, hitX: cx, cool: 0, t: 0 });
+      return 30;
+    },
+    paw(y, d) {            // a cat paw from one edge: shows where it will strike, then swipes in an arc
+      obstacles.push({ type: 'paw', y, side: Math.random() < 0.5 ? -1 : 1, L: rand(W * 0.45, W * 0.58),
+        phase: 'rest', t: rand(0, 0.6), warn: lerp(1.1, 0.7, d), ang: -PAW_SWEEP, ext: 0,
+        col: CAT_COLORS[ri(0, CAT_COLORS.length - 1)] });
+      return 120;
     }
   };
 
@@ -723,6 +758,10 @@
     if (d > 0.18) pool.push(['sharpener', 1.2]);
     if (d > 0.2) pool.push(['whiteout', 1.1]);
     if (d > 0.22) pool.push(['stamp', 1.3]);
+    if (d > 0.05) pool.push(['band', 1.2]);
+    if (d > 0.08) pool.push(['setsquare', 1.2]);
+    if (d > 0.15) pool.push(['magnifier', 1.2]);
+    if (d > 0.2) pool.push(['paw', 1.3]);
     const choices = pool.filter(p => p[0] !== lastType);   // never the same obstacle twice in a row
     let r = Math.random() * choices.reduce((s, p) => s + p[1], 0), type = choices[0][0];
     for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
@@ -795,12 +834,35 @@
       case 'stamp': return o.phase === 'down' ? [{ k: 'b', x: o.x, y: o.y, hw: 32, hh: 24, a: 0 }] : [];
       case 'sharpener': return [{ k: 'b', x: o.x, y: o.y, hw: 17, hh: 14, a: 0 }];
       case 'note': return [{ k: 'b', x: o.x, y: o.y, hw: 21, hh: 21, a: o.rot }];
-      // coffee and whiteout never crash the plane
+      case 'setsquare': {
+        const c = Math.cos(o.rot), s = Math.sin(o.rot);
+        return [{ k: 'p', pts: o.verts.map(([x, y]) => [o.x + x * c - y * s, o.y + x * s + y * c]) }];
+      }
+      case 'magnifier': return [{ k: 'c', x: o.x, y: o.y, r: 10 }];       // only the burning spot hurts
+      case 'band': return [{ k: 'c', x: o.x1, y: o.y1, r: 9 }, { k: 'c', x: o.x2, y: o.y2, r: 9 }];   // the tacks
+      case 'paw': {
+        if (o.phase !== 'swipe') return [];
+        const i = inward(o), x0 = wallX(o), dx = i * Math.cos(o.ang), dy = Math.sin(o.ang);
+        return [{ k: 'b', x: x0 + dx * o.L / 2, y: o.y + dy * o.L / 2, hw: o.L / 2, hh: 11, a: Math.atan2(dy, dx) },
+                { k: 'c', x: x0 + dx * o.L, y: o.y + dy * o.L, r: 18 }];
+      }
+      // coffee, whiteout and the rubber band itself never crash the plane
     }
     return [];
   }
 
   function circleHits(cx, cy, r, s) {
+    if (s.k === 'p') {                 // convex polygon: touching an edge, or fully inside
+      let pos = false, neg = false;
+      for (let i = 0; i < s.pts.length; i++) {
+        const [ax, ay] = s.pts[i], [bx, by] = s.pts[(i + 1) % s.pts.length];
+        const ex = bx - ax, ey = by - ay;
+        const t = clamp(((cx - ax) * ex + (cy - ay) * ey) / (ex * ex + ey * ey), 0, 1);
+        if (Math.hypot(cx - (ax + ex * t), cy - (ay + ey * t)) < r) return true;
+        if (ex * (cy - ay) - ey * (cx - ax) > 0) pos = true; else neg = true;
+      }
+      return !(pos && neg);
+    }
     const dx = cx - s.x, dy = cy - s.y;
     if (s.k === 'c') { const rr = r + s.r; return dx * dx + dy * dy < rr * rr; }
     const c = Math.cos(s.a), sn = Math.sin(s.a);
@@ -886,6 +948,48 @@
         }
         break;
       case 'sharpener': o.t += dt; break;
+      case 'setsquare':
+        o.rot += o.spin * dt;
+        o.x += o.vx * dt;
+        if (o.x < o.R + 4) o.vx = Math.abs(o.vx);
+        if (o.x > W - o.R - 4) o.vx = -Math.abs(o.vx);
+        break;
+      case 'magnifier':
+        o.t += dt;
+        if (o.y - dist < H + 20) {
+          o.x = clamp(o.x + clamp(plane.x - o.x, -o.v * dt, o.v * dt), 30, W - 30);   // creep toward the plane
+          o.burnT -= dt;
+          if (o.burnT <= 0) {
+            o.burnT = 0.06;
+            o.scorch.push({ x: o.x + rand(-2, 2), r: rand(4, 7) });
+            if (o.scorch.length > 70) o.scorch.shift();
+          }
+        }
+        break;
+      case 'band':
+        o.t += dt; o.cool -= dt; o.wob *= Math.exp(-4 * dt);
+        break;
+      case 'paw':
+        if (o.y - dist < H + 40) {
+          o.t += dt;
+          if (o.phase === 'rest' && o.t >= PAW_TIMES.rest) {
+            o.phase = 'warn'; o.t = 0;
+          } else if (o.phase === 'warn' && o.t >= o.warn) {
+            o.phase = 'swipe'; o.t = 0;
+            if (o.y - dist < H) tone(700, 220, 0.16, 'sawtooth', 0.03);
+          } else if (o.phase === 'swipe' && o.t >= PAW_TIMES.swipe) {
+            o.phase = 'retract'; o.t = 0;
+          } else if (o.phase === 'retract' && o.t >= PAW_TIMES.retract) {
+            o.phase = 'rest'; o.t = 0;
+          }
+        }
+        if (o.phase === 'warn') { o.ang = -PAW_SWEEP; o.ext = 0.16; }
+        else if (o.phase === 'swipe') {
+          const k = Math.min(1, o.t / PAW_TIMES.swipe);
+          o.ang = -PAW_SWEEP + 2 * PAW_SWEEP * (1 - (1 - k) ** 2); o.ext = 1;
+        } else if (o.phase === 'retract') { o.ext = 1 - Math.min(1, o.t / PAW_TIMES.retract); }
+        else o.ext = 0;
+        break;
       case 'note':
         o.ph += o.f * dt;
         o.x = clamp(o.bx + Math.sin(o.ph) * o.amp, 26, W - 26);
@@ -973,6 +1077,17 @@
       if (plane.soggy <= 0) floaters.push({ x: clamp(plane.x, 50, W - 50), y: planeY - 30, text: 'Soggy!', life: 1.2, col: '#7a4a22' });
       plane.soggy = SOGGY_TIME;
     }
+    // rubber bands kick the plane sideways, toward the nearer end of the band
+    for (const o of obstacles) {
+      if (o.type !== 'band' || o.cool > 0 || plane.invuln > 0) continue;
+      const bx = o.x2 - o.x1, by = o.y2 - o.y1;
+      const k = clamp(((plane.x - o.x1) * bx + (planeY - o.y1) * by) / (bx * bx + by * by), 0, 1);
+      if (Math.hypot(plane.x - (o.x1 + bx * k), planeY - (o.y1 + by * k)) > 9) continue;
+      const side = plane.x < (o.x1 + o.x2) / 2 ? -1 : 1;
+      plane.vx = side * maxSideSpeed() * 1.4;
+      o.wob = 1; o.hitX = plane.x; o.cool = 0.6;
+      sfx.twang();
+    }
     if (plane.soggy > 0 && Math.random() < dt * 8) {   // coffee drips
       particles.push({ kind: 'spark', col: '#7a4a22', x: plane.x + rand(-8, 8), y: planeY - 4, vx: rand(-20, 20), vy: -rand(20, 60),
         g: 0, rot: 0, vr: 0, life: 1, ttl: 0.6, size: rand(2, 3.5) });
@@ -1009,7 +1124,7 @@
     outer:
     for (const o of obstacles) {
       if (plane.invuln > 0) break;   // still blinking after using the extra life
-      if (Math.abs(o.y - (dist + planeScreenY())) > 140) continue;
+      if (Math.abs(o.y - (dist + planeScreenY())) > 160) continue;
       for (const s of shapes(o)) {
         for (const c of circles) {
           if (circleHits(c.x, c.y, c.r, s)) { plane.lives > 0 ? useExtraLife() : crash(); break outer; }
@@ -1305,21 +1420,50 @@
     const cx = o.side < 0 ? 0 : W, a0 = o.side < 0 ? -Math.PI / 2 : Math.PI / 2;
     ctx.fillStyle = 'rgba(34,53,107,.12)';
     ctx.beginPath(); ctx.arc(cx + 4, sy + 7, o.r, a0, a0 + Math.PI); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'rgba(163,208,234,.75)';
-    ctx.beginPath(); ctx.arc(cx, sy, o.r, a0, a0 + Math.PI); ctx.closePath(); ctx.fill(); inkStroke(1.4);
+    ctx.fillStyle = GEO.fill;
+    ctx.beginPath(); ctx.arc(cx, sy, o.r, a0, a0 + Math.PI); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = GEO.edge; ctx.lineWidth = 1.6; ctx.stroke();
     ctx.beginPath(); ctx.arc(cx, sy, o.r * 0.58, a0, a0 + Math.PI);
-    ctx.strokeStyle = 'rgba(34,53,107,.45)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.strokeStyle = GEO.mark; ctx.lineWidth = 1; ctx.stroke();
     ctx.fillStyle = COL.paper;
-    ctx.beginPath(); ctx.arc(cx, sy, 7, a0, a0 + Math.PI); ctx.closePath(); ctx.fill(); inkStroke(1);
+    ctx.beginPath(); ctx.arc(cx, sy, 7, a0, a0 + Math.PI); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = GEO.edge; ctx.lineWidth = 1; ctx.stroke();
     ctx.save();
-    ctx.fillStyle = COL.ink; ctx.font = '8px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = GEO.mark; ctx.strokeStyle = GEO.mark; ctx.lineWidth = 1;
+    ctx.font = '700 8px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.beginPath();
     for (let i = 1; i < 18; i++) {           // degree ticks every 10°, labels every 30°
       const a = a0 + i * Math.PI / 18, c = Math.cos(a), s = Math.sin(a), len = i % 3 === 0 ? 9 : 5;
       ctx.moveTo(cx + c * o.r, sy + s * o.r); ctx.lineTo(cx + c * (o.r - len), sy + s * (o.r - len));
       if (i % 3 === 0) ctx.fillText(String(i * 10), cx + c * (o.r - 17), sy + s * (o.r - 17));
     }
-    inkStroke(1);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // a spinning set square in the same green plastic, with the usual triangular cut-out
+  function drawSetSquare(o, sy) {
+    const tri = (k, dx = 0, dy = 0) => {
+      o.verts.forEach(([x, y], i) => (i ? ctx.lineTo(x * k + dx, y * k + dy) : ctx.moveTo(x * k + dx, y * k + dy)));
+      ctx.closePath();
+    };
+    ctx.save();
+    ctx.translate(o.x, sy);
+    ctx.save(); ctx.translate(4, 7); ctx.rotate(o.rot);
+    ctx.beginPath(); tri(1); tri(0.42); ctx.fillStyle = 'rgba(34,53,107,.12)'; ctx.fill('evenodd');
+    ctx.restore();
+    ctx.rotate(o.rot);
+    ctx.beginPath(); tri(1); tri(0.42);
+    ctx.fillStyle = GEO.fill; ctx.fill('evenodd');
+    ctx.strokeStyle = GEO.edge; ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.stroke();
+    // centimetre ticks along the bottom leg (from the right angle along +x)
+    const [x0, y0] = o.verts[0], [x1] = o.verts[1];
+    ctx.strokeStyle = GEO.mark; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = x0 + 6, i = 1; x < x1 - 10; x += 6, i++) {
+      ctx.moveTo(x, y0); ctx.lineTo(x, y0 - (i % 5 === 0 ? 8 : 4));
+    }
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -1611,6 +1755,109 @@
     ctx.restore();
   }
 
+  function drawMagnifier(o, sy) {
+    // scorch trail the sun spot has burnt into the page
+    for (const s of o.scorch) {
+      ctx.fillStyle = 'rgba(110,60,20,.28)';
+      ctx.beginPath(); ctx.arc(s.x, sy, s.r, 0, Math.PI * 2); ctx.fill();
+    }
+    const flick = 1 + Math.sin(o.t * 30) * 0.08;
+    // lens hovering above the page, up and to the side, with its cone of light down to the spot
+    const lx = o.x - 30, ly = sy - 46, R = 30;
+    ctx.fillStyle = 'rgba(255,225,120,.22)';
+    ctx.beginPath(); ctx.moveTo(lx - R * 0.8, ly + R * 0.5); ctx.lineTo(o.x, sy); ctx.lineTo(lx + R * 0.9, ly - R * 0.3); ctx.closePath(); ctx.fill();
+    // the burning spot
+    const g = ctx.createRadialGradient(o.x, sy, 0, o.x, sy, 22 * flick);
+    g.addColorStop(0, 'rgba(255,255,235,1)'); g.addColorStop(0.3, 'rgba(255,200,60,.95)');
+    g.addColorStop(0.6, 'rgba(240,110,30,.5)'); g.addColorStop(1, 'rgba(240,110,30,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(o.x, sy, 22 * flick, 0, Math.PI * 2); ctx.fill();
+    // smoke wisps
+    ctx.strokeStyle = 'rgba(120,120,120,.35)'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+    for (let k = 0; k < 2; k++) {
+      const ph = (o.t * 1.4 + k * 0.5) % 1;
+      ctx.globalAlpha = 1 - ph;
+      ctx.beginPath(); ctx.moveTo(o.x + 4 * k, sy - 8 - ph * 26);
+      ctx.quadraticCurveTo(o.x + 8 + 4 * k, sy - 14 - ph * 26, o.x + 2 + 4 * k, sy - 22 - ph * 26); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    // handle, then the rim and glass
+    ctx.save(); ctx.translate(lx, ly); ctx.rotate(-2.3);
+    ctx.fillStyle = 'rgba(34,53,107,.12)'; ctx.fillRect(R + 4, -2, 42, 12);
+    ctx.fillStyle = '#3b2a1f'; ctx.beginPath(); roundRectPath(R + 2, -6, 44, 12, 5); ctx.fill(); inkStroke(1.2);
+    ctx.fillStyle = '#b9bec6'; ctx.fillRect(R - 2, -4, 8, 8);
+    ctx.restore();
+    ctx.fillStyle = 'rgba(180,220,255,.28)';
+    ctx.beginPath(); ctx.arc(lx, ly, R, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#5b6474'; ctx.lineWidth = 5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(lx, ly, R + 2.5, 0, Math.PI * 2); inkStroke(1.2);
+    ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(lx, ly, R - 8, Math.PI * 1.1, Math.PI * 1.45); ctx.stroke();
+  }
+
+  function drawBand(o, sy) {
+    const dy1 = o.y1 - o.y, dy2 = o.y2 - o.y;
+    // the band wobbles after a hit: bend it at the hit point, perpendicular to its length
+    const len = Math.hypot(o.x2 - o.x1, o.y2 - o.y1), nx = -(o.y2 - o.y1) / len, ny = (o.x2 - o.x1) / len;
+    const k = clamp((o.hitX - o.x1) / (o.x2 - o.x1), 0.1, 0.9);
+    const bend = Math.sin(o.t * 32) * o.wob * 14;
+    const cx = o.x1 + (o.x2 - o.x1) * k + nx * bend, cy = sy + dy1 + (dy2 - dy1) * k + ny * bend;
+    ctx.save();
+    ctx.lineCap = 'round';
+    for (const off of [-2, 2]) {             // two strands of the loop
+      ctx.strokeStyle = 'rgba(34,53,107,.12)'; ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.moveTo(o.x1 + 3, sy + dy1 + off + 5); ctx.quadraticCurveTo(cx + 3, cy + off + 5, o.x2 + 3, sy + dy2 + off + 5); ctx.stroke();
+      ctx.strokeStyle = o.col; ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.moveTo(o.x1, sy + dy1 + off); ctx.quadraticCurveTo(cx, cy + off, o.x2, sy + dy2 + off); ctx.stroke();
+    }
+    ctx.restore();
+    drawTack({ x: o.x1, r: 9, col: '#8d939e' }, sy + dy1);
+    drawTack({ x: o.x2, r: 9, col: '#8d939e' }, sy + dy2);
+  }
+
+  function drawPaw(o, sy) {
+    ctx.save();
+    toolFrame(o, sy);
+    if (o.phase === 'warn') {                // shaded wedge where the paw is about to swing
+      const k = Math.min(1, o.t / o.warn);
+      ctx.fillStyle = `rgba(200,60,40,${0.05 + 0.13 * k})`;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, o.L + 20, -PAW_SWEEP, PAW_SWEEP); ctx.closePath(); ctx.fill();
+      ctx.save();
+      ctx.strokeStyle = `rgba(200,60,40,${0.25 + 0.5 * k})`; ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
+      ctx.beginPath(); ctx.arc(0, 0, o.L + 20, -PAW_SWEEP, PAW_SWEEP); ctx.stroke();
+      ctx.restore();
+    }
+    if (o.ext > 0) {
+      const len = o.L * o.ext;
+      ctx.rotate(o.ang);
+      ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(-10, -5, len + 10, 26);
+      // furry arm with stripes
+      ctx.fillStyle = o.col;
+      ctx.beginPath(); roundRectPath(-20, -11, len + 6, 22, 10); ctx.fill(); inkStroke(1.3);
+      ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let x = 6; x < len - 24; x += 18) { ctx.moveTo(x, -9); ctx.lineTo(x + 5, 0); }
+      ctx.stroke();
+      // the paw: round pad, pink beans, claws out while swiping
+      ctx.translate(len, 0);
+      if (o.phase === 'swipe') {
+        ctx.fillStyle = '#fbfbf7';
+        for (const a of [-0.6, -0.2, 0.2, 0.6]) {
+          ctx.save(); ctx.rotate(a);
+          ctx.beginPath(); ctx.moveTo(16, -2.5); ctx.lineTo(27, 0); ctx.lineTo(16, 2.5); ctx.closePath(); ctx.fill(); inkStroke(0.8);
+          ctx.restore();
+        }
+      }
+      ctx.fillStyle = o.col;
+      ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
+      ctx.fillStyle = '#f2a1b0';
+      ctx.beginPath(); ctx.ellipse(-3, 0, 6.5, 7.5, 0, 0, Math.PI * 2); ctx.fill();
+      for (const a of [-0.9, -0.3, 0.3, 0.9]) {
+        ctx.beginPath(); ctx.arc(Math.cos(a) * 11, Math.sin(a) * 11, 3.2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
   function planeOutline(c = ctx) {
     c.beginPath();
     c.moveTo(0, 20); c.lineTo(-14, -14); c.lineTo(-2, -9); c.lineTo(0, -12);
@@ -1811,6 +2058,10 @@
         case 'coffee': drawCoffee(o, sy); break;
         case 'whiteout': drawWhiteout(o, sy); break;
         case 'note': drawNote(o, sy); break;
+        case 'setsquare': drawSetSquare(o, sy); break;
+        case 'magnifier': drawMagnifier(o, sy); break;
+        case 'band': drawBand(o, sy); break;
+        case 'paw': drawPaw(o, sy); break;
       }
     }
     for (const p of pickups) drawStar(p, p.y - dist);
