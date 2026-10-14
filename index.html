@@ -117,7 +117,8 @@
         <ul>
           <li><kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd> to steer</li>
           <li>Mouse: point where you want to fly</li>
-          <li>Phone: tap the left or right side. The plane keeps drifting that way until you tap the other side</li>
+          <li>Phone: tap a side to drift that way. Tap the other side once to fall straight, twice to drift back. Hold a side for a sharp turn</li>
+          <li>Gliding sideways slows your fall</li>
           <li>Grab gold stars for +25 m · <kbd>P</kbd> pauses</li>
         </ul>
         <button class="play" id="startBtn" type="button">Throw it</button>
@@ -148,6 +149,7 @@
   const W = 400;              // logical playfield width; height follows the screen
   const PX_PER_M = 30;        // world units per metre of depth
   const STAR_BONUS = 25;
+  const SIDE_SLOWDOWN = 0.4;  // at full sideways speed the plane falls 40% slower
   const COL = {
     paper: '#fbf9f1', rule: '#bcd3ea', margin: '#e7a1a1', ink: '#22356b',
     graphite: '#55585e', hole: '#24313f', inkBlot: '#1b2760'
@@ -231,11 +233,14 @@
 
   const keys = { left: false, right: false };
   let pointerX = null, pointerDown = false;
-  // touch: holding a side steers hard; after release the plane keeps drifting that way
-  let touchSide = 0, drift = 0, touchId = null, usedTouch = false;
+  // touch: each tap steps the drift one notch toward that side (left -> straight -> right);
+  // holding a side past HOLD_MS steers hard and leaves the plane drifting that way
+  const HOLD_MS = 220;
+  let touchSide = 0, drift = 0, touchId = null, touchStart = 0, usedTouch = false;
 
   const planeScreenY = () => H * 0.28;
   const difficulty = () => 1 - Math.exp(-time / 75);
+  const maxSideSpeed = () => 300 + 60 * difficulty();
   const score = () => Math.floor(dist / PX_PER_M) + stars * STAR_BONUS;
 
   function reset() {
@@ -395,17 +400,20 @@
 
   function steer(dt) {
     let target = 0;
-    const maxV = 300 + 60 * difficulty();
+    const maxV = maxSideSpeed();
     const ax = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
     if (ax) {
       target = ax * maxV;
       plane.vx += (target - plane.vx) * Math.min(1, 7 * dt);
-    } else if (touchSide) {
+    } else if (touchSide && performance.now() - touchStart > HOLD_MS) {
+      drift = touchSide;
       target = touchSide * maxV;
       plane.vx += (target - plane.vx) * Math.min(1, 9 * dt);
     } else if (drift) {
       target = drift * maxV * 0.7;
       plane.vx += (target - plane.vx) * Math.min(1, 6 * dt);
+    } else if (usedTouch) {
+      plane.vx += (0 - plane.vx) * Math.min(1, 8 * dt);
     } else if (pointerX !== null) {
       target = clamp((pointerX - plane.x) * 7, -maxV, maxV);
       plane.vx += (target - plane.vx) * Math.min(1, 10 * dt);
@@ -451,9 +459,11 @@
 
     // playing
     time += dt;
-    speed = 150 + 270 * difficulty();
-    dist += speed * dt;
     steer(dt);
+    // gliding sideways trades fall speed for horizontal speed
+    const sideways = Math.min(1, Math.abs(plane.vx) / maxSideSpeed());
+    speed = (150 + 270 * difficulty()) * (1 - SIDE_SLOWDOWN * sideways);
+    dist += speed * dt;
     const targetAng = Math.atan2(plane.vx, speed + 60);
     plane.ang += (targetAng - plane.ang) * Math.min(1, 12 * dt);
     updateTrail();
@@ -924,7 +934,9 @@
     e.preventDefault();
     usedTouch = true;
     touchId = e.pointerId;
-    touchSide = drift = sideOf(e.clientX);
+    touchSide = sideOf(e.clientX);
+    touchStart = performance.now();
+    drift = clamp(drift + touchSide, -1, 1);
     pointerX = null;
   });
   canvas.addEventListener('pointermove', e => {
@@ -933,7 +945,7 @@
       drift = 0;
       pointerX = toWorldX(e.clientX);
     } else if (e.pointerId === touchId) {
-      touchSide = drift = sideOf(e.clientX);
+      touchSide = sideOf(e.clientX);
     }
   });
   const release = e => {
