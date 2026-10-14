@@ -100,7 +100,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v4</div>
+    <div class="version" id="version">v5</div>
 
     <div class="hud">
       <div>
@@ -230,6 +230,67 @@
     crash: () => { crunch(); tone(220, 60, 0.4, 'sawtooth', 0.04); }
   };
 
+  // ---------- background math: harder the deeper the page ----------
+  const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const FORMULA_DEPTHS = [0, 150, 400, 800, 1500, 2500];   // metres where each level starts
+  const FORMULA_TIERS = [
+    [ // arithmetic
+      () => { const a = ri(2, 19), b = ri(2, 19); return `${a} + ${b} = ${a + b}`; },
+      () => { const a = ri(10, 30), b = ri(1, 9); return `${a} − ${b} = ${a - b}`; },
+      () => { const a = ri(2, 9), b = ri(2, 9); return `${a} × ${b} = ${a * b}`; },
+      () => { const b = ri(2, 9), q = ri(2, 9); return `${b * q} ÷ ${b} = ${q}`; },
+      '1/2 + 1/4 = 3/4', '100 − 37 = 63'
+    ],
+    [ // fractions, percentages, first algebra
+      'x + 7 = 12  →  x = 5', '3x = 21  →  x = 7', '2/3 + 1/6 = 5/6', '25% of 80 = 20',
+      '√144 = 12', 'A = π r²', 'P = 2(l + w)', '2⁵ = 32', '−3 · (−4) = 12'
+    ],
+    [ // algebra, geometry, trig
+      'x = (−b ± √(b² − 4ac)) / 2a', 'a² + b² = c²', '(a + b)² = a² + 2ab + b²', 'sin²θ + cos²θ = 1',
+      'y = mx + b', 'log₂ 8 = 3', 'aᵐ · aⁿ = aᵐ⁺ⁿ', 'V = 4/3 π r³', 'tan θ = sin θ / cos θ'
+    ],
+    [ // calculus
+      'd/dx xⁿ = n xⁿ⁻¹', '∫ x² dx = x³/3 + C', 'lim x→0  sin x / x = 1', 'd/dx eˣ = eˣ',
+      '∫₀¹ x dx = 1/2', "f′(x) = lim h→0 (f(x+h) − f(x)) / h", "(fg)′ = f′g + fg′", '∫ 1/x dx = ln|x| + C'
+    ],
+    [ // series, complex numbers, linear algebra
+      'e^(iπ) + 1 = 0', '∑ 1/n² = π²/6', 'eˣ = ∑ xⁿ / n!', '∫ e^(−x²) dx = √π', 'det(A − λI) = 0',
+      'e^(iθ) = cos θ + i sin θ', 'Γ(n) = (n − 1)!', '∑ (−1)ⁿ / (2n+1) = π/4'
+    ],
+    [ // physics and the scary stuff
+      'iℏ ∂Ψ/∂t = ĤΨ', 'ζ(s) = ∑ 1/nˢ', '∇ × B = μ₀J + μ₀ε₀ ∂E/∂t', '∇ · E = ρ / ε₀',
+      'ρ(∂u/∂t + u·∇u) = −∇p + μ∇²u', 'Gμν + Λgμν = (8πG/c⁴) Tμν', 'f̂(ξ) = ∫ f(x) e^(−2πixξ) dx',
+      'P = NP ?'
+    ]
+  ];
+  const formulaFont = size => `${size}px Kalam, "Cambria Math", "Segoe UI Symbol", cursive`;
+  let formulas = [], nextFormulaY = 60;
+
+  function spawnFormula(lineY) {
+    const m = lineY / PX_PER_M;
+    let tier = 0;
+    for (let i = 1; i < FORMULA_DEPTHS.length; i++) if (m >= FORMULA_DEPTHS[i]) tier = i;
+    const list = FORMULA_TIERS[tier];
+    const item = list[Math.floor(Math.random() * list.length)];
+    const text = typeof item === 'function' ? item() : item;
+    let size = 19;
+    ctx.font = formulaFont(size);
+    let w = ctx.measureText(text).width;
+    const room = W - 66 - 12;
+    if (w > room) { size *= room / w; w = room; }
+    formulas.push({ text, size, w, x: rand(66, W - 12 - w), y: lineY - 6, rot: rand(-0.03, 0.03),
+      underline: Math.random() < 0.2 });
+  }
+
+  // formulas sit on the ruled lines (every 30 units of world y)
+  function updateFormulas() {
+    while (nextFormulaY < dist + H + 40) {
+      spawnFormula(nextFormulaY);
+      nextFormulaY += 30 * ri(4, 7);
+    }
+    formulas = formulas.filter(f => f.y > dist - 40);
+  }
+
   // ---------- game state ----------
   let state = 'title';          // title | play | paused | dying | over
   let plane, obstacles, pickups, particles, floaters, trail;
@@ -257,6 +318,7 @@
     obstacles = []; pickups = []; particles = []; floaters = []; trail = [];
     dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
     nextRowY = H + 140;
+    formulas = []; nextFormulaY = 60;
   }
   reset();
 
@@ -441,6 +503,7 @@
   }
 
   function update(dt) {
+    updateFormulas();
     if (state === 'title' || state === 'over') {
       titleTime += dt;
       if (state === 'title') {
@@ -551,6 +614,22 @@
     // margin
     ctx.strokeStyle = COL.margin; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.moveTo(52, 0); ctx.lineTo(52, H); ctx.moveTo(55, 0); ctx.lineTo(55, H); ctx.stroke();
+    // pencilled math homework
+    ctx.save();
+    ctx.globalAlpha = 0.42;
+    ctx.fillStyle = COL.graphite; ctx.strokeStyle = COL.graphite; ctx.lineWidth = 1.2;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    for (const f of formulas) {
+      const sy = f.y - dist;
+      if (sy < -30 || sy > H + 30) continue;
+      ctx.save();
+      ctx.translate(f.x, sy); ctx.rotate(f.rot);
+      ctx.font = formulaFont(f.size);
+      ctx.fillText(f.text, 0, 0);
+      if (f.underline) { ctx.beginPath(); ctx.moveTo(-2, 4); ctx.quadraticCurveTo(f.w / 2, 7, f.w + 3, 3); ctx.stroke(); }
+      ctx.restore();
+    }
+    ctx.restore();
     // punched holes
     const hg = 250;
     for (let y = hg / 2 - (dist % hg) - hg; y < H + hg; y += hg) {
