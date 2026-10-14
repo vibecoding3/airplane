@@ -117,7 +117,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v11</div>
+    <div class="version" id="version">v12</div>
 
     <div class="hud">
       <div>
@@ -139,7 +139,7 @@
         <p>Your plane only goes one way: down. Steer it through the notebook and see how deep it falls before it gets crumpled.</p>
         <ul>
           <li>Tap or click a side of the screen, or press <kbd>←</kbd> <kbd>→</kbd> (<kbd>A</kbd> <kbd>D</kbd>), to drift that way</li>
-          <li>Each press moves one step: left, slight left, straight, slight right, right. Hold a side for a sharp turn</li>
+          <li>Press the other side once to fall straight, twice to drift back. Hold a side for a sharp turn</li>
           <li>The deeper you fall, the faster you go. Gliding sideways slows you down</li>
           <li>Grab gold stars for +25 m · <kbd>P</kbd> pauses</li>
         </ul>
@@ -406,10 +406,8 @@
   let titleTime = 0;
 
   // One control scheme for every device (tap/click a screen side, or press an arrow key):
-  // each press steps the drift one notch toward that side, through five positions
-  // (left, slight left, straight, slight right, right);
-  // holding past HOLD_MS steers hard and leaves the plane drifting fully that way.
-  const DRIFT_STEPS = 2;            // notches on each side of straight down
+  // each press steps the drift one notch toward that side (left -> straight -> right);
+  // holding past HOLD_MS steers hard and leaves the plane drifting that way.
   const HOLD_MS = 220;
   let drift = 0, holdSide = 0, holdSource = null, holdStart = 0;
 
@@ -418,7 +416,7 @@
     holdSide = side;
     holdSource = source;
     holdStart = performance.now();
-    drift = clamp(drift + side, -DRIFT_STEPS, DRIFT_STEPS);
+    drift = clamp(drift + side, -1, 1);
   }
   function release(source) {
     if (source !== holdSource) return;
@@ -673,11 +671,11 @@
     let target = 0;
     const maxV = maxSideSpeed();
     if (holdSide && performance.now() - holdStart > HOLD_MS) {
-      drift = holdSide * DRIFT_STEPS;
+      drift = holdSide;
       target = holdSide * maxV;
       plane.vx += (target - plane.vx) * Math.min(1, 9 * dt);
     } else if (drift) {
-      target = (drift / DRIFT_STEPS) * maxV * 0.7;   // slight drift = half of a full drift
+      target = drift * maxV * 0.7;
       plane.vx += (target - plane.vx) * Math.min(1, 6 * dt);
     } else {
       plane.vx += (0 - plane.vx) * Math.min(1, 8 * dt);
@@ -1295,23 +1293,21 @@
     syncHudPage();
   }
 
-  // chevrons in the bottom corners show the drift: one lit for a slight drift, both for a full one
+  // chevrons in the bottom corners show which way the plane is drifting
   function drawSteerHints() {
     const y = H - 46;
     for (const side of [-1, 1]) {
       const x = side < 0 ? 44 : W - 44;
-      const level = Math.sign(drift) === side ? Math.abs(drift) : 0;
+      const active = drift === side;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.globalAlpha = active ? (holdSide === side ? 0.75 : 0.5) : 0.18;
+      ctx.beginPath();
       for (const o of [-7, 7]) {
-        const outer = o * side > 0;            // the chevron nearer the page edge
-        const lit = outer ? level >= 2 : level >= 1;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.globalAlpha = lit ? (holdSide === side ? 0.75 : 0.5) : 0.18;
-        ctx.beginPath();
         ctx.moveTo(o - side * 6, -12); ctx.lineTo(o + side * 6, 0); ctx.lineTo(o - side * 6, 12);
-        inkStroke(4);
-        ctx.restore();
       }
+      inkStroke(4);
+      ctx.restore();
     }
   }
 
