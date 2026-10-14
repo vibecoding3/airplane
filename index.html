@@ -117,7 +117,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v12</div>
+    <div class="version" id="version">v14</div>
 
     <div class="hud">
       <div>
@@ -366,7 +366,7 @@
     let size = 19;
     ctx.font = formulaFont(size);
     let w = ctx.measureText(text).width;
-    const rot = formulaAngle(w);
+    const rot = formulaAngle();
     const c = Math.abs(Math.cos(rot)), s = Math.abs(Math.sin(rot));
     // shrink the formula until its rotated box fits between the red margin and the right edge
     let ex = w * c + size * s;
@@ -378,14 +378,13 @@
     return ey;
   }
 
-  // a mix of handwriting angles: mostly crooked or slanted, some steep, some sideways, a few upside down
-  function formulaAngle(w) {
+  // a mix of handwriting angles, never tilted more than 45° so every formula stays readable
+  const MAX_TILT = Math.PI / 4;
+  function formulaAngle() {
     const r = Math.random(), sign = Math.random() < 0.5 ? -1 : 1;
-    if (r < 0.4) return sign * rand(0.04, 0.15);
-    if (r < 0.7) return sign * rand(0.25, 0.6);
-    if (r < 0.85) return sign * rand(0.7, 1.0);
-    if (r < 0.95) return w < 200 ? sign * Math.PI / 2 + rand(-0.05, 0.05) : sign * rand(0.25, 0.6);
-    return Math.PI + rand(-0.15, 0.15);
+    if (r < 0.4) return sign * rand(0.04, 0.15);       // a little crooked
+    if (r < 0.75) return sign * rand(0.25, 0.5);       // clearly slanted
+    return sign * rand(0.55, MAX_TILT);                // steep, up to 45°
   }
 
   // formulas start on the ruled lines (every 30 units of world y); tall rotated ones push the next one down
@@ -445,6 +444,7 @@
   // ---------- obstacle generation ----------
   const TACK_COLORS = ['#d9443a', '#2f8f5b', '#2f6fd1', '#e0a21a', '#8a4fc2'];
   const CLIP_COLORS = ['#8d96a3', '#d9443a', '#2f6fd1', '#2f8f5b', '#e0a21a'];
+  const PEN_COLORS = ['#1f3fa8', '#c0392b', '#1d1d1d', '#2f8f5b'];
   const make = {
     gate(y, d) {           // two rulers leaving a gap
       const gapW = lerp(170, 98, d) + rand(-10, 10);
@@ -535,8 +535,34 @@
           r: 10, col: TACK_COLORS[ri(0, TACK_COLORS.length - 1)] });
       }
       return 40;
+    },
+    glue(y, d) {           // a glue tube on one edge squirting blobs across the page
+      obstacles.push({ type: 'glue', y, side: Math.random() < 0.5 ? -1 : 1, blobs: [], timer: rand(0.2, 0.8),
+        every: lerp(1.6, 1.0, d), blobV: rand(130, 170 + 90 * d), squeeze: 0 });
+      return 20;
+    },
+    cutter(y, d) {         // a snap-off cutter on one edge: the blade shoots out, holds, then slides back
+      obstacles.push({ type: 'cutter', y, side: Math.random() < 0.5 ? -1 : 1, ext: 0,
+        maxExt: rand(W * 0.4, W * 0.6), period: lerp(2.4, 1.6, d), t: rand(0, 2) });
+    },
+    pen(y, d) {            // a pen inks a solid line across the page, stopping short of the far edge
+      obstacles.push({ type: 'pen', y, side: Math.random() < 0.5 ? -1 : 1,
+        len: W - rand(lerp(140, 95, d), lerp(170, 120, d)), drawn: 0, v: 0, active: false, wave: rand(0, 6),
+        col: PEN_COLORS[ri(0, PEN_COLORS.length - 1)] });
+    },
+    stylus(y, d) {         // a tablet stylus hovering over the page; every tap sends out an expanding ripple
+      obstacles.push({ type: 'stylus', y, x: rand(70, W - 70), vx: (Math.random() < 0.5 ? -1 : 1) * rand(30, 60 + 50 * d),
+        rings: [], timer: rand(0.3, 0.9), every: lerp(1.5, 1.0, d), tap: 0, maxR: lerp(75, 95, d) });
+      return 60;
     }
   };
+
+  // geometry shared by drawing and collision for the edge-mounted tools (glue tube, cutter, pen)
+  const wallX = o => (o.side < 0 ? 0 : W);
+  const inward = o => -o.side;
+  const CUTTER_HANDLE = 80;
+  const PEN_TILT = 0.9;          // pen body leans back ~50° from its tip
+  const PEN_LEN = 75;
 
   function clipXs(o) {
     const span = o.n * o.sp, xs = [];
@@ -553,6 +579,10 @@
     if (d > 0.18) pool.push(['fan', 1.1]);
     if (d > 0.22) pool.push(['erasers', 1.4]);
     if (d > 0.3) pool.push(['compass', 1.3]);
+    if (d > 0.05) pool.push(['pen', 1.3]);
+    if (d > 0.1) pool.push(['glue', 1.2]);
+    if (d > 0.15) pool.push(['cutter', 1.3]);
+    if (d > 0.25) pool.push(['stylus', 1.2]);
     const choices = pool.filter(p => p[0] !== lastType);   // never the same obstacle twice in a row
     let r = Math.random() * choices.reduce((s, p) => s + p[1], 0), type = choices[0][0];
     for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
@@ -610,6 +640,31 @@
                 { k: 'c', x: o.x, y: o.y, r: 8 }];
       }
       case 'fan': return [{ k: 'c', x: o.side < 0 ? 0 : W, y: o.y, r: 24 }];
+      case 'glue': {
+        const x0 = wallX(o), i = inward(o);
+        return [{ k: 'b', x: x0 + i * 31, y: o.y, hw: 31, hh: 11, a: 0 },
+                { k: 'b', x: x0 + i * 70, y: o.y, hw: 8, hh: 4, a: 0 },
+                ...o.blobs.map(b => ({ k: 'c', x: b.x, y: o.y, r: b.r * 0.9 }))];
+      }
+      case 'cutter': {
+        const x0 = wallX(o), i = inward(o);
+        const out = [{ k: 'b', x: x0 + i * CUTTER_HANDLE / 2, y: o.y, hw: CUTTER_HANDLE / 2, hh: 12, a: 0 }];
+        if (o.ext > 1) out.push({ k: 'b', x: x0 + i * (CUTTER_HANDLE + o.ext / 2), y: o.y, hw: o.ext / 2, hh: 6, a: 0 });
+        return out;
+      }
+      case 'pen': {
+        const x0 = wallX(o), i = inward(o), tip = x0 + i * o.drawn;
+        const bx = -i * Math.cos(PEN_TILT), by = -Math.sin(PEN_TILT);
+        const out = [{ k: 'b', x: tip + bx * PEN_LEN / 2, y: o.y + by * PEN_LEN / 2, hw: PEN_LEN / 2, hh: 5,
+          a: Math.atan2(by, bx) }];
+        if (o.drawn > 2) out.push({ k: 'b', x: x0 + i * o.drawn / 2, y: o.y, hw: o.drawn / 2, hh: 4.5, a: 0 });
+        return out;
+      }
+      case 'stylus': {
+        const out = [{ k: 'b', x: o.x, y: o.y - 36 + o.tap * 6, hw: 34, hh: 6, a: Math.PI / 2 }];
+        for (const ring of o.rings) if (ring.R < o.maxR * 0.85) out.push({ k: 'r', x: ring.x, y: o.y, R: ring.R, t: 2.5 });
+        return out;
+      }
     }
     return [];
   }
@@ -617,6 +672,7 @@
   function circleHits(cx, cy, r, s) {
     const dx = cx - s.x, dy = cy - s.y;
     if (s.k === 'c') { const rr = r + s.r; return dx * dx + dy * dy < rr * rr; }
+    if (s.k === 'r') return Math.abs(Math.hypot(dx, dy) - s.R) < r + s.t;   // thin ring
     const c = Math.cos(s.a), sn = Math.sin(s.a);
     const lx = dx * c + dy * sn, ly = -dx * sn + dy * c;
     const ex = lx - clamp(lx, -s.hw, s.hw), ey = ly - clamp(ly, -s.hh, s.hh);
@@ -664,6 +720,47 @@
         o.swept = Math.min(Math.PI * 2, o.swept + Math.abs(o.spin) * dt);
         break;
       case 'fan': o.blade += 22 * dt; o.t += dt; break;
+      case 'glue':
+        if (o.y - dist < H + 40) {
+          o.timer -= dt;
+          if (o.timer <= 0) {
+            o.timer = o.every;
+            o.squeeze = 1;
+            o.blobs.push({ x: wallX(o) + inward(o) * 78, r: rand(7, 10), wob: rand(0, 6) });
+          }
+        }
+        o.squeeze = Math.max(0, o.squeeze - 4 * dt);
+        for (const b of o.blobs) { b.x += inward(o) * o.blobV * dt; b.wob += 8 * dt; }
+        o.blobs = o.blobs.filter(b => b.x > -20 && b.x < W + 20);
+        break;
+      case 'cutter': {
+        o.t += dt;
+        const p = (o.t % o.period) / o.period;   // snap out fast, hold, slide back slowly
+        const f = p < 0.15 ? 1 - (1 - p / 0.15) ** 2 : p < 0.45 ? 1 : 1 - (p - 0.45) / 0.55;
+        o.ext = o.maxExt * f;
+        break;
+      }
+      case 'pen':
+        if (!o.active && o.y - dist < H) {
+          // pace the stroke so it finishes a little before the plane gets there
+          o.active = true;
+          const eta = Math.max(0.4, (o.y - dist - planeScreenY()) / Math.max(60, speed));
+          o.v = o.len / (eta * 0.65);
+        }
+        if (o.active) o.drawn = Math.min(o.len, o.drawn + o.v * dt);
+        break;
+      case 'stylus':
+        o.x += o.vx * dt;
+        if (o.x < 50) o.vx = Math.abs(o.vx);
+        if (o.x > W - 50) o.vx = -Math.abs(o.vx);
+        if (o.y - dist < H + 20) {
+          o.timer -= dt;
+          if (o.timer <= 0) { o.timer = o.every; o.tap = 1; o.rings.push({ x: o.x, R: 4 }); }
+        }
+        o.tap = Math.max(0, o.tap - 5 * dt);
+        for (const ring of o.rings) ring.R += 95 * dt;
+        o.rings = o.rings.filter(ring => ring.R < o.maxR);
+        break;
     }
   }
 
@@ -1123,6 +1220,135 @@
     ctx.restore();
   }
 
+  // edge-mounted tools draw in a frame where +x points from their wall into the page
+  function toolFrame(o, sy) {
+    ctx.translate(wallX(o), sy);
+    ctx.scale(inward(o), 1);
+  }
+
+  function drawGlue(o, sy) {
+    // blobs in flight
+    for (const b of o.blobs) {
+      const sx = 1 + Math.sin(b.wob) * 0.12;
+      ctx.fillStyle = 'rgba(34,53,107,.12)';
+      ctx.beginPath(); ctx.ellipse(b.x + 3, sy + 5, b.r * sx, b.r / sx, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fbfbf7';
+      ctx.beginPath(); ctx.ellipse(b.x, sy, b.r * sx, b.r / sx, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(110,120,140,.9)'; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.fillStyle = 'rgba(160,190,230,.7)';
+      ctx.beginPath(); ctx.arc(b.x - b.r * 0.35, sy - b.r * 0.35, b.r * 0.25, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.save();
+    toolFrame(o, sy);
+    const sq = 1 - 0.18 * o.squeeze;       // the tube gets squeezed on every squirt
+    ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(4, -11 * sq + 6, 74, 22 * sq);
+    // nozzle
+    ctx.fillStyle = '#f4f2ea';
+    ctx.beginPath(); ctx.moveTo(60, -7); ctx.lineTo(78, -3); ctx.lineTo(78, 3); ctx.lineTo(60, 7); ctx.closePath();
+    ctx.fill(); inkStroke(1.2);
+    // body with a printed label and a crimped end at the wall
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); roundRectPath(-4, -11 * sq, 66, 22 * sq, 5); ctx.fill();
+    ctx.fillStyle = '#e8812f'; ctx.fillRect(16, -11 * sq, 30, 22 * sq);
+    ctx.beginPath(); roundRectPath(-4, -11 * sq, 66, 22 * sq, 5); inkStroke(1.3);
+    ctx.beginPath();
+    for (let x = 2; x < 12; x += 3) { ctx.moveTo(x, -11 * sq); ctx.lineTo(x, 11 * sq); }
+    inkStroke(0.8);
+    ctx.save();
+    ctx.translate(31, 0); ctx.scale(inward(o), 1);   // keep the label readable on either edge
+    ctx.fillStyle = '#ffffff'; ctx.font = '700 10px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('GLUE', 0, 1);
+    ctx.restore();
+    ctx.restore();
+  }
+
+  function drawCutter(o, sy) {
+    ctx.save();
+    toolFrame(o, sy);
+    const h = CUTTER_HANDLE, e = o.ext;
+    ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(4, -6, h + e, 24);
+    if (e > 1) {
+      // snap-off blade with its score lines and angled tip
+      ctx.fillStyle = '#cfd5de';
+      ctx.beginPath(); ctx.moveTo(h - 10, -6); ctx.lineTo(h + e, -6); ctx.lineTo(h + e - 10, 6); ctx.lineTo(h - 10, 6); ctx.closePath();
+      ctx.fill(); inkStroke(1.2);
+      ctx.save(); ctx.clip();
+      ctx.strokeStyle = 'rgba(120,130,145,.8)'; ctx.lineWidth = 0.9; ctx.beginPath();
+      for (let x = h + 4; x < h + e; x += 12) { ctx.moveTo(x, -6); ctx.lineTo(x - 7, 6); }
+      ctx.stroke();
+      ctx.restore();
+    }
+    // handle
+    ctx.fillStyle = '#f2b233';
+    ctx.beginPath(); roundRectPath(-6, -12, h + 6, 24, 6); ctx.fill(); inkStroke(1.4);
+    ctx.beginPath();
+    for (let x = 6; x < 34; x += 5) { ctx.moveTo(x, -8); ctx.lineTo(x, 8); }
+    inkStroke(0.9);
+    ctx.fillStyle = '#3b3f47';                      // slider button
+    ctx.beginPath(); roundRectPath(h - 30, -15, 14, 7, 2); ctx.fill(); inkStroke(1);
+    ctx.restore();
+  }
+
+  function drawPen(o, sy) {
+    const x0 = wallX(o), i = inward(o);
+    // the ink stroke drawn so far, a little wobbly like real handwriting
+    if (o.drawn > 1) {
+      ctx.save();
+      ctx.strokeStyle = o.col; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let t = 0; t <= o.drawn; t += 6) ctx.lineTo(x0 + i * t, sy + Math.sin(t * 0.05 + o.wave) * 2.5);
+      ctx.lineTo(x0 + i * o.drawn, sy + Math.sin(o.drawn * 0.05 + o.wave) * 2.5);
+      ctx.stroke();
+      ctx.restore();
+    }
+    // the pen, tip on the end of the line and body leaning back up the page
+    const tipX = x0 + i * o.drawn, tipY = sy + Math.sin(o.drawn * 0.05 + o.wave) * 2.5;
+    const ang = Math.atan2(-Math.sin(PEN_TILT), -i * Math.cos(PEN_TILT));
+    for (const pass of ['shadow', 'main']) {
+      ctx.save();
+      ctx.translate(tipX + (pass === 'shadow' ? 6 : 0), tipY + (pass === 'shadow' ? 9 : 0));
+      ctx.rotate(ang);
+      if (pass === 'shadow') {
+        ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(0, -5, PEN_LEN, 10);
+      } else {
+        ctx.fillStyle = '#b9bec6';                                           // metal tip
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(9, -3.5); ctx.lineTo(9, 3.5); ctx.closePath(); ctx.fill(); inkStroke(1);
+        ctx.fillStyle = o.col; ctx.fillRect(9, -4.5, 20, 9);                // rubber grip
+        ctx.fillStyle = '#f4f4f0'; ctx.fillRect(29, -5, 38, 10);            // barrel
+        ctx.fillStyle = o.col;
+        ctx.beginPath(); roundRectPath(63, -5, 12, 10, 3); ctx.fill();      // end cap
+        ctx.beginPath(); ctx.rect(9, -4.5, 20, 9); ctx.rect(29, -5, 38, 10); roundRectPath(63, -5, 12, 10, 3); inkStroke(1.1);
+        ctx.fillStyle = o.col; ctx.fillRect(42, -7.5, 22, 2.5);             // clip
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawStylus(o, sy) {
+    // ripples from each tap, fading as they spread
+    for (const ring of o.rings) {
+      const k = ring.R / o.maxR;
+      ctx.strokeStyle = `rgba(56,168,216,${(1 - k) * 0.9})`; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(ring.x, sy, ring.R, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = `rgba(56,168,216,${(1 - k) * 0.35})`; ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.arc(ring.x, sy, Math.max(0, ring.R - 6), 0, Math.PI * 2); ctx.stroke();
+    }
+    const dip = o.tap * 6;
+    ctx.fillStyle = 'rgba(34,53,107,.15)';
+    ctx.beginPath(); ctx.ellipse(o.x + 3, sy + 3, 6 + o.tap * 3, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.save();
+    ctx.translate(o.x, sy - 8 + dip);
+    ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(1, -64, 11, 60);
+    ctx.fillStyle = '#c9ced6';                                                // tip cone
+    ctx.beginPath(); ctx.moveTo(-5.5, -10); ctx.lineTo(0, 0); ctx.lineTo(5.5, -10); ctx.closePath(); ctx.fill(); inkStroke(1.1);
+    ctx.fillStyle = '#3b3f47';                                                // barrel
+    ctx.beginPath(); roundRectPath(-5.5, -68, 11, 58, 5); ctx.fill(); inkStroke(1.2);
+    ctx.fillStyle = '#5b6474'; ctx.fillRect(-5.5, -46, 11, 3);                // seam
+    ctx.fillStyle = '#7b8494'; ctx.fillRect(4, -40, 2.5, 10);                 // side button
+    ctx.fillStyle = '#38a8d8'; ctx.beginPath(); ctx.arc(0, -60, 1.8, 0, Math.PI * 2); ctx.fill();   // status light
+    ctx.restore();
+  }
+
   function planeOutline(c = ctx) {
     c.beginPath();
     c.moveTo(0, 20); c.lineTo(-14, -14); c.lineTo(-2, -9); c.lineTo(0, -12);
@@ -1258,6 +1484,10 @@
         case 'clips': for (const x of clipXs(o)) drawClip(x, sy, o.col); break;
         case 'compass': drawCompass(o, sy); break;
         case 'fan': drawFan(o, sy); break;
+        case 'glue': drawGlue(o, sy); break;
+        case 'cutter': drawCutter(o, sy); break;
+        case 'pen': drawPen(o, sy); break;
+        case 'stylus': drawStylus(o, sy); break;
       }
     }
     for (const p of pickups) drawStar(p, p.y - dist);
