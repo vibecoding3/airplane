@@ -117,7 +117,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v6</div>
+    <div class="version" id="version">v7</div>
 
     <div class="hud">
       <div>
@@ -138,9 +138,8 @@
         <h1>Paper Nosedive</h1>
         <p>Your plane only goes one way: down. Steer it through the notebook and see how deep it falls before it gets crumpled.</p>
         <ul>
-          <li><kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd> to steer</li>
-          <li>Mouse: point where you want to fly</li>
-          <li>Phone: tap a side to drift that way. Tap the other side once to fall straight, twice to drift back. Hold a side for a sharp turn</li>
+          <li>Tap or click a side of the screen, or press <kbd>←</kbd> <kbd>→</kbd> (<kbd>A</kbd> <kbd>D</kbd>), to drift that way</li>
+          <li>Press the other side once to fall straight, twice to drift back. Hold a side for a sharp turn</li>
           <li>The deeper you fall, the faster you go. Gliding sideways slows you down</li>
           <li>Grab gold stars for +25 m · <kbd>P</kbd> pauses</li>
         </ul>
@@ -346,12 +345,25 @@
   let skin = SKINS.find(s => s.id === store.get('nosedive-skin')) || SKINS[0];
   let titleTime = 0;
 
-  const keys = { left: false, right: false };
-  let pointerX = null, pointerDown = false;
-  // touch: each tap steps the drift one notch toward that side (left -> straight -> right);
-  // holding a side past HOLD_MS steers hard and leaves the plane drifting that way
+  // One control scheme for every device (tap/click a screen side, or press an arrow key):
+  // each press steps the drift one notch toward that side (left -> straight -> right);
+  // holding past HOLD_MS steers hard and leaves the plane drifting that way.
   const HOLD_MS = 220;
-  let touchSide = 0, drift = 0, touchId = null, touchStart = 0, usedTouch = false;
+  let drift = 0, holdSide = 0, holdSource = null, holdStart = 0;
+
+  function press(side, source) {
+    if (state !== 'play') return;
+    holdSide = side;
+    holdSource = source;
+    holdStart = performance.now();
+    drift = clamp(drift + side, -1, 1);
+  }
+  function release(source) {
+    if (source !== holdSource) return;
+    holdSide = 0;
+    holdSource = null;
+  }
+  function clearControls() { drift = 0; holdSide = 0; holdSource = null; }
 
   const planeScreenY = () => H * 0.28;
   // everything scales with depth: the deeper the plane gets, the faster it falls, with no cap
@@ -372,6 +384,7 @@
 
   // ---------- obstacle generation ----------
   const TACK_COLORS = ['#d9443a', '#2f8f5b', '#2f6fd1', '#e0a21a', '#8a4fc2'];
+  const CLIP_COLORS = ['#8d96a3', '#d9443a', '#2f6fd1', '#2f8f5b', '#e0a21a'];
   const make = {
     gate(y, d) {           // two rulers leaving a gap
       const gapW = lerp(170, 98, d) + rand(-10, 10);
@@ -422,26 +435,80 @@
       const gapMax = lerp(190, 150, d), gapMin = lerp(74, 56, d);
       obstacles.push({ type: 'erasers', y, cx: rand(110, W - 110), gapMin, gapMax, gap: gapMax,
         freq: rand(1.2, 1.9), ph: rand(0, 6.28) });
+    },
+    // the generators below may return extra vertical room they need before the next row
+    protractor(y, d) {     // half-disc stuck to an edge; deeper down they come in slalom pairs
+      const side = Math.random() < 0.5 ? -1 : 1;
+      obstacles.push({ type: 'protractor', y, side, r: rand(70, 95 + 15 * d) });
+      if (d > 0.25 && Math.random() < 0.6) {
+        obstacles.push({ type: 'protractor', y: y + rand(115, 150), side: -side, r: rand(70, 95 + 15 * d) });
+        return 160;
+      }
+      return 40;
+    },
+    wad(y, d) {            // crumpled paper thrown up the page, bouncing off the edges
+      const n = d > 0.45 && Math.random() < 0.5 ? 2 : 1;
+      for (let i = 0; i < n; i++) {
+        const creases = [];
+        for (let j = 0; j < 3; j++) creases.push([rand(-0.6, 0.6), rand(-0.6, 0.6), rand(-0.6, 0.6), rand(-0.6, 0.6)]);
+        obstacles.push({ type: 'wad', y: y + i * 70, x: rand(40, W - 40), r: rand(14, 18), creases,
+          pts: Array.from({ length: 9 }, () => rand(0.82, 1.08)), active: false,
+          vx: (Math.random() < 0.5 ? -1 : 1) * rand(50, 130), vy: -rand(50, 90 + 110 * d), rot: 0, vr: rand(-4, 4) });
+      }
+    },
+    clips(y, d) {          // a conveyor of paper clips sliding across the page
+      const sp = lerp(125, 92, d);
+      obstacles.push({ type: 'clips', y, sp, n: Math.ceil((W + 40) / sp) + 1, off: rand(0, sp),
+        v: (Math.random() < 0.5 ? -1 : 1) * rand(40, 70 + 80 * d), col: CLIP_COLORS[ri(0, CLIP_COLORS.length - 1)] });
+    },
+    compass(y, d) {        // a drawing compass sweeping its pencil leg around the needle
+      const ang = rand(0, 6.28);
+      obstacles.push({ type: 'compass', y, x: rand(105, W - 105), L: rand(80, 105), ang, a0: ang, swept: 0,
+        spin: (Math.random() < 0.5 ? -1 : 1) * rand(1.1, 1.6 + 0.9 * d) });
+      return 60;
+    },
+    fan(y, d) {            // a desk fan on one edge blows the plane sideways inside its wind band
+      const side = Math.random() < 0.5 ? -1 : 1;
+      obstacles.push({ type: 'fan', y, side, band: 170, force: lerp(450, 750, d), blade: 0, t: rand(0, 5) });
+      if (d > 0.3) {       // and something nasty downwind
+        obstacles.push({ type: 'tack', x: side < 0 ? rand(W * 0.6, W - 30) : rand(30, W * 0.4), y: y + rand(-30, 30),
+          r: 10, col: TACK_COLORS[ri(0, TACK_COLORS.length - 1)] });
+      }
+      return 40;
     }
   };
 
+  function clipXs(o) {
+    const span = o.n * o.sp, xs = [];
+    for (let i = 0; i < o.n; i++) xs.push((((o.off + i * o.sp) % span) + span) % span - 20);
+    return xs;
+  }
+
+  // depth (as difficulty d) at which each obstacle starts appearing, and how often
+  let lastType = '';
   function spawnRow(y, d) {
-    const pool = [['gate', 3], ['blots', 2], ['tacks', 2], ['pencil', 1 + 2 * d]];
+    const pool = [['gate', 3], ['blots', 2], ['tacks', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
+    if (d > 0.08) pool.push(['clips', 1.4]);
     if (d > 0.12) pool.push(['scissors', 0.6 + 1.6 * d]);
+    if (d > 0.18) pool.push(['fan', 1.1]);
     if (d > 0.22) pool.push(['erasers', 1.4]);
-    let r = Math.random() * pool.reduce((s, p) => s + p[1], 0), type = pool[0][0];
-    for (const [t, w] of pool) { if ((r -= w) < 0) { type = t; break; } }
-    make[type](y, d);
-    if (type !== 'gate' && Math.random() < 0.28) {
-      pickups.push({ x: rand(40, W - 40), y: y + rand(95, 125), r: 10, spin: rand(0, 6) });
+    if (d > 0.3) pool.push(['compass', 1.3]);
+    const choices = pool.filter(p => p[0] !== lastType);   // never the same obstacle twice in a row
+    let r = Math.random() * choices.reduce((s, p) => s + p[1], 0), type = choices[0][0];
+    for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
+    lastType = type;
+    const extra = make[type](y, d) || 0;
+    if (type !== 'gate' && type !== 'protractor' && Math.random() < 0.28) {
+      pickups.push({ x: rand(40, W - 40), y: y + extra + rand(95, 125), r: 10, spin: rand(0, 6) });
     }
+    return extra;
   }
 
   function spawnRows() {
     const d = difficulty();
     while (nextRowY < dist + H + 80) {
-      spawnRow(nextRowY, d);
-      nextRowY += lerp(300, 185, d) + rand(0, 70);
+      const extra = spawnRow(nextRowY, d);
+      nextRowY += lerp(300, 185, d) + rand(0, 70) + extra;
     }
   }
 
@@ -474,6 +541,15 @@
       }
       case 'blot': return [{ k: 'c', x: o.x, y: o.y, r: o.r * 0.88 }];
       case 'tack': return [{ k: 'c', x: o.x, y: o.y, r: o.r }];
+      case 'protractor': return [{ k: 'c', x: o.side < 0 ? 0 : W, y: o.y, r: o.r }];
+      case 'wad': return [{ k: 'c', x: o.x, y: o.y, r: o.r * 0.9 }];
+      case 'clips': return clipXs(o).map(x => ({ k: 'b', x, y: o.y, hw: 17, hh: 6, a: 0 }));
+      case 'compass': {
+        const c = Math.cos(o.ang), s = Math.sin(o.ang);
+        return [{ k: 'b', x: o.x + c * o.L / 2, y: o.y + s * o.L / 2, hw: o.L / 2, hh: 4, a: o.ang },
+                { k: 'c', x: o.x, y: o.y, r: 8 }];
+      }
+      case 'fan': return [{ k: 'c', x: o.side < 0 ? 0 : W, y: o.y, r: 24 }];
     }
     return [];
   }
@@ -514,30 +590,40 @@
         if (o.x < 70) o.vx = Math.abs(o.vx);
         if (o.x > W - 70) o.vx = -Math.abs(o.vx);
         break;
+      case 'wad':          // starts flying once it reaches the bottom of the screen
+        if (!o.active && o.y - dist < H + 20) o.active = true;
+        if (o.active) {
+          o.x += o.vx * dt; o.y += o.vy * dt; o.rot += o.vr * dt;
+          if (o.x < o.r) o.vx = Math.abs(o.vx);
+          if (o.x > W - o.r) o.vx = -Math.abs(o.vx);
+        }
+        break;
+      case 'clips': o.off += o.v * dt; break;
+      case 'compass':
+        o.ang += o.spin * dt;
+        o.swept = Math.min(Math.PI * 2, o.swept + Math.abs(o.spin) * dt);
+        break;
+      case 'fan': o.blade += 22 * dt; o.t += dt; break;
     }
   }
 
   function steer(dt) {
     let target = 0;
     const maxV = maxSideSpeed();
-    const ax = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-    if (ax) {
-      target = ax * maxV;
-      plane.vx += (target - plane.vx) * Math.min(1, 7 * dt);
-    } else if (touchSide && performance.now() - touchStart > HOLD_MS) {
-      drift = touchSide;
-      target = touchSide * maxV;
+    if (holdSide && performance.now() - holdStart > HOLD_MS) {
+      drift = holdSide;
+      target = holdSide * maxV;
       plane.vx += (target - plane.vx) * Math.min(1, 9 * dt);
     } else if (drift) {
       target = drift * maxV * 0.7;
       plane.vx += (target - plane.vx) * Math.min(1, 6 * dt);
-    } else if (usedTouch) {
-      plane.vx += (0 - plane.vx) * Math.min(1, 8 * dt);
-    } else if (pointerX !== null) {
-      target = clamp((pointerX - plane.x) * 7, -maxV, maxV);
-      plane.vx += (target - plane.vx) * Math.min(1, 10 * dt);
     } else {
-      plane.vx += (0 - plane.vx) * Math.min(1, 3 * dt);
+      plane.vx += (0 - plane.vx) * Math.min(1, 8 * dt);
+    }
+    // desk fans push the plane while it is inside their wind band
+    const py = dist + planeScreenY();
+    for (const o of obstacles) {
+      if (o.type === 'fan' && Math.abs(o.y - py) < o.band / 2) plane.vx += -o.side * o.force * dt;
     }
     plane.x += plane.vx * dt;
     if (plane.x < 16) { plane.x = 16; plane.vx = Math.max(0, plane.vx); }
@@ -608,7 +694,7 @@
     // obstacles
     outer:
     for (const o of obstacles) {
-      if (Math.abs(o.y - (dist + planeScreenY())) > 110) continue;
+      if (Math.abs(o.y - (dist + planeScreenY())) > 140) continue;
       for (const s of shapes(o)) {
         for (const c of circles) {
           if (circleHits(c.x, c.y, c.r, s)) { crash(); break outer; }
@@ -835,6 +921,116 @@
     ctx.restore();
   }
 
+  function drawProtractor(o, sy) {
+    const cx = o.side < 0 ? 0 : W, a0 = o.side < 0 ? -Math.PI / 2 : Math.PI / 2;
+    ctx.fillStyle = 'rgba(34,53,107,.12)';
+    ctx.beginPath(); ctx.arc(cx + 4, sy + 7, o.r, a0, a0 + Math.PI); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(163,208,234,.75)';
+    ctx.beginPath(); ctx.arc(cx, sy, o.r, a0, a0 + Math.PI); ctx.closePath(); ctx.fill(); inkStroke(1.4);
+    ctx.beginPath(); ctx.arc(cx, sy, o.r * 0.58, a0, a0 + Math.PI);
+    ctx.strokeStyle = 'rgba(34,53,107,.45)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = COL.paper;
+    ctx.beginPath(); ctx.arc(cx, sy, 7, a0, a0 + Math.PI); ctx.closePath(); ctx.fill(); inkStroke(1);
+    ctx.save();
+    ctx.fillStyle = COL.ink; ctx.font = '8px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.beginPath();
+    for (let i = 1; i < 18; i++) {           // degree ticks every 10°, labels every 30°
+      const a = a0 + i * Math.PI / 18, c = Math.cos(a), s = Math.sin(a), len = i % 3 === 0 ? 9 : 5;
+      ctx.moveTo(cx + c * o.r, sy + s * o.r); ctx.lineTo(cx + c * (o.r - len), sy + s * (o.r - len));
+      if (i % 3 === 0) ctx.fillText(String(i * 10), cx + c * (o.r - 17), sy + s * (o.r - 17));
+    }
+    inkStroke(1);
+    ctx.restore();
+  }
+
+  function drawWad(o, sy) {
+    ctx.save(); ctx.translate(o.x, sy);
+    ctx.fillStyle = 'rgba(34,53,107,.14)'; ctx.beginPath(); ctx.arc(5, 8, o.r, 0, Math.PI * 2); ctx.fill();
+    ctx.rotate(o.rot);
+    ctx.fillStyle = '#e6e2d4';
+    ctx.beginPath();
+    o.pts.forEach((k, i) => {
+      const a = i / o.pts.length * Math.PI * 2;
+      ctx.lineTo(Math.cos(a) * o.r * k, Math.sin(a) * o.r * k);
+    });
+    ctx.closePath(); ctx.fill(); inkStroke(1.3);
+    ctx.beginPath();
+    for (const [x1, y1, x2, y2] of o.creases) { ctx.moveTo(x1 * o.r, y1 * o.r); ctx.lineTo(x2 * o.r, y2 * o.r); }
+    inkStroke(0.8);
+    ctx.restore();
+  }
+
+  function roundRectPath(x, y, w, h, r) {
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawClip(x, sy, col) {
+    ctx.save(); ctx.translate(x, sy);
+    for (const [dx, dy, w, c] of [[3, 4, 4, 'rgba(34,53,107,.15)'], [0, 0, 4, COL.ink], [0, 0, 2.2, col]]) {
+      ctx.beginPath();
+      roundRectPath(-17 + dx, -6 + dy, 34, 12, 6);
+      roundRectPath(-12 + dx, -3 + dy, 25, 6, 3);
+      ctx.lineWidth = w; ctx.strokeStyle = c; ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawCompass(o, sy) {
+    const dir = o.spin > 0 ? 1 : -1, L = o.L;
+    ctx.save();
+    // the circle it has pencilled so far
+    ctx.strokeStyle = 'rgba(85,88,94,.45)'; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.arc(o.x, sy, L, o.a0, o.a0 + dir * o.swept, dir < 0); ctx.stroke();
+    ctx.translate(o.x, sy);
+    ctx.save(); ctx.translate(4, 7); ctx.rotate(o.ang);
+    ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(0, -4, L, 8);
+    ctx.restore();
+    ctx.rotate(o.ang);
+    ctx.fillStyle = '#c3c9d3';
+    ctx.beginPath(); ctx.moveTo(0, -4.5); ctx.lineTo(L - 16, -2.5); ctx.lineTo(L - 16, 2.5); ctx.lineTo(0, 4.5); ctx.closePath();
+    ctx.fill(); inkStroke(1.2);
+    // pencil stub held at the end of the leg
+    ctx.fillStyle = '#f4c430'; ctx.fillRect(L - 16, -3, 9, 6);
+    ctx.fillStyle = '#ecc99a'; ctx.beginPath(); ctx.moveTo(L - 7, -3); ctx.lineTo(L, 0); ctx.lineTo(L - 7, 3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#3a3a3a'; ctx.beginPath(); ctx.moveTo(L - 3, -1.2); ctx.lineTo(L, 0); ctx.lineTo(L - 3, 1.2); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.rect(L - 16, -3, 9, 6); ctx.moveTo(L - 7, -3); ctx.lineTo(L, 0); ctx.lineTo(L - 7, 3); inkStroke(1);
+    // hinge over the needle
+    ctx.fillStyle = '#8d939e'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
+    ctx.fillStyle = '#c8463b'; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawFan(o, sy) {
+    const cx = o.side < 0 ? 0 : W, dir = -o.side;
+    // the wind band: a faint tint plus gusts travelling away from the fan
+    ctx.fillStyle = 'rgba(120,160,210,.09)';
+    ctx.fillRect(0, sy - o.band / 2, W, o.band);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(90,130,190,.55)'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+    for (let k = 0; k < 6; k++) {
+      const yy = sy - o.band / 2 + (k + 0.5) * o.band / 6;
+      const run = (o.t * 170 + k * 71) % (W + 60);
+      const x0 = dir > 0 ? run - 30 : W - run + 30;
+      ctx.beginPath(); ctx.moveTo(x0, yy); ctx.quadraticCurveTo(x0 + dir * 18, yy - 5, x0 + dir * 36, yy); ctx.stroke();
+    }
+    ctx.restore();
+    // the fan, half off the page edge
+    ctx.save(); ctx.translate(cx, sy);
+    ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.beginPath(); ctx.arc(4, 7, 26, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#dfe3ea'; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill(); inkStroke(1.4);
+    ctx.rotate(o.blade);
+    ctx.fillStyle = '#7fa7d9';
+    for (let b = 0; b < 3; b++) {
+      ctx.rotate(Math.PI * 2 / 3);
+      ctx.beginPath(); ctx.ellipse(12, 0, 11, 5.5, 0.3, 0, Math.PI * 2); ctx.fill(); inkStroke(1);
+    }
+    ctx.fillStyle = '#5b6474'; ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
   function planeOutline(c = ctx) {
     c.beginPath();
     c.moveTo(0, 20); c.lineTo(-14, -14); c.lineTo(-2, -9); c.lineTo(0, -12);
@@ -965,6 +1161,11 @@
         case 'scissors': drawScissors(o, sy); break;
         case 'blot': drawBlot(o, sy); break;
         case 'tack': drawTack(o, sy); break;
+        case 'protractor': drawProtractor(o, sy); break;
+        case 'wad': drawWad(o, sy); break;
+        case 'clips': for (const x of clipXs(o)) drawClip(x, sy, o.col); break;
+        case 'compass': drawCompass(o, sy); break;
+        case 'fan': drawFan(o, sy); break;
       }
     }
     for (const p of pickups) drawStar(p, p.y - dist);
@@ -996,18 +1197,18 @@
       ctx.fillText(f.text, f.x, f.y - dist - (1 - f.life) * 40);
     }
     ctx.globalAlpha = 1;
-    if (usedTouch && state === 'play') drawTouchHints();
+    if (state === 'play') drawSteerHints();
   }
 
   // chevrons in the bottom corners show which way the plane is drifting
-  function drawTouchHints() {
+  function drawSteerHints() {
     const y = H - 46;
     for (const side of [-1, 1]) {
       const x = side < 0 ? 44 : W - 44;
       const active = drift === side;
       ctx.save();
       ctx.translate(x, y);
-      ctx.globalAlpha = active ? (touchSide === side ? 0.75 : 0.5) : 0.18;
+      ctx.globalAlpha = active ? (holdSide === side ? 0.75 : 0.5) : 0.18;
       ctx.beginPath();
       for (const o of [-7, 7]) {
         ctx.moveTo(o - side * 6, -12); ctx.lineTo(o + side * 6, 0); ctx.lineTo(o - side * 6, 12);
@@ -1050,8 +1251,7 @@
   function start() {
     reset();
     state = 'play';
-    keys.left = keys.right = false;
-    drift = 0; touchSide = 0; touchId = null;
+    clearControls();
     showCard(null);
     sfx.throw();
   }
@@ -1065,7 +1265,7 @@
     if (state !== 'paused') return;
     state = 'play';
     ui.pauseBtn.textContent = 'Pause';
-    keys.left = keys.right = false;
+    holdSide = 0; holdSource = null;   // a key released while paused never sent its keyup here
     showCard(null);
   }
   function gameOver() {
@@ -1143,8 +1343,8 @@
       if (k === 'Escape') closeSkins();
       return;
     }
-    if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.left = true; pointerX = null; drift = 0; e.preventDefault(); }
-    else if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = true; pointerX = null; drift = 0; e.preventDefault(); }
+    const side = keySide(k);
+    if (side) { e.preventDefault(); if (!e.repeat) press(side, 'key' + side); }
     else if (k === 'p' || k === 'P' || k === 'Escape') { state === 'paused' ? resume() : pause(); }
     else if ((k === ' ' || k === 'Enter') && (state === 'title' || state === 'over' || state === 'paused')) {
       if (e.target instanceof HTMLButtonElement && !e.target.classList.contains('play')) return;
@@ -1153,49 +1353,33 @@
     } else if (k === ' ' && state === 'play') { e.preventDefault(); }
   });
   window.addEventListener('keyup', e => {
-    const k = e.key;
-    if (k === 'ArrowLeft' || k === 'a' || k === 'A') keys.left = false;
-    if (k === 'ArrowRight' || k === 'd' || k === 'D') keys.right = false;
+    const side = keySide(e.key);
+    if (side) release('key' + side);
   });
+  function keySide(k) {
+    if (k === 'ArrowLeft' || k === 'a' || k === 'A') return -1;
+    if (k === 'ArrowRight' || k === 'd' || k === 'D') return 1;
+    return 0;
+  }
 
-  const toWorldX = clientX => {
+  // mouse, pen and touch all work the same: press the left or right half of the playfield
+  const sideOf = clientX => {
     const r = canvas.getBoundingClientRect();
-    return (clientX - r.left) / r.width * W;
+    return clientX - r.left < r.width / 2 ? -1 : 1;
   };
-  const sideOf = clientX => (toWorldX(clientX) < W / 2 ? -1 : 1);
   canvas.addEventListener('pointerdown', e => {
-    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
-    if (e.pointerType === 'mouse') {
-      pointerDown = true;
-      drift = 0;
-      pointerX = toWorldX(e.clientX);
-      return;
-    }
     e.preventDefault();
-    usedTouch = true;
-    touchId = e.pointerId;
-    touchSide = sideOf(e.clientX);
-    touchStart = performance.now();
-    drift = clamp(drift + touchSide, -1, 1);
-    pointerX = null;
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    press(sideOf(e.clientX), 'ptr' + e.pointerId);
   });
   canvas.addEventListener('pointermove', e => {
-    if (e.pointerType === 'mouse') {
-      if (!pointerDown && (keys.left || keys.right)) return;
-      drift = 0;
-      pointerX = toWorldX(e.clientX);
-    } else if (e.pointerId === touchId) {
-      touchSide = sideOf(e.clientX);
-    }
+    // sliding a held finger or mouse across the middle switches the hold to that side
+    if (holdSource === 'ptr' + e.pointerId) holdSide = sideOf(e.clientX);
   });
-  const release = e => {
-    if (e.pointerType === 'mouse') { pointerDown = false; return; }
-    if (e.pointerId === touchId) { touchId = null; touchSide = 0; }
-  };
+  const releasePointer = e => release('ptr' + e.pointerId);
   canvas.addEventListener('contextmenu', e => e.preventDefault());
-  canvas.addEventListener('pointerup', release);
-  canvas.addEventListener('pointercancel', release);
-  canvas.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && !pointerDown) pointerX = null; });
+  canvas.addEventListener('pointerup', releasePointer);
+  canvas.addEventListener('pointercancel', releasePointer);
 
   window.addEventListener('blur', pause);
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
