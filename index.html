@@ -117,7 +117,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v8</div>
+    <div class="version" id="version">v9</div>
 
     <div class="hud">
       <div>
@@ -332,14 +332,37 @@
   ];
   const formulaFont = size => `${size}px Kalam, "Cambria Math", "Segoe UI Symbol", cursive`;
   let formulas = [], nextFormulaY = 60;
+  const usedFormulas = new Set();   // each formula appears at most once per run
+
+  // an unused formula from this level; once it runs dry, borrow from harder levels, then easier ones
+  function pickFormula(tier) {
+    const order = [tier];
+    for (let i = tier + 1; i < FORMULA_TIERS.length; i++) order.push(i);
+    for (let i = tier - 1; i >= 0; i--) order.push(i);
+    for (const t of order) {
+      const options = [];
+      for (const item of FORMULA_TIERS[t]) {
+        if (typeof item === 'function') {
+          for (let n = 0; n < 5; n++) {
+            const s = item();
+            if (!usedFormulas.has(s)) { options.push(s); break; }
+          }
+        } else if (!usedFormulas.has(item)) {
+          options.push(item);
+        }
+      }
+      if (options.length) return options[Math.floor(Math.random() * options.length)];
+    }
+    return null;
+  }
 
   function spawnFormula(lineY) {
     const m = lineY / PX_PER_M;
     let tier = 0;
     for (let i = 1; i < FORMULA_DEPTHS.length; i++) if (m >= FORMULA_DEPTHS[i]) tier = i;
-    const list = FORMULA_TIERS[tier];
-    const item = list[Math.floor(Math.random() * list.length)];
-    const text = typeof item === 'function' ? item() : item;
+    const text = pickFormula(tier);
+    if (!text) return;
+    usedFormulas.add(text);
     let size = 19;
     ctx.font = formulaFont(size);
     let w = ctx.measureText(text).width;
@@ -399,7 +422,7 @@
     obstacles = []; pickups = []; particles = []; floaters = []; trail = [];
     dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
     nextRowY = H + 140;
-    formulas = []; nextFormulaY = 60;
+    formulas = []; nextFormulaY = 60; usedFormulas.clear();
   }
   reset();
 
