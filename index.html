@@ -145,7 +145,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v16</div>
+    <div class="version" id="version">v17</div>
 
     <div class="hud">
       <div>
@@ -531,7 +531,6 @@
   // ---------- obstacle generation ----------
   const TACK_COLORS = ['#d9443a', '#2f8f5b', '#2f6fd1', '#e0a21a', '#8a4fc2'];
   const CLIP_COLORS = ['#8d96a3', '#d9443a', '#2f6fd1', '#2f8f5b', '#e0a21a'];
-  const PEN_COLORS = ['#1f3fa8', '#c0392b', '#1d1d1d', '#2f8f5b'];
   const NOTE_COLORS = ['#fde58a', '#f7a8c4', '#b9e3a8', '#a8d4f2'];
   const SCISSOR_COLORS = ['#f07f1e', '#2f8f5b', '#8a4fc2', '#2f6fd1', '#d9443a'];
   const SOGGY_TIME = 2.5;          // seconds a coffee soaking lasts
@@ -636,11 +635,6 @@
       obstacles.push({ type: 'cutter', y, side: Math.random() < 0.5 ? -1 : 1, ext: 0,
         maxExt: rand(W * 0.22, W * 0.38), period: lerp(2.4, 1.6, d), t: rand(0, 2) });
     },
-    pen(y, d) {            // a pen inks a solid line across the page, stopping short of the far edge
-      obstacles.push({ type: 'pen', y, side: Math.random() < 0.5 ? -1 : 1,
-        len: W - rand(lerp(140, 95, d), lerp(170, 120, d)), drawn: 0, v: 0, active: false, wave: rand(0, 6),
-        col: PEN_COLORS[ri(0, PEN_COLORS.length - 1)] });
-    },
     stamp(y, d) {          // a rubber stamp: its shadow warns where it will land, then it slams down
       obstacles.push({ type: 'stamp', y, x: rand(60, W - 60), phase: 'warn', t: 0, warn: lerp(1.2, 0.75, d), marks: [] });
       return 40;
@@ -688,12 +682,10 @@
     }
   };
 
-  // geometry shared by drawing and collision for the edge-mounted tools (glue tube, cutter, pen)
+  // geometry shared by drawing and collision for the edge-mounted tools (glue tube, cutter)
   const wallX = o => (o.side < 0 ? 0 : W);
   const inward = o => -o.side;
   const CUTTER_HANDLE = 80;
-  const PEN_TILT = 0.9;          // pen body leans back ~50° from its tip
-  const PEN_LEN = 75;
 
   function clipXs(o) {
     const span = o.n * o.sp, xs = [];
@@ -710,7 +702,6 @@
     if (d > 0.18) pool.push(['fan', 1.1]);
     if (d > 0.22) pool.push(['erasers', 1.4]);
     if (d > 0.3) pool.push(['compass', 1.3]);
-    if (d > 0.05) pool.push(['pen', 1.3]);
     if (d > 0.1) pool.push(['glue', 1.2]);
     if (d > 0.15) pool.push(['cutter', 1.3]);
     if (d > 0.06) pool.push(['notes', 1.2]);
@@ -785,14 +776,6 @@
         const x0 = wallX(o), i = inward(o);
         const out = [{ k: 'b', x: x0 + i * CUTTER_HANDLE / 2, y: o.y, hw: CUTTER_HANDLE / 2, hh: 12, a: 0 }];
         if (o.ext > 1) out.push({ k: 'b', x: x0 + i * (CUTTER_HANDLE + o.ext / 2), y: o.y, hw: o.ext / 2, hh: 6, a: 0 });
-        return out;
-      }
-      case 'pen': {
-        const x0 = wallX(o), i = inward(o), tip = x0 + i * o.drawn;
-        const bx = -i * Math.cos(PEN_TILT), by = -Math.sin(PEN_TILT);
-        const out = [{ k: 'b', x: tip + bx * PEN_LEN / 2, y: o.y + by * PEN_LEN / 2, hw: PEN_LEN / 2, hh: 5,
-          a: Math.atan2(by, bx) }];
-        if (o.drawn > 2) out.push({ k: 'b', x: x0 + i * o.drawn / 2, y: o.y, hw: o.drawn / 2, hh: 4.5, a: 0 });
         return out;
       }
       case 'stamp': return o.phase === 'down' ? [{ k: 'b', x: o.x, y: o.y, hw: 32, hh: 24, a: 0 }] : [];
@@ -873,15 +856,6 @@
         o.ext = o.maxExt * f;
         break;
       }
-      case 'pen':
-        if (!o.active && o.y - dist < H) {
-          // pace the stroke so it finishes a little before the plane gets there
-          o.active = true;
-          const eta = Math.max(0.4, (o.y - dist - planeScreenY()) / Math.max(60, speed));
-          o.v = o.len / (eta * 0.65);
-        }
-        if (o.active) o.drawn = Math.min(o.len, o.drawn + o.v * dt);
-        break;
       case 'stamp':        // warn (shadow grows) -> down (deadly) -> lift -> warn again somewhere else
         if (o.y - dist < H + 40) {
           o.t += dt;
@@ -1491,40 +1465,6 @@
     ctx.restore();
   }
 
-  function drawPen(o, sy) {
-    const x0 = wallX(o), i = inward(o);
-    // the ink stroke drawn so far, a little wobbly like real handwriting
-    if (o.drawn > 1) {
-      ctx.save();
-      ctx.strokeStyle = o.col; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
-      ctx.beginPath();
-      for (let t = 0; t <= o.drawn; t += 6) ctx.lineTo(x0 + i * t, sy + Math.sin(t * 0.05 + o.wave) * 2.5);
-      ctx.lineTo(x0 + i * o.drawn, sy + Math.sin(o.drawn * 0.05 + o.wave) * 2.5);
-      ctx.stroke();
-      ctx.restore();
-    }
-    // the pen, tip on the end of the line and body leaning back up the page
-    const tipX = x0 + i * o.drawn, tipY = sy + Math.sin(o.drawn * 0.05 + o.wave) * 2.5;
-    const ang = Math.atan2(-Math.sin(PEN_TILT), -i * Math.cos(PEN_TILT));
-    for (const pass of ['shadow', 'main']) {
-      ctx.save();
-      ctx.translate(tipX + (pass === 'shadow' ? 6 : 0), tipY + (pass === 'shadow' ? 9 : 0));
-      ctx.rotate(ang);
-      if (pass === 'shadow') {
-        ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(0, -5, PEN_LEN, 10);
-      } else {
-        ctx.fillStyle = '#b9bec6';                                           // metal tip
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(9, -3.5); ctx.lineTo(9, 3.5); ctx.closePath(); ctx.fill(); inkStroke(1);
-        ctx.fillStyle = o.col; ctx.fillRect(9, -4.5, 20, 9);                // rubber grip
-        ctx.fillStyle = '#f4f4f0'; ctx.fillRect(29, -5, 38, 10);            // barrel
-        ctx.fillStyle = o.col;
-        ctx.beginPath(); roundRectPath(63, -5, 12, 10, 3); ctx.fill();      // end cap
-        ctx.beginPath(); ctx.rect(9, -4.5, 20, 9); ctx.rect(29, -5, 38, 10); roundRectPath(63, -5, 12, 10, 3); inkStroke(1.1);
-        ctx.fillStyle = o.col; ctx.fillRect(42, -7.5, 22, 2.5);             // clip
-      }
-      ctx.restore();
-    }
-  }
 
   // a smooth, lumpy blob: curves through the midpoints between radius samples
   function blobPath(x, y, r, pts, squash = 1) {
@@ -1851,7 +1791,6 @@
         case 'fan': drawFan(o, sy); break;
         case 'glue': drawGlue(o, sy); break;
         case 'cutter': drawCutter(o, sy); break;
-        case 'pen': drawPen(o, sy); break;
         case 'stamp': drawStamp(o, sy); break;
         case 'sharpener': drawSharpener(o, sy); break;
         case 'coffee': drawCoffee(o, sy); break;
