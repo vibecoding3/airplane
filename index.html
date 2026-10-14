@@ -105,6 +105,23 @@
   .skin .tag { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; opacity: .6; }
   .skin[aria-checked="true"] { border: 2px solid var(--ink); background: rgba(255,255,255,.55); }
   .skin:hover { background: rgba(255,255,255,.35); }
+  .bank { font-size: 18px; }
+  .bank strong { font-family: var(--display); font-size: 22px; color: #a8740f; font-variant-numeric: tabular-nums; }
+  .shop { display: grid; gap: 8px; }
+  .upgrade {
+    display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+    padding: 8px; border: 1.5px dashed rgba(34,53,107,.35); border-radius: 8px;
+  }
+  .upgrade canvas { width: 44px; height: 44px; }
+  .upgrade .info { display: grid; gap: 2px; min-width: 0; font-size: 15px; line-height: 1.15; }
+  .upgrade .info strong { font-family: var(--display); font-size: 18px; }
+  .upgrade .buy {
+    font-family: var(--display); font-weight: 700; font-size: 16px; white-space: nowrap;
+    color: var(--paper); background: var(--ink); border: 2px solid var(--ink); border-radius: 8px 6px 9px 7px;
+    padding: 4px 10px 2px; cursor: pointer;
+  }
+  .upgrade .buy:disabled { color: var(--ink); background: transparent; opacity: .55; cursor: default; }
+  .upgrade .buy.owned { opacity: 1; border-style: dashed; }
   .card .play:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 rgba(34,53,107,.35); }
   .card .play:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(34,53,107,.35); }
   button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
@@ -117,7 +134,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v14</div>
+    <div class="version" id="version">v15</div>
 
     <div class="hud">
       <div>
@@ -141,11 +158,12 @@
           <li>Tap or click a side of the screen, or press <kbd>←</kbd> <kbd>→</kbd> (<kbd>A</kbd> <kbd>D</kbd>), to drift that way</li>
           <li>Press the other side once to fall straight, twice to drift back. Hold a side for a sharp turn</li>
           <li>The deeper you fall, the faster you go. Gliding sideways slows you down</li>
-          <li>Grab gold stars for +25 m · <kbd>P</kbd> pauses</li>
+          <li>Gold stars give +25 m and can be spent in the Shop · <kbd>P</kbd> pauses</li>
         </ul>
         <div class="actions">
           <button class="play" id="startBtn" type="button">Throw it</button>
           <button class="ghost" id="skinsBtn" type="button">Skins</button>
+          <button class="ghost" id="shopBtn" type="button">Shop</button>
         </div>
       </div>
 
@@ -154,6 +172,14 @@
         <p>Pick the paper for your plane. Every skin is free for now.</p>
         <div class="skins" id="skinGrid" role="radiogroup" aria-label="Plane skins"></div>
         <button class="play" id="skinsDone" type="button">Done</button>
+      </div>
+
+      <div class="card" id="shopCard" hidden>
+        <h2>Shop</h2>
+        <p>Spend the stars you collect on upgrades. You keep them forever.</p>
+        <div class="bank">You have <strong id="bankCount">★ 0</strong></div>
+        <div class="shop" id="shopList"></div>
+        <button class="play" id="shopDone" type="button">Done</button>
       </div>
 
       <div class="card" id="pauseCard" hidden>
@@ -167,9 +193,11 @@
         <span class="stamp" id="recordStamp" hidden>New best!</span>
         <p id="overDetail"></p>
         <div class="meta" id="overBest"></div>
+        <div class="meta" id="overBank"></div>
         <div class="actions">
           <button class="play" id="againBtn" type="button">Throw again</button>
           <button class="ghost" id="skinsBtnOver" type="button">Skins</button>
+          <button class="ghost" id="shopBtnOver" type="button">Shop</button>
         </div>
       </div>
     </div>
@@ -273,7 +301,9 @@
   const sfx = {
     throw: () => tone(520, 180, 0.35, 'triangle', 0.07),
     star: () => { tone(880, 1320, 0.12, 'sine', 0.1); tone(1320, 1760, 0.15, 'sine', 0.08, 0.08); },
-    crash: () => { crunch(); tone(220, 60, 0.4, 'sawtooth', 0.04); }
+    crash: () => { crunch(); tone(220, 60, 0.4, 'sawtooth', 0.04); },
+    save: () => { crunch(); tone(330, 990, 0.35, 'triangle', 0.1); },
+    buy: () => { tone(660, 990, 0.1, 'sine', 0.1); tone(990, 1480, 0.18, 'sine', 0.08, 0.09); }
   };
 
   // ---------- background math: harder the deeper the page ----------
@@ -402,6 +432,18 @@
   let dist, speed, time, nextRowY, stars, shake, overTimer;
   let best = +store.get('nosedive-best') || 0;
   let skin = SKINS.find(s => s.id === store.get('nosedive-skin')) || SKINS[0];
+
+  // ---------- shop: stars collected in runs go into a bank and buy permanent upgrades ----------
+  const UPGRADES = [
+    { id: 'life', name: 'Extra life', price: 20,
+      desc: 'Survive one crash every run. Your plane glows blue while the spare life is ready.' },
+    { id: 'magnet', name: 'Star magnet', price: 10, desc: 'Stars near your plane fly straight to it.' }
+  ];
+  const MAGNET_RANGE = 120;
+  let bank = +store.get('nosedive-bank') || 0;
+  let owned = {};
+  try { owned = JSON.parse(store.get('nosedive-upgrades') || '{}') || {}; } catch (e) { owned = {}; }
+  const has = id => owned[id] === true;
   let titleTime = 0;
 
   // One control scheme for every device (tap/click a screen side, or press an arrow key):
@@ -433,7 +475,7 @@
   const score = () => Math.floor(dist / PX_PER_M) + stars * STAR_BONUS;
 
   function reset() {
-    plane = { x: W / 2, vx: 0, ang: 0, alive: true };
+    plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: has('life') ? 1 : 0, invuln: 0 };
     obstacles = []; pickups = []; particles = []; floaters = []; trail = [];
     dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
     nextRowY = H + 140;
@@ -822,6 +864,8 @@
 
     // playing
     time += dt;
+    plane.invuln = Math.max(0, plane.invuln - dt);
+    shake = Math.max(0, shake - 40 * dt);
     steer(dt);
     // gliding sideways trades fall speed for horizontal speed
     const sideways = Math.min(1, Math.abs(plane.vx) / maxSideSpeed());
@@ -840,6 +884,13 @@
     // stars
     for (let i = pickups.length - 1; i >= 0; i--) {
       const p = pickups[i]; p.spin += dt * 2;
+      if (has('magnet') && plane.alive) {
+        const py = dist + planeScreenY(), dx = plane.x - p.x, dy = py - p.y, dd = Math.hypot(dx, dy);
+        if (dd < MAGNET_RANGE && dd > 1) {
+          const step = Math.min(dd, (300 + speed) * dt);
+          p.x += dx / dd * step; p.y += dy / dd * step;
+        }
+      }
       if (circles.some(c => (c.x - p.x) ** 2 + (c.y - p.y) ** 2 < (c.r + p.r + 4) ** 2)) {
         pickups.splice(i, 1);
         stars++;
@@ -851,10 +902,11 @@
     // obstacles
     outer:
     for (const o of obstacles) {
+      if (plane.invuln > 0) break;   // still blinking after using the extra life
       if (Math.abs(o.y - (dist + planeScreenY())) > 140) continue;
       for (const s of shapes(o)) {
         for (const c of circles) {
-          if (circleHits(c.x, c.y, c.r, s)) { crash(); break outer; }
+          if (circleHits(c.x, c.y, c.r, s)) { plane.lives > 0 ? useExtraLife() : crash(); break outer; }
         }
       }
     }
@@ -876,6 +928,17 @@
   function spark(x, y) {
     const a = rand(0, 6.28), v = rand(60, 160);
     return { kind: 'spark', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 0, rot: 0, vr: 0, life: 1, ttl: 0.45, size: rand(2, 4) };
+  }
+
+  // the Extra life upgrade: the hit is forgiven and the plane blinks through obstacles for a moment
+  function useExtraLife() {
+    plane.lives--;
+    plane.invuln = 2;
+    shake = 7;
+    const px = plane.x, py = dist + planeScreenY();
+    for (let i = 0; i < 16; i++) { const p = spark(px, py); p.col = '#2f8fe0'; p.size += 1; particles.push(p); }
+    floaters.push({ x: clamp(px, 80, W - 80), y: py - 30, text: 'Extra life used!', life: 1.4, col: '#2f6fb8' });
+    sfx.save();
   }
 
   function crash() {
@@ -1419,12 +1482,22 @@
     c.beginPath(); c.moveTo(0, 20); c.lineTo(0, -12); c.lineWidth = 1; c.stroke();
   }
 
+  // blue glow around the plane while the Extra life is still unused
+  function paintLifeOutline(c) {
+    planeOutline(c);
+    c.lineJoin = 'round';
+    c.strokeStyle = 'rgba(47,143,224,.35)'; c.lineWidth = 9; c.stroke();
+    c.strokeStyle = '#2f8fe0'; c.lineWidth = 4.5; c.stroke();
+  }
+
   function drawPlane(x, y, ang) {
     ctx.save(); ctx.translate(x + 8, y + 12); ctx.rotate(-ang);
     ctx.fillStyle = 'rgba(34,53,107,.14)'; planeOutline(); ctx.fill();
     ctx.restore();
 
     ctx.save(); ctx.translate(x, y); ctx.rotate(-ang);
+    if (plane.invuln > 0) ctx.globalAlpha = Math.floor(plane.invuln * 12) % 2 ? 0.3 : 1;
+    if (plane.lives > 0) paintLifeOutline(ctx);
     paintPlane(ctx, skin, clamp(plane.vx / 400, -1, 1));
     ctx.restore();
   }
@@ -1494,6 +1567,12 @@
 
     drawTrail();
     const py = planeScreenY();
+    if (has('magnet') && plane.alive && state === 'play') {     // faint ring showing the magnet's reach
+      ctx.save();
+      ctx.strokeStyle = 'rgba(200,70,59,.18)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 7]);
+      ctx.beginPath(); ctx.arc(plane.x, py, MAGNET_RANGE, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
     if (plane.alive) drawPlane(plane.x, py, plane.ang);
     else drawCrumple(plane.x, py);
 
@@ -1506,7 +1585,7 @@
         ctx.beginPath(); ctx.moveTo(-p.size, -p.size * 0.6); ctx.lineTo(p.size, -p.size * 0.3); ctx.lineTo(p.size * 0.4, p.size * 0.7); ctx.closePath();
         ctx.fill(); inkStroke(1);
       } else {
-        ctx.fillStyle = '#f2b53a';
+        ctx.fillStyle = p.col || '#f2b53a';
         ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
       }
       ctx.restore();
@@ -1515,7 +1594,7 @@
     ctx.font = '700 18px Kalam, cursive';
     for (const f of floaters) {
       ctx.globalAlpha = clamp(f.life, 0, 1);
-      ctx.fillStyle = '#a8740f';
+      ctx.fillStyle = f.col || '#a8740f';
       ctx.fillText(f.text, f.x, f.y - dist - (1 - f.life) * 40);
     }
     ctx.globalAlpha = 1;
@@ -1545,6 +1624,7 @@
   const ui = {
     depth: $('depth'), stars: $('starCount'), best: $('best'),
     overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'), skins: $('skinsCard'),
+    shop: $('shopCard'), overBank: $('overBank'),
     overTitle: $('overTitle'), overDetail: $('overDetail'), overBest: $('overBest'), stamp: $('recordStamp'),
     pauseBtn: $('pauseBtn'), muteBtn: $('muteBtn')
   };
@@ -1565,6 +1645,7 @@
     ui.pause.hidden = which !== 'pause';
     ui.over.hidden = which !== 'over';
     ui.skins.hidden = which !== 'skins';
+    ui.shop.hidden = which !== 'shop';
     const btn = which && ui[which].querySelector('.play');
     if (btn) btn.focus({ preventScroll: true });
   }
@@ -1602,6 +1683,8 @@
       ' in ' + time.toFixed(1) + ' s.';
     ui.overBest.textContent = record ? 'That is your deepest dive yet.' : 'Your best is ' + fmt(best) + ' m.';
     ui.stamp.hidden = !record;
+    if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
+    ui.overBank.textContent = (stars ? '★ ' + stars + ' added to your stars. ' : '') + 'You have ★ ' + fmt(bank) + ' to spend in the Shop.';
     showCard('over');
   }
 
@@ -1651,6 +1734,79 @@
   $('skinsBtn').addEventListener('click', openSkins);
   $('skinsBtnOver').addEventListener('click', openSkins);
   $('skinsDone').addEventListener('click', closeSkins);
+
+  // ---------- shop ----------
+  let shopReturn = 'title';
+  function openShop() {
+    shopReturn = state === 'over' ? 'over' : 'title';
+    renderShop();
+    showCard('shop');
+  }
+  function closeShop() { showCard(shopReturn); }
+  function buyUpgrade(u) {
+    if (has(u.id) || bank < u.price) return;
+    bank -= u.price;
+    owned[u.id] = true;
+    store.set('nosedive-bank', String(bank));
+    store.set('nosedive-upgrades', JSON.stringify(owned));
+    if (state !== 'play') plane.lives = has('life') ? 1 : 0;   // show the blue outline right away
+    sfx.buy();
+    renderShop();
+    const btn = $('shopList').querySelector(`[data-upgrade="${u.id}"]`);
+    if (btn) btn.focus({ preventScroll: true });
+  }
+  function drawUpgradeIcon(c, id) {
+    c.translate(22, 22);
+    if (id === 'life') {
+      c.rotate(-0.35); c.scale(0.95, 0.95);
+      paintLifeOutline(c);
+      paintPlane(c, skin, -0.5);
+    } else {
+      // horseshoe magnet with silver tips
+      c.rotate(0.6);
+      c.lineCap = 'butt';
+      c.strokeStyle = COL.ink; c.lineWidth = 12;
+      c.beginPath(); c.arc(0, -2, 11, Math.PI, 0, true); c.moveTo(-11, -2); c.lineTo(-11, 12); c.moveTo(11, -2); c.lineTo(11, 12); c.stroke();
+      c.strokeStyle = '#d9443a'; c.lineWidth = 9;
+      c.beginPath(); c.arc(0, -2, 11, Math.PI, 0, true); c.moveTo(-11, -2); c.lineTo(-11, 6); c.moveTo(11, -2); c.lineTo(11, 6); c.stroke();
+      c.strokeStyle = '#c3c9d3';
+      c.beginPath(); c.moveTo(-11, 6); c.lineTo(-11, 12); c.moveTo(11, 6); c.lineTo(11, 12); c.stroke();
+    }
+  }
+  function renderShop() {
+    $('bankCount').textContent = '★ ' + fmt(bank);
+    const list = $('shopList');
+    list.replaceChildren();
+    const pr = Math.min(window.devicePixelRatio || 1, 2);
+    for (const u of UPGRADES) {
+      const row = document.createElement('div'); row.className = 'upgrade';
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = Math.round(44 * pr);
+      const c = cv.getContext('2d'); c.scale(pr, pr);
+      drawUpgradeIcon(c, u.id);
+      const info = document.createElement('div'); info.className = 'info';
+      const name = document.createElement('strong'); name.textContent = u.name;
+      const desc = document.createElement('span'); desc.textContent = u.desc;
+      info.append(name, desc);
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'buy'; btn.dataset.upgrade = u.id;
+      if (has(u.id)) {
+        btn.textContent = 'Owned'; btn.disabled = true; btn.classList.add('owned');
+      } else {
+        btn.textContent = '★ ' + u.price;
+        btn.disabled = bank < u.price;
+        btn.setAttribute('aria-label', bank < u.price
+          ? `${u.name} costs ${u.price} stars. You need ${u.price - bank} more.`
+          : `Buy ${u.name} for ${u.price} stars`);
+        btn.addEventListener('click', () => buyUpgrade(u));
+      }
+      row.append(cv, info, btn);
+      list.append(row);
+    }
+  }
+  $('shopBtn').addEventListener('click', openShop);
+  $('shopBtnOver').addEventListener('click', openShop);
+  $('shopDone').addEventListener('click', closeShop);
   ui.pauseBtn.addEventListener('click', () => (state === 'paused' ? resume() : pause()));
   ui.muteBtn.addEventListener('click', () => {
     muted = !muted;
@@ -1662,8 +1818,8 @@
   // ---------- input ----------
   window.addEventListener('keydown', e => {
     const k = e.key;
-    if (!ui.skins.hidden) {           // picker open: let buttons handle Enter/Space natively
-      if (k === 'Escape') closeSkins();
+    if (!ui.skins.hidden || !ui.shop.hidden) {   // a menu is open: let its buttons handle Enter/Space natively
+      if (k === 'Escape') ui.shop.hidden ? closeSkins() : closeShop();
       return;
     }
     const side = keySide(k);
