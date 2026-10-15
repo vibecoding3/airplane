@@ -148,7 +148,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v19</div>
+    <div class="version" id="version">v20</div>
 
     <div class="hud">
       <div>
@@ -544,15 +544,99 @@
   reset();
 
   // ---------- obstacle generation ----------
-  const TACK_COLORS = ['#d9443a', '#2f8f5b', '#2f6fd1', '#e0a21a', '#8a4fc2'];
-  const CLIP_COLORS = ['#8d96a3', '#d9443a', '#2f6fd1', '#2f8f5b', '#e0a21a'];
-  const NOTE_COLORS = ['#fde58a', '#f7a8c4', '#b9e3a8', '#a8d4f2'];
-  const SCISSOR_COLORS = ['#f07f1e', '#2f8f5b', '#8a4fc2', '#2f6fd1', '#d9443a'];
+  // a small round ink blot, used as the extra hazard next to fans and coffee spills
+  const inkBlot = (x, y, r = rand(14, 18)) => ({ type: 'blot', x, y, r, drops: [],
+    bumps: Array.from({ length: 6 }, (_, j) => ({ t: j / 6 * 6.28, d: r * 0.7, r: r * 0.4 })) });
+  const CLIP_COLORS = ['#8d96a3', '#d9443a', '#2f6fd1', '#2f8f5b', '#e0a21a', '#f29fbd', '#8a4fc2', '#2b2b2b', '#00a3a3'];
+  const NOTE_COLORS = ['#fde58a', '#f7a8c4', '#b9e3a8', '#a8d4f2', '#ffc58a', '#d4b8f2', '#a8efe0'];
+  const SCISSOR_COLORS = ['#f07f1e', '#2f8f5b', '#8a4fc2', '#2f6fd1', '#d9443a', '#f29fbd', '#00a3a3', '#2b2b2b', '#e0a21a'];
   const SOGGY_TIME = 2.5;          // seconds a coffee soaking lasts
-  const BAND_COLORS = ['#c0392b', '#e0a21a', '#2f6fd1', '#2f8f5b', '#b07a45'];
-  const CAT_COLORS = ['#e8913a', '#9a9a9a', '#4a4a4a', '#efe2c8'];
+  const BAND_COLORS = ['#c0392b', '#e0a21a', '#2f6fd1', '#2f8f5b', '#b07a45', '#8a4fc2', '#f29fbd', '#00a3a3'];
+  const CAT_COLORS = ['#e8913a', '#9a9a9a', '#4a4a4a', '#efe2c8', '#8b5a2b', '#fbfbf7', '#c9b79c'];
   // the classic green of school geometry sets: translucent plastic, darker edge, white markings
   const GEO = { fill: 'rgba(0,135,85,.55)', edge: '#00573a', mark: 'rgba(255,255,255,.92)' };
+  const geo = (fill, edge) => ({ fill, edge, mark: 'rgba(255,255,255,.92)' });
+
+  // colour variants per obstacle; one is picked when an obstacle spawns (shared within a row)
+  const PALETTES = {
+    gate: [   // rulers: wood, clear blue, geometry green, pink, metal, orange plastic
+      { face: '#f3d88b', edge: '#e6c46a', mark: COL.ink },
+      { face: 'rgba(150,200,238,.85)', edge: 'rgba(95,150,205,.85)', mark: COL.ink },
+      { face: 'rgba(0,135,85,.6)', edge: 'rgba(0,95,60,.7)', mark: '#ffffff' },
+      { face: '#f6b9cb', edge: '#e597ad', mark: COL.ink },
+      { face: '#d7dbe1', edge: '#b3b9c2', mark: COL.ink },
+      { face: 'rgba(246,155,70,.8)', edge: 'rgba(210,112,32,.85)', mark: COL.ink }
+    ],
+    erasers: [
+      { rub: '#f2a7b5', shade: '#e48c9d', sleeve: '#3a66c4' },
+      { rub: '#f4f4ef', shade: '#dcdcd4', sleeve: '#2f6fd1' },
+      { rub: '#bfe3b0', shade: '#9fcd8d', sleeve: '#2f8f5b' },
+      { rub: '#fbe38a', shade: '#efcb5c', sleeve: '#d9443a' },
+      { rub: '#c9cdd3', shade: '#aeb3ba', sleeve: '#2b2b2b' },
+      { rub: '#d9c8f2', shade: '#c2aae6', sleeve: '#8a4fc2' }
+    ],
+    pencil: [   // body facets light / mid / dark, plus the eraser tip
+      { light: '#f8d75a', mid: '#f4c430', dark: '#d9a520', tip: '#f29fae' },
+      { light: '#f38b83', mid: '#d9443a', dark: '#b8322a', tip: '#f29fae' },
+      { light: '#86aeea', mid: '#2f6fd1', dark: '#2152a8', tip: '#f29fae' },
+      { light: '#7fcf9a', mid: '#2f8f5b', dark: '#226b44', tip: '#f29fae' },
+      { light: '#5b5f66', mid: '#2b2b2b', dark: '#141414', tip: '#d9443a' },
+      { light: '#f9c9d8', mid: '#f29fbd', dark: '#d97a9c', tip: '#fbfbf7' },
+      { light: '#c4a2e8', mid: '#8a4fc2', dark: '#6a3699', tip: '#f29fae' }
+    ],
+    blot: [   // ink colours
+      { ink: '#1b2760' }, { ink: '#141414' }, { ink: '#a31d1d' }, { ink: '#1f6b3a' }, { ink: '#4b2370' }, { ink: '#0f4c81' }
+    ],
+    // geometry tools: the green stays the most common (half the time)
+    protractor: null, setsquare: null,
+    wad: [ { paper: '#e6e2d4' }, { paper: '#f6efb4' }, { paper: '#f7cbd8' }, { paper: '#cfe3f6' }, { paper: '#d3d3cd' }, { paper: '#d5efcc' } ],
+    compass: [
+      { leg: '#c3c9d3', hinge: '#8d939e', cap: '#c8463b' },
+      { leg: '#dcc46e', hinge: '#b8963a', cap: '#2f6fd1' },
+      { leg: '#c3c9d3', hinge: '#2f6fd1', cap: '#f4c430' },
+      { leg: '#9aa0a8', hinge: '#2b2b2b', cap: '#2f8f5b' },
+      { leg: '#e8b8aa', hinge: '#c07a6a', cap: '#8a4fc2' }
+    ],
+    fan: [
+      { body: '#dfe3ea', blade: '#7fa7d9', hub: '#5b6474' },
+      { body: '#f3dddb', blade: '#e06a5f', hub: '#8a2f28' },
+      { body: '#dcefe0', blade: '#6cbf86', hub: '#2f6b44' },
+      { body: '#f6efd2', blade: '#f2c84b', hub: '#8a6a14' },
+      { body: '#f4f4f2', blade: '#c9cdd3', hub: '#5b6474' },
+      { body: '#e8e0f4', blade: '#a688d8', hub: '#4b2370' }
+    ],
+    glue: [ { label: '#e8812f' }, { label: '#2f6fd1' }, { label: '#8a4fc2' }, { label: '#2f8f5b' }, { label: '#d9443a' }, { label: '#e0a21a' } ],
+    cutter: [
+      { handle: '#f2b233', slider: '#3b3f47' }, { handle: '#f07f1e', slider: '#3b3f47' }, { handle: '#2f6fd1', slider: '#f4c430' },
+      { handle: '#2f8f5b', slider: '#3b3f47' }, { handle: '#2b2b2b', slider: '#d9443a' }, { handle: '#f29fbd', slider: '#3b3f47' },
+      { handle: '#8a4fc2', slider: '#f4c430' }
+    ],
+    stamp: [   // wooden block, handle knob, ink colour (r,g,b) and what it prints
+      { wood: '#b07a45', knob: '#8a5a2e', ink: '200,40,40', text: 'A+' },
+      { wood: '#b07a45', knob: '#2b2b2b', ink: '40,80,200', text: 'A+' },
+      { wood: '#c9a06a', knob: '#2f8f5b', ink: '30,140,70', text: '10/10' },
+      { wood: '#a06a3c', knob: '#8a4fc2', ink: '120,50,180', text: 'OK!' },
+      { wood: '#d9443a', knob: '#7a1d16', ink: '200,40,40', text: 'B+' },
+      { wood: '#2f6fd1', knob: '#1d3f80', ink: '40,80,200', text: 'A+' }
+    ],
+    coffee: [   // spill fill and rim (r,g,b)
+      { fill: '122,74,34', rim: '95,55,22' }, { fill: '70,40,20', rim: '45,25,10' }, { fill: '190,130,50', rim: '150,95,30' },
+      { fill: '95,32,22', rim: '62,16,8' }, { fill: '110,150,60', rim: '75,110,35' }, { fill: '240,150,40', rim: '200,110,20' }
+    ],
+    magnifier: [
+      { handle: '#3b2a1f', rim: '#5b6474' }, { handle: '#1d1d1d', rim: '#8d939e' }, { handle: '#c0392b', rim: '#b9bec6' },
+      { handle: '#2f6fd1', rim: '#c9a54a' }, { handle: '#2f8f5b', rim: '#5b6474' }, { handle: '#8a5a2e', rim: '#c9a54a' }
+    ]
+  };
+  PALETTES.protractor = PALETTES.setsquare = [
+    GEO, GEO, GEO, GEO, GEO,
+    geo('rgba(40,120,220,.5)', '#1d4f9a'), geo('rgba(240,130,30,.55)', '#a8540f'),
+    geo('rgba(140,70,200,.5)', '#5a2a8c'), geo('rgba(70,75,85,.45)', '#2b2e35'), geo('rgba(230,80,140,.5)', '#9c2c5f')
+  ];
+  const pickPal = type => {
+    const list = PALETTES[type];
+    return list ? list[Math.floor(Math.random() * list.length)] : null;
+  };
   const PAW_SWEEP = 0.55;          // the cat paw swings this far (radians) above and below level
   const PAW_TIMES = { rest: 0.6, swipe: 0.38, retract: 0.3 };
   const blobShape = n => Array.from({ length: n }, () => rand(0.8, 1.1));
@@ -594,14 +678,6 @@
         obstacles.push({ type: 'blot', x: rand(30, W - 30), y: y + rand(-45, 45), r, bumps, drops });
       }
     },
-    tacks(y, d) {
-      let x = rand(18, 70);
-      while (x < W - 18) {
-        obstacles.push({ type: 'tack', x, y: y + rand(-14, 14), r: 10,
-          col: TACK_COLORS[Math.floor(Math.random() * TACK_COLORS.length)] });
-        x += rand(lerp(112, 78, d), lerp(175, 120, d));
-      }
-    },
     erasers(y, d) {        // two erasers that slide shut and open again
       const gapMax = lerp(190, 150, d), gapMin = lerp(74, 56, d);
       obstacles.push({ type: 'erasers', y, cx: rand(110, W - 110), gapMin, gapMax, gap: gapMax,
@@ -641,9 +717,8 @@
     fan(y, d) {            // a desk fan on one edge blows the plane sideways inside its wind band
       const side = Math.random() < 0.5 ? -1 : 1;
       obstacles.push({ type: 'fan', y, side, band: 170, force: lerp(450, 750, d), blade: 0, t: rand(0, 5) });
-      if (d > 0.3) {       // and something nasty downwind
-        obstacles.push({ type: 'tack', x: side < 0 ? rand(W * 0.6, W - 30) : rand(30, W * 0.4), y: y + rand(-30, 30),
-          r: 10, col: TACK_COLORS[ri(0, TACK_COLORS.length - 1)] });
+      if (d > 0.3) {       // and an ink blot waiting downwind
+        obstacles.push(inkBlot(side < 0 ? rand(W * 0.6, W - 30) : rand(30, W * 0.4), y + rand(-30, 30)));
       }
       return 40;
     },
@@ -660,37 +735,16 @@
       obstacles.push({ type: 'stamp', y, x: rand(60, W - 60), phase: 'warn', t: 0, warn: lerp(1.2, 0.75, d), marks: [] });
       return 40;
     },
-    sharpener(y, d) {      // a pencil sharpener that sucks the plane sideways toward it
-      obstacles.push({ type: 'sharpener', y, x: rand(80, W - 80), R: 150, force: lerp(500, 800, d), t: rand(0, 5) });
-      return 40;
-    },
     coffee(y, d) {         // a coffee spill: flying through it soaks the plane (falls faster, steers worse)
       const r = rand(40, 58);
       obstacles.push({ type: 'coffee', y, x: rand(r + 10, W - r - 10), r, pts: blobShape(14),
         drops: Array.from({ length: 5 }, () => [rand(0, 6.28), rand(1.2, 1.6), rand(2, 5)]),
         ring: Math.random() < 0.6 ? { a: rand(0, 6.28), r: rand(20, 26) } : null });
-      if (d > 0.35) {      // and a tack waiting below the spill for a soggy plane
-        obstacles.push({ type: 'tack', x: rand(30, W - 30), y: y + rand(90, 120), r: 10,
-          col: TACK_COLORS[ri(0, TACK_COLORS.length - 1)] });
+      if (d > 0.35) {      // and an ink blot waiting below the spill for a soggy plane
+        obstacles.push(inkBlot(rand(30, W - 30), y + rand(90, 120)));
         return 110;
       }
       return 30;
-    },
-    whiteout(y, d) {       // a dab of correction fluid hiding tacks or ink until the plane is close
-      const r = rand(70, 92), x = rand(r + 6, W - r - 6);
-      const n = d > 0.4 ? 3 : 2;
-      for (let i = 0; i < n; i++) {   // hidden hazards go first so the whiteout draws on top of them
-        const a = rand(0, 6.28), k = rand(0, 0.55) * r;
-        const hx = x + Math.cos(a) * k, hy = y + Math.sin(a) * k;
-        if (Math.random() < 0.6) obstacles.push({ type: 'tack', x: hx, y: hy, r: 10, col: TACK_COLORS[ri(0, TACK_COLORS.length - 1)] });
-        else {
-          const br = rand(13, 18);
-          obstacles.push({ type: 'blot', x: hx, y: hy, r: br, drops: [],
-            bumps: Array.from({ length: 6 }, (_, j) => ({ t: j / 6 * 6.28, d: br * 0.7, r: br * 0.4 })) });
-        }
-      }
-      obstacles.push({ type: 'whiteout', y, x, r, pts: blobShape(16), streaks: Array.from({ length: 4 }, () => rand(-0.6, 0.6)) });
-      return 60;
     },
     notes(y, d) {          // sticky notes fluttering down the page, swaying side to side
       const n = d > 0.4 ? 3 : 2;
@@ -745,7 +799,7 @@
   // depth (as difficulty d) at which each obstacle starts appearing, and how often
   let lastType = '';
   function spawnRow(y, d) {
-    const pool = [['gate', 3], ['blots', 2], ['tacks', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
+    const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
     if (d > 0.08) pool.push(['clips', 1.4]);
     if (d > 0.12) pool.push(['scissors', 0.6 + 1.6 * d]);
     if (d > 0.18) pool.push(['fan', 1.1]);
@@ -755,8 +809,6 @@
     if (d > 0.15) pool.push(['cutter', 1.3]);
     if (d > 0.06) pool.push(['notes', 1.2]);
     if (d > 0.1) pool.push(['coffee', 1.1]);
-    if (d > 0.18) pool.push(['sharpener', 1.2]);
-    if (d > 0.2) pool.push(['whiteout', 1.1]);
     if (d > 0.22) pool.push(['stamp', 1.3]);
     if (d > 0.05) pool.push(['band', 1.2]);
     if (d > 0.08) pool.push(['setsquare', 1.2]);
@@ -766,7 +818,13 @@
     let r = Math.random() * choices.reduce((s, p) => s + p[1], 0), type = choices[0][0];
     for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
     lastType = type;
+    const before = obstacles.length;
     const extra = make[type](y, d) || 0;
+    const rowPal = {};                 // obstacles of the same kind in one row share a colour
+    for (let i = before; i < obstacles.length; i++) {
+      const o = obstacles[i];
+      if (!o.pal) o.pal = rowPal[o.type] || (rowPal[o.type] = pickPal(o.type));
+    }
     if (type !== 'gate' && type !== 'protractor' && Math.random() < 0.28) {
       pickups.push({ x: rand(40, W - 40), y: y + extra + rand(95, 125), r: 10, spin: rand(0, 6) });
     }
@@ -809,7 +867,6 @@
         return out;
       }
       case 'blot': return [{ k: 'c', x: o.x, y: o.y, r: o.r * 0.88 }];
-      case 'tack': return [{ k: 'c', x: o.x, y: o.y, r: o.r }];
       case 'protractor': return [{ k: 'c', x: o.side < 0 ? 0 : W, y: o.y, r: o.r }];
       case 'wad': return [{ k: 'c', x: o.x, y: o.y, r: o.r * 0.9 }];
       case 'clips': return clipXs(o).map(x => ({ k: 'b', x, y: o.y, hw: 17, hh: 6, a: 0 }));
@@ -832,7 +889,6 @@
         return out;
       }
       case 'stamp': return o.phase === 'down' ? [{ k: 'b', x: o.x, y: o.y, hw: 32, hh: 24, a: 0 }] : [];
-      case 'sharpener': return [{ k: 'b', x: o.x, y: o.y, hw: 17, hh: 14, a: 0 }];
       case 'note': return [{ k: 'b', x: o.x, y: o.y, hw: 21, hh: 21, a: o.rot }];
       case 'setsquare': {
         const c = Math.cos(o.rot), s = Math.sin(o.rot);
@@ -846,7 +902,7 @@
         return [{ k: 'b', x: x0 + dx * o.L / 2, y: o.y + dy * o.L / 2, hw: o.L / 2, hh: 11, a: Math.atan2(dy, dx) },
                 { k: 'c', x: x0 + dx * o.L, y: o.y + dy * o.L, r: 18 }];
       }
-      // coffee, whiteout and the rubber band itself never crash the plane
+      // coffee and the rubber band itself never crash the plane
     }
     return [];
   }
@@ -947,7 +1003,6 @@
           }
         }
         break;
-      case 'sharpener': o.t += dt; break;
       case 'setsquare':
         o.rot += o.spin * dt;
         o.x += o.vx * dt;
@@ -1016,10 +1071,6 @@
     const py = dist + planeScreenY();
     for (const o of obstacles) {
       if (o.type === 'fan' && Math.abs(o.y - py) < o.band / 2) plane.vx += -o.side * o.force * dt;
-      if (o.type === 'sharpener') {   // pulls harder the closer the plane gets
-        const dx = o.x - plane.x, dd = Math.hypot(dx, o.y - py);
-        if (dd < o.R) plane.vx += Math.sign(dx) * o.force * (1 - dd / o.R) * dt;
-      }
     }
     plane.x += plane.vx * dt;
     if (plane.x < 16) { plane.x = 16; plane.vx = Math.max(0, plane.vx); }
@@ -1074,7 +1125,8 @@
     const planeY = dist + planeScreenY();
     for (const o of obstacles) {
       if (o.type !== 'coffee' || Math.hypot(plane.x - o.x, planeY - o.y) > o.r * 0.85) continue;
-      if (plane.soggy <= 0) floaters.push({ x: clamp(plane.x, 50, W - 50), y: planeY - 30, text: 'Soggy!', life: 1.2, col: '#7a4a22' });
+      plane.soggyCol = `rgb(${(o.pal || PALETTES.coffee[0]).fill})`;   // stained the colour of the drink
+      if (plane.soggy <= 0) floaters.push({ x: clamp(plane.x, 50, W - 50), y: planeY - 30, text: 'Soggy!', life: 1.2, col: plane.soggyCol });
       plane.soggy = SOGGY_TIME;
     }
     // rubber bands kick the plane sideways, toward the nearer end of the band
@@ -1089,7 +1141,7 @@
       sfx.twang();
     }
     if (plane.soggy > 0 && Math.random() < dt * 8) {   // coffee drips
-      particles.push({ kind: 'spark', col: '#7a4a22', x: plane.x + rand(-8, 8), y: planeY - 4, vx: rand(-20, 20), vy: -rand(20, 60),
+      particles.push({ kind: 'spark', col: plane.soggyCol || '#7a4a22', x: plane.x + rand(-8, 8), y: planeY - 4, vx: rand(-20, 20), vy: -rand(20, 60),
         g: 0, rot: 0, vr: 0, life: 1, ttl: 0.6, size: rand(2, 3.5) });
     }
     const targetAng = Math.atan2(plane.vx, speed + 60);
@@ -1250,17 +1302,17 @@
 
   function inkStroke(w = 1.3) { ctx.strokeStyle = COL.ink; ctx.lineWidth = w; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke(); }
 
-  function drawRuler(x0, x1, sy, innerX, outDir) {
+  function drawRuler(x0, x1, sy, innerX, outDir, p = PALETTES.gate[0]) {
     if (x1 - x0 < 1) return;
     ctx.fillStyle = 'rgba(34,53,107,.12)';
     ctx.fillRect(x0 + 4, sy - 11 + 6, x1 - x0, 22);
-    ctx.fillStyle = '#f3d88b';
+    ctx.fillStyle = p.face;
     ctx.beginPath(); ctx.rect(x0, sy - 11, x1 - x0, 22); ctx.fill();
-    ctx.fillStyle = '#e6c46a'; ctx.fillRect(x0, sy + 6, x1 - x0, 5);
+    ctx.fillStyle = p.edge; ctx.fillRect(x0, sy + 6, x1 - x0, 5);
     inkStroke(1.4);
     ctx.save();
     ctx.beginPath(); ctx.rect(x0, sy - 11, x1 - x0, 22); ctx.clip();
-    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1; ctx.fillStyle = COL.ink;
+    ctx.strokeStyle = p.mark; ctx.lineWidth = 1; ctx.fillStyle = p.mark;
     ctx.font = '9px Kalam, cursive'; ctx.textAlign = 'center';
     ctx.beginPath();
     for (let t = 4, i = 0; t < 460; t += 6, i++) {
@@ -1273,18 +1325,18 @@
     ctx.restore();
   }
 
-  function drawEraser(x0, x1, sy, innerX, outDir) {
+  function drawEraser(x0, x1, sy, innerX, outDir, p = PALETTES.erasers[0]) {
     if (x1 - x0 < 1) return;
     ctx.fillStyle = 'rgba(34,53,107,.12)';
     ctx.fillRect(x0 + 4, sy - 14 + 6, x1 - x0, 28);
-    ctx.fillStyle = '#f2a7b5';
+    ctx.fillStyle = p.rub;
     ctx.beginPath(); ctx.rect(x0, sy - 14, x1 - x0, 28); ctx.fill();
-    ctx.fillStyle = '#e48c9d'; ctx.fillRect(x0, sy + 8, x1 - x0, 6);
-    // blue sleeve a little back from the inner (rubbing) end
+    ctx.fillStyle = p.shade; ctx.fillRect(x0, sy + 8, x1 - x0, 6);
+    // paper sleeve a little back from the inner (rubbing) end
     const s0 = innerX + outDir * 26, s1 = innerX + outDir * 120;
     const a = Math.max(x0, Math.min(s0, s1)), b = Math.min(x1, Math.max(s0, s1));
     if (b > a) {
-      ctx.fillStyle = '#3a66c4'; ctx.fillRect(a, sy - 14, b - a, 28);
+      ctx.fillStyle = p.sleeve; ctx.fillRect(a, sy - 14, b - a, 28);
       ctx.fillStyle = '#fbf9f1'; ctx.font = '700 12px Kalam, cursive'; ctx.textAlign = 'center';
       if (b - a > 60) ctx.fillText('ERASER', (a + b) / 2, sy + 5);
     }
@@ -1300,13 +1352,14 @@
     ctx.save(); ctx.translate(4, 7); ctx.fillStyle = 'rgba(34,53,107,.13)';
     ctx.beginPath(); ctx.moveTo(-L, -h); ctx.lineTo(L - 26, -h); ctx.lineTo(L, 0); ctx.lineTo(L - 26, h); ctx.lineTo(-L, h); ctx.closePath(); ctx.fill();
     ctx.restore();
+    const p = o.pal || PALETTES.pencil[0];
     // eraser + ferrule
-    ctx.fillStyle = '#f29fae'; ctx.fillRect(-L, -h, 12, h * 2);
+    ctx.fillStyle = p.tip; ctx.fillRect(-L, -h, 12, h * 2);
     ctx.fillStyle = '#b9bec6'; ctx.fillRect(-L + 12, -h, 11, h * 2);
     // body facets
-    ctx.fillStyle = '#f8d75a'; ctx.fillRect(-L + 23, -h, o.len - 49, h * 0.66);
-    ctx.fillStyle = '#f4c430'; ctx.fillRect(-L + 23, -h + h * 0.66, o.len - 49, h * 0.68);
-    ctx.fillStyle = '#d9a520'; ctx.fillRect(-L + 23, h - h * 0.66, o.len - 49, h * 0.66);
+    ctx.fillStyle = p.light; ctx.fillRect(-L + 23, -h, o.len - 49, h * 0.66);
+    ctx.fillStyle = p.mid; ctx.fillRect(-L + 23, -h + h * 0.66, o.len - 49, h * 0.68);
+    ctx.fillStyle = p.dark; ctx.fillRect(-L + 23, h - h * 0.66, o.len - 49, h * 0.66);
     // wood cone & graphite
     ctx.fillStyle = '#ecc99a';
     ctx.beginPath(); ctx.moveTo(L - 26, -h); ctx.lineTo(L, 0); ctx.lineTo(L - 26, h); ctx.closePath(); ctx.fill();
@@ -1374,7 +1427,7 @@
 
   function drawBlot(o, sy) {
     ctx.save(); ctx.translate(o.x, sy);
-    ctx.fillStyle = COL.inkBlot;
+    ctx.fillStyle = (o.pal || PALETTES.blot[0]).ink;
     ctx.globalAlpha = 0.93;
     ctx.beginPath(); ctx.arc(0, 0, o.r * 0.8, 0, Math.PI * 2); ctx.fill();
     for (const b of o.bumps) {
@@ -1418,6 +1471,7 @@
 
   function drawProtractor(o, sy) {
     const cx = o.side < 0 ? 0 : W, a0 = o.side < 0 ? -Math.PI / 2 : Math.PI / 2;
+    const GEO = o.pal || PALETTES.protractor[0];
     ctx.fillStyle = 'rgba(34,53,107,.12)';
     ctx.beginPath(); ctx.arc(cx + 4, sy + 7, o.r, a0, a0 + Math.PI); ctx.closePath(); ctx.fill();
     ctx.fillStyle = GEO.fill;
@@ -1443,6 +1497,7 @@
 
   // a spinning set square in the same green plastic, with the usual triangular cut-out
   function drawSetSquare(o, sy) {
+    const GEO = o.pal || PALETTES.setsquare[0];
     const tri = (k, dx = 0, dy = 0) => {
       o.verts.forEach(([x, y], i) => (i ? ctx.lineTo(x * k + dx, y * k + dy) : ctx.moveTo(x * k + dx, y * k + dy)));
       ctx.closePath();
@@ -1471,7 +1526,7 @@
     ctx.save(); ctx.translate(o.x, sy);
     ctx.fillStyle = 'rgba(34,53,107,.14)'; ctx.beginPath(); ctx.arc(5, 8, o.r, 0, Math.PI * 2); ctx.fill();
     ctx.rotate(o.rot);
-    ctx.fillStyle = '#e6e2d4';
+    ctx.fillStyle = (o.pal || PALETTES.wad[0]).paper;
     ctx.beginPath();
     o.pts.forEach((k, i) => {
       const a = i / o.pts.length * Math.PI * 2;
@@ -1513,7 +1568,8 @@
     ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(0, -4, L, 8);
     ctx.restore();
     ctx.rotate(o.ang);
-    ctx.fillStyle = '#c3c9d3';
+    const p = o.pal || PALETTES.compass[0];
+    ctx.fillStyle = p.leg;
     ctx.beginPath(); ctx.moveTo(0, -4.5); ctx.lineTo(L - 16, -2.5); ctx.lineTo(L - 16, 2.5); ctx.lineTo(0, 4.5); ctx.closePath();
     ctx.fill(); inkStroke(1.2);
     // pencil stub held at the end of the leg
@@ -1522,8 +1578,8 @@
     ctx.fillStyle = '#3a3a3a'; ctx.beginPath(); ctx.moveTo(L - 3, -1.2); ctx.lineTo(L, 0); ctx.lineTo(L - 3, 1.2); ctx.closePath(); ctx.fill();
     ctx.beginPath(); ctx.rect(L - 16, -3, 9, 6); ctx.moveTo(L - 7, -3); ctx.lineTo(L, 0); ctx.lineTo(L - 7, 3); inkStroke(1);
     // hinge over the needle
-    ctx.fillStyle = '#8d939e'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
-    ctx.fillStyle = '#c8463b'; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = p.hinge; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
+    ctx.fillStyle = p.cap; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
@@ -1544,14 +1600,15 @@
     // the fan, half off the page edge
     ctx.save(); ctx.translate(cx, sy);
     ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.beginPath(); ctx.arc(4, 7, 26, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#dfe3ea'; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill(); inkStroke(1.4);
+    const p = o.pal || PALETTES.fan[0];
+    ctx.fillStyle = p.body; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill(); inkStroke(1.4);
     ctx.rotate(o.blade);
-    ctx.fillStyle = '#7fa7d9';
+    ctx.fillStyle = p.blade;
     for (let b = 0; b < 3; b++) {
       ctx.rotate(Math.PI * 2 / 3);
       ctx.beginPath(); ctx.ellipse(12, 0, 11, 5.5, 0.3, 0, Math.PI * 2); ctx.fill(); inkStroke(1);
     }
-    ctx.fillStyle = '#5b6474'; ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = p.hub; ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
@@ -1584,7 +1641,7 @@
     // body with a printed label and a crimped end at the wall
     ctx.fillStyle = '#ffffff';
     ctx.beginPath(); roundRectPath(-4, -11 * sq, 66, 22 * sq, 5); ctx.fill();
-    ctx.fillStyle = '#e8812f'; ctx.fillRect(16, -11 * sq, 30, 22 * sq);
+    ctx.fillStyle = (o.pal || PALETTES.glue[0]).label; ctx.fillRect(16, -11 * sq, 30, 22 * sq);
     ctx.beginPath(); roundRectPath(-4, -11 * sq, 66, 22 * sq, 5); inkStroke(1.3);
     ctx.beginPath();
     for (let x = 2; x < 12; x += 3) { ctx.moveTo(x, -11 * sq); ctx.lineTo(x, 11 * sq); }
@@ -1614,12 +1671,13 @@
       ctx.restore();
     }
     // handle
-    ctx.fillStyle = '#f2b233';
+    const p = o.pal || PALETTES.cutter[0];
+    ctx.fillStyle = p.handle;
     ctx.beginPath(); roundRectPath(-6, -12, h + 6, 24, 6); ctx.fill(); inkStroke(1.4);
     ctx.beginPath();
     for (let x = 6; x < 34; x += 5) { ctx.moveTo(x, -8); ctx.lineTo(x, 8); }
     inkStroke(0.9);
-    ctx.fillStyle = '#3b3f47';                      // slider button
+    ctx.fillStyle = p.slider;                       // slider button
     ctx.beginPath(); roundRectPath(h - 30, -15, 14, 7, 2); ctx.fill(); inkStroke(1);
     ctx.restore();
   }
@@ -1643,14 +1701,15 @@
   }
 
   function drawStamp(o, sy) {
-    // "A+" marks left by earlier landings
+    const p = o.pal || PALETTES.stamp[0];
+    // marks ("A+", "OK!"...) left by earlier landings, in this stamp's ink
     for (const m of o.marks) {
       ctx.save();
       ctx.translate(m.x, sy); ctx.rotate(m.rot);
-      ctx.strokeStyle = 'rgba(200,40,40,.65)'; ctx.fillStyle = 'rgba(200,40,40,.65)'; ctx.lineWidth = 2.5;
+      ctx.strokeStyle = `rgba(${p.ink},.65)`; ctx.fillStyle = `rgba(${p.ink},.65)`; ctx.lineWidth = 2.5;
       ctx.beginPath(); roundRectPath(-27, -19, 54, 38, 6); ctx.stroke();
-      ctx.font = '700 22px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('A+', 0, 2);
+      ctx.font = `700 ${p.text.length > 3 ? 15 : 22}px Kalam, cursive`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(p.text, 0, 2);
       ctx.restore();
     }
     // h: how high the stamp is (1 = up by the viewer, 0 = on the page)
@@ -1667,74 +1726,31 @@
     ctx.save();
     ctx.translate(o.x - 16 * h, sy - 34 * h);
     ctx.scale(1 + 0.25 * h, 1 + 0.25 * h);
-    ctx.fillStyle = '#b07a45';                                   // wooden block
+    ctx.fillStyle = p.wood;                                      // stamp block
     ctx.beginPath(); roundRectPath(-32, -24, 64, 48, 7); ctx.fill(); inkStroke(1.4);
-    ctx.strokeStyle = 'rgba(90,55,25,.5)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1;
     ctx.beginPath(); roundRectPath(-26, -18, 52, 36, 5); ctx.stroke();
-    ctx.fillStyle = '#8a5a2e';                                   // handle knob
+    ctx.fillStyle = p.knob;                                      // handle knob
     ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
     ctx.fillStyle = 'rgba(255,255,255,.3)';
     ctx.beginPath(); ctx.arc(-5, -5, 5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
-  function drawSharpener(o, sy) {
-    ctx.save();
-    // its reach, and pencil shavings spiralling in
-    ctx.strokeStyle = 'rgba(176,122,69,.18)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 8]);
-    ctx.beginPath(); ctx.arc(o.x, sy, o.R, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.strokeStyle = '#b07a45'; ctx.lineWidth = 2; ctx.lineCap = 'round';
-    for (let k = 0; k < 8; k++) {
-      const ph = (o.t * 0.6 + k / 8) % 1, rr = o.R * (1 - ph), a = k * 0.8 + ph * 5;
-      ctx.globalAlpha = Math.min(1, ph * 1.5) * 0.8;
-      ctx.beginPath(); ctx.arc(o.x + Math.cos(a) * rr, sy + Math.sin(a) * rr * 0.8, 3.5, a, a + 4); ctx.stroke();
-    }
-    ctx.restore();
-    ctx.fillStyle = 'rgba(34,53,107,.15)'; ctx.fillRect(o.x - 13, sy - 8, 34, 28);
-    ctx.fillStyle = '#2f6fd1';
-    ctx.beginPath(); roundRectPath(o.x - 17, sy - 14, 34, 28, 5); ctx.fill(); inkStroke(1.4);
-    ctx.fillStyle = '#c3c9d3'; ctx.fillRect(o.x - 12, sy - 11, 24, 9);   // blade plate
-    ctx.beginPath(); ctx.rect(o.x - 12, sy - 11, 24, 9); inkStroke(1);
-    ctx.fillStyle = '#1d2027';
-    ctx.beginPath(); ctx.arc(o.x, sy + 5, 6.5, 0, Math.PI * 2); ctx.fill();   // the hole
-    ctx.fillStyle = '#5b6474'; ctx.beginPath(); ctx.arc(o.x + 8, sy - 6.5, 1.8, 0, Math.PI * 2); ctx.fill();   // screw
-  }
-
   function drawCoffee(o, sy) {
-    ctx.fillStyle = 'rgba(122,74,34,.42)';
+    const p = o.pal || PALETTES.coffee[0];
+    ctx.fillStyle = `rgba(${p.fill},.42)`;
     blobPath(o.x, sy, o.r, o.pts); ctx.fill();
-    ctx.strokeStyle = 'rgba(95,55,22,.55)'; ctx.lineWidth = 3; ctx.stroke();
-    ctx.fillStyle = 'rgba(122,74,34,.5)';
+    ctx.strokeStyle = `rgba(${p.rim},.55)`; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = `rgba(${p.fill},.5)`;
     for (const [a, k, r] of o.drops) {
       ctx.beginPath(); ctx.arc(o.x + Math.cos(a) * o.r * k, sy + Math.sin(a) * o.r * k, r, 0, Math.PI * 2); ctx.fill();
     }
     if (o.ring) {                        // the mug's ring
-      ctx.strokeStyle = 'rgba(95,55,22,.45)'; ctx.lineWidth = 3;
+      ctx.strokeStyle = `rgba(${p.rim},.45)`; ctx.lineWidth = 3;
       const cx = o.x + Math.cos(o.ring.a) * o.r * 0.9, cy = sy + Math.sin(o.ring.a) * o.r * 0.9;
       ctx.beginPath(); ctx.arc(cx, cy, o.ring.r, 0.3, Math.PI * 2 - 0.4); ctx.stroke();
     }
-  }
-
-  function drawWhiteout(o, sy) {
-    // opaque until the plane gets close; reveals sooner the faster the plane falls
-    const dy = o.y - (dist + planeScreenY());
-    const reveal = 70 + speed * 0.45;
-    const alpha = clamp((dy - 30) / reveal, 0, 1);
-    if (alpha <= 0.01) return;
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = 'rgba(34,53,107,.1)';
-    blobPath(o.x + 4, sy + 6, o.r, o.pts, 0.85); ctx.fill();
-    ctx.fillStyle = '#fdfdfb';
-    blobPath(o.x, sy, o.r, o.pts, 0.85); ctx.fill();
-    ctx.strokeStyle = 'rgba(150,150,150,.55)'; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.strokeStyle = 'rgba(215,215,210,1)'; ctx.lineWidth = 6; ctx.lineCap = 'round';   // brush streaks
-    o.streaks.forEach((k, i) => {
-      const yy = sy + (i - 1.5) * o.r * 0.32;
-      ctx.beginPath(); ctx.moveTo(o.x - o.r * 0.55, yy + k * 6); ctx.lineTo(o.x + o.r * 0.5, yy - k * 6); ctx.stroke();
-    });
-    ctx.restore();
   }
 
   function drawNote(o, sy) {
@@ -1781,14 +1797,15 @@
     }
     ctx.globalAlpha = 1;
     // handle, then the rim and glass
+    const p = o.pal || PALETTES.magnifier[0];
     ctx.save(); ctx.translate(lx, ly); ctx.rotate(-2.3);
     ctx.fillStyle = 'rgba(34,53,107,.12)'; ctx.fillRect(R + 4, -2, 42, 12);
-    ctx.fillStyle = '#3b2a1f'; ctx.beginPath(); roundRectPath(R + 2, -6, 44, 12, 5); ctx.fill(); inkStroke(1.2);
-    ctx.fillStyle = '#b9bec6'; ctx.fillRect(R - 2, -4, 8, 8);
+    ctx.fillStyle = p.handle; ctx.beginPath(); roundRectPath(R + 2, -6, 44, 12, 5); ctx.fill(); inkStroke(1.2);
+    ctx.fillStyle = p.rim; ctx.fillRect(R - 2, -4, 8, 8);
     ctx.restore();
     ctx.fillStyle = 'rgba(180,220,255,.28)';
     ctx.beginPath(); ctx.arc(lx, ly, R, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#5b6474'; ctx.lineWidth = 5; ctx.stroke();
+    ctx.strokeStyle = p.rim; ctx.lineWidth = 5; ctx.stroke();
     ctx.beginPath(); ctx.arc(lx, ly, R + 2.5, 0, Math.PI * 2); inkStroke(1.2);
     ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2.5;
     ctx.beginPath(); ctx.arc(lx, ly, R - 8, Math.PI * 1.1, Math.PI * 1.45); ctx.stroke();
@@ -1947,7 +1964,7 @@
     paintPlane(ctx, skin, clamp(plane.vx / 400, -1, 1));
     if (plane.soggy > 0) {                     // coffee stain soaking into the paper
       ctx.globalAlpha *= 0.5 * Math.min(1, plane.soggy / 0.6);
-      ctx.fillStyle = '#8a5a2e'; planeOutline(); ctx.fill();
+      ctx.fillStyle = plane.soggyCol || '#8a5a2e'; planeOutline(); ctx.fill();
     }
     ctx.restore();
   }
@@ -2032,20 +2049,19 @@
       switch (o.type) {
         case 'gate': {
           const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
-          drawRuler(-10, l, sy, l, -1);
-          drawRuler(r, W + 10, sy, r, 1);
+          drawRuler(-10, l, sy, l, -1, o.pal);
+          drawRuler(r, W + 10, sy, r, 1, o.pal);
           break;
         }
         case 'erasers': {
           const l = o.cx - o.gap / 2, r = o.cx + o.gap / 2;
-          drawEraser(-10, l, sy, l, -1);
-          drawEraser(r, W + 10, sy, r, 1);
+          drawEraser(-10, l, sy, l, -1, o.pal);
+          drawEraser(r, W + 10, sy, r, 1, o.pal);
           break;
         }
         case 'pencil': drawPencil(o, sy); break;
         case 'scissors': drawScissors(o, sy); break;
         case 'blot': drawBlot(o, sy); break;
-        case 'tack': drawTack(o, sy); break;
         case 'protractor': drawProtractor(o, sy); break;
         case 'wad': drawWad(o, sy); break;
         case 'clips': for (const x of clipXs(o)) drawClip(x, sy, o.col); break;
@@ -2054,9 +2070,7 @@
         case 'glue': drawGlue(o, sy); break;
         case 'cutter': drawCutter(o, sy); break;
         case 'stamp': drawStamp(o, sy); break;
-        case 'sharpener': drawSharpener(o, sy); break;
         case 'coffee': drawCoffee(o, sy); break;
-        case 'whiteout': drawWhiteout(o, sy); break;
         case 'note': drawNote(o, sy); break;
         case 'setsquare': drawSetSquare(o, sy); break;
         case 'magnifier': drawMagnifier(o, sy); break;
