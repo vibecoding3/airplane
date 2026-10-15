@@ -1,0 +1,284 @@
+// Paper Nosedive — HUD, menu cards, pause / game over, the skin picker and the shop.
+'use strict';
+
+// ---------- HUD & screens ----------
+const ui = {
+  depth: $('depth'), stars: $('starCount'), best: $('best'),
+  overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'), skins: $('skinsCard'),
+  shop: $('shopCard'), overBank: $('overBank'),
+  overTitle: $('overTitle'), overDetail: $('overDetail'), overBest: $('overBest'), stamp: $('recordStamp'),
+  pauseBtn: $('pauseBtn'), muteBtn: $('muteBtn')
+};
+let hudDepth = -1, hudStars = -1, hudBest = -1;
+function updateHud() {
+  const playing = state === 'play' || state === 'paused' || state === 'dying' || state === 'over';
+  const d = playing ? score() : 0;
+  // total stars owned: the bank plus whatever this run has picked up so far
+  // (once the run is over, its stars are already in the bank)
+  const total = bank + (state === 'over' ? 0 : stars);
+  if (d === hudDepth && total === hudStars && best === hudBest) return;   // touch the page only on change
+  hudDepth = d; hudStars = total; hudBest = best;
+  ui.depth.textContent = fmt(d);
+  ui.stars.textContent = '★ ' + fmt(total);
+  ui.best.textContent = fmt(best);
+}
+function showCard(which) {
+  ui.overlay.hidden = !which;
+  ui.title.hidden = which !== 'title';
+  ui.pause.hidden = which !== 'pause';
+  ui.over.hidden = which !== 'over';
+  ui.skins.hidden = which !== 'skins';
+  ui.shop.hidden = which !== 'shop';
+  const btn = which && ui[which].querySelector('.play');
+  if (btn) btn.focus({ preventScroll: true });
+}
+// top-bar icons (the buttons keep spoken labels for screen readers)
+const svg = body => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+const SPEAKER = '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="none"/>';
+const ICONS = {
+  sound: svg(SPEAKER + '<path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/>'),
+  muted: svg(SPEAKER + '<path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
+  pause: svg('<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>'),
+  play: svg('<path d="M8 5.5l11 6.5-11 6.5z" fill="currentColor" stroke="none"/>')
+};
+function setMuteLabel() {
+  ui.muteBtn.innerHTML = muted ? ICONS.muted : ICONS.sound;
+  ui.muteBtn.setAttribute('aria-label', muted ? 'Sound off' : 'Sound on');
+  ui.muteBtn.title = muted ? 'Sound off' : 'Sound on';
+}
+function setPauseIcon(paused) {
+  ui.pauseBtn.innerHTML = paused ? ICONS.play : ICONS.pause;
+  ui.pauseBtn.setAttribute('aria-label', paused ? 'Resume' : 'Pause');
+  ui.pauseBtn.title = paused ? 'Resume' : 'Pause';
+}
+setPauseIcon(false);
+setMuteLabel();
+
+function start() {
+  reset();
+  state = 'play';
+  clearControls();
+  showCard(null);
+  sfx.throw();
+}
+function pause() {
+  if (state !== 'play') return;
+  state = 'paused';
+  setPauseIcon(true);
+  showCard('pause');
+}
+function resume() {
+  if (state !== 'paused') return;
+  state = 'play';
+  setPauseIcon(false);
+  holdSide = 0; holdSource = null;   // a key released while paused never sent its keyup here
+  showCard(null);
+}
+function gameOver() {
+  state = 'over';
+  const s = score();
+  const record = s > best;
+  if (record) { best = s; store.set('nosedive-best', String(best)); }
+  ui.overTitle.textContent = 'Crumpled at ' + fmt(s) + ' m';
+  ui.overDetail.textContent = 'You fell for ' + time.toFixed(1) + ' s' +
+    (stars ? ' and caught ' + stars + (stars === 1 ? ' star.' : ' stars.') : '.');
+  ui.overBest.textContent = record ? 'That is your deepest dive yet.' : 'Your best is ' + fmt(best) + ' m.';
+  ui.stamp.hidden = !record;
+  if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
+  ui.overBank.textContent = (stars ? '★ ' + stars + ' added to your stars. ' : '') + 'You have ★ ' + fmt(bank) + ' to spend in the Shop.';
+  showCard('over');
+}
+
+$('startBtn').addEventListener('click', start);
+$('againBtn').addEventListener('click', start);
+$('resumeBtn').addEventListener('click', resume);
+
+// ---------- skin picker ----------
+let skinsReturn = 'title';
+const skinButtons = [];
+function openSkins() {
+  skinsReturn = state === 'over' ? 'over' : 'title';
+  showCard('skins');
+  const current = skinButtons.find(b => b.dataset.skin === skin.id);
+  if (current) current.focus({ preventScroll: true });
+}
+function closeSkins() { showCard(skinsReturn); }
+function selectSkin(s) {
+  skin = s;
+  store.set('nosedive-skin', s.id);
+  for (const b of skinButtons) b.setAttribute('aria-checked', String(b.dataset.skin === s.id));
+}
+function buildSkinGrid() {
+  const grid = $('skinGrid');
+  const pr = Math.min(window.devicePixelRatio || 1, 2);
+  for (const s of SKINS) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'skin';
+    b.setAttribute('role', 'radio');
+    b.dataset.skin = s.id;
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = Math.round(52 * pr);
+    const c = cv.getContext('2d');
+    c.scale(pr, pr);
+    c.translate(26, 24); c.rotate(-0.35); c.scale(1.3, 1.3);
+    paintPlane(c, s, -0.5);
+    const name = document.createElement('span'); name.textContent = s.name;
+    const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = 'Free';
+    b.append(cv, name, tag);
+    b.addEventListener('click', () => selectSkin(s));
+    grid.append(b);
+    skinButtons.push(b);
+  }
+  selectSkin(skin);
+}
+buildSkinGrid();
+$('skinsBtn').addEventListener('click', openSkins);
+$('skinsBtnOver').addEventListener('click', openSkins);
+$('skinsDone').addEventListener('click', closeSkins);
+
+// ---------- shop ----------
+let shopReturn = 'title';
+function openShop() {
+  shopReturn = state === 'over' ? 'over' : 'title';
+  renderShop();
+  showCard('shop');
+}
+function closeShop() { showCard(shopReturn); }
+function buyUpgrade(u) {
+  const lvl = level(u.id);
+  if (lvl >= u.levels.length || bank < u.levels[lvl].price) return;
+  bank -= u.levels[lvl].price;
+  owned[u.id] = lvl + 1;
+  store.set('nosedive-bank', String(bank));
+  store.set('nosedive-upgrades', JSON.stringify(owned));
+  if (state !== 'play') plane.lives = level('life');   // show the blue outline right away
+  sfx.buy();
+  renderShop();
+  const btn = $('shopList').querySelector(`[data-upgrade="${u.id}"]`);
+  if (btn) btn.focus({ preventScroll: true });
+}
+function drawUpgradeIcon(c, id) {
+  c.translate(22, 22);
+  if (id === 'life') {
+    c.rotate(-0.35); c.scale(0.95, 0.95);
+    paintLifeOutline(c);
+    paintPlane(c, skin, -0.5);
+  } else {
+    // horseshoe magnet with silver tips, scaled so the whole shape sits inside the 44px icon
+    c.translate(0, 3); c.rotate(0.55); c.scale(0.72, 0.72);
+    const arm = (y1, y2) => {
+      c.beginPath();
+      c.arc(0, -6, 12, Math.PI, 0, false);
+      c.moveTo(-12, -6); c.lineTo(-12, y2); c.moveTo(12, -6); c.lineTo(12, y2);
+      if (y1 !== null) { c.moveTo(-12, y1); c.lineTo(-12, y2); c.moveTo(12, y1); c.lineTo(12, y2); }
+    };
+    c.lineCap = 'butt';
+    c.strokeStyle = COL.ink; c.lineWidth = 13; arm(null, 16); c.stroke();
+    c.strokeStyle = '#d9443a'; c.lineWidth = 9.5; arm(null, 7); c.stroke();
+    c.strokeStyle = '#c3c9d3';
+    c.beginPath(); c.moveTo(-12, 7); c.lineTo(-12, 15); c.moveTo(12, 7); c.lineTo(12, 15); c.stroke();
+    c.strokeStyle = 'rgba(255,255,255,.4)'; c.lineWidth = 2;   // shine along the curve
+    c.beginPath(); c.arc(0, -6, 14, Math.PI * 1.15, Math.PI * 1.5, false); c.stroke();
+  }
+}
+function renderShop() {
+  $('bankCount').textContent = '★ ' + fmt(bank);
+  const list = $('shopList');
+  list.replaceChildren();
+  const pr = Math.min(window.devicePixelRatio || 1, 2);
+  for (const u of UPGRADES) {
+    const row = document.createElement('div'); row.className = 'upgrade';
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = Math.round(44 * pr);
+    const c = cv.getContext('2d'); c.scale(pr, pr);
+    drawUpgradeIcon(c, u.id);
+    const lvl = level(u.id), max = u.levels.length, next = u.levels[lvl];
+    const info = document.createElement('div'); info.className = 'info';
+    const name = document.createElement('strong'); name.textContent = u.name;
+    const pips = document.createElement('span'); pips.className = 'pips';
+    pips.setAttribute('aria-label', `Level ${lvl} of ${max}`);
+    for (let i = 0; i < max; i++) {
+      const p = document.createElement('i'); if (i < lvl) p.className = 'on'; pips.append(p);
+    }
+    pips.append(document.createTextNode(lvl ? ` Level ${lvl} of ${max}` : ` Not bought yet`));
+    // describe what the next level gives, or the top level once maxed
+    const desc = document.createElement('span');
+    desc.textContent = !next ? u.levels[max - 1].desc : (lvl ? 'Next: ' : '') + next.desc;
+    info.append(name, pips, desc);
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'buy'; btn.dataset.upgrade = u.id;
+    if (!next) {
+      btn.textContent = 'Maxed'; btn.disabled = true; btn.classList.add('owned');
+    } else {
+      btn.textContent = '★ ' + next.price;
+      btn.disabled = bank < next.price;
+      const what = lvl ? `${u.name} level ${lvl + 1}` : u.name;
+      btn.setAttribute('aria-label', bank < next.price
+        ? `${what} costs ${next.price} stars. You need ${next.price - bank} more.`
+        : `Buy ${what} for ${next.price} stars`);
+      btn.addEventListener('click', () => buyUpgrade(u));
+    }
+    row.append(cv, info, btn);
+    list.append(row);
+  }
+  renderTrails(pr);
+}
+
+// trails: buy once with stars, then pick which one to use
+function renderTrails(pr) {
+  const list = $('trailList');
+  list.replaceChildren();
+  const sample = Array.from({ length: 24 }, (_, i) => ({ x: 4 + i * 3.4, y: 15 + Math.sin(i * 0.45) * 7 }));
+  for (const t of TRAILS) {
+    const tile = document.createElement('div');
+    tile.className = 'trail' + (t.id === trailStyle ? ' selected' : '');
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(84 * pr); cv.height = Math.round(30 * pr);
+    const c = cv.getContext('2d'); c.scale(pr, pr);
+    paintTrail(c, sample, t.id, 0.4);
+    const name = document.createElement('span'); name.textContent = t.name;
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'buy'; btn.dataset.trail = t.id;
+    if (t.id === trailStyle) {
+      btn.textContent = 'In use'; btn.disabled = true; btn.classList.add('owned');
+    } else if (ownsTrail(t)) {
+      btn.textContent = 'Use';
+      btn.setAttribute('aria-label', 'Use the ' + t.name + ' trail');
+      btn.addEventListener('click', () => chooseTrail(t));
+    } else {
+      btn.textContent = '★ ' + t.price;
+      btn.disabled = bank < t.price;
+      btn.setAttribute('aria-label', bank < t.price
+        ? `${t.name} trail costs ${t.price} stars. You need ${t.price - bank} more.`
+        : `Buy the ${t.name} trail for ${t.price} stars`);
+      btn.addEventListener('click', () => chooseTrail(t));
+    }
+    tile.append(cv, name, btn);
+    list.append(tile);
+  }
+}
+function chooseTrail(t) {
+  if (!ownsTrail(t)) {
+    if (bank < t.price) return;
+    bank -= t.price;
+    owned['trail-' + t.id] = true;
+    store.set('nosedive-bank', String(bank));
+    store.set('nosedive-upgrades', JSON.stringify(owned));
+    sfx.buy();
+  }
+  trailStyle = t.id;
+  store.set('nosedive-trail', t.id);
+  renderShop();
+  const btn = $('trailList').querySelector(`[data-trail="${t.id}"]`);
+  if (btn) btn.focus({ preventScroll: true });
+}
+$('shopBtn').addEventListener('click', openShop);
+$('shopBtnOver').addEventListener('click', openShop);
+$('shopDone').addEventListener('click', closeShop);
+ui.pauseBtn.addEventListener('click', () => (state === 'paused' ? resume() : pause()));
+ui.muteBtn.addEventListener('click', () => {
+  muted = !muted;
+  store.set('nosedive-muted', muted ? '1' : '0');
+  setMuteLabel();
+  if (!muted) tone(660, 990, 0.1, 'sine', 0.08);
+});

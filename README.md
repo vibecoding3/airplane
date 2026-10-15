@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v31** (2026-10-15)
+Current version: **v32** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,11 +10,11 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Single file:** the whole game is `index.html` (about 3,400 lines of HTML, CSS and JavaScript). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand).
+- **Files:** `index.html` (the page and menus), `style.css`, and 12 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). Opening `index.html` straight from disk works too.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves `index.html` from the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v31 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v32 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -266,7 +266,29 @@ Sky dive has no walls at its edges, so wall-based mechanics there need a floatin
 
 ---
 
-## 10. Code map (`index.html`)
+## 10. Code map
+
+Since v32 the game is split into files. The scripts are ordinary `<script src>` files (not ES modules), so they share one global scope and run in the order `index.html` lists them. Each file only uses names from earlier files while it loads; anything else is used later, once the game is running. `main.js` loads last and starts the game.
+
+| File | What it holds |
+|---|---|
+| `index.html` | The page: playfield layers, HUD, menu cards (title, skins, shop, pause, game over) |
+| `style.css` | All styling, including the paper / sea / sun-ray background layers |
+| `js/core.js` | Constants, helpers, saved settings (`store`), screen sizing, sprite cache |
+| `js/audio.js` | Sound effects (Web Audio, no sound files) |
+| `js/paper-background.js` | Pencil formulas by depth tier |
+| `js/sea-background.js` | Background fish, specks, whale and shipwreck silhouettes |
+| `js/state.js` | Game state, upgrade and trail data, controls, speed and difficulty rules, `reset` |
+| `js/obstacles.js` | Obstacle palettes, the `make` generators, sea obstacle pool, row spawning |
+| `js/physics.js` | Collision shapes, obstacle movement, steering, the per-frame `update`, crashes |
+| `js/draw-paper.js` | Page colours, `MAPS`, paper background drawing, Paper obstacle art |
+| `js/draw-sea.js` | Deep sea obstacle art |
+| `js/render.js` | Plane, skins, trails, screen shake, `render`, map switching |
+| `js/ui.js` | HUD, menu cards, start / pause / game over, skin picker, shop |
+| `js/main.js` | Keyboard and touch input, frame pacing, main loop (loaded last) |
+
+Key names by area:
+
 
 | Area | Key names |
 |---|---|
