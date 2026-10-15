@@ -148,7 +148,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v20</div>
+    <div class="version" id="version">v21</div>
 
     <div class="hud">
       <div>
@@ -335,7 +335,9 @@
       '1/2 + 1/4 = 3/4', '100 − 37 = 63',
       '12 + 15 = 27', '9 + 9 = 18', '45 − 18 = 27', '6 × 7 = 42', '81 ÷ 9 = 9', '3 × 3 × 3 = 27',
       '50 + 50 = 100', '1000 − 1 = 999', '0.5 + 0.25 = 0.75', '12 × 12 = 144', '7 + 8 + 9 = 24',
-      '64 ÷ 8 = 8', '11 × 11 = 121', '2 + 2 = 4', '99 + 1 = 100', '15 × 4 = 60'
+      '64 ÷ 8 = 8', '11 × 11 = 121', '2 + 2 = 4', '99 + 1 = 100', '15 × 4 = 60',
+      // number play
+      '1 + 1 = 10₂', '2⁰ = 1', 'gcd(12, 18) = 6', 'lcm(4, 6) = 12'
     ],
     [ // fractions, percentages, first algebra
       'x + 7 = 12  →  x = 5', '3x = 21  →  x = 7', '2/3 + 1/6 = 5/6', '25% of 80 = 20',
@@ -344,7 +346,13 @@
       '10% of 250 = 25', '√81 = 9', '3² + 4² = 25', '10³ = 1000', '5! = 120', 'C = 2πr', 'A = ½ b h',
       '(−2)³ = −8', '0.2 × 0.3 = 0.06', '5x − 7 = 18  →  x = 5', 'a/b ÷ c/d = ad / bc', '7/8 − 3/8 = 1/2',
       // first physics
-      'v = d / t', 'ρ = m / V', 'P = F / A', 'W = F · d', 'a = Δv / Δt'
+      'v = d / t', 'ρ = m / V', 'P = F / A', 'W = F · d', 'a = Δv / Δt',
+      // geometry basics
+      'A = l × w', 'V = l × w × h', 'C = π d', 'A = s²', 'α + β + γ = 180°',
+      // first statistics
+      'x̄ = Σx / n', 'P(heads) = ½',
+      // number theory
+      '0.999… = 1', '1 + 2 + 3 + 4 = 10', 'Fₙ = Fₙ₋₁ + Fₙ₋₂', '17 ≡ 2 (mod 5)'
     ],
     [ // algebra, geometry, trig
       'x = (−b ± √(b² − 4ac)) / 2a', 'a² + b² = c²', '(a + b)² = a² + 2ab + b²', 'sin²θ + cos²θ = 1',
@@ -356,7 +364,16 @@
       // mechanics and circuits
       'F = ma', 'p = mv', 'KE = ½ m v²', 'PE = m g h', 'V = I R', 'P = I V', 'λ = v / f', 'T = 2π √(L / g)',
       // engineering basics: stress, strain, moments, resistors
-      'σ = F / A', 'ε = ΔL / L₀', 'σ = E ε', 'M = F · d', 'R = R₁ + R₂'
+      'σ = F / A', 'ε = ΔL / L₀', 'σ = E ε', 'M = F · d', 'R = R₁ + R₂',
+      // geometry: solids, sectors, trapezoids
+      'V = ⅓ π r² h', 'S = 4π r²', 'A = ½ ab sin C', 'A = π r² θ / 360°', 'V = π r² h', 'd = a√2', 'A = ½ (a + b) h',
+      // statistics and counting
+      'z = (x − μ) / σ', 'P(A ∪ B) = P(A) + P(B) − P(A ∩ B)', 'P(A ∩ B) = P(A) · P(B|A)', 'σ² = Σ(x − μ)² / N',
+      'nCr = n! / (r! (n − r)!)', 'nPr = n! / (n − r)!',
+      // number theory
+      '1, 1, 2, 3, 5, 8, 13, 21…', 'a ≡ b (mod n) ⇔ n | (a − b)',
+      // astronomy basics
+      'v = 2πr / T', 'g = GM / r²', '1 AU ≈ 1.496 × 10⁸ km', '1 ly ≈ 9.46 × 10¹² km'
     ],
     [ // calculus
       'd/dx xⁿ = n xⁿ⁻¹', '∫ x² dx = x³/3 + C', 'lim x→0  sin x / x = 1', 'd/dx eˣ = eˣ',
@@ -369,7 +386,14 @@
       'F = −kx', 'τ = r F sin θ', 'a = v² / r', 'v² = u² + 2as', 's = ut + ½at²', 'n₁ sin θ₁ = n₂ sin θ₂',
       'F = qE', 'F = q v × B',
       // engineering: circuits, drives, flow, beams, wind
-      '1/R = 1/R₁ + 1/R₂', 'τ = RC', 'P = τ ω', 'Q = A v', 'δ = FL³ / (3EI)', 'σ = M y / I', 'P = ½ ρ A v³'
+      '1/R = 1/R₁ + 1/R₂', 'τ = RC', 'P = τ ω', 'Q = A v', 'δ = FL³ / (3EI)', 'σ = M y / I', 'P = ½ ρ A v³',
+      // geometry: Heron, Euler's polyhedra, Pick, polygon angles
+      'A = √(s(s−a)(s−b)(s−c))', 'V − E + F = 2', 'A = i + b/2 − 1', 'Σ angles = (n − 2) · 180°',
+      // probability
+      'P(A|B) = P(B|A) P(A) / P(B)', 'P(k) = C(n,k) pᵏ (1−p)ⁿ⁻ᵏ', 'E[X] = Σ x · P(x)', 'Var(X) = E[X²] − (E[X])²',
+      'r = cov(X,Y) / (σₓ σᵧ)',
+      // orbits and the expanding universe
+      'T² = 4π² a³ / (GM)', 'v = H₀ d', 'vₑ = √(2GM / r)', 'v = √(GM / r)'
     ],
     [ // series, complex numbers, linear algebra
       'e^(iπ) + 1 = 0', '∑ 1/n² = π²/6', 'eˣ = ∑ xⁿ / n!', '∫ e^(−x²) dx = √π', 'det(A − λI) = 0',
@@ -382,7 +406,13 @@
       'L = Iω', 'Q = m c ΔT', 'η = 1 − T_c / T_h', 'E = ½ C V²', 'Φ = B A cos θ', 'ε = −dΦ/dt', 'U = ½ k x²',
       // engineering: fluids, heat flow, buckling, AC circuits
       'P + ½ρv² + ρgh = const', 'Re = ρ v L / μ', 'q = −k ∇T', 'P_cr = π² E I / (K L)²', 'f = 1 / (2π √(LC))',
-      'X_C = 1 / (2π f C)', 'Z = R + jX'
+      'X_C = 1 / (2π f C)', 'Z = R + jX',
+      // distributions
+      'f(x) = e^(−(x−μ)² / 2σ²) / (σ√(2π))', 'P(k) = λᵏ e^(−λ) / k!', 'SE = σ / √n',
+      // number theory
+      'aᵖ⁻¹ ≡ 1 (mod p)', 'Fₙ = (φⁿ − ψⁿ) / √5', 'φ(p) = p − 1', '∑ 1/p diverges',
+      // stars and light
+      'L = 4π R² σ T⁴', 'λ_max T = b', 'm − M = 5 log₁₀(d / 10 pc)', 'z = Δλ / λ'
     ],
     [ // physics and the scary stuff
       'iℏ ∂Ψ/∂t = ĤΨ', 'ζ(s) = ∑ 1/nˢ', '∇ × B = μ₀J + μ₀ε₀ ∂E/∂t', '∇ · E = ρ / ε₀',
@@ -395,7 +425,9 @@
       'f′ = f (v + v_o) / (v − v_s)', 'γ = 1 / √(1 − v²/c²)', 'λ = h / p',
       // engineering: control systems, signals, pipe flow, convection
       'H(s) = Y(s) / X(s)', 'ℒ{f′(t)} = s F(s) − f(0)', 'G(s) = ωₙ² / (s² + 2ζωₙs + ωₙ²)',
-      'Δp = f (L/D) (ρv² / 2)', 'Nu = h L / k'
+      'Δp = f (L/D) (ρv² / 2)', 'Nu = h L / k',
+      // prime counting, black holes, starlight
+      'π(x) ~ x / ln x', 'r_s = 2GM / c²', 'F = L / (4π d²)'
     ]
   ];
   const formulaFont = size => `${size}px Kalam, "Cambria Math", "Segoe UI Symbol", cursive`;
