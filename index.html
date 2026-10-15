@@ -65,8 +65,9 @@
   .hud .right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 17px; font-variant-numeric: tabular-nums; }
   .hud .tools { display: flex; gap: 6px; pointer-events: auto; }
   .version {
-    position: absolute; top: max(3px, env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%);
-    font-size: 13px; letter-spacing: .06em; opacity: .55; pointer-events: none; z-index: 1;
+    /* bottom centre, between the steering arrows, so it never collides with the top bar's buttons */
+    position: absolute; bottom: max(6px, env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
+    font-size: 13px; letter-spacing: .06em; opacity: .55; pointer-events: none; z-index: 1; white-space: nowrap;
   }
   .hud button {
     font: inherit; font-size: 15px; color: var(--ink); background: transparent;
@@ -172,7 +173,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v24</div>
+    <div class="version" id="version">v25</div>
 
     <div class="hud">
       <div>
@@ -181,6 +182,7 @@
       </div>
       <div class="right">
         <div class="tools">
+          <button id="shadowBtn" type="button" aria-pressed="true">Shadows on</button>
           <button id="muteBtn" type="button">Sound on</button>
           <button id="pauseBtn" type="button">Pause</button>
         </div>
@@ -382,6 +384,8 @@
   // ---------- sound ----------
   let actx = null;
   let muted = store.get('nosedive-muted') === '1';
+  // drop shadows under the plane and obstacles (the stamp's landing shadow stays: it is its warning)
+  let shadowsOn = store.get('nosedive-shadows') !== '0';
   function audio() {
     if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
     if (actx.state === 'suspended') actx.resume();
@@ -1428,8 +1432,7 @@
   function drawRuler(x0, x1, sy, innerX, outDir, p = PALETTES.gate[0]) {
     const len = Math.min(x1 - x0, RULER_LEN);
     if (len < 1) return;
-    ctx.fillStyle = 'rgba(34,53,107,.12)';
-    ctx.fillRect(x0 + 4, sy - 11 + 6, x1 - x0, 22);
+    if (shadowsOn) { ctx.fillStyle = 'rgba(34,53,107,.12)'; ctx.fillRect(x0 + 4, sy - 11 + 6, x1 - x0, 22); }
     const s = rulerStrip(p, outDir), r = spriteRes;
     // crop the strip from its inner end: the left end for rulers pointing right, the right end otherwise
     const srcX = outDir > 0 ? 0 : (RULER_LEN - len) * r;
@@ -1440,8 +1443,7 @@
 
   function drawEraser(x0, x1, sy, innerX, outDir, p = PALETTES.erasers[0]) {
     if (x1 - x0 < 1) return;
-    ctx.fillStyle = 'rgba(34,53,107,.12)';
-    ctx.fillRect(x0 + 4, sy - 14 + 6, x1 - x0, 28);
+    if (shadowsOn) { ctx.fillStyle = 'rgba(34,53,107,.12)'; ctx.fillRect(x0 + 4, sy - 14 + 6, x1 - x0, 28); }
     ctx.fillStyle = p.rub;
     ctx.beginPath(); ctx.rect(x0, sy - 14, x1 - x0, 28); ctx.fill();
     ctx.fillStyle = p.shade; ctx.fillRect(x0, sy + 8, x1 - x0, 6);
@@ -1462,9 +1464,11 @@
     if (o.vx < 0) ctx.scale(-1, 1);
     const L = o.len / 2, h = 6.5;
     // shadow
-    ctx.save(); ctx.translate(4, 7); ctx.fillStyle = 'rgba(34,53,107,.13)';
-    ctx.beginPath(); ctx.moveTo(-L, -h); ctx.lineTo(L - 26, -h); ctx.lineTo(L, 0); ctx.lineTo(L - 26, h); ctx.lineTo(-L, h); ctx.closePath(); ctx.fill();
-    ctx.restore();
+    if (shadowsOn) {
+      ctx.save(); ctx.translate(4, 7); ctx.fillStyle = 'rgba(34,53,107,.13)';
+      ctx.beginPath(); ctx.moveTo(-L, -h); ctx.lineTo(L - 26, -h); ctx.lineTo(L, 0); ctx.lineTo(L - 26, h); ctx.lineTo(-L, h); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
     const p = o.pal || PALETTES.pencil[0];
     // eraser + ferrule
     ctx.fillStyle = p.tip; ctx.fillRect(-L, -h, 12, h * 2);
@@ -1526,7 +1530,7 @@
   }
   function drawScissors(o, sy) {
     const col = o.col || '#f07f1e';
-    for (const s of [-1, 1]) blit(scissorShadow(s), o.x + 5, sy + 8, o.rot + s * o.open / 2);
+    if (shadowsOn) for (const s of [-1, 1]) blit(scissorShadow(s), o.x + 5, sy + 8, o.rot + s * o.open / 2);
     for (const s of [-1, 1]) blit(scissorHalf(col, s), o.x, sy, o.rot + s * o.open / 2);
     // brass pivot screw
     ctx.fillStyle = '#c9a54a'; ctx.beginPath(); ctx.arc(o.x, sy, 4, 0, Math.PI * 2); ctx.fill(); inkStroke(1);
@@ -1551,8 +1555,10 @@
   }
 
   function drawTack(o, sy) {
-    ctx.fillStyle = 'rgba(34,53,107,.16)';
-    ctx.beginPath(); ctx.ellipse(o.x + 4, sy + 6, o.r, o.r * 0.85, 0, 0, Math.PI * 2); ctx.fill();
+    if (shadowsOn) {
+      ctx.fillStyle = 'rgba(34,53,107,.16)';
+      ctx.beginPath(); ctx.ellipse(o.x + 4, sy + 6, o.r, o.r * 0.85, 0, 0, Math.PI * 2); ctx.fill();
+    }
     ctx.fillStyle = o.col;
     ctx.beginPath(); ctx.arc(o.x, sy, o.r, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
     ctx.fillStyle = 'rgba(255,255,255,.35)';
@@ -1571,7 +1577,7 @@
       }
       ctx.closePath();
     };
-    ctx.save(); ctx.translate(3, 4); ctx.fillStyle = 'rgba(34,53,107,.15)'; path(); ctx.fill(); ctx.restore();
+    if (shadowsOn) { ctx.save(); ctx.translate(3, 4); ctx.fillStyle = 'rgba(34,53,107,.15)'; path(); ctx.fill(); ctx.restore(); }
     ctx.fillStyle = '#f2b53a'; path(); ctx.fill();
     ctx.strokeStyle = '#a8740f'; ctx.lineWidth = 1.3; ctx.lineJoin = 'round'; ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,.55)';
@@ -1582,8 +1588,10 @@
   function paintProtractor(o, sy) {
     const cx = o.side < 0 ? 0 : W, a0 = o.side < 0 ? -Math.PI / 2 : Math.PI / 2;
     const GEO = o.pal || PALETTES.protractor[0];
-    ctx.fillStyle = 'rgba(34,53,107,.12)';
-    ctx.beginPath(); ctx.arc(cx + 4, sy + 7, o.r, a0, a0 + Math.PI); ctx.closePath(); ctx.fill();
+    if (shadowsOn) {
+      ctx.fillStyle = 'rgba(34,53,107,.12)';
+      ctx.beginPath(); ctx.arc(cx + 4, sy + 7, o.r, a0, a0 + Math.PI); ctx.closePath(); ctx.fill();
+    }
     ctx.fillStyle = GEO.fill;
     ctx.beginPath(); ctx.arc(cx, sy, o.r, a0, a0 + Math.PI); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = GEO.edge; ctx.lineWidth = 1.6; ctx.stroke();
@@ -1630,12 +1638,12 @@
       }
       ctx.stroke();
     });
-    blit(shadow, o.x + 4, sy + 7, o.rot);
+    if (shadowsOn) blit(shadow, o.x + 4, sy + 7, o.rot);
     blit(body, o.x, sy, o.rot);
   }
 
   function drawWad(o, sy) {
-    ctx.fillStyle = 'rgba(34,53,107,.14)'; ctx.beginPath(); ctx.arc(o.x + 5, sy + 8, o.r, 0, Math.PI * 2); ctx.fill();
+    if (shadowsOn) { ctx.fillStyle = 'rgba(34,53,107,.14)'; ctx.beginPath(); ctx.arc(o.x + 5, sy + 8, o.r, 0, Math.PI * 2); ctx.fill(); }
     const R = o.r * 1.15 + 3;
     const s = ownSprite(o, 'spr', R * 2, R * 2, R, R, () => {
       ctx.fillStyle = (o.pal || PALETTES.wad[0]).paper;
@@ -1661,7 +1669,7 @@
 
   function paintClip(x, sy, col) {
     ctx.save(); ctx.translate(x, sy);
-    for (const [dx, dy, w, c] of [[3, 4, 4, 'rgba(34,53,107,.15)'], [0, 0, 4, COL.ink], [0, 0, 2.2, col]]) {
+    for (const [dx, dy, w, c] of [[3, 4, 4, shadowsOn ? 'rgba(34,53,107,.15)' : 'rgba(0,0,0,0)'], [0, 0, 4, COL.ink], [0, 0, 2.2, col]]) {
       ctx.beginPath();
       roundRectPath(-17 + dx, -6 + dy, 34, 12, 6);
       roundRectPath(-12 + dx, -3 + dy, 25, 6, 3);
@@ -1686,7 +1694,7 @@
       ctx.moveTo(8, 0); ctx.arc(0, 0, 8, 0, Math.PI * 2);
       ctx.fill();
     });
-    blit(shadow, o.x + 4, sy + 7, o.ang);
+    if (shadowsOn) blit(shadow, o.x + 4, sy + 7, o.ang);
     const p = o.pal || PALETTES.compass[0];
     const arm = ownSprite(o, 'spr', L + 14, 20, 10, 10, () => {
       ctx.fillStyle = p.leg;
@@ -1719,7 +1727,7 @@
     // the fan, half off the page edge: a still body plus a spinning blade sprite
     const p = o.pal || PALETTES.fan[0], k = palKey(p);
     const body = sharedSprite('fanBody' + k, 64, 68, 30, 30, () => {
-      ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.beginPath(); ctx.arc(4, 7, 26, 0, Math.PI * 2); ctx.fill();
+      if (shadowsOn) { ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.beginPath(); ctx.arc(4, 7, 26, 0, Math.PI * 2); ctx.fill(); }
       ctx.fillStyle = p.body; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill(); inkStroke(1.4);
     });
     const blades = sharedSprite('fanBlades' + k, 52, 52, 26, 26, () => {
@@ -1744,8 +1752,10 @@
     // blobs in flight
     for (const b of o.blobs) {
       const sx = 1 + Math.sin(b.wob) * 0.12;
-      ctx.fillStyle = 'rgba(34,53,107,.12)';
-      ctx.beginPath(); ctx.ellipse(b.x + 3, sy + 5, b.r * sx, b.r / sx, 0, 0, Math.PI * 2); ctx.fill();
+      if (shadowsOn) {
+        ctx.fillStyle = 'rgba(34,53,107,.12)';
+        ctx.beginPath(); ctx.ellipse(b.x + 3, sy + 5, b.r * sx, b.r / sx, 0, 0, Math.PI * 2); ctx.fill();
+      }
       ctx.fillStyle = '#fbfbf7';
       ctx.beginPath(); ctx.ellipse(b.x, sy, b.r * sx, b.r / sx, 0, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = 'rgba(110,120,140,.9)'; ctx.lineWidth = 1.2; ctx.stroke();
@@ -1756,7 +1766,7 @@
     const p = o.pal || PALETTES.glue[0], dir = inward(o);
     const tube = sharedSprite('glue' + dir + palKey(p), 168, 34, 84, 14, () => {
       ctx.scale(dir, 1);
-      ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(4, -5, 74, 22);
+      if (shadowsOn) { ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(4, -5, 74, 22); }
       // nozzle
       ctx.fillStyle = '#f4f2ea';
       ctx.beginPath(); ctx.moveTo(60, -7); ctx.lineTo(78, -3); ctx.lineTo(78, 3); ctx.lineTo(60, 7); ctx.closePath();
@@ -1781,11 +1791,13 @@
     toolFrame(o, sy);
     const h = CUTTER_HANDLE, e = o.ext;
     // shadow shaped like the tool (handle + thin blade), offset down and to the right; one path so overlaps don't double up
-    ctx.fillStyle = 'rgba(34,53,107,.13)';
-    ctx.beginPath();
-    roundRectPath(-2, -6, h + 6, 24, 6);
-    if (e > 1) { ctx.moveTo(h - 6, 0); ctx.lineTo(h + e + 4, 0); ctx.lineTo(h + e - 6, 12); ctx.lineTo(h - 6, 12); ctx.closePath(); }
-    ctx.fill();
+    if (shadowsOn) {
+      ctx.fillStyle = 'rgba(34,53,107,.13)';
+      ctx.beginPath();
+      roundRectPath(-2, -6, h + 6, 24, 6);
+      if (e > 1) { ctx.moveTo(h - 6, 0); ctx.lineTo(h + e + 4, 0); ctx.lineTo(h + e - 6, 12); ctx.lineTo(h - 6, 12); ctx.closePath(); }
+      ctx.fill();
+    }
     if (e > 1) {
       // snap-off blade with its score lines and angled tip
       ctx.fillStyle = '#cfd5de';
@@ -1888,7 +1900,7 @@
   function paintNote(o, sy) {
     ctx.save();
     ctx.translate(o.x, sy); ctx.rotate(o.rot);
-    ctx.fillStyle = 'rgba(34,53,107,.14)'; ctx.fillRect(-18, -16, 44, 44);
+    if (shadowsOn) { ctx.fillStyle = 'rgba(34,53,107,.14)'; ctx.fillRect(-18, -16, 44, 44); }
     ctx.fillStyle = o.col; ctx.fillRect(-22, -22, 44, 44);
     ctx.fillStyle = 'rgba(0,0,0,.06)'; ctx.fillRect(-22, -22, 44, 9);       // sticky strip
     ctx.fillStyle = 'rgba(255,255,255,.35)';                                 // curled corner
@@ -1914,8 +1926,10 @@
     ctx.save();
     ctx.lineCap = 'round';
     for (const off of [-2, 2]) {             // two strands of the loop
-      ctx.strokeStyle = 'rgba(34,53,107,.12)'; ctx.lineWidth = 2.6;
-      ctx.beginPath(); ctx.moveTo(o.x1 + 3, sy + dy1 + off + 5); ctx.quadraticCurveTo(cx + 3, cy + off + 5, o.x2 + 3, sy + dy2 + off + 5); ctx.stroke();
+      if (shadowsOn) {
+        ctx.strokeStyle = 'rgba(34,53,107,.12)'; ctx.lineWidth = 2.6;
+        ctx.beginPath(); ctx.moveTo(o.x1 + 3, sy + dy1 + off + 5); ctx.quadraticCurveTo(cx + 3, cy + off + 5, o.x2 + 3, sy + dy2 + off + 5); ctx.stroke();
+      }
       ctx.strokeStyle = o.col; ctx.lineWidth = 2.6;
       ctx.beginPath(); ctx.moveTo(o.x1, sy + dy1 + off); ctx.quadraticCurveTo(cx, cy + off, o.x2, sy + dy2 + off); ctx.stroke();
     }
@@ -1937,7 +1951,7 @@
     if (o.ext > 0) {
       const len = o.L * o.ext;
       ctx.rotate(o.ang);
-      ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(-10, -5, len + 10, 26);
+      if (shadowsOn) { ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(-10, -5, len + 10, 26); }
       // furry arm with stripes
       ctx.fillStyle = o.col;
       ctx.beginPath(); roundRectPath(-20, -11, len + 6, 22, 10); ctx.fill(); inkStroke(1.3);
@@ -2075,9 +2089,11 @@
   }
 
   function drawPlane(x, y, ang) {
-    ctx.save(); ctx.translate(x + 8, y + 12); ctx.rotate(-ang);
-    ctx.fillStyle = 'rgba(34,53,107,.14)'; planeOutline(); ctx.fill();
-    ctx.restore();
+    if (shadowsOn) {
+      ctx.save(); ctx.translate(x + 8, y + 12); ctx.rotate(-ang);
+      ctx.fillStyle = 'rgba(34,53,107,.14)'; planeOutline(); ctx.fill();
+      ctx.restore();
+    }
 
     ctx.save(); ctx.translate(x, y); ctx.rotate(-ang);
     if (plane.invuln > 0) ctx.globalAlpha = Math.floor(plane.invuln * 12) % 2 ? 0.3 : 1;
@@ -2092,7 +2108,7 @@
 
   function drawCrumple(x, y) {
     ctx.save(); ctx.translate(x, y);
-    ctx.fillStyle = 'rgba(34,53,107,.15)'; ctx.beginPath(); ctx.arc(5, 8, 13, 0, Math.PI * 2); ctx.fill();
+    if (shadowsOn) { ctx.fillStyle = 'rgba(34,53,107,.15)'; ctx.beginPath(); ctx.arc(5, 8, 13, 0, Math.PI * 2); ctx.fill(); }
     ctx.fillStyle = skin.light;
     ctx.beginPath();
     const pts = [[0, -13], [9, -10], [13, -1], [10, 9], [1, 13], [-9, 10], [-13, 1], [-10, -9]];
@@ -2295,7 +2311,7 @@
     overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'), skins: $('skinsCard'),
     shop: $('shopCard'), overBank: $('overBank'),
     overTitle: $('overTitle'), overDetail: $('overDetail'), overBest: $('overBest'), stamp: $('recordStamp'),
-    pauseBtn: $('pauseBtn'), muteBtn: $('muteBtn')
+    pauseBtn: $('pauseBtn'), muteBtn: $('muteBtn'), shadowBtn: $('shadowBtn')
   };
   let hudDepth = -1, hudStars = -1, hudBest = -1;
   function updateHud() {
@@ -2321,6 +2337,17 @@
     if (btn) btn.focus({ preventScroll: true });
   }
   function setMuteLabel() { ui.muteBtn.textContent = muted ? 'Sound off' : 'Sound on'; }
+  function setShadowLabel() {
+    ui.shadowBtn.textContent = shadowsOn ? 'Shadows on' : 'Shadows off';
+    ui.shadowBtn.setAttribute('aria-pressed', String(shadowsOn));
+  }
+  setShadowLabel();
+  ui.shadowBtn.addEventListener('click', () => {
+    shadowsOn = !shadowsOn;
+    store.set('nosedive-shadows', shadowsOn ? '1' : '0');
+    setShadowLabel();
+    invalidateSprites();          // cached obstacle images are repainted with or without their shadows
+  });
   setMuteLabel();
 
   function start() {
