@@ -148,7 +148,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v22</div>
+    <div class="version" id="version">v23</div>
 
     <div class="hud">
       <div>
@@ -715,10 +715,6 @@
     coffee: [   // spill fill and rim (r,g,b)
       { fill: '122,74,34', rim: '95,55,22' }, { fill: '70,40,20', rim: '45,25,10' }, { fill: '190,130,50', rim: '150,95,30' },
       { fill: '95,32,22', rim: '62,16,8' }, { fill: '110,150,60', rim: '75,110,35' }, { fill: '240,150,40', rim: '200,110,20' }
-    ],
-    magnifier: [
-      { handle: '#3b2a1f', rim: '#5b6474' }, { handle: '#1d1d1d', rim: '#8d939e' }, { handle: '#c0392b', rim: '#b9bec6' },
-      { handle: '#2f6fd1', rim: '#c9a54a' }, { handle: '#2f8f5b', rim: '#5b6474' }, { handle: '#8a5a2e', rim: '#c9a54a' }
     ]
   };
   PALETTES.protractor = PALETTES.setsquare = [
@@ -859,10 +855,6 @@
         vx: (Math.random() < 0.5 ? -1 : 1) * rand(15, 45 + 30 * d) });
       return 50;
     },
-    magnifier(y, d) {      // a magnifying glass whose burning sun spot slides toward the plane
-      obstacles.push({ type: 'magnifier', y, x: rand(60, W - 60), v: lerp(70, 130, d), t: 0, burnT: 0, scorch: [] });
-      return 40;
-    },
     band(y, d) {           // a rubber band between two tacks: the band bounces you, the tacks don't forgive
       const len = rand(130, 200), cx = rand(len / 2 + 20, W - len / 2 - 20), tilt = rand(-0.15, 0.15);
       const hx = Math.cos(tilt) * len / 2, hy = Math.sin(tilt) * len / 2;
@@ -905,7 +897,6 @@
     if (d > 0.22) pool.push(['stamp', 1.3]);
     if (d > 0.05) pool.push(['band', 1.2]);
     if (d > 0.08) pool.push(['setsquare', 1.2]);
-    if (d > 0.15) pool.push(['magnifier', 1.2]);
     if (d > 0.2) pool.push(['paw', 1.3]);
     const choices = pool.filter(p => p[0] !== lastType);   // never the same obstacle twice in a row
     let r = Math.random() * choices.reduce((s, p) => s + p[1], 0), type = choices[0][0];
@@ -987,7 +978,6 @@
         const c = Math.cos(o.rot), s = Math.sin(o.rot);
         return [{ k: 'p', pts: o.verts.map(([x, y]) => [o.x + x * c - y * s, o.y + x * s + y * c]) }];
       }
-      case 'magnifier': return [{ k: 'c', x: o.x, y: o.y, r: 10 }];       // only the burning spot hurts
       case 'band': return [{ k: 'c', x: o.x1, y: o.y1, r: 9 }, { k: 'c', x: o.x2, y: o.y2, r: 9 }];   // the tacks
       case 'paw': {
         if (o.phase !== 'swipe') return [];
@@ -1101,18 +1091,6 @@
         o.x += o.vx * dt;
         if (o.x < o.R + 4) o.vx = Math.abs(o.vx);
         if (o.x > W - o.R - 4) o.vx = -Math.abs(o.vx);
-        break;
-      case 'magnifier':
-        o.t += dt;
-        if (o.y - dist < H + 20) {
-          o.x = clamp(o.x + clamp(plane.x - o.x, -o.v * dt, o.v * dt), 30, W - 30);   // creep toward the plane
-          o.burnT -= dt;
-          if (o.burnT <= 0) {
-            o.burnT = 0.06;
-            o.scorch.push({ x: o.x + rand(-2, 2), r: rand(4, 7) });
-            if (o.scorch.length > 70) o.scorch.shift();
-          }
-        }
         break;
       case 'band':
         o.t += dt; o.cool -= dt; o.wob *= Math.exp(-4 * dt);
@@ -1667,11 +1645,17 @@
     // the circle it has pencilled so far
     ctx.strokeStyle = 'rgba(85,88,94,.45)'; ctx.lineWidth = 1.3;
     ctx.beginPath(); ctx.arc(o.x, sy, L, o.a0, o.a0 + dir * o.swept, dir < 0); ctx.stroke();
-    ctx.translate(o.x, sy);
-    ctx.save(); ctx.translate(4, 7); ctx.rotate(o.ang);
-    ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(0, -4, L, 8);
     ctx.restore();
-    ctx.restore();
+    // shadow with the arm's own outline (tapered leg, pencil stub, round hinge), offset down-right on screen
+    const shadow = ownSprite(o, 'sprS', L + 14, 20, 10, 10, () => {
+      ctx.fillStyle = 'rgba(34,53,107,.13)';
+      ctx.beginPath();
+      ctx.moveTo(0, -4.5); ctx.lineTo(L - 16, -3); ctx.lineTo(L - 7, -3); ctx.lineTo(L, 0);
+      ctx.lineTo(L - 7, 3); ctx.lineTo(L - 16, 3); ctx.lineTo(0, 4.5); ctx.closePath();
+      ctx.moveTo(8, 0); ctx.arc(0, 0, 8, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    blit(shadow, o.x + 4, sy + 7, o.ang);
     const p = o.pal || PALETTES.compass[0];
     const arm = ownSprite(o, 'spr', L + 14, 20, 10, 10, () => {
       ctx.fillStyle = p.leg;
@@ -1767,7 +1751,12 @@
     ctx.save();
     toolFrame(o, sy);
     const h = CUTTER_HANDLE, e = o.ext;
-    ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(4, -6, h + e, 24);
+    // shadow shaped like the tool (handle + thin blade), offset down and to the right; one path so overlaps don't double up
+    ctx.fillStyle = 'rgba(34,53,107,.13)';
+    ctx.beginPath();
+    roundRectPath(-2, -6, h + 6, 24, 6);
+    if (e > 1) { ctx.moveTo(h - 6, 0); ctx.lineTo(h + e + 4, 0); ctx.lineTo(h + e - 6, 12); ctx.lineTo(h - 6, 12); ctx.closePath(); }
+    ctx.fill();
     if (e > 1) {
       // snap-off blade with its score lines and angled tip
       ctx.fillStyle = '#cfd5de';
@@ -1885,53 +1874,6 @@
     ctx.restore();
   }
 
-  function drawMagnifier(o, sy) {
-    // scorch trail the sun spot has burnt into the page (one path, one fill)
-    if (o.scorch.length) {
-      ctx.fillStyle = 'rgba(110,60,20,.28)';
-      ctx.beginPath();
-      for (const s of o.scorch) { ctx.moveTo(s.x + s.r, sy); ctx.arc(s.x, sy, s.r, 0, Math.PI * 2); }
-      ctx.fill();
-    }
-    const flick = 1 + Math.sin(o.t * 30) * 0.08;
-    // lens hovering above the page, up and to the side, with its cone of light down to the spot
-    const lx = o.x - 30, ly = sy - 46, R = 30;
-    ctx.fillStyle = 'rgba(255,225,120,.22)';
-    ctx.beginPath(); ctx.moveTo(lx - R * 0.8, ly + R * 0.5); ctx.lineTo(o.x, sy); ctx.lineTo(lx + R * 0.9, ly - R * 0.3); ctx.closePath(); ctx.fill();
-    // the burning spot: a pre-painted glow, pulsing in size
-    const glow = sharedSprite('sunGlow', 52, 52, 26, 26, () => {
-      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 24);
-      g.addColorStop(0, 'rgba(255,255,235,1)'); g.addColorStop(0.3, 'rgba(255,200,60,.95)');
-      g.addColorStop(0.6, 'rgba(240,110,30,.5)'); g.addColorStop(1, 'rgba(240,110,30,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
-    });
-    blit(glow, o.x, sy, 0, flick * 22 / 24, flick * 22 / 24);
-    // smoke wisps
-    ctx.strokeStyle = 'rgba(120,120,120,.35)'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
-    for (let k = 0; k < 2; k++) {
-      const ph = (o.t * 1.4 + k * 0.5) % 1;
-      ctx.globalAlpha = 1 - ph;
-      ctx.beginPath(); ctx.moveTo(o.x + 4 * k, sy - 8 - ph * 26);
-      ctx.quadraticCurveTo(o.x + 8 + 4 * k, sy - 14 - ph * 26, o.x + 2 + 4 * k, sy - 22 - ph * 26); ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-    // handle, rim and glass: one sprite per colour, centred on the lens
-    const p = o.pal || PALETTES.magnifier[0];
-    const lens = sharedSprite('lens' + palKey(p), 126, 130, 88, 92, () => {
-      ctx.save(); ctx.rotate(-2.3);
-      ctx.fillStyle = 'rgba(34,53,107,.12)'; ctx.fillRect(R + 4, -2, 42, 12);
-      ctx.fillStyle = p.handle; ctx.beginPath(); roundRectPath(R + 2, -6, 44, 12, 5); ctx.fill(); inkStroke(1.2);
-      ctx.fillStyle = p.rim; ctx.fillRect(R - 2, -4, 8, 8);
-      ctx.restore();
-      ctx.fillStyle = 'rgba(180,220,255,.28)';
-      ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = p.rim; ctx.lineWidth = 5; ctx.stroke();
-      ctx.beginPath(); ctx.arc(0, 0, R + 2.5, 0, Math.PI * 2); inkStroke(1.2);
-      ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2.5;
-      ctx.beginPath(); ctx.arc(0, 0, R - 8, Math.PI * 1.1, Math.PI * 1.45); ctx.stroke();
-    });
-    blit(lens, lx, ly);
-  }
 
   function drawBand(o, sy) {
     const dy1 = o.y1 - o.y, dy2 = o.y2 - o.y;
@@ -2225,7 +2167,6 @@
         case 'coffee': drawCoffee(o, sy); break;
         case 'note': drawNote(o, sy); break;
         case 'setsquare': drawSetSquare(o, sy); break;
-        case 'magnifier': drawMagnifier(o, sy); break;
         case 'band': drawBand(o, sy); break;
         case 'paw': drawPaw(o, sy); break;
       }
@@ -2299,11 +2240,14 @@
   function updateHud() {
     const playing = state === 'play' || state === 'paused' || state === 'dying' || state === 'over';
     const d = playing ? score() : 0;
-    const key = d + '|' + stars + '|' + best;
+    // total stars owned: the bank plus whatever this run has picked up so far
+    // (once the run is over, its stars are already in the bank)
+    const total = bank + (state === 'over' ? 0 : stars);
+    const key = d + '|' + total + '|' + best;
     if (key === lastHud) return;
     lastHud = key;
     ui.depth.textContent = fmt(d);
-    ui.stars.textContent = '★ ' + stars;
+    ui.stars.textContent = '★ ' + fmt(total);
     ui.best.textContent = fmt(best);
   }
   function showCard(which) {
