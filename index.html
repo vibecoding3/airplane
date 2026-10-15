@@ -48,22 +48,36 @@
     background-size: 100% calc(var(--u) * 250), 100% 100%, 100% calc(var(--u) * 30);
     background-repeat: repeat-y, no-repeat, repeat-y;
   }
-  /* Deep sea map: rising bubbles (two repeat sizes so the pattern doesn't look tiled) and dark rock
-     walls down both sides of a trench. Both repeats divide 750 units, so scrolling stays seamless. */
+  /* Deep sea map: rising bubbles (two repeat sizes so the pattern doesn't look tiled). Both repeats
+     divide 750 units, so scrolling stays seamless. */
   #world.map-sea #ruling {
     background-image:
-      linear-gradient(to right,
-        rgba(6,22,38,.55) 0, rgba(6,22,38,.55) calc(var(--u) * 10), rgba(6,22,38,.25) calc(var(--u) * 18), transparent calc(var(--u) * 26),
-        transparent calc(100% - var(--u) * 26), rgba(6,22,38,.25) calc(100% - var(--u) * 18), rgba(6,22,38,.55) calc(100% - var(--u) * 10), rgba(6,22,38,.55) 100%),
       radial-gradient(circle at calc(var(--u) * 70) calc(var(--u) * 60), transparent calc(var(--u) * 4.5), rgba(255,255,255,.5) calc(var(--u) * 4.5), rgba(255,255,255,.5) calc(var(--u) * 6), transparent calc(var(--u) * 6)),
       radial-gradient(circle at calc(var(--u) * 82) calc(var(--u) * 92), transparent calc(var(--u) * 2.5), rgba(255,255,255,.45) calc(var(--u) * 2.5), rgba(255,255,255,.45) calc(var(--u) * 3.6), transparent calc(var(--u) * 3.6)),
       radial-gradient(circle at calc(var(--u) * 300) calc(var(--u) * 180), transparent calc(var(--u) * 7), rgba(255,255,255,.4) calc(var(--u) * 7), rgba(255,255,255,.4) calc(var(--u) * 8.6), transparent calc(var(--u) * 8.6)),
       radial-gradient(circle at calc(var(--u) * 315) calc(var(--u) * 215), transparent calc(var(--u) * 3), rgba(255,255,255,.45) calc(var(--u) * 3), rgba(255,255,255,.45) calc(var(--u) * 4.2), transparent calc(var(--u) * 4.2)),
       radial-gradient(circle at calc(var(--u) * 190) calc(var(--u) * 300), transparent calc(var(--u) * 5), rgba(255,255,255,.35) calc(var(--u) * 5), rgba(255,255,255,.35) calc(var(--u) * 6.4), transparent calc(var(--u) * 6.4)),
       radial-gradient(circle at calc(var(--u) * 140) calc(var(--u) * 120), transparent calc(var(--u) * 2), rgba(255,255,255,.4) calc(var(--u) * 2), rgba(255,255,255,.4) calc(var(--u) * 3), transparent calc(var(--u) * 3));
-    background-size: 100% 100%, 100% calc(var(--u) * 250), 100% calc(var(--u) * 250), 100% calc(var(--u) * 375), 100% calc(var(--u) * 375), 100% calc(var(--u) * 375), 100% calc(var(--u) * 250);
-    background-repeat: no-repeat, repeat-y, repeat-y, repeat-y, repeat-y, repeat-y, repeat-y;
+    background-size: 100% calc(var(--u) * 250), 100% calc(var(--u) * 250), 100% calc(var(--u) * 375), 100% calc(var(--u) * 375), 100% calc(var(--u) * 375), 100% calc(var(--u) * 250);
+    background-repeat: repeat-y;
   }
+  /* sun rays slanting down from the surface in the first 100 m of the sea; they sway slowly and fade
+     with depth (opacity set from script). One compositor layer, no canvas drawing. */
+  #rays { display: none; height: 100%; opacity: 0; pointer-events: none; }
+  #world > #rays { left: -15%; width: 130%; }
+  #world.map-sea #rays {
+    display: block;
+    background:
+      linear-gradient(to bottom, rgba(255,255,235,.35), rgba(255,255,235,0) 22%),
+      repeating-linear-gradient(104deg,
+        rgba(255,255,235,0) 0, rgba(255,255,235,0) 34px, rgba(255,255,235,.2) 52px,
+        rgba(255,255,235,.32) 62px, rgba(255,255,235,.2) 72px, rgba(255,255,235,0) 92px, rgba(255,255,235,0) 150px);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.65) 40%, transparent 88%);
+            mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.65) 40%, transparent 88%);
+    animation: rays-sway 9s ease-in-out infinite alternate;
+  }
+  @keyframes rays-sway { from { transform: translateX(-4%) skewX(-4deg); } to { transform: translateX(4%) skewX(4deg); } }
+  @media (prefers-reduced-motion: reduce) { #world.map-sea #rays { animation: none; } }
   /* readable top bar on dark water */
   #wrap.dark-page .hud { color: #e4f3fb; }
   #wrap.dark-page .hud button { color: #e4f3fb; border-color: #e4f3fb; }
@@ -215,10 +229,11 @@
       <div class="page-colour" id="pageNow"></div>
       <div class="page-colour" id="pageNext"></div>
       <div id="ruling"></div>
+      <div id="rays"></div>
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v30</div>
+    <div class="version" id="version">v31</div>
 
     <div class="hud">
       <div>
@@ -349,7 +364,7 @@
 
   // the canvas is transparent: the paper behind it is a set of browser layers (see #world in the CSS)
   const stage = $('stage'), wrap = $('wrap'), canvas = $('game'), world = $('world');
-  const pageNow = $('pageNow'), pageNext = $('pageNext'), ruling = $('ruling');
+  const pageNow = $('pageNow'), pageNext = $('pageNext'), ruling = $('ruling'), raysEl = $('rays');
   let ctx = canvas.getContext('2d');   // `let`: sprites temporarily swap it (see makeSprite)
   let H = 640, scale = 1, dpr = 1;
 
@@ -830,32 +845,101 @@
     ['clown', 'tang', 'school'], ['puffer', 'angel', 'jelly'], ['lion', 'barracuda', 'moray'],
     ['ray', 'sword', 'reefshark'], ['white', 'squid'], ['angler', 'viper', 'gulper']
   ];
+  let lastSceneryY = -1e9;
+  // far-away scenery: very faded silhouettes that appear now and then (never collide)
+  FISH.whale = { w: 300, h: 110, alpha: 0.2, paint() {
+    ctx.fillStyle = '#0e3b5c';
+    ctx.beginPath();
+    ctx.moveTo(130, 4); ctx.quadraticCurveTo(118, -40, 30, -40); ctx.quadraticCurveTo(-60, -38, -112, -8);
+    ctx.lineTo(-146, -32); ctx.quadraticCurveTo(-140, -6, -134, 0); ctx.quadraticCurveTo(-140, 8, -146, 30);
+    ctx.lineTo(-110, 10); ctx.quadraticCurveTo(-40, 36, 40, 38); ctx.quadraticCurveTo(110, 36, 130, 4);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(28, 40, 26, 8, 0.5, 0, Math.PI * 2); ctx.fill();          // flipper
+    ctx.strokeStyle = 'rgba(160,200,225,.5)'; ctx.lineWidth = 1.4;                      // throat grooves
+    ctx.beginPath(); for (const y of [16, 22, 28]) { ctx.moveTo(110, y - 8); ctx.quadraticCurveTo(70, y + 4, 30, y + 4); } ctx.stroke();
+    ctx.fillStyle = 'rgba(190,220,240,.7)'; ctx.beginPath(); ctx.arc(96, -6, 2.5, 0, Math.PI * 2); ctx.fill();
+  } };
+  FISH.wreck = { w: 300, h: 140, alpha: 0.22, still: true, paint() {
+    ctx.rotate(-0.12);
+    ctx.fillStyle = '#0b2a40';
+    ctx.beginPath(); ctx.moveTo(-130, -10); ctx.lineTo(120, -18); ctx.lineTo(96, 34); ctx.lineTo(-110, 38); ctx.closePath(); ctx.fill();   // hull
+    ctx.fillRect(-40, -40, 70, 24);                                                                                                    // cabin
+    ctx.strokeStyle = '#0b2a40'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-70, -12); ctx.lineTo(-84, -66); ctx.moveTo(56, -16); ctx.lineTo(70, -54); ctx.lineTo(90, -60); ctx.stroke();   // broken masts
+    ctx.fillStyle = 'rgba(120,170,200,.45)';
+    for (const x of [-90, -60, -30, 0, 30, 60]) { ctx.beginPath(); ctx.arc(x, 10, 4, 0, Math.PI * 2); ctx.fill(); }                   // portholes
+  } };
   function spawnFish(lineY) {
     const m = lineY / PX_PER_M;
     let tier = 0;
     for (let i = 1; i < FORMULA_DEPTHS.length; i++) if (m >= FORMULA_DEPTHS[i]) tier = i;
     if (tier > 0 && Math.random() < 0.2) tier--;                   // the odd smaller fish keeps it varied
-    const kind = FISH_TIERS[tier][ri(0, FISH_TIERS[tier].length - 1)];
+    let kind = FISH_TIERS[tier][ri(0, FISH_TIERS[tier].length - 1)];
+    // rare far-away scenery, never two close together (at least ~30 m apart)
+    if (lineY - lastSceneryY > 900) {
+      if (m >= 100 && m < 800 && Math.random() < 0.12) kind = 'whale';     // a whale passing far away
+      else if (m >= 600 && Math.random() < 0.08) kind = 'wreck';          // a sunken ship in the gloom
+      if (kind === 'whale' || kind === 'wreck') lastSceneryY = lineY;
+    }
     const def = FISH[kind], K = fishK(kind), s = rand(0.75, 1), dir = Math.random() < 0.5 ? -1 : 1;
-    fishes.push({ kind, tier, x: rand(50, W - 50), y: lineY, dir, s, t: rand(0, 6),
-      vx: dir * rand(10, 30) * (tier >= 3 ? 0.8 : 1), w: def.w * K * s, ext: def.h * K * s });
+    const speed = def.still ? 0 : kind === 'whale' ? rand(8, 14) : rand(10, 30) * (tier >= 3 ? 0.8 : 1);
+    fishes.push({ kind, tier, x: def.still ? rand(W * 0.3, W * 0.7) : rand(50, W - 50), y: lineY, dir, s, t: rand(0, 6),
+      vx: dir * speed, w: def.w * K * s, ext: def.h * K * s });
     return def.h * K * s;
   }
   // the small reef fish of the first three levels are drawn 35% larger so they read on a phone
-  const fishK = kind => (FISH_TIERS.findIndex(t => t.includes(kind)) <= 2 ? 1.35 : 1);
+  const fishK = kind => {
+    const t = FISH_TIERS.findIndex(list => list.includes(kind));
+    return t >= 0 && t <= 2 ? 1.35 : 1;
+  };
   function fishSprite(kind) {
     const def = FISH[kind], K = fishK(kind);
     return sharedSprite('fish' + kind, def.w * K, def.h * K, def.w * K / 2, def.h * K / 2, () => { ctx.scale(K, K); def.paint(); });
   }
+  // drifting specks that change with depth: plankton (100–400 m), marine snow (400–1,000 m), then
+  // twinkling bioluminescence. Positions come from a hash of the page chunk, so nothing is stored.
+  const hash = n => { const s = Math.sin(n * 127.1) * 43758.5453; return s - Math.floor(s); };
+  function drawSeaParticles() {
+    const CH = 300, N = 14, t = titleTime + time;
+    ctx.save();
+    for (let c = Math.floor((dist - 20) / CH); c * CH < dist + H + 20; c++) {
+      const m = c * CH / PX_PER_M;
+      if (m < 100) continue;                       // the sunlit shallows have rays instead
+      for (let i = 0; i < N; i++) {
+        const hx = hash(c * 97 + i * 13.1), hy = hash(c * 53 + i * 7.7), hs = hash(c * 11 + i * 3.3);
+        let x = hx * W, y = c * CH + hy * CH - dist;
+        if (m < 400) {                             // plankton
+          ctx.globalAlpha = 0.35; ctx.fillStyle = '#c8f0c0';
+          const s = 1.2 + hs * 1.4; ctx.fillRect(x, y, s, s);
+        } else if (m < 1000) {                     // marine snow, sinking slowly
+          y = c * CH + ((hy * CH + t * (6 + hs * 8)) % CH) - dist;
+          x += Math.sin(t * 0.6 + i) * 4;
+          ctx.globalAlpha = 0.55; ctx.fillStyle = '#eef6fb';
+          const s = 1 + hs * 2; ctx.fillRect(x, y, s, s);
+        } else {                                   // bioluminescence, twinkling
+          const tw = 0.5 + 0.5 * Math.sin(t * (1.5 + hs * 2) + i * 1.7), r = 1.4 + hs * 1.2;
+          ctx.fillStyle = hs > 0.5 ? '#7fe3ff' : '#9dffb8';
+          ctx.globalAlpha = (0.25 + 0.6 * tw) * 0.25;
+          ctx.beginPath(); ctx.arc(x, y, r * 3, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 0.25 + 0.6 * tw;
+          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    }
+    ctx.restore();
+  }
+
   function drawFishes() {
     ctx.save();
-    for (const f of fishes) {
-      const sy = f.y - dist + Math.sin(f.t * 1.6) * 2.5;
-      if (sy < -f.ext - 20 || sy > H + f.ext + 20) continue;
+    // two passes: far-away scenery (whales, wrecks) first, then the fish in front of it
+    for (const far of [true, false]) for (const f of fishes) {
       const def = FISH[f.kind];
+      if (!!def.alpha !== far) continue;
+      const sy = f.y - dist + (def.still ? 0 : Math.sin(f.t * 1.6) * 2.5);
+      if (sy < -f.ext - 20 || sy > H + f.ext + 20) continue;
       const spr = fishSprite(f.kind);
-      ctx.globalAlpha = f.tier >= 3 ? 0.68 : 0.55;                  // background: faded so they never read as obstacles
-      blit(spr, f.x, sy, Math.sin(f.t * 3) * 0.04 * f.dir, f.s * f.dir, f.s);
+      ctx.globalAlpha = def.alpha || (f.tier >= 3 ? 0.68 : 0.55);   // background: faded so they never read as obstacles
+      blit(spr, f.x, sy, def.still ? 0 : Math.sin(f.t * 3) * (far ? 0.015 : 0.04) * f.dir, f.s * f.dir, f.s);
       if (def.lure) {                                                // the anglerfish lure pulses
         const g = sharedSprite('lureGlow', 30, 30, 15, 15, () => {
           const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, 14);
@@ -945,7 +1029,7 @@
     obstacles = []; pickups = []; particles = []; floaters = []; trail = [];
     dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
     nextRowY = H + 140;
-    formulas = []; nextFormulaY = 60; usedFormulas.clear(); fishes.length = 0;
+    formulas = []; nextFormulaY = 60; usedFormulas.clear(); fishes.length = 0; lastSceneryY = -1e9;
   }
   reset();
 
@@ -1772,7 +1856,8 @@
   // the page colour, ruled lines, margin and punched holes are browser layers behind the canvas
   // (see syncPaperLayers); the canvas only adds the pencilled formulas and the depth markers
   function drawPaper() {
-    if (MAPS[mapId].formulas) drawFormulas(); else drawFishes();
+    if (MAPS[mapId].formulas) drawFormulas();
+    else { drawSeaParticles(); drawFishes(); }
     drawDepthMarkers();
   }
 
@@ -2801,7 +2886,7 @@
   }
 
   // slide the paper layers to match the scroll position; only the transforms change each frame
-  let pageNowCol = '', pageNextCol = '';
+  let pageNowCol = '', pageNextCol = '', raysOp = -1;
   function syncPaperLayers() {
     const px = v => Math.round(v * scale * dpr) / dpr;           // whole device pixels keep the lines crisp
     ruling.style.transform = `translate3d(0, ${px(-(dist % PAPER_REPEAT))}px, 0)`;
@@ -2811,6 +2896,11 @@
     if (next !== pageNextCol) pageNext.style.background = pageNextCol = next;
     const boundary = pageTop(k + 1) - dist;                         // where the next colour starts on screen
     pageNext.style.transform = `translate3d(0, ${px(Math.min(boundary, H + 10))}px, 0)`;
+    // sun rays: full strength at the surface, gone by 100 m (stepped so the style only changes now and then)
+    if (mapId === 'sea') {
+      const op = Math.round(clamp(1 - dist / (100 * PX_PER_M), 0, 1) * 40) / 40;
+      if (op !== raysOp) raysEl.style.opacity = raysOp = op;
+    }
   }
 
   function render() {
@@ -2923,9 +3013,9 @@
   function applyMap() {
     world.classList.toggle('map-sea', mapId === 'sea');
     // swap the background decorations right away: clear them and refill from just above the screen
-    formulas = []; fishes.length = 0;
+    formulas = []; fishes.length = 0; lastSceneryY = -1e9;
     nextFormulaY = Math.ceil(dist / 30) * 30;
-    hudPage = ''; pageNowCol = ''; pageNextCol = '';   // force the colours to refresh
+    hudPage = ''; pageNowCol = ''; pageNextCol = ''; raysOp = -1;   // force the colours to refresh
     for (const b of document.querySelectorAll('[data-map]')) b.setAttribute('aria-pressed', String(b.dataset.map === mapId));
   }
   for (const b of document.querySelectorAll('[data-map]')) {

@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v30** (2026-10-15)
+Current version: **v31** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -14,7 +14,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves `index.html` from the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v30 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v31 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -70,7 +70,18 @@ The map is chosen with two picture tiles, **Paper** and **Deep sea**, on the sta
 
 ### 4.2 Deep sea
 - **Water colour:** light turquoise at the surface, darkening every 100 m down to near-black navy by about 1,000 m, then staying there.
-- **Background:** bubbles rising past the plane, and dark rock walls down both sides like an underwater trench.
+- **Background:** bubbles rising past the plane (no side walls; they were removed in v31). What else you see changes with depth:
+
+| Depth | Background |
+|---|---|
+| 0–100 m | Sun rays slanting down from the surface with a bright glow at the top. They sway slowly and fade out by 100 m (one CSS layer, no canvas drawing). |
+| 100–400 m | Tiny green plankton specks |
+| 400–1,000 m | White "marine snow" sinking slowly |
+| 1,000 m + | Bioluminescence: twinkling blue and green lights |
+| 100–800 m | Now and then, a huge faded whale silhouette gliding far behind the fish |
+| 600 m + | Now and then, a faded shipwreck resting in the dark |
+
+  The specks are placed by a hash of the page position, so nothing is stored per speck. Whales and wrecks are kept at least about 30 m apart, so two never share the screen.
 - **Readability:** on dark water, the top bar, the steering arrows and the depth markers switch to light colours.
 - **Background decoration:** fish instead of formulas. They are faded, never collide with the plane, swim slowly sideways, and get more dangerous with depth:
 
@@ -124,7 +135,7 @@ Eight sea obstacles reuse the movement and collision of a notebook obstacle with
 | Coral ledges | Coral from both walls with a gap | Rulers | 0 m |
 | Sea urchins | Static spiky balls | Ink blots | 0 m |
 | Jellyfish | Pulsing jellyfish drifting down the water | Sticky notes | 0 m |
-| Starfish | Spins while drifting, bouncing off the rock walls | New | 0 m |
+| Starfish | Spins while drifting, bouncing off the screen edges | New | 0 m |
 | Air bubble column | Slows the fall while inside and never hurts | New | 0 m |
 | Naval mine | On a chain. When the plane approaches it blinks and shows a dashed blast circle, then explodes so the blast lands as the plane arrives | New | ~50 m |
 | Moray eel | Lunges out of a hole in the rock wall | Cutter | ~65 m |
@@ -241,7 +252,7 @@ Sky dive has no walls at its edges, so wall-based mechanics there need a floatin
 |---|---|
 | Sprite cache | Rigid obstacle parts, fish, stars and plane-independent art are painted once into offscreen canvases at screen resolution (`sharedSprite` / `ownSprite`) and then copied each frame, rotated, flipped, stretched or cropped as needed. The cache is rebuilt on resize and when fonts finish loading. |
 | No drop shadows | The game has no drop shadows (removed in v29), which saves a draw per obstacle each frame. The rubber stamp keeps its darkening landing spot because that is its warning. |
-| Background as browser layers | The page colour, ruled lines, margin and holes (or bubbles and rock walls) are CSS layers behind a transparent canvas. The compositor slides them into place each frame, so the canvas only draws formulas, fish, markers, obstacles and the plane. Screen shake moves the whole playfield with one CSS transform. |
+| Background as browser layers | The page colour, ruled lines, margin and holes (or the rising bubbles and the sea's sun rays) are CSS layers behind a transparent canvas. The compositor slides them into place each frame, so the canvas only draws formulas, fish, markers, obstacles and the plane. Screen shake moves the whole playfield with one CSS transform. |
 | No per-frame gradients | Scissor blades, glows and blasts use pre-painted sprites instead of creating gradients every frame |
 | Fewer large see-through fills | The desk fan's wind band tint was removed, and the cat paw and kelp warnings are dashed outlines |
 | Less garbage collection | Lists are pruned in place, and the plane's hit circles, trail points and static collision shapes are reused. The top bar only touches the page when a number changes. |
