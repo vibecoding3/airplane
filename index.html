@@ -31,7 +31,26 @@
   }
   #stage { position: relative; height: 100%; display: flex; justify-content: center; align-items: center; }
   #wrap { position: relative; height: 100%; box-shadow: 0 0 0 1px rgba(0,0,0,.25), 0 18px 60px rgba(0,0,0,.45); }
-  canvas { display: block; width: 100%; height: 100%; cursor: crosshair; -webkit-touch-callout: none; }
+  /* The playfield is layered: the paper (page colour + ruled lines, margin and punched holes) lives in
+     browser layers that the compositor slides into place each frame; the canvas on top only draws what
+     moves. --u is the size of one world unit in CSS pixels (set from script). */
+  #world { position: absolute; inset: 0; overflow: hidden; background: var(--paper); }
+  #world > * { position: absolute; left: 0; top: 0; width: 100%; will-change: transform; }
+  .page-colour { height: 100%; }
+  #ruling {
+    background-image:
+      radial-gradient(circle at calc(var(--u) * 24) calc(var(--u) * 125),
+        var(--desk) calc(var(--u) * 9), rgba(0,0,0,.12) calc(var(--u) * 9), rgba(0,0,0,.12) calc(var(--u) * 11), transparent calc(var(--u) * 11)),
+      linear-gradient(to right,
+        transparent calc(var(--u) * 51.4), var(--margin) calc(var(--u) * 51.4), var(--margin) calc(var(--u) * 52.6), transparent calc(var(--u) * 52.6),
+        transparent calc(var(--u) * 54.4), var(--margin) calc(var(--u) * 54.4), var(--margin) calc(var(--u) * 55.6), transparent calc(var(--u) * 55.6)),
+      repeating-linear-gradient(to bottom, var(--rule) 0, var(--rule) calc(var(--u) * 1), transparent calc(var(--u) * 1), transparent calc(var(--u) * 30));
+    background-size: 100% calc(var(--u) * 250), 100% 100%, 100% calc(var(--u) * 30);
+    background-repeat: repeat-y, no-repeat, repeat-y;
+  }
+  #world canvas { display: block; height: 100%; cursor: crosshair; -webkit-touch-callout: none; will-change: auto; }
+  .opt { display: flex; align-items: center; gap: 8px; font-size: 16px; cursor: pointer; }
+  .opt input { width: 18px; height: 18px; margin: 0; accent-color: var(--ink); }
 
   .hud {
     position: absolute; inset: 0 0 auto 0;
@@ -146,9 +165,14 @@
 <body>
 <div id="stage">
   <div id="wrap">
-    <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
+    <div id="world">
+      <div class="page-colour" id="pageNow"></div>
+      <div class="page-colour" id="pageNext"></div>
+      <div id="ruling"></div>
+      <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
+    </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v23</div>
+    <div class="version" id="version">v24</div>
 
     <div class="hud">
       <div>
@@ -173,6 +197,7 @@
           <li>Press the other side once to fall straight, twice to drift back. Hold a side for a sharp turn</li>
           <li>The deeper you fall, the faster you go. Gliding sideways slows you down</li>
           <li>Collect gold stars to spend in the Shop · <kbd>P</kbd> pauses</li>
+          <li><label class="opt"><input type="checkbox" id="cap60"> Limit to 60 fps (saves battery on 120 Hz screens)</label></li>
         </ul>
         <div class="actions">
           <button class="play" id="startBtn" type="button">Throw it</button>
@@ -254,6 +279,12 @@
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;
+  // drop items in place (no new array each frame, so less garbage for the browser to collect)
+  function prune(arr, keep) {
+    let j = 0;
+    for (let i = 0; i < arr.length; i++) if (keep(arr[i])) arr[j++] = arr[i];
+    arr.length = j;
+  }
   const fmt = n => Math.floor(n).toLocaleString('en-US');
   const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -262,15 +293,18 @@
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } }
   };
 
-  // the page is painted edge to edge every frame, so the canvas never needs transparency (cheaper to composite)
-  const stage = $('stage'), wrap = $('wrap'), canvas = $('game');
-  let ctx = canvas.getContext('2d', { alpha: false });   // `let`: sprites temporarily swap it (see makeSprite)
+  // the canvas is transparent: the paper behind it is a set of browser layers (see #world in the CSS)
+  const stage = $('stage'), wrap = $('wrap'), canvas = $('game'), world = $('world');
+  const pageNow = $('pageNow'), pageNext = $('pageNext'), ruling = $('ruling');
+  let ctx = canvas.getContext('2d');   // `let`: sprites temporarily swap it (see makeSprite)
   let H = 640, scale = 1, dpr = 1;
 
-  // Rendering resolution: up to 2× on sharp screens, lowered automatically on devices that can't keep up
-  // (remembered between visits). Never below 1×.
+  // Rendering resolution: never more than 2×; very dense phone screens start at 1.5× (hard to tell apart
+  // on a moving game, about half the pixels). Lowered further automatically on devices that can't keep up,
+  // and remembered between visits. Never below 1×.
   const MAX_DPR = Math.min(window.devicePixelRatio || 1, 2);
-  let dprCap = clamp(+store.get('nosedive-res') || MAX_DPR, 1, MAX_DPR);
+  const START_DPR = (window.devicePixelRatio || 1) >= 2.5 ? 1.5 : MAX_DPR;
+  let dprCap = clamp(+store.get('nosedive-res') || START_DPR, 1, MAX_DPR);
 
   function resize() {
     const sw = stage.clientWidth, sh = stage.clientHeight;
@@ -282,8 +316,13 @@
     canvas.height = Math.round(sh * dpr);
     scale = cw / W;
     H = sh / scale;
+    // paper layers: one world unit = `scale` CSS px; the ruling layer is one pattern repeat taller than the view
+    world.style.setProperty('--u', scale + 'px');
+    ruling.style.height = Math.ceil((H + PAPER_REPEAT) * scale) + 'px';
     invalidateSprites();
   }
+  // the ruling pattern repeats every 750 units: lines every 30, punched holes every 250
+  const PAPER_REPEAT = 750;
 
   // ---------- sprite cache ----------
   // Static drawings (paper pattern, formulas, rigid obstacle parts) are painted once into small offscreen
@@ -554,7 +593,7 @@
       const ext = spawnFormula(nextFormulaY) || 0;
       nextFormulaY += Math.max(30 * ri(4, 7), 30 * Math.ceil((ext / 2 + 105) / 30));
     }
-    formulas = formulas.filter(f => f.y + f.ext / 2 > dist - 20);
+    prune(formulas, f => f.y + f.ext / 2 > dist - 20);
   }
 
   // ---------- game state ----------
@@ -924,7 +963,13 @@
   }
 
   // ---------- collision ----------
+  // obstacles that never move keep their collision shapes instead of rebuilding them every step
+  const STATIC_SHAPES = new Set(['blot', 'protractor', 'band']);
   function shapes(o) {
+    if (!STATIC_SHAPES.has(o.type)) return computeShapes(o);
+    return o.__shapes || (o.__shapes = computeShapes(o));
+  }
+  function computeShapes(o) {
     switch (o.type) {
       case 'gate': {
         const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
@@ -1012,10 +1057,15 @@
 
   // plane hit circles in local space (nose points to +y)
   const PLANE_HIT = [[0, 11, 4], [0, -2, 6], [-8, -10, 4], [8, -10, 4]];
+  const planeHitCircles = PLANE_HIT.map(() => ({ x: 0, y: 0, r: 0 }));   // reused every step
   function planeCircles() {
     const th = -plane.ang, c = Math.cos(th), s = Math.sin(th);
     const py = dist + planeScreenY();
-    return PLANE_HIT.map(([lx, ly, r]) => ({ x: plane.x + lx * c - ly * s, y: py + lx * s + ly * c, r }));
+    PLANE_HIT.forEach(([lx, ly, r], i) => {
+      const h = planeHitCircles[i];
+      h.x = plane.x + lx * c - ly * s; h.y = py + lx * s + ly * c; h.r = r;
+    });
+    return planeHitCircles;
   }
 
   // ---------- update ----------
@@ -1062,7 +1112,7 @@
         }
         o.squeeze = Math.max(0, o.squeeze - 4 * dt);
         for (const b of o.blobs) { b.x += inward(o) * o.blobV * dt; b.wob += 8 * dt; }
-        o.blobs = o.blobs.filter(b => b.x > -20 && b.x < W + 20);
+        prune(o.blobs, b => b.x > -20 && b.x < W + 20);
         break;
       case 'cutter': {
         o.t += dt;
@@ -1150,8 +1200,11 @@
 
   function updateTrail() {
     const th = -plane.ang;
-    trail.push({ x: plane.x + 12 * Math.sin(th), y: dist + planeScreenY() - 12 * Math.cos(th) });
-    if (trail.length > 34) trail.shift();
+    // reuse the oldest point once the trail is full instead of allocating a new one every frame
+    const p = trail.length >= 34 ? trail.shift() : {};
+    p.x = plane.x + 12 * Math.sin(th);
+    p.y = dist + planeScreenY() - 12 * Math.cos(th);
+    trail.push(p);
   }
 
   function update(dt) {
@@ -1221,8 +1274,8 @@
 
     spawnRows();
     for (const o of obstacles) updateObstacle(o, dt);
-    obstacles = obstacles.filter(o => o.y > dist - 160);
-    pickups = pickups.filter(p => p.y > dist - 60);
+    prune(obstacles, o => o.y > dist - 160);
+    prune(pickups, p => p.y > dist - 60);
 
     const circles = planeCircles();
     // stars
@@ -1264,9 +1317,9 @@
       p.vx *= Math.exp(-1.5 * dt);
       p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
     }
-    particles = particles.filter(p => p.life > 0);
+    prune(particles, p => p.life > 0);
     for (const f of floaters) { f.life -= dt; f.y -= 0; }
-    floaters = floaters.filter(f => f.life > 0);
+    prune(floaters, f => f.life > 0);
   }
 
   function spark(x, y) {
@@ -1315,23 +1368,9 @@
     if (c !== hudPage) { hudPage = c; wrap.style.setProperty('--page', c); }
   }
 
+  // the page colour, ruled lines, margin and punched holes are browser layers behind the canvas
+  // (see syncPaperLayers); the canvas only adds the pencilled formulas and the depth markers
   function drawPaper() {
-    const top = dist - 20, bottom = dist + H + 20;
-    for (let k = pageIndexAt(top), y = top; y < bottom; k++) {
-      const next = Math.min(bottom, pageTop(k + 1));
-      ctx.fillStyle = pageColor(k);
-      ctx.fillRect(-20, y - dist, W + 40, next - y);
-      y = next;
-    }
-    // ruled lines and margin: a single stroked path each (cheaper than copying a full-screen image,
-    // especially where the browser draws the canvas in software)
-    const gap = 30;
-    ctx.strokeStyle = COL.rule; ctx.lineWidth = 1;
-    ctx.beginPath();
-    for (let y = gap - (dist % gap); y < H + gap; y += gap) { ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); }
-    ctx.stroke();
-    ctx.strokeStyle = COL.margin; ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.moveTo(52, 0); ctx.lineTo(52, H); ctx.moveTo(55, 0); ctx.lineTo(55, H); ctx.stroke();
     // pencilled math homework (text is cheap to draw directly; the browser caches the glyphs)
     ctx.save();
     ctx.globalAlpha = 0.42;
@@ -1361,14 +1400,6 @@
       ctx.fillStyle = COL.graphite; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = 'right';
       ctx.fillText(fmt(k * PAGE_M) + ' m', W - 10, y - 6);
       ctx.restore();
-    }
-    // punched holes
-    const hg = 250;
-    for (let y = hg / 2 - (dist % hg) - hg; y < H + hg; y += hg) {
-      ctx.fillStyle = COL.hole;
-      ctx.beginPath(); ctx.arc(24, y, 9, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(24, y, 10, 0, Math.PI * 2); ctx.stroke();
     }
   }
 
@@ -1675,11 +1706,9 @@
 
   function drawFan(o, sy) {
     const cx = o.side < 0 ? 0 : W, dir = -o.side;
-    // the wind band: a faint tint plus gusts travelling away from the fan
-    ctx.fillStyle = 'rgba(120,160,210,.09)';
-    ctx.fillRect(0, sy - o.band / 2, W, o.band);
+    // the wind band: gusts travelling away from the fan (no full-width tint, which costs a large blended fill)
     ctx.save();
-    ctx.strokeStyle = 'rgba(90,130,190,.55)'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(90,130,190,.6)'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
     for (let k = 0; k < 6; k++) {
       const yy = sy - o.band / 2 + (k + 0.5) * o.band / 6;
       const run = (o.t * 170 + k * 71) % (W + 60);
@@ -1898,13 +1927,11 @@
   function drawPaw(o, sy) {
     ctx.save();
     toolFrame(o, sy);
-    if (o.phase === 'warn') {                // shaded wedge where the paw is about to swing
+    if (o.phase === 'warn') {                // dashed outline of the wedge the paw is about to swing through
       const k = Math.min(1, o.t / o.warn);
-      ctx.fillStyle = `rgba(200,60,40,${0.05 + 0.13 * k})`;
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, o.L + 20, -PAW_SWEEP, PAW_SWEEP); ctx.closePath(); ctx.fill();
       ctx.save();
-      ctx.strokeStyle = `rgba(200,60,40,${0.25 + 0.5 * k})`; ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
-      ctx.beginPath(); ctx.arc(0, 0, o.L + 20, -PAW_SWEEP, PAW_SWEEP); ctx.stroke();
+      ctx.strokeStyle = `rgba(200,60,40,${0.3 + 0.55 * k})`; ctx.lineWidth = 2.2; ctx.setLineDash([6, 6]);
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, o.L + 20, -PAW_SWEEP, PAW_SWEEP); ctx.closePath(); ctx.stroke();
       ctx.restore();
     }
     if (o.ext > 0) {
@@ -2077,8 +2104,14 @@
     ctx.restore();
   }
 
+  const trailPts = [];   // reused screen-space copy of the trail
   function drawTrail() {
-    paintTrail(ctx, trail.map(p => ({ x: p.x, y: p.y - dist })), trailStyle, titleTime + time);
+    for (let i = 0; i < trail.length; i++) {
+      const p = trailPts[i] || (trailPts[i] = { x: 0, y: 0 });
+      p.x = trail[i].x; p.y = trail[i].y - dist;
+    }
+    trailPts.length = trail.length;
+    paintTrail(ctx, trailPts, trailStyle, titleTime + time);
   }
 
   // trail styles from the Shop; pts run oldest (furthest behind the plane) to newest
@@ -2132,9 +2165,37 @@
     c.restore();
   }
 
+  // screen shake moves the whole playfield (paper layers + canvas) in one compositor transform
+  let shaking = false;
+  function applyShake() {
+    if (shake > 0 && !reduceMotion) {
+      world.style.transform = `translate(${(rand(-shake, shake) * scale).toFixed(1)}px, ${(rand(-shake, shake) * scale).toFixed(1)}px)`;
+      shaking = true;
+    } else if (shaking) {
+      world.style.transform = '';
+      shaking = false;
+    }
+  }
+
+  // slide the paper layers to match the scroll position; only the transforms change each frame
+  let pageNowCol = '', pageNextCol = '';
+  function syncPaperLayers() {
+    const px = v => Math.round(v * scale * dpr) / dpr;           // whole device pixels keep the lines crisp
+    ruling.style.transform = `translate3d(0, ${px(-(dist % PAPER_REPEAT))}px, 0)`;
+    const k = pageIndexAt(dist);
+    const now = pageColor(k), next = pageColor(k + 1);
+    if (now !== pageNowCol) pageNow.style.background = pageNowCol = now;
+    if (next !== pageNextCol) pageNext.style.background = pageNextCol = next;
+    const boundary = pageTop(k + 1) - dist;                         // where the next colour starts on screen
+    pageNext.style.transform = `translate3d(0, ${px(Math.min(boundary, H + 10))}px, 0)`;
+  }
+
   function render() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
-    if (shake > 0 && !reduceMotion) ctx.translate(rand(-shake, shake), rand(-shake, shake));
+    applyShake();
+    syncPaperLayers();
     drawPaper();
 
     for (const o of obstacles) {
@@ -2236,16 +2297,15 @@
     overTitle: $('overTitle'), overDetail: $('overDetail'), overBest: $('overBest'), stamp: $('recordStamp'),
     pauseBtn: $('pauseBtn'), muteBtn: $('muteBtn')
   };
-  let lastHud = '';
+  let hudDepth = -1, hudStars = -1, hudBest = -1;
   function updateHud() {
     const playing = state === 'play' || state === 'paused' || state === 'dying' || state === 'over';
     const d = playing ? score() : 0;
     // total stars owned: the bank plus whatever this run has picked up so far
     // (once the run is over, its stars are already in the bank)
     const total = bank + (state === 'over' ? 0 : stars);
-    const key = d + '|' + total + '|' + best;
-    if (key === lastHud) return;
-    lastHud = key;
+    if (d === hudDepth && total === hudStars && best === hudBest) return;   // touch the page only on change
+    hudDepth = d; hudStars = total; hudBest = best;
     ui.depth.textContent = fmt(d);
     ui.stars.textContent = '★ ' + fmt(total);
     ui.best.textContent = fmt(best);
@@ -2504,6 +2564,7 @@
     else if (k === 'p' || k === 'P' || k === 'Escape') { state === 'paused' ? resume() : pause(); }
     else if ((k === ' ' || k === 'Enter') && (state === 'title' || state === 'over' || state === 'paused')) {
       if (e.target instanceof HTMLButtonElement && !e.target.classList.contains('play')) return;
+      if (e.target instanceof HTMLInputElement) return;       // Space toggles the 60 fps checkbox, not the game
       e.preventDefault();
       state === 'paused' ? resume() : start();
     } else if (k === ' ' && state === 'play') { e.preventDefault(); }
@@ -2565,7 +2626,24 @@
     fpsFrames = 0; fpsSince = now;
   }
 
+  // Frame pacing: full speed while playing (or at most 60 fps when the player asks for it); menus need
+  // much less, so the start / game-over screens run at 30 fps and the pause screen at 4 fps.
+  const cap60Box = $('cap60');
+  let cap60 = store.get('nosedive-cap60') === '1';
+  cap60Box.checked = cap60;
+  cap60Box.addEventListener('change', () => { cap60 = cap60Box.checked; store.set('nosedive-cap60', cap60 ? '1' : '0'); });
+  let nextDraw = 0;
+  function frameInterval() {
+    if (state === 'play' || state === 'dying') return cap60 ? 1000 / 60 : 0;
+    return state === 'paused' ? 250 : 1000 / 30;
+  }
+
   function frame(now) {
+    const interval = frameInterval();
+    if (interval) {
+      if (now + 1.5 < nextDraw) { requestAnimationFrame(frame); return; }   // not this refresh
+      nextDraw = nextDraw + interval < now ? now + interval : nextDraw + interval;
+    }
     const real = (now - last) / 1000;
     const dt = Math.min(1 / 30, real);
     last = now;
