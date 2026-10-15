@@ -1,0 +1,8 @@
+{
+  "name": "paper-nosedive-tools",
+  "private": true,
+  "description": "Dev-only test, screenshot and bundle scripts. The game itself needs none of this.",
+  "dependencies": {
+    "puppeteer-core": "22.15.0"
+  }
+}

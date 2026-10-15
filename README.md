@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v34** (2026-10-15)
+Current version: **v35** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,11 +10,11 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css` and 12 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
+- **Files:** `index.html`, `style.css` and 13 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v34 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v35 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -250,7 +250,9 @@ airplane/
 ├── index.html              the page: playfield layers, top bar, menu cards; loads everything below
 ├── style.css               all styling, including the paper, sea and sun-ray background layers
 ├── README.md               this document
-└── js/                     12 game scripts, listed in the order they load
+├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
+├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
+└── js/                     13 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
     ├── paper-background.js Paper map: pencil formulas by depth
@@ -258,7 +260,8 @@ airplane/
     ├── state.js            game state, shop data, controls, speed and difficulty rules
     ├── obstacles.js        obstacle generators and row spawning, for both maps
     ├── physics.js          collision, obstacle movement, steering, per-frame update
-    ├── draw-paper.js       page colours, map definitions, Paper obstacle art
+    ├── maps.js             map definitions, page and water colours, paper background drawing
+    ├── draw-paper.js       Paper obstacle art
     ├── draw-sea.js         Deep sea obstacle art
     ├── render.js           plane, skins, trails, screen shake, frame drawing, map switching
     ├── ui.js               top bar, menus, start / pause / game over, skins, shop
@@ -284,7 +287,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | How an obstacle moves or what counts as a hit | `js/physics.js` (`updateObstacle`, `computeShapes`) |
 | How an obstacle looks | `js/draw-paper.js` or `js/draw-sea.js` (`draw*` / `paint*`) |
 | Background decorations | `js/paper-background.js` (formulas) or `js/sea-background.js` (fish, specks, silhouettes) |
-| Page and water colours, a new map entry | `js/draw-paper.js` (`MAPS`, `RAINBOW`, `SEA`) and the map tiles in `index.html` |
+| Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`) and the map tiles in `index.html` |
 | Plane, skins, trails | `js/core.js` (`SKINS`), `js/state.js` (`TRAILS`), `js/render.js` (`paintPlane`, `paintTrail`) |
 | Shop prices and upgrades | `js/state.js` (`UPGRADES`, `MAGNET_RANGES`, `TRAILS`) and `js/ui.js` (shop screen) |
 | Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js` |
@@ -303,11 +306,23 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `state.js` | `state`, `plane`, `obstacles`, `dist`, `speed`, `UPGRADES`, `TRAILS`, `press` / `release`, `depthM`, `difficulty`, `baseFallSpeed`, `reset` |
 | `obstacles.js` | `make` (generators), `PALETTES`, `SEA_MAKERS`, `seaPool`, `spawnRow`, `spawnFromPool`, `spawnRows` |
 | `physics.js` | `computeShapes` / `shapes`, `circleHits` (circles, rotated boxes, convex polygons), `planeCircles`, `updateObstacle`, `steer`, `update`, `crash` |
-| `draw-paper.js` | `MAPS`, `SEA`, `RAINBOW`, `drawPaper`, `drawFormulas`, `drawDepthMarkers`, Paper `draw*` / `paint*` functions |
+| `maps.js` | `MAPS`, `mapId`, `SEA`, `RAINBOW`, `isDark`, `syncHudPage`, `drawPaper`, `drawFormulas`, `drawDepthMarkers` |
+| `draw-paper.js` | Paper obstacle `draw*` / `paint*` functions (`drawRuler`, `paintPencil`, `drawScissors`, `drawFan`, `drawStamp`, `drawPaw`, …) |
 | `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
 | `render.js` | `paintPlane`, `drawPlane`, `paintTrail`, `syncPaperLayers`, `render`, `applyMap` |
 | `ui.js` | `updateHud`, `showCard`, `start`, `pause`, `resume`, `gameOver`, `renderShop`, `buyUpgrade`, `chooseTrail` |
 | `main.js` | `watchFrameRate`, `frameInterval`, `frame` |
+
+### 10.5 Dev tools (`tools/`)
+
+Not used by the game; for testing during development. Set up once with `cd tools && npm install` (installs puppeteer-core; Chrome must be installed, or set `CHROME` to its path). Output goes to `tools/out/`, which git ignores.
+
+| Command | What it does |
+|---|---|
+| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on both maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
+| `node tools/shot.js <notebook|sea> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
+| `node tools/shot.js title [sea]` | Title screen screenshot |
+| `node tools/bundle.js [out.html]` | Inlines `style.css` and the scripts into one page (for a single-file copy) |
 
 ---
 
