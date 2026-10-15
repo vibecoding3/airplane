@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v32** (2026-10-15)
+Current version: **v33** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,11 +10,11 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html` (the page and menus), `style.css`, and 12 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). Opening `index.html` straight from disk works too.
+- **Files:** `index.html`, `style.css` and 12 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
-- **Hosting:** GitHub Pages serves `index.html` from the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v32 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
+- **Version label:** the bottom-centre label (for example `v33 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -128,7 +128,7 @@ The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fi
 The extra hazard next to desk fans and below coffee spills deeper down is a small ink blot.
 
 ### 5.2 Deep sea map (12 types)
-Eight sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in the code). Four are new mechanics.
+Eight sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in `js/obstacles.js`). Four are new mechanics.
 
 | Sea obstacle | Behaviour | Based on | Starts at |
 |---|---|---|---|
@@ -154,7 +154,7 @@ These were built and then removed at the player's request: the pen (drew a wall 
 
 Every obstacle in the game is one of the **20 mechanics** below, dressed in a map's art. A mechanic defines how something moves, what hurts, how it warns the player, and what can be tuned. A map's obstacle is just *mechanic + look*. The goal is to build new maps (Sky dive, Skyscraper and later ones) by reusing these mechanics with new drawings, instead of writing new movement and collision code each time.
 
-In the code, the mechanic lives in the generator (`make.<name>`), the movement (`updateObstacle`) and the collision (`computeShapes`). The look lives in the `draw*` / `paint*` functions. The Deep sea map already works this way: `SEA_MAKERS` maps each sea obstacle to the notebook generator whose mechanic it reuses.
+In the code, the mechanic lives in the generator (`make.<name>` in `js/obstacles.js`), the movement (`updateObstacle`) and the collision (`computeShapes`), both in `js/physics.js`. The look lives in the `draw*` / `paint*` functions in `js/draw-paper.js` and `js/draw-sea.js`. The Deep sea map already works this way: `SEA_MAKERS` maps each sea obstacle to the notebook generator whose mechanic it reuses.
 
 ### 6.1 Mechanic catalogue
 
@@ -266,41 +266,73 @@ Sky dive has no walls at its edges, so wall-based mechanics there need a floatin
 
 ---
 
-## 10. Code map
+## 10. Project structure
 
-Since v32 the game is split into files. The scripts are ordinary `<script src>` files (not ES modules), so they share one global scope and run in the order `index.html` lists them. Each file only uses names from earlier files while it loads; anything else is used later, once the game is running. `main.js` loads last and starts the game.
+### 10.1 Files
 
-| File | What it holds |
+```
+airplane/
+├── index.html              the page: playfield layers, top bar, menu cards; loads everything below
+├── style.css               all styling, including the paper, sea and sun-ray background layers
+├── README.md               this document
+└── js/                     12 game scripts, listed in the order they load
+    ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
+    ├── audio.js            sound effects
+    ├── paper-background.js Paper map: pencil formulas by depth
+    ├── sea-background.js   Deep sea map: fish, specks, whales, shipwrecks
+    ├── state.js            game state, shop data, controls, speed and difficulty rules
+    ├── obstacles.js        obstacle generators and row spawning, for both maps
+    ├── physics.js          collision, obstacle movement, steering, per-frame update
+    ├── draw-paper.js       page colours, map definitions, Paper obstacle art
+    ├── draw-sea.js         Deep sea obstacle art
+    ├── render.js           plane, skins, trails, screen shake, frame drawing, map switching
+    ├── ui.js               top bar, menus, start / pause / game over, skins, shop
+    └── main.js             keyboard and touch input, main loop (loads last, starts the game)
+```
+
+There is no build step and nothing to install. To play locally, open `index.html` in a browser (straight from disk works) or serve the folder with any static server, for example `python -m http.server`.
+
+### 10.2 How the scripts fit together
+
+- The scripts are ordinary `<script src>` files, not ES modules, so they all share **one global scope**: a name declared in one file (`const`, `let` or `function`) can be used from any other file.
+- They run **in the order `index.html` lists them**. While a file is loading it may only use names from files above it; code inside functions can use names from anywhere, because it only runs once the game is going.
+- `main.js` must stay **last**: it starts the main loop.
+- Each file starts with `'use strict'` and a one-line description.
+- Global names must not clash with built-in browser globals such as `top`, `window` or `location`.
+
+### 10.3 Where to change things
+
+| To change… | Look in |
 |---|---|
-| `index.html` | The page: playfield layers, HUD, menu cards (title, skins, shop, pause, game over) |
-| `style.css` | All styling, including the paper / sea / sun-ray background layers |
-| `js/core.js` | Constants, helpers, saved settings (`store`), screen sizing, sprite cache |
-| `js/audio.js` | Sound effects (Web Audio, no sound files) |
-| `js/paper-background.js` | Pencil formulas by depth tier |
-| `js/sea-background.js` | Background fish, specks, whale and shipwreck silhouettes |
-| `js/state.js` | Game state, upgrade and trail data, controls, speed and difficulty rules, `reset` |
-| `js/obstacles.js` | Obstacle palettes, the `make` generators, sea obstacle pool, row spawning |
-| `js/physics.js` | Collision shapes, obstacle movement, steering, the per-frame `update`, crashes |
-| `js/draw-paper.js` | Page colours, `MAPS`, paper background drawing, Paper obstacle art |
-| `js/draw-sea.js` | Deep sea obstacle art |
-| `js/render.js` | Plane, skins, trails, screen shake, `render`, map switching |
-| `js/ui.js` | HUD, menu cards, start / pause / game over, skin picker, shop |
-| `js/main.js` | Keyboard and touch input, frame pacing, main loop (loaded last) |
+| Speed, difficulty, controls, starting state | `js/state.js` (`baseFallSpeed`, `difficulty`, `HOLD_MS`, `reset`) |
+| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `spawnRow`) |
+| How an obstacle moves or what counts as a hit | `js/physics.js` (`updateObstacle`, `computeShapes`) |
+| How an obstacle looks | `js/draw-paper.js` or `js/draw-sea.js` (`draw*` / `paint*`) |
+| Background decorations | `js/paper-background.js` (formulas) or `js/sea-background.js` (fish, specks, silhouettes) |
+| Page and water colours, a new map entry | `js/draw-paper.js` (`MAPS`, `RAINBOW`, `SEA`) and the map tiles in `index.html` |
+| Plane, skins, trails | `js/core.js` (`SKINS`), `js/state.js` (`TRAILS`), `js/render.js` (`paintPlane`, `paintTrail`) |
+| Shop prices and upgrades | `js/state.js` (`UPGRADES`, `MAGNET_RANGES`, `TRAILS`) and `js/ui.js` (shop screen) |
+| Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js` |
+| Sounds | `js/audio.js` (`sfx`) |
+| Frame rate, resolution, input | `js/main.js`, plus `resize` in `js/core.js` |
+| Version label | `index.html` (`id="version"`) |
 
-Key names by area:
+### 10.4 Key names by file
 
-
-| Area | Key names |
+| File | Key names |
 |---|---|
-| Constants and helpers | `W` (playfield width 400), `PX_PER_M`, `COL`, `rand`, `clamp`, `lerp`, `prune`, `store` |
-| Canvas and resolution | `resize`, `dprCap`, `watchFrameRate` |
-| Sprite cache | `makeSprite`, `sharedSprite`, `ownSprite`, `blit`, `invalidateSprites` |
-| Background | `syncPaperLayers`, `drawPaper`, `drawFormulas`, `drawFishes`, `drawDepthMarkers`, `MAPS`, `SEA`, `RAINBOW` |
-| Formulas and fish | `FORMULA_TIERS`, `pickFormula`, `spawnFormula`, `FISH`, `FISH_TIERS`, `spawnFish`, `updateFormulas` |
-| Obstacles | `make` (generators), `seaPool`, `SEA_MAKERS`, `spawnRow`, `spawnFromPool`, `computeShapes` / `shapes` (collision), `updateObstacle`, `draw*` / `paint*` functions |
-| Collision | `circleHits` (circles, rotated boxes, convex polygons), `planeCircles` |
-| Game loop | `update`, `steer`, `render`, `frame`, `frameInterval` |
-| Shop and UI | `UPGRADES`, `TRAILS`, `SKINS`, `renderShop`, `buyUpgrade`, `chooseTrail`, `showCard`, `updateHud` |
+| `core.js` | `W` (playfield width 400), `PX_PER_M`, `COL`, `SKINS`, `rand`, `clamp`, `lerp`, `prune`, `store`, `resize`, `dprCap`, `makeSprite`, `sharedSprite`, `ownSprite`, `blit`, `invalidateSprites` |
+| `audio.js` | `sfx`, `tone`, `muted` |
+| `paper-background.js` | `FORMULA_TIERS`, `pickFormula`, `spawnFormula`, `updateFormulas` |
+| `sea-background.js` | `FISH`, `FISH_TIERS`, `spawnFish`, `drawFishes`, `drawSeaParticles` |
+| `state.js` | `state`, `plane`, `obstacles`, `dist`, `speed`, `UPGRADES`, `TRAILS`, `press` / `release`, `depthM`, `difficulty`, `baseFallSpeed`, `reset` |
+| `obstacles.js` | `make` (generators), `PALETTES`, `SEA_MAKERS`, `seaPool`, `spawnRow`, `spawnFromPool`, `spawnRows` |
+| `physics.js` | `computeShapes` / `shapes`, `circleHits` (circles, rotated boxes, convex polygons), `planeCircles`, `updateObstacle`, `steer`, `update`, `crash` |
+| `draw-paper.js` | `MAPS`, `SEA`, `RAINBOW`, `drawPaper`, `drawFormulas`, `drawDepthMarkers`, Paper `draw*` / `paint*` functions |
+| `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
+| `render.js` | `paintPlane`, `drawPlane`, `paintTrail`, `syncPaperLayers`, `render`, `applyMap` |
+| `ui.js` | `updateHud`, `showCard`, `start`, `pause`, `resume`, `gameOver`, `renderShop`, `buyUpgrade`, `chooseTrail` |
+| `main.js` | `watchFrameRate`, `frameInterval`, `frame` |
 
 ---
 
