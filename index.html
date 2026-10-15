@@ -68,12 +68,31 @@
   #wrap.dark-page .hud { color: #e4f3fb; }
   #wrap.dark-page .hud button { color: #e4f3fb; border-color: #e4f3fb; }
   #wrap.dark-page .version { color: #e4f3fb; }
-  .maps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 16px; }
-  .map-btn {
-    font: inherit; font-size: 15px; color: var(--ink); background: transparent; cursor: pointer;
-    border: 1.5px dashed rgba(34,53,107,.45); border-radius: 7px 10px 8px 9px; padding: 2px 10px;
+  /* map picker: two big picture tiles, on the start and game-over cards */
+  .map-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .map-tile {
+    display: grid; gap: 4px; justify-items: stretch; padding: 6px 6px 4px; cursor: pointer;
+    font-family: var(--display); font-weight: 700; font-size: 17px; color: var(--ink); text-align: center;
+    background: transparent; border: 1.5px dashed rgba(34,53,107,.45); border-radius: 10px 8px 11px 9px;
   }
-  .map-btn[aria-pressed="true"] { border: 2px solid var(--ink); background: rgba(255,255,255,.55); }
+  .map-tile[aria-pressed="true"] { border: 2.5px solid var(--ink); background: rgba(255,255,255,.6); }
+  .map-tile:hover { background: rgba(255,255,255,.4); }
+  .map-thumb { height: 46px; border-radius: 6px; border: 1.5px solid var(--ink); }
+  .map-thumb.paper {
+    background:
+      linear-gradient(to right, transparent 16%, #e7a1a1 16%, #e7a1a1 18%, transparent 18%),
+      repeating-linear-gradient(to bottom, #fbf9f1 0, #fbf9f1 9px, #bcd3ea 9px, #bcd3ea 10px);
+  }
+  .map-thumb.sea {
+    background:
+      radial-gradient(circle at 28% 34%, transparent 3px, rgba(255,255,255,.75) 3px, rgba(255,255,255,.75) 4.5px, transparent 4.5px),
+      radial-gradient(circle at 66% 62%, transparent 2px, rgba(255,255,255,.65) 2px, rgba(255,255,255,.65) 3.2px, transparent 3.2px),
+      radial-gradient(circle at 52% 24%, transparent 1.5px, rgba(255,255,255,.65) 1.5px, rgba(255,255,255,.65) 2.6px, transparent 2.6px),
+      linear-gradient(#a3dcec, #205c88);
+  }
+  /* icon buttons in the top bar (pause, sound) */
+  .hud .icon-btn { display: grid; place-items: center; width: 38px; height: 32px; padding: 0; }
+  .hud .icon-btn svg { width: 20px; height: 20px; }
   #world canvas { display: block; height: 100%; cursor: crosshair; -webkit-touch-callout: none; will-change: auto; }
   .opt { display: flex; align-items: center; gap: 8px; font-size: 16px; cursor: pointer; }
   .opt input { width: 18px; height: 18px; margin: 0; accent-color: var(--ink); }
@@ -199,7 +218,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v29</div>
+    <div class="version" id="version">v30</div>
 
     <div class="hud">
       <div>
@@ -208,8 +227,8 @@
       </div>
       <div class="right">
         <div class="tools">
-          <button id="muteBtn" type="button">Sound on</button>
-          <button id="pauseBtn" type="button">Pause</button>
+          <button id="muteBtn" class="icon-btn" type="button" aria-label="Sound on"></button>
+          <button id="pauseBtn" class="icon-btn" type="button" aria-label="Pause"></button>
         </div>
         <div><span id="starCount">★ 0</span> · best <span id="best">0</span> m</div>
       </div>
@@ -218,7 +237,11 @@
     <div class="overlay" id="overlay">
       <div class="card" id="titleCard">
         <h1>Paper Nosedive</h1>
-        <p>Your plane only goes one way: down. Steer it through the notebook and see how deep it falls before it gets crumpled.</p>
+        <p>Your plane only goes one way: down. Steer it past everything in the way and see how deep it falls before it gets crumpled.</p>
+        <div class="map-pick" role="group" aria-label="Choose a map">
+          <button class="map-tile" type="button" data-map="notebook" aria-pressed="true"><span class="map-thumb paper"></span>Paper</button>
+          <button class="map-tile" type="button" data-map="sea" aria-pressed="false"><span class="map-thumb sea"></span>Deep sea</button>
+        </div>
         <ul>
           <li>Tap or click a side of the screen, or press <kbd>←</kbd> <kbd>→</kbd> (<kbd>A</kbd> <kbd>D</kbd>), to drift that way</li>
           <li>Press the other side once to fall straight, twice to drift back. Hold a side for a sharp turn</li>
@@ -230,11 +253,6 @@
           <button class="play" id="startBtn" type="button">Throw it</button>
           <button class="ghost" id="skinsBtn" type="button">Skins</button>
           <button class="ghost" id="shopBtn" type="button">Shop</button>
-        </div>
-        <div class="maps" role="group" aria-label="Map">
-          <span>Map:</span>
-          <button class="map-btn" type="button" data-map="notebook" aria-pressed="true">Notebook</button>
-          <button class="map-btn" type="button" data-map="sea" aria-pressed="false">Deep sea</button>
         </div>
       </div>
 
@@ -268,6 +286,10 @@
         <p id="overDetail"></p>
         <div class="meta" id="overBest"></div>
         <div class="meta" id="overBank"></div>
+        <div class="map-pick" role="group" aria-label="Choose a map for the next run">
+          <button class="map-tile" type="button" data-map="notebook" aria-pressed="true"><span class="map-thumb paper"></span>Paper</button>
+          <button class="map-tile" type="button" data-map="sea" aria-pressed="false"><span class="map-thumb sea"></span>Deep sea</button>
+        </div>
         <div class="actions">
           <button class="play" id="againBtn" type="button">Throw again</button>
           <button class="ghost" id="skinsBtnOver" type="button">Skins</button>
@@ -1725,7 +1747,7 @@
   // deep sea: the water darkens every 100 m and stays at the darkest shade below 1,000 m
   const SEA = ['#c4ecf4', '#a3dcec', '#80c8e2', '#5daed3', '#3f92c0', '#2c76a6', '#205c88', '#18456b', '#123352', '#0d253d', '#091a2c'];
   const MAPS = {
-    notebook: { name: 'Notebook', colour: k => (k < 1 ? COL.paper : RAINBOW[(k - 1) % RAINBOW.length]), formulas: true },
+    notebook: { name: 'Paper', colour: k => (k < 1 ? COL.paper : RAINBOW[(k - 1) % RAINBOW.length]), formulas: true },
     sea: { name: 'Deep sea', colour: k => SEA[clamp(k, 0, SEA.length - 1)], formulas: false }
   };
   let mapId = MAPS[store.get('nosedive-map')] ? store.get('nosedive-map') : 'notebook';
@@ -2946,7 +2968,26 @@
     const btn = which && ui[which].querySelector('.play');
     if (btn) btn.focus({ preventScroll: true });
   }
-  function setMuteLabel() { ui.muteBtn.textContent = muted ? 'Sound off' : 'Sound on'; }
+  // top-bar icons (the buttons keep spoken labels for screen readers)
+  const svg = body => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+  const SPEAKER = '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="none"/>';
+  const ICONS = {
+    sound: svg(SPEAKER + '<path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/>'),
+    muted: svg(SPEAKER + '<path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
+    pause: svg('<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>'),
+    play: svg('<path d="M8 5.5l11 6.5-11 6.5z" fill="currentColor" stroke="none"/>')
+  };
+  function setMuteLabel() {
+    ui.muteBtn.innerHTML = muted ? ICONS.muted : ICONS.sound;
+    ui.muteBtn.setAttribute('aria-label', muted ? 'Sound off' : 'Sound on');
+    ui.muteBtn.title = muted ? 'Sound off' : 'Sound on';
+  }
+  function setPauseIcon(paused) {
+    ui.pauseBtn.innerHTML = paused ? ICONS.play : ICONS.pause;
+    ui.pauseBtn.setAttribute('aria-label', paused ? 'Resume' : 'Pause');
+    ui.pauseBtn.title = paused ? 'Resume' : 'Pause';
+  }
+  setPauseIcon(false);
   setMuteLabel();
 
   function start() {
@@ -2959,13 +3000,13 @@
   function pause() {
     if (state !== 'play') return;
     state = 'paused';
-    ui.pauseBtn.textContent = 'Resume';
+    setPauseIcon(true);
     showCard('pause');
   }
   function resume() {
     if (state !== 'paused') return;
     state = 'play';
-    ui.pauseBtn.textContent = 'Pause';
+    setPauseIcon(false);
     holdSide = 0; holdSource = null;   // a key released while paused never sent its keyup here
     showCard(null);
   }

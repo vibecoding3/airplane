@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v29** (2026-10-15)
+Current version: **v30** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -14,7 +14,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves `index.html` from the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v29 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v30 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -50,16 +50,16 @@ The arrows in the bottom corners show the current drift, and get darker while a 
 
 ### Plane states
 - **Extra life** (Shop upgrade): the plane has a blue outline while a spare life is ready. When a life is used, the plane blinks and can't be hit for 2 seconds.
-- **Soggy** (Notebook map, coffee spill): for 2.5 seconds the plane falls 25% faster and steers at 60%. It turns the colour of the drink it flew through.
+- **Soggy** (Paper map, coffee spill): for 2.5 seconds the plane falls 25% faster and steers at 60%. It turns the colour of the drink it flew through.
 - **Bubbled** (Deep sea map, bubble column): the plane falls 50% slower while inside the column.
 
 ---
 
 ## 4. Maps
 
-The map is chosen on the start screen (Map: Notebook / Deep sea) and saved per device. Obstacles, background art and background decorations all depend on the map.
+The map is chosen with two picture tiles, **Paper** and **Deep sea**, on the start screen and on the game-over screen (so you can switch between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
 
-### 4.1 Notebook
+### 4.1 Paper
 - **Background:** ruled notebook paper with a red margin and punched holes.
 - **Page colour:** plain paper for the first 100 m, then pastel red, orange, yellow, green, blue, indigo and violet, changing every 100 m and repeating. A pencilled dashed line labelled "100 m", "200 m"… marks each change.
 - **Background decoration:** pencilled maths and science formulas, faded so they read as background.
@@ -91,7 +91,7 @@ The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fi
 
 "Starts at" is the depth where an obstacle first joins the pool of possible obstacles. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
 
-### 5.1 Notebook map (18 types)
+### 5.1 Paper map (18 types)
 
 | Obstacle | Behaviour | Starts at |
 |---|---|---|
@@ -139,7 +139,74 @@ These were built and then removed at the player's request: the pen (drew a wall 
 
 ---
 
-## 6. Shop and progression
+## 6. Generalized obstacles
+
+Every obstacle in the game is one of the **20 mechanics** below, dressed in a map's art. A mechanic defines how something moves, what hurts, how it warns the player, and what can be tuned. A map's obstacle is just *mechanic + look*. The goal is to build new maps (Sky dive, Skyscraper and later ones) by reusing these mechanics with new drawings, instead of writing new movement and collision code each time.
+
+In the code, the mechanic lives in the generator (`make.<name>`), the movement (`updateObstacle`) and the collision (`computeShapes`). The look lives in the `draw*` / `paint*` functions. The Deep sea map already works this way: `SEA_MAKERS` maps each sea obstacle to the notebook generator whose mechanic it reuses.
+
+### 6.1 Mechanic catalogue
+
+| # | Mechanic | How it works | Warning | What hurts | Paper | Deep sea |
+|---|---|---|---|---|---|---|
+| 1 | **Gap Wall** | Two barriers from both walls leaving one gap; deeper down the gap slides side to side | The gap is visible | Both barriers | Rulers | Coral ledges |
+| 2 | **Closing Jaws** | Two blocks from both walls whose gap keeps opening and closing | The rhythm is visible | Both blocks | Erasers | Giant clam |
+| 3 | **Static Hazards** | 1–3 round hazards that don't move | — | The hazards | Ink blots | Sea urchins |
+| 4 | **Wall Bulge** | A large half-disc stuck to one wall; deeper down a pair on opposite walls forms a slalom | — | The bulge | Protractor | — |
+| 5 | **Bouncing Slider** | A long bar sliding sideways and bouncing off the walls | — | The bar | Pencil | — |
+| 6 | **Rising Projectile** | Thrown up the screen toward the plane, bouncing off the walls | — | The projectile | Paper wad | — |
+| 7 | **Drifting Swarm** | 2–3 items sinking slower than the plane while swaying side to side | — | Each item | Sticky notes | Jellyfish |
+| 8 | **Conveyor** | A row of evenly spaced pieces sliding across the screen | The gaps move with the row | Each piece | Paper clips | — |
+| 9 | **Spinning Drifter** | One shape spinning while it drifts sideways and bounces off the walls | — | The shape (triangle or circle) | Set square | Starfish |
+| 10 | **Spinning Blades** | Two blades spinning around a pivot while opening and closing, drifting slowly | — | Blades and handles | Scissors | — |
+| 11 | **Sweeping Arm** | An arm rotating all the way around a fixed pivot | The arc it traces | Arm and pivot | Drawing compass | — |
+| 12 | **Wall Piston** | Shoots out from a wall, holds, then retracts on a loop | The body at the wall | Base and extended part | Cutter | Moray eel |
+| 13 | **Wall Turret** | Mounted on a wall, fires projectiles straight across on a timer | Bow or nozzle cue before firing (sea version) | Base and projectiles | Glue tube | Submarine |
+| 14 | **Charged Beam** | On a wall; charges, then a beam crosses part of the screen for a moment | Dashed preview line while charging | Base and beam | — | Electric eel |
+| 15 | **Telegraphed Sweep** | A dashed wedge shows the danger area, then an arm swipes through it in an arc from a wall | Dashed wedge | The arm and its tip, only mid-swipe | Cat paw | Kelp |
+| 16 | **Telegraphed Slam** | A target appears at a spot, then something slams down there, lifts, and moves to a new spot | Darkening spot and dashed target | Only the moment it is down | Rubber stamp | — |
+| 17 | **Proximity Blast** | Sits still; when the plane gets close it arms, shows its blast radius, then explodes as the plane arrives | Fast blinking and a dashed blast circle | The body, then the blast | — | Naval mine |
+| 18 | **Push Zone** | A horizontal band that pushes the plane sideways while inside it; may have a solid source on the wall | Moving streaks | Only the source, if there is one | Desk fan (fan is solid) | Ocean current (no source) |
+| 19 | **Effect Zone** | A zone that never hurts but changes the plane for a while: a debuff or a buff | The zone itself | Nothing (can be paired with a hazard placed after it) | Coffee spill (falls faster, steers worse) | Bubble column (falls slower) |
+| 20 | **Spring Line** | A line between two anchors; touching the line kicks the plane sideways instead of crashing it | — | Only the anchors | Rubber band | — |
+
+### 6.2 Tunable parameters
+
+Every mechanic is already tuned by depth through `difficulty()`. The knobs each map can change:
+
+- **Size and spacing:** gap width, hazard radius, bar length, number of pieces, distance between pieces.
+- **Speed and timing:** drift, spin and slide speed, turret fire rate and projectile speed, piston cycle length, sweep and slam warning time, mine trigger distance.
+- **Reach:** piston and beam length, sweep radius, blast radius, push strength and band height.
+- **Unlock depth:** when the mechanic joins that map's obstacle pool, and how often it is picked.
+
+### 6.3 Reuse ideas for the planned sections
+
+| Mechanic | Sky dive (0–1,000 m) | Skyscraper (1,000–2,000 m) |
+|---|---|---|
+| Gap Wall | Cloud banks from both sides | Balconies or scaffolding from both sides |
+| Closing Jaws | Two storm clouds drifting together and apart | Sliding window shutters or elevator doors |
+| Static Hazards | Hailstones or floating balloons | Flower pots or bricks on ledges |
+| Wall Bulge | A thundercloud bulging from the edge | An AC unit or a rounded balcony |
+| Bouncing Slider | A glider or small plane crossing | A window-washer platform sliding along |
+| Rising Projectile | A firework rocket or a loose balloon rising | A pigeon flying up |
+| Drifting Swarm | Falling leaves or paper lanterns | Falling laundry or loose papers |
+| Conveyor | Geese flying across in a line | Cable-car cabins on a wire |
+| Spinning Drifter | A spinning maple seed | A tumbling frisbee or hubcap |
+| Spinning Blades | A helicopter rotor | A rooftop ventilation turbine |
+| Sweeping Arm | A windmill blade | A construction crane boom |
+| Wall Piston | — (no walls; could become a drone that darts in) | An extending window-washer ladder or flagpole |
+| Wall Turret | A cloud spitting hail sideways | A sprinkler or water jet from a window |
+| Charged Beam | Lightning arcing between two clouds | A security laser or welding spark |
+| Telegraphed Sweep | A kite tail swinging | A swinging sign or crane hook |
+| Telegraphed Slam | A lightning strike on a marked spot | A falling flower pot with its landing spot marked |
+| Proximity Blast | A firework that bursts as you pass | A sparking neon sign that shorts out |
+| Push Zone | A wind gust | An AC exhaust or air vent blast |
+| Effect Zone | Warm updraft (falls slower) or rain cloud (soggy) | Steam vent (falls slower) or a paint spill (debuff) |
+| Spring Line | A kite string or power line | A shop awning that bounces you |
+
+Sky dive has no walls at its edges, so wall-based mechanics there need a floating source on the side (a cloud, a balloon basket) or a different mechanic.
+
+## 7. Shop and progression
 
 - **Star bank:** stars caught in a run are added to a saved bank when the run ends. The top bar shows the total during a run (bank plus stars caught so far).
 - **Upgrades** (bought one level at a time):
@@ -154,21 +221,21 @@ These were built and then removed at the player's request: the pen (drew a wall 
 
 ---
 
-## 7. Settings
+## 8. Settings
 
 | Setting | Where | Notes |
 |---|---|---|
-| Sound on/off | Top bar | Sound effects are generated in code (Web Audio) |
-| Pause / Resume | Top bar, P, Esc | Also pauses automatically when the tab is hidden |
+| Sound on/off | Top bar (speaker icon, crossed out when muted) | Sound effects are generated in code (Web Audio) |
+| Pause / Resume | Top bar (pause icon, becomes a play icon while paused), P, Esc | Also pauses automatically when the tab is hidden |
 | Limit to 60 fps | Start screen | Keeps a steady 60 fps on 90, 120 and 144 Hz screens to save battery and heat |
-| Map | Start screen | Notebook / Deep sea |
+| Map | Start and game-over screens | Paper / Deep sea picture tiles |
 
 ### Saved data (browser localStorage)
 `nosedive-best`, `nosedive-bank`, `nosedive-upgrades` (upgrade levels and owned trails), `nosedive-skin`, `nosedive-trail`, `nosedive-map`, `nosedive-muted`, `nosedive-cap60`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
 
 ---
 
-## 8. Performance and optimizations
+## 9. Performance and optimizations
 
 | Optimization | What it does |
 |---|---|
@@ -188,7 +255,7 @@ These were built and then removed at the player's request: the pen (drew a wall 
 
 ---
 
-## 9. Code map (`index.html`)
+## 10. Code map (`index.html`)
 
 | Area | Key names |
 |---|---|
@@ -204,12 +271,14 @@ These were built and then removed at the player's request: the pen (drew a wall 
 
 ---
 
-## 10. Planned next: one continuous map
+## 11. Direction
 
-Agreed plan for the next version:
+**Current focus (since v30): two maps, Paper and Deep sea,** each chosen from the menu.
+
+**On hold: one continuous map.** An earlier plan is paused, not cancelled:
 
 1. **Sky dive**, from 0 to 1,000 m: open sky going from space to blue to sunset to fields, with clouds and planes in the background and floating obstacles.
 2. **Skyscraper**, from 1,000 to 2,000 m: falling down a city tower from day to night, with obstacles sticking out from the building sides.
 3. **Deep sea**, from 2,000 m onward with no end: the existing sea map. Its look, fish and obstacle unlocks start again from the sea's own 0 m (clear water), while the depth counter, fall speed and difficulty keep following the total depth.
 
-The Notebook map and the start-screen map selector will be deleted completely. The movement code that the sea obstacles reuse from notebook obstacles stays.
+In that plan the Paper map would be removed. Any new map or section should be built from the mechanics in section 6, with new art. Section 6.3 lists a starting idea for each mechanic.
