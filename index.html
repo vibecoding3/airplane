@@ -148,7 +148,7 @@
   <div id="wrap">
     <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v21</div>
+    <div class="version" id="version">v22</div>
 
     <div class="hud">
       <div>
@@ -262,22 +262,83 @@
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } }
   };
 
-  const stage = $('stage'), wrap = $('wrap'), canvas = $('game'), ctx = canvas.getContext('2d');
+  // the page is painted edge to edge every frame, so the canvas never needs transparency (cheaper to composite)
+  const stage = $('stage'), wrap = $('wrap'), canvas = $('game');
+  let ctx = canvas.getContext('2d', { alpha: false });   // `let`: sprites temporarily swap it (see makeSprite)
   let H = 640, scale = 1, dpr = 1;
+
+  // Rendering resolution: up to 2× on sharp screens, lowered automatically on devices that can't keep up
+  // (remembered between visits). Never below 1×.
+  const MAX_DPR = Math.min(window.devicePixelRatio || 1, 2);
+  let dprCap = clamp(+store.get('nosedive-res') || MAX_DPR, 1, MAX_DPR);
 
   function resize() {
     const sw = stage.clientWidth, sh = stage.clientHeight;
     const cw = sw < 560 ? sw : Math.min(sw, sh * 0.66);
     wrap.style.width = cw + 'px';
     wrap.style.height = sh + 'px';
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = dprCap;
     canvas.width = Math.round(cw * dpr);
     canvas.height = Math.round(sh * dpr);
     scale = cw / W;
     H = sh / scale;
+    invalidateSprites();
   }
+
+  // ---------- sprite cache ----------
+  // Static drawings (paper pattern, formulas, rigid obstacle parts) are painted once into small offscreen
+  // canvases at screen resolution and then just copied each frame, which is far cheaper than redrawing
+  // paths and text 60 times a second.
+  let spriteRes = 1, spriteGen = 0;
+  const spriteCache = new Map();
+  function invalidateSprites() {
+    spriteRes = scale * dpr;
+    spriteGen++;
+    spriteCache.clear();
+  }
+  // w,h: size in world units; (ox,oy): where the drawing's origin sits inside the sprite
+  function makeSprite(w, h, ox, oy, paint) {
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.ceil(w * spriteRes));
+    c.height = Math.max(1, Math.ceil(h * spriteRes));
+    const g = c.getContext('2d');
+    g.scale(spriteRes, spriteRes);
+    g.translate(ox, oy);
+    const screen = ctx;
+    ctx = g;                       // the existing draw helpers all paint into `ctx`
+    try { paint(); } finally { ctx = screen; }
+    return { c, w, h, ox, oy, gen: spriteGen };
+  }
+  // shared by every obstacle with the same look (key = shape + colours)
+  function sharedSprite(key, w, h, ox, oy, paint) {
+    let s = spriteCache.get(key);
+    if (!s) spriteCache.set(key, s = makeSprite(w, h, ox, oy, paint));
+    return s;
+  }
+  // unique to one object (random shape); rebuilt after a resize
+  function ownSprite(o, slot, w, h, ox, oy, paint) {
+    let s = o[slot];
+    if (!s || s.gen !== spriteGen) s = o[slot] = makeSprite(w, h, ox, oy, paint);
+    return s;
+  }
+  function blit(s, x, y, rot = 0, sx = 1, sy = 1) {
+    if (!rot && sx === 1 && sy === 1) { ctx.drawImage(s.c, x - s.ox, y - s.oy, s.w, s.h); return; }
+    ctx.save();
+    ctx.translate(x, y);
+    if (rot) ctx.rotate(rot);
+    if (sx !== 1 || sy !== 1) ctx.scale(sx, sy);
+    ctx.drawImage(s.c, -s.ox, -s.oy, s.w, s.h);
+    ctx.restore();
+  }
+  const palKey = p => (p ? Object.values(p).join('|') : '');
+
   window.addEventListener('resize', resize);
   resize();
+  // sprites with text were painted before the handwriting font arrived: repaint them once it has
+  if (document.fonts) {
+    document.fonts.ready.then(invalidateSprites);
+    document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', invalidateSprites);
+  }
 
   // ---------- sound ----------
   let actx = null;
@@ -1284,32 +1345,33 @@
       ctx.fillRect(-20, y - dist, W + 40, next - y);
       y = next;
     }
-    // ruled lines
+    // ruled lines and margin: a single stroked path each (cheaper than copying a full-screen image,
+    // especially where the browser draws the canvas in software)
     const gap = 30;
     ctx.strokeStyle = COL.rule; ctx.lineWidth = 1;
     ctx.beginPath();
     for (let y = gap - (dist % gap); y < H + gap; y += gap) { ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); }
     ctx.stroke();
-    // margin
     ctx.strokeStyle = COL.margin; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.moveTo(52, 0); ctx.lineTo(52, H); ctx.moveTo(55, 0); ctx.lineTo(55, H); ctx.stroke();
-    // pencilled math homework
+    // pencilled math homework (text is cheap to draw directly; the browser caches the glyphs)
     ctx.save();
     ctx.globalAlpha = 0.42;
     ctx.fillStyle = COL.graphite; ctx.strokeStyle = COL.graphite; ctx.lineWidth = 1.2;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    let font = '';
     for (const f of formulas) {
       const sy = f.y - dist;
       if (sy < -f.ext / 2 - 20 || sy > H + f.ext / 2 + 20) continue;
-      ctx.save();
       ctx.translate(f.x, sy); ctx.rotate(f.rot);
-      ctx.font = formulaFont(f.size);
+      const fnt = formulaFont(f.size);
+      if (fnt !== font) ctx.font = font = fnt;      // only re-parse the font when it changes
       ctx.fillText(f.text, 0, 0);
       if (f.underline) {
         const u = f.size * 0.5;
         ctx.beginPath(); ctx.moveTo(-f.w / 2 - 2, u); ctx.quadraticCurveTo(0, u + 3, f.w / 2 + 3, u - 1); ctx.stroke();
       }
-      ctx.restore();
+      ctx.rotate(-f.rot); ctx.translate(-f.x, -sy);  // undo, keeping the font set
     }
     ctx.restore();
     // pencilled marker where each new colour starts
@@ -1334,27 +1396,37 @@
 
   function inkStroke(w = 1.3) { ctx.strokeStyle = COL.ink; ctx.lineWidth = w; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke(); }
 
+  // a ruler is a pre-painted strip (face, edge band, ticks, numbers) measured from its inner end;
+  // each frame just shows as much of the strip as the ruler is long
+  const RULER_LEN = 470;
+  function rulerStrip(p, outDir) {
+    return sharedSprite('ruler' + outDir + palKey(p), RULER_LEN, 24, outDir > 0 ? 0 : RULER_LEN, 12, () => {
+      const xa = outDir > 0 ? 0 : -RULER_LEN;
+      ctx.fillStyle = p.face; ctx.fillRect(xa, -11, RULER_LEN, 22);
+      ctx.fillStyle = p.edge; ctx.fillRect(xa, 6, RULER_LEN, 5);
+      ctx.strokeStyle = p.mark; ctx.lineWidth = 1; ctx.fillStyle = p.mark;
+      ctx.font = '9px Kalam, cursive'; ctx.textAlign = 'center';
+      ctx.beginPath();
+      for (let t = 4, i = 0; t < RULER_LEN; t += 6, i++) {
+        const x = outDir * t;
+        const len = i % 10 === 0 ? 9 : (i % 5 === 0 ? 6 : 3.5);
+        ctx.moveTo(x, -11); ctx.lineTo(x, -11 + len);
+        if (i % 10 === 0 && i > 0) ctx.fillText(String(i / 10), x, 5);
+      }
+      ctx.stroke();
+    });
+  }
   function drawRuler(x0, x1, sy, innerX, outDir, p = PALETTES.gate[0]) {
-    if (x1 - x0 < 1) return;
+    const len = Math.min(x1 - x0, RULER_LEN);
+    if (len < 1) return;
     ctx.fillStyle = 'rgba(34,53,107,.12)';
     ctx.fillRect(x0 + 4, sy - 11 + 6, x1 - x0, 22);
-    ctx.fillStyle = p.face;
-    ctx.beginPath(); ctx.rect(x0, sy - 11, x1 - x0, 22); ctx.fill();
-    ctx.fillStyle = p.edge; ctx.fillRect(x0, sy + 6, x1 - x0, 5);
-    inkStroke(1.4);
-    ctx.save();
-    ctx.beginPath(); ctx.rect(x0, sy - 11, x1 - x0, 22); ctx.clip();
-    ctx.strokeStyle = p.mark; ctx.lineWidth = 1; ctx.fillStyle = p.mark;
-    ctx.font = '9px Kalam, cursive'; ctx.textAlign = 'center';
-    ctx.beginPath();
-    for (let t = 4, i = 0; t < 460; t += 6, i++) {
-      const x = innerX + outDir * t;
-      const len = i % 10 === 0 ? 9 : (i % 5 === 0 ? 6 : 3.5);
-      ctx.moveTo(x, sy - 11); ctx.lineTo(x, sy - 11 + len);
-      if (i % 10 === 0 && i > 0) ctx.fillText(String(i / 10), x, sy + 5);
-    }
-    ctx.stroke();
-    ctx.restore();
+    const s = rulerStrip(p, outDir), r = spriteRes;
+    // crop the strip from its inner end: the left end for rulers pointing right, the right end otherwise
+    const srcX = outDir > 0 ? 0 : (RULER_LEN - len) * r;
+    const dstX = outDir > 0 ? innerX : innerX - len;
+    ctx.drawImage(s.c, srcX, 0, len * r, s.c.height, dstX, sy - 12, len, 24);
+    ctx.beginPath(); ctx.rect(x0, sy - 11, x1 - x0, 22); inkStroke(1.4);
   }
 
   function drawEraser(x0, x1, sy, innerX, outDir, p = PALETTES.erasers[0]) {
@@ -1375,7 +1447,7 @@
     ctx.beginPath(); ctx.rect(x0, sy - 14, x1 - x0, 28); inkStroke(1.4);
   }
 
-  function drawPencil(o, sy) {
+  function paintPencil(o, sy) {
     ctx.save();
     ctx.translate(o.x, sy); ctx.rotate(o.a);
     if (o.vx < 0) ctx.scale(-1, 1);
@@ -1420,44 +1492,41 @@
     if (oval) ctx.ellipse(-23, 0, 12.5, 8.5, 0, 0, Math.PI * 2);   // finger loop
     else ctx.arc(-21, 0, 9.5, 0, Math.PI * 2);                    // thumb loop
   }
+  // each half of the scissors (blade + handle) is a sprite; only the two angles change per frame
+  function scissorHalf(col, s) {
+    return sharedSprite('scissor' + s + col, 116, 30, 44, 15, () => {
+      const g = ctx.createLinearGradient(0, -6, 0, 5);
+      g.addColorStop(0, '#f1f3f7'); g.addColorStop(0.55, s < 0 ? '#c4cad4' : '#b3bac6'); g.addColorStop(1, '#8e97a5');
+      ctx.fillStyle = g; bladePath(); ctx.fill(); inkStroke(1.1);
+      ctx.beginPath(); ctx.moveTo(2, 2.4); ctx.lineTo(60, 0.6);
+      ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1; ctx.stroke();       // bevel glint
+      // plastic neck and loop
+      ctx.fillStyle = col;
+      ctx.beginPath(); roundRectPath(-14, -4, 13, 8, 3); ctx.fill(); inkStroke(1.1);
+      handlePath(s > 0);
+      ctx.strokeStyle = COL.ink; ctx.lineWidth = 8.5; ctx.stroke();
+      ctx.strokeStyle = col; ctx.lineWidth = 6; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5; ctx.stroke();   // plastic sheen
+    });
+  }
+  function scissorShadow(s) {
+    return sharedSprite('scissorShadow' + s, 116, 30, 44, 15, () => {
+      ctx.fillStyle = 'rgba(34,53,107,.13)'; bladePath(); ctx.fill();
+      handlePath(s > 0); ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(34,53,107,.13)'; ctx.stroke();
+    });
+  }
   function drawScissors(o, sy) {
     const col = o.col || '#f07f1e';
-    for (const pass of ['shadow', 'main']) {
-      ctx.save();
-      if (pass === 'shadow') ctx.translate(o.x + 5, sy + 8); else ctx.translate(o.x, sy);
-      for (const s of [-1, 1]) {
-        ctx.save();
-        ctx.rotate(o.rot + s * o.open / 2);
-        if (pass === 'shadow') {
-          ctx.fillStyle = 'rgba(34,53,107,.13)'; bladePath(); ctx.fill();
-          handlePath(s > 0); ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(34,53,107,.13)'; ctx.stroke();
-        } else {
-          const g = ctx.createLinearGradient(0, -6, 0, 5);
-          g.addColorStop(0, '#f1f3f7'); g.addColorStop(0.55, s < 0 ? '#c4cad4' : '#b3bac6'); g.addColorStop(1, '#8e97a5');
-          ctx.fillStyle = g; bladePath(); ctx.fill(); inkStroke(1.1);
-          ctx.beginPath(); ctx.moveTo(2, 2.4); ctx.lineTo(60, 0.6);
-          ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1; ctx.stroke();       // bevel glint
-          // plastic neck and loop
-          ctx.fillStyle = col;
-          ctx.beginPath(); roundRectPath(-14, -4, 13, 8, 3); ctx.fill(); inkStroke(1.1);
-          handlePath(s > 0);
-          ctx.strokeStyle = COL.ink; ctx.lineWidth = 8.5; ctx.stroke();
-          ctx.strokeStyle = col; ctx.lineWidth = 6; ctx.stroke();
-          ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5; ctx.stroke();   // plastic sheen
-        }
-        ctx.restore();
-      }
-      if (pass === 'main') {   // brass pivot screw
-        ctx.fillStyle = '#c9a54a'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill(); inkStroke(1);
-        ctx.save(); ctx.rotate(o.rot);
-        ctx.beginPath(); ctx.moveTo(-2.5, 0); ctx.lineTo(2.5, 0); inkStroke(1.2);
-        ctx.restore();
-      }
-      ctx.restore();
-    }
+    for (const s of [-1, 1]) blit(scissorShadow(s), o.x + 5, sy + 8, o.rot + s * o.open / 2);
+    for (const s of [-1, 1]) blit(scissorHalf(col, s), o.x, sy, o.rot + s * o.open / 2);
+    // brass pivot screw
+    ctx.fillStyle = '#c9a54a'; ctx.beginPath(); ctx.arc(o.x, sy, 4, 0, Math.PI * 2); ctx.fill(); inkStroke(1);
+    ctx.save(); ctx.translate(o.x, sy); ctx.rotate(o.rot);
+    ctx.beginPath(); ctx.moveTo(-2.5, 0); ctx.lineTo(2.5, 0); inkStroke(1.2);
+    ctx.restore();
   }
 
-  function drawBlot(o, sy) {
+  function paintBlot(o, sy) {
     ctx.save(); ctx.translate(o.x, sy);
     ctx.fillStyle = (o.pal || PALETTES.blot[0]).ink;
     ctx.globalAlpha = 0.93;
@@ -1483,7 +1552,7 @@
     ctx.beginPath(); ctx.arc(o.x - 3, sy - 3, 2.2, 0, Math.PI * 2); ctx.fill();
   }
 
-  function drawStar(p, sy) {
+  function paintStar(p, sy) {
     ctx.save(); ctx.translate(p.x, sy); ctx.rotate(Math.sin(p.spin) * 0.35);
     const path = () => {
       ctx.beginPath();
@@ -1501,7 +1570,7 @@
     ctx.restore();
   }
 
-  function drawProtractor(o, sy) {
+  function paintProtractor(o, sy) {
     const cx = o.side < 0 ? 0 : W, a0 = o.side < 0 ? -Math.PI / 2 : Math.PI / 2;
     const GEO = o.pal || PALETTES.protractor[0];
     ctx.fillStyle = 'rgba(34,53,107,.12)';
@@ -1534,41 +1603,44 @@
       o.verts.forEach(([x, y], i) => (i ? ctx.lineTo(x * k + dx, y * k + dy) : ctx.moveTo(x * k + dx, y * k + dy)));
       ctx.closePath();
     };
-    ctx.save();
-    ctx.translate(o.x, sy);
-    ctx.save(); ctx.translate(4, 7); ctx.rotate(o.rot);
-    ctx.beginPath(); tri(1); tri(0.42); ctx.fillStyle = 'rgba(34,53,107,.12)'; ctx.fill('evenodd');
-    ctx.restore();
-    ctx.rotate(o.rot);
-    ctx.beginPath(); tri(1); tri(0.42);
-    ctx.fillStyle = GEO.fill; ctx.fill('evenodd');
-    ctx.strokeStyle = GEO.edge; ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.stroke();
-    // centimetre ticks along the bottom leg (from the right angle along +x)
-    const [x0, y0] = o.verts[0], [x1] = o.verts[1];
-    ctx.strokeStyle = GEO.mark; ctx.lineWidth = 1;
-    ctx.beginPath();
-    for (let x = x0 + 6, i = 1; x < x1 - 10; x += 6, i++) {
-      ctx.moveTo(x, y0); ctx.lineTo(x, y0 - (i % 5 === 0 ? 8 : 4));
-    }
-    ctx.stroke();
-    ctx.restore();
+    const R = o.R + 4;
+    // the shadow stays offset down-right on screen, so it is a separate sprite rotated at its own spot
+    const shadow = ownSprite(o, 'sprS', R * 2, R * 2, R, R, () => {
+      ctx.beginPath(); tri(1); tri(0.42); ctx.fillStyle = 'rgba(34,53,107,.12)'; ctx.fill('evenodd');
+    });
+    const body = ownSprite(o, 'spr', R * 2, R * 2, R, R, () => {
+      ctx.beginPath(); tri(1); tri(0.42);
+      ctx.fillStyle = GEO.fill; ctx.fill('evenodd');
+      ctx.strokeStyle = GEO.edge; ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.stroke();
+      // centimetre ticks along the bottom leg (from the right angle along +x)
+      const [x0, y0] = o.verts[0], [x1] = o.verts[1];
+      ctx.strokeStyle = GEO.mark; ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = x0 + 6, i = 1; x < x1 - 10; x += 6, i++) {
+        ctx.moveTo(x, y0); ctx.lineTo(x, y0 - (i % 5 === 0 ? 8 : 4));
+      }
+      ctx.stroke();
+    });
+    blit(shadow, o.x + 4, sy + 7, o.rot);
+    blit(body, o.x, sy, o.rot);
   }
 
   function drawWad(o, sy) {
-    ctx.save(); ctx.translate(o.x, sy);
-    ctx.fillStyle = 'rgba(34,53,107,.14)'; ctx.beginPath(); ctx.arc(5, 8, o.r, 0, Math.PI * 2); ctx.fill();
-    ctx.rotate(o.rot);
-    ctx.fillStyle = (o.pal || PALETTES.wad[0]).paper;
-    ctx.beginPath();
-    o.pts.forEach((k, i) => {
-      const a = i / o.pts.length * Math.PI * 2;
-      ctx.lineTo(Math.cos(a) * o.r * k, Math.sin(a) * o.r * k);
+    ctx.fillStyle = 'rgba(34,53,107,.14)'; ctx.beginPath(); ctx.arc(o.x + 5, sy + 8, o.r, 0, Math.PI * 2); ctx.fill();
+    const R = o.r * 1.15 + 3;
+    const s = ownSprite(o, 'spr', R * 2, R * 2, R, R, () => {
+      ctx.fillStyle = (o.pal || PALETTES.wad[0]).paper;
+      ctx.beginPath();
+      o.pts.forEach((k, i) => {
+        const a = i / o.pts.length * Math.PI * 2;
+        ctx.lineTo(Math.cos(a) * o.r * k, Math.sin(a) * o.r * k);
+      });
+      ctx.closePath(); ctx.fill(); inkStroke(1.3);
+      ctx.beginPath();
+      for (const [x1, y1, x2, y2] of o.creases) { ctx.moveTo(x1 * o.r, y1 * o.r); ctx.lineTo(x2 * o.r, y2 * o.r); }
+      inkStroke(0.8);
     });
-    ctx.closePath(); ctx.fill(); inkStroke(1.3);
-    ctx.beginPath();
-    for (const [x1, y1, x2, y2] of o.creases) { ctx.moveTo(x1 * o.r, y1 * o.r); ctx.lineTo(x2 * o.r, y2 * o.r); }
-    inkStroke(0.8);
-    ctx.restore();
+    blit(s, o.x, sy, o.rot);
   }
 
   function roundRectPath(x, y, w, h, r) {
@@ -1578,7 +1650,7 @@
     ctx.closePath();
   }
 
-  function drawClip(x, sy, col) {
+  function paintClip(x, sy, col) {
     ctx.save(); ctx.translate(x, sy);
     for (const [dx, dy, w, c] of [[3, 4, 4, 'rgba(34,53,107,.15)'], [0, 0, 4, COL.ink], [0, 0, 2.2, col]]) {
       ctx.beginPath();
@@ -1599,20 +1671,22 @@
     ctx.save(); ctx.translate(4, 7); ctx.rotate(o.ang);
     ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(0, -4, L, 8);
     ctx.restore();
-    ctx.rotate(o.ang);
-    const p = o.pal || PALETTES.compass[0];
-    ctx.fillStyle = p.leg;
-    ctx.beginPath(); ctx.moveTo(0, -4.5); ctx.lineTo(L - 16, -2.5); ctx.lineTo(L - 16, 2.5); ctx.lineTo(0, 4.5); ctx.closePath();
-    ctx.fill(); inkStroke(1.2);
-    // pencil stub held at the end of the leg
-    ctx.fillStyle = '#f4c430'; ctx.fillRect(L - 16, -3, 9, 6);
-    ctx.fillStyle = '#ecc99a'; ctx.beginPath(); ctx.moveTo(L - 7, -3); ctx.lineTo(L, 0); ctx.lineTo(L - 7, 3); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#3a3a3a'; ctx.beginPath(); ctx.moveTo(L - 3, -1.2); ctx.lineTo(L, 0); ctx.lineTo(L - 3, 1.2); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.rect(L - 16, -3, 9, 6); ctx.moveTo(L - 7, -3); ctx.lineTo(L, 0); ctx.lineTo(L - 7, 3); inkStroke(1);
-    // hinge over the needle
-    ctx.fillStyle = p.hinge; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
-    ctx.fillStyle = p.cap; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
+    const p = o.pal || PALETTES.compass[0];
+    const arm = ownSprite(o, 'spr', L + 14, 20, 10, 10, () => {
+      ctx.fillStyle = p.leg;
+      ctx.beginPath(); ctx.moveTo(0, -4.5); ctx.lineTo(L - 16, -2.5); ctx.lineTo(L - 16, 2.5); ctx.lineTo(0, 4.5); ctx.closePath();
+      ctx.fill(); inkStroke(1.2);
+      // pencil stub held at the end of the leg
+      ctx.fillStyle = '#f4c430'; ctx.fillRect(L - 16, -3, 9, 6);
+      ctx.fillStyle = '#ecc99a'; ctx.beginPath(); ctx.moveTo(L - 7, -3); ctx.lineTo(L, 0); ctx.lineTo(L - 7, 3); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#3a3a3a'; ctx.beginPath(); ctx.moveTo(L - 3, -1.2); ctx.lineTo(L, 0); ctx.lineTo(L - 3, 1.2); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.rect(L - 16, -3, 9, 6); ctx.moveTo(L - 7, -3); ctx.lineTo(L, 0); ctx.lineTo(L - 7, 3); inkStroke(1);
+      // hinge over the needle
+      ctx.fillStyle = p.hinge; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
+      ctx.fillStyle = p.cap; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill();
+    });
+    blit(arm, o.x, sy, o.ang);
   }
 
   function drawFan(o, sy) {
@@ -1629,19 +1703,22 @@
       ctx.beginPath(); ctx.moveTo(x0, yy); ctx.quadraticCurveTo(x0 + dir * 18, yy - 5, x0 + dir * 36, yy); ctx.stroke();
     }
     ctx.restore();
-    // the fan, half off the page edge
-    ctx.save(); ctx.translate(cx, sy);
-    ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.beginPath(); ctx.arc(4, 7, 26, 0, Math.PI * 2); ctx.fill();
-    const p = o.pal || PALETTES.fan[0];
-    ctx.fillStyle = p.body; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill(); inkStroke(1.4);
-    ctx.rotate(o.blade);
-    ctx.fillStyle = p.blade;
-    for (let b = 0; b < 3; b++) {
-      ctx.rotate(Math.PI * 2 / 3);
-      ctx.beginPath(); ctx.ellipse(12, 0, 11, 5.5, 0.3, 0, Math.PI * 2); ctx.fill(); inkStroke(1);
-    }
-    ctx.fillStyle = p.hub; ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
+    // the fan, half off the page edge: a still body plus a spinning blade sprite
+    const p = o.pal || PALETTES.fan[0], k = palKey(p);
+    const body = sharedSprite('fanBody' + k, 64, 68, 30, 30, () => {
+      ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.beginPath(); ctx.arc(4, 7, 26, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = p.body; ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill(); inkStroke(1.4);
+    });
+    const blades = sharedSprite('fanBlades' + k, 52, 52, 26, 26, () => {
+      ctx.fillStyle = p.blade;
+      for (let b = 0; b < 3; b++) {
+        ctx.rotate(Math.PI * 2 / 3);
+        ctx.beginPath(); ctx.ellipse(12, 0, 11, 5.5, 0.3, 0, Math.PI * 2); ctx.fill(); inkStroke(1);
+      }
+      ctx.fillStyle = p.hub; ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
+    });
+    blit(body, cx, sy);
+    blit(blades, cx, sy, o.blade);
   }
 
   // edge-mounted tools draw in a frame where +x points from their wall into the page
@@ -1662,28 +1739,28 @@
       ctx.fillStyle = 'rgba(160,190,230,.7)';
       ctx.beginPath(); ctx.arc(b.x - b.r * 0.35, sy - b.r * 0.35, b.r * 0.25, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.save();
-    toolFrame(o, sy);
-    const sq = 1 - 0.18 * o.squeeze;       // the tube gets squeezed on every squirt
-    ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(4, -11 * sq + 6, 74, 22 * sq);
-    // nozzle
-    ctx.fillStyle = '#f4f2ea';
-    ctx.beginPath(); ctx.moveTo(60, -7); ctx.lineTo(78, -3); ctx.lineTo(78, 3); ctx.lineTo(60, 7); ctx.closePath();
-    ctx.fill(); inkStroke(1.2);
-    // body with a printed label and a crimped end at the wall
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); roundRectPath(-4, -11 * sq, 66, 22 * sq, 5); ctx.fill();
-    ctx.fillStyle = (o.pal || PALETTES.glue[0]).label; ctx.fillRect(16, -11 * sq, 30, 22 * sq);
-    ctx.beginPath(); roundRectPath(-4, -11 * sq, 66, 22 * sq, 5); inkStroke(1.3);
-    ctx.beginPath();
-    for (let x = 2; x < 12; x += 3) { ctx.moveTo(x, -11 * sq); ctx.lineTo(x, 11 * sq); }
-    inkStroke(0.8);
-    ctx.save();
-    ctx.translate(31, 0); ctx.scale(inward(o), 1);   // keep the label readable on either edge
-    ctx.fillStyle = '#ffffff'; ctx.font = '700 10px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('GLUE', 0, 1);
-    ctx.restore();
-    ctx.restore();
+    // the tube is pre-painted per colour and edge; squeezing just squashes the sprite vertically
+    const p = o.pal || PALETTES.glue[0], dir = inward(o);
+    const tube = sharedSprite('glue' + dir + palKey(p), 168, 34, 84, 14, () => {
+      ctx.scale(dir, 1);
+      ctx.fillStyle = 'rgba(34,53,107,.13)'; ctx.fillRect(4, -5, 74, 22);
+      // nozzle
+      ctx.fillStyle = '#f4f2ea';
+      ctx.beginPath(); ctx.moveTo(60, -7); ctx.lineTo(78, -3); ctx.lineTo(78, 3); ctx.lineTo(60, 7); ctx.closePath();
+      ctx.fill(); inkStroke(1.2);
+      // body with a printed label and a crimped end at the wall
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); roundRectPath(-4, -11, 66, 22, 5); ctx.fill();
+      ctx.fillStyle = p.label; ctx.fillRect(16, -11, 30, 22);
+      ctx.beginPath(); roundRectPath(-4, -11, 66, 22, 5); inkStroke(1.3);
+      ctx.beginPath();
+      for (let x = 2; x < 12; x += 3) { ctx.moveTo(x, -11); ctx.lineTo(x, 11); }
+      inkStroke(0.8);
+      ctx.translate(31, 0); ctx.scale(dir, 1);       // keep the label readable on either edge
+      ctx.fillStyle = '#ffffff'; ctx.font = '700 10px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('GLUE', 0, 1);
+    });
+    blit(tube, wallX(o), sy, 0, 1, 1 - 0.18 * o.squeeze);   // squeezed on every squirt
   }
 
   function drawCutter(o, sy) {
@@ -1702,16 +1779,20 @@
       ctx.stroke();
       ctx.restore();
     }
-    // handle
-    const p = o.pal || PALETTES.cutter[0];
-    ctx.fillStyle = p.handle;
-    ctx.beginPath(); roundRectPath(-6, -12, h + 6, 24, 6); ctx.fill(); inkStroke(1.4);
-    ctx.beginPath();
-    for (let x = 6; x < 34; x += 5) { ctx.moveTo(x, -8); ctx.lineTo(x, 8); }
-    inkStroke(0.9);
-    ctx.fillStyle = p.slider;                       // slider button
-    ctx.beginPath(); roundRectPath(h - 30, -15, 14, 7, 2); ctx.fill(); inkStroke(1);
     ctx.restore();
+    // handle, pre-painted per colour and edge
+    const p = o.pal || PALETTES.cutter[0], dir = inward(o);
+    const handle = sharedSprite('cutter' + dir + palKey(p), 180, 34, 90, 17, () => {
+      ctx.scale(dir, 1);
+      ctx.fillStyle = p.handle;
+      ctx.beginPath(); roundRectPath(-6, -12, h + 6, 24, 6); ctx.fill(); inkStroke(1.4);
+      ctx.beginPath();
+      for (let x = 6; x < 34; x += 5) { ctx.moveTo(x, -8); ctx.lineTo(x, 8); }
+      inkStroke(0.9);
+      ctx.fillStyle = p.slider;                       // slider button
+      ctx.beginPath(); roundRectPath(h - 30, -15, 14, 7, 2); ctx.fill(); inkStroke(1);
+    });
+    blit(handle, wallX(o), sy);
   }
 
 
@@ -1733,17 +1814,15 @@
   }
 
   function drawStamp(o, sy) {
-    const p = o.pal || PALETTES.stamp[0];
+    const p = o.pal || PALETTES.stamp[0], k = palKey(p);
     // marks ("A+", "OK!"...) left by earlier landings, in this stamp's ink
-    for (const m of o.marks) {
-      ctx.save();
-      ctx.translate(m.x, sy); ctx.rotate(m.rot);
+    const mark = sharedSprite('stampMark' + k, 62, 46, 31, 23, () => {
       ctx.strokeStyle = `rgba(${p.ink},.65)`; ctx.fillStyle = `rgba(${p.ink},.65)`; ctx.lineWidth = 2.5;
       ctx.beginPath(); roundRectPath(-27, -19, 54, 38, 6); ctx.stroke();
       ctx.font = `700 ${p.text.length > 3 ? 15 : 22}px Kalam, cursive`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(p.text, 0, 2);
-      ctx.restore();
-    }
+    });
+    for (const m of o.marks) blit(mark, m.x, sy, m.rot);
     // h: how high the stamp is (1 = up by the viewer, 0 = on the page)
     const h = o.phase === 'warn' ? 1 - Math.min(1, o.t / o.warn) ** 2 : o.phase === 'down' ? 0 : Math.min(1, o.t / 0.45);
     const near = 1 - h;
@@ -1755,21 +1834,24 @@
       ctx.beginPath(); ctx.ellipse(o.x, sy, 36, 28, 0, 0, Math.PI * 2); ctx.stroke();
       ctx.restore();
     }
-    ctx.save();
-    ctx.translate(o.x - 16 * h, sy - 34 * h);
-    ctx.scale(1 + 0.25 * h, 1 + 0.25 * h);
-    ctx.fillStyle = p.wood;                                      // stamp block
-    ctx.beginPath(); roundRectPath(-32, -24, 64, 48, 7); ctx.fill(); inkStroke(1.4);
-    ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1;
-    ctx.beginPath(); roundRectPath(-26, -18, 52, 36, 5); ctx.stroke();
-    ctx.fillStyle = p.knob;                                      // handle knob
-    ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
-    ctx.fillStyle = 'rgba(255,255,255,.3)';
-    ctx.beginPath(); ctx.arc(-5, -5, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
+    // the block is painted at its largest (lifted) size and scaled down as it comes to the page
+    const BIG = 1.25;
+    const block = sharedSprite('stampBlock' + k, 70 * BIG, 54 * BIG, 35 * BIG, 27 * BIG, () => {
+      ctx.scale(BIG, BIG);
+      ctx.fillStyle = p.wood;                                      // stamp block
+      ctx.beginPath(); roundRectPath(-32, -24, 64, 48, 7); ctx.fill(); inkStroke(1.4);
+      ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1;
+      ctx.beginPath(); roundRectPath(-26, -18, 52, 36, 5); ctx.stroke();
+      ctx.fillStyle = p.knob;                                      // handle knob
+      ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
+      ctx.fillStyle = 'rgba(255,255,255,.3)';
+      ctx.beginPath(); ctx.arc(-5, -5, 5, 0, Math.PI * 2); ctx.fill();
+    });
+    const sc = (1 + 0.25 * h) / BIG;
+    blit(block, o.x - 16 * h, sy - 34 * h, 0, sc, sc);
   }
 
-  function drawCoffee(o, sy) {
+  function paintCoffee(o, sy) {
     const p = o.pal || PALETTES.coffee[0];
     ctx.fillStyle = `rgba(${p.fill},.42)`;
     blobPath(o.x, sy, o.r, o.pts); ctx.fill();
@@ -1785,7 +1867,7 @@
     }
   }
 
-  function drawNote(o, sy) {
+  function paintNote(o, sy) {
     ctx.save();
     ctx.translate(o.x, sy); ctx.rotate(o.rot);
     ctx.fillStyle = 'rgba(34,53,107,.14)'; ctx.fillRect(-18, -16, 44, 44);
@@ -1804,21 +1886,26 @@
   }
 
   function drawMagnifier(o, sy) {
-    // scorch trail the sun spot has burnt into the page
-    for (const s of o.scorch) {
+    // scorch trail the sun spot has burnt into the page (one path, one fill)
+    if (o.scorch.length) {
       ctx.fillStyle = 'rgba(110,60,20,.28)';
-      ctx.beginPath(); ctx.arc(s.x, sy, s.r, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath();
+      for (const s of o.scorch) { ctx.moveTo(s.x + s.r, sy); ctx.arc(s.x, sy, s.r, 0, Math.PI * 2); }
+      ctx.fill();
     }
     const flick = 1 + Math.sin(o.t * 30) * 0.08;
     // lens hovering above the page, up and to the side, with its cone of light down to the spot
     const lx = o.x - 30, ly = sy - 46, R = 30;
     ctx.fillStyle = 'rgba(255,225,120,.22)';
     ctx.beginPath(); ctx.moveTo(lx - R * 0.8, ly + R * 0.5); ctx.lineTo(o.x, sy); ctx.lineTo(lx + R * 0.9, ly - R * 0.3); ctx.closePath(); ctx.fill();
-    // the burning spot
-    const g = ctx.createRadialGradient(o.x, sy, 0, o.x, sy, 22 * flick);
-    g.addColorStop(0, 'rgba(255,255,235,1)'); g.addColorStop(0.3, 'rgba(255,200,60,.95)');
-    g.addColorStop(0.6, 'rgba(240,110,30,.5)'); g.addColorStop(1, 'rgba(240,110,30,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(o.x, sy, 22 * flick, 0, Math.PI * 2); ctx.fill();
+    // the burning spot: a pre-painted glow, pulsing in size
+    const glow = sharedSprite('sunGlow', 52, 52, 26, 26, () => {
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 24);
+      g.addColorStop(0, 'rgba(255,255,235,1)'); g.addColorStop(0.3, 'rgba(255,200,60,.95)');
+      g.addColorStop(0.6, 'rgba(240,110,30,.5)'); g.addColorStop(1, 'rgba(240,110,30,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
+    });
+    blit(glow, o.x, sy, 0, flick * 22 / 24, flick * 22 / 24);
     // smoke wisps
     ctx.strokeStyle = 'rgba(120,120,120,.35)'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
     for (let k = 0; k < 2; k++) {
@@ -1828,19 +1915,22 @@
       ctx.quadraticCurveTo(o.x + 8 + 4 * k, sy - 14 - ph * 26, o.x + 2 + 4 * k, sy - 22 - ph * 26); ctx.stroke();
     }
     ctx.globalAlpha = 1;
-    // handle, then the rim and glass
+    // handle, rim and glass: one sprite per colour, centred on the lens
     const p = o.pal || PALETTES.magnifier[0];
-    ctx.save(); ctx.translate(lx, ly); ctx.rotate(-2.3);
-    ctx.fillStyle = 'rgba(34,53,107,.12)'; ctx.fillRect(R + 4, -2, 42, 12);
-    ctx.fillStyle = p.handle; ctx.beginPath(); roundRectPath(R + 2, -6, 44, 12, 5); ctx.fill(); inkStroke(1.2);
-    ctx.fillStyle = p.rim; ctx.fillRect(R - 2, -4, 8, 8);
-    ctx.restore();
-    ctx.fillStyle = 'rgba(180,220,255,.28)';
-    ctx.beginPath(); ctx.arc(lx, ly, R, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = p.rim; ctx.lineWidth = 5; ctx.stroke();
-    ctx.beginPath(); ctx.arc(lx, ly, R + 2.5, 0, Math.PI * 2); inkStroke(1.2);
-    ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.arc(lx, ly, R - 8, Math.PI * 1.1, Math.PI * 1.45); ctx.stroke();
+    const lens = sharedSprite('lens' + palKey(p), 126, 130, 88, 92, () => {
+      ctx.save(); ctx.rotate(-2.3);
+      ctx.fillStyle = 'rgba(34,53,107,.12)'; ctx.fillRect(R + 4, -2, 42, 12);
+      ctx.fillStyle = p.handle; ctx.beginPath(); roundRectPath(R + 2, -6, 44, 12, 5); ctx.fill(); inkStroke(1.2);
+      ctx.fillStyle = p.rim; ctx.fillRect(R - 2, -4, 8, 8);
+      ctx.restore();
+      ctx.fillStyle = 'rgba(180,220,255,.28)';
+      ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = p.rim; ctx.lineWidth = 5; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, R + 2.5, 0, Math.PI * 2); inkStroke(1.2);
+      ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(0, 0, R - 8, Math.PI * 1.1, Math.PI * 1.45); ctx.stroke();
+    });
+    blit(lens, lx, ly);
   }
 
   function drawBand(o, sy) {
@@ -1905,6 +1995,36 @@
       }
     }
     ctx.restore();
+  }
+
+  // ---------- sprite-backed versions of rigid obstacles ----------
+  // Each paints the original drawing once at the origin (unrotated), then blits it with the live transform.
+  function drawPencil(o, sy) {
+    const L = o.len / 2;
+    const s = ownSprite(o, 'spr', o.len + 12, 26, L + 3, 10, () => paintPencil({ ...o, x: 0, a: 0, vx: 1 }, 0));
+    blit(s, o.x, sy, o.a, o.vx < 0 ? -1 : 1);
+  }
+  function drawBlot(o, sy) {
+    const R = o.r * 1.85 + 6;
+    blit(ownSprite(o, 'spr', R * 2, R * 2, R, R, () => paintBlot({ ...o, x: 0 }, 0)), o.x, sy);
+  }
+  function drawStar(p, sy) {
+    blit(sharedSprite('star', 32, 32, 14, 14, () => paintStar({ x: 0, spin: 0 }, 0)), p.x, sy, Math.sin(p.spin) * 0.35);
+  }
+  function drawProtractor(o, sy) {
+    const cx = o.side < 0 ? 0 : W, R = o.r + 8;
+    const s = ownSprite(o, 'spr', R * 2, R * 2 + 4, R, R - 2, () => { ctx.translate(-cx, 0); paintProtractor(o, 0); });
+    blit(s, cx, sy);
+  }
+  function drawCoffee(o, sy) {
+    const R = o.r * 1.65 + 32;
+    blit(ownSprite(o, 'spr', R * 2, R * 2, R, R, () => paintCoffee({ ...o, x: 0 }, 0)), o.x, sy);
+  }
+  function drawNote(o, sy) {
+    blit(ownSprite(o, 'spr', 56, 58, 26, 26, () => paintNote({ ...o, x: 0, rot: 0 }, 0)), o.x, sy, o.rot);
+  }
+  function drawClip(x, sy, col) {
+    blit(sharedSprite('clip' + col, 48, 26, 21, 10, () => paintClip(0, 0, col)), x, sy);
   }
 
   function planeOutline(c = ctx) {
@@ -2478,9 +2598,35 @@
 
   // ---------- main loop ----------
   let last = performance.now();
+  // if frames keep running slow during play, step the resolution down a notch (and remember it)
+  let slowFor = 0;
+  function watchFrameRate(real) {
+    if (state !== 'play' || real > 0.25 || dprCap <= 1) return;   // ignore tab switches and menus
+    slowFor = real > 1 / 48 ? slowFor + real : Math.max(0, slowFor - real * 0.5);
+    if (slowFor > 1.5) {
+      slowFor = 0;
+      dprCap = Math.max(1, Math.round((dprCap - 0.25) * 4) / 4);
+      store.set('nosedive-res', String(dprCap));
+      resize();
+    }
+  }
+
+  // live frame rate next to the version label, refreshed twice a second
+  const versionEl = $('version'), VERSION = versionEl.textContent;
+  let fpsFrames = 0, fpsSince = performance.now();
+  function countFrame(now) {
+    fpsFrames++;
+    if (now - fpsSince < 500) return;
+    versionEl.textContent = `${VERSION} · ${Math.round(fpsFrames * 1000 / (now - fpsSince))} fps`;
+    fpsFrames = 0; fpsSince = now;
+  }
+
   function frame(now) {
-    const dt = Math.min(1 / 30, (now - last) / 1000);
+    const real = (now - last) / 1000;
+    const dt = Math.min(1 / 30, real);
     last = now;
+    watchFrameRate(real);
+    countFrame(now);
     // at high speed, split the frame so the plane can't skip through thin obstacles
     const steps = state === 'play' ? Math.max(1, Math.ceil(speed * dt / 10)) : 1;
     for (let i = 0; i < steps; i++) update(dt / steps);
