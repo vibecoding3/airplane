@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v33** (2026-10-15)
+Current version: **v34** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -14,7 +14,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v33 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v34 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -152,7 +152,7 @@ These were built and then removed at the player's request: the pen (drew a wall 
 
 ## 6. Generalized obstacles
 
-Every obstacle in the game is one of the **20 mechanics** below, dressed in a map's art. A mechanic defines how something moves, what hurts, how it warns the player, and what can be tuned. A map's obstacle is just *mechanic + look*. The goal is to build new maps (Sky dive, Skyscraper and later ones) by reusing these mechanics with new drawings, instead of writing new movement and collision code each time.
+Every obstacle in the game is one of the **20 mechanics** below, dressed in a map's art. A mechanic defines how something moves, what hurts, how it warns the player, and what can be tuned. A map's obstacle is just *mechanic + look*. The goal is to build any new map by reusing these mechanics with new drawings, instead of writing new movement and collision code each time.
 
 In the code, the mechanic lives in the generator (`make.<name>` in `js/obstacles.js`), the movement (`updateObstacle`) and the collision (`computeShapes`), both in `js/physics.js`. The look lives in the `draw*` / `paint*` functions in `js/draw-paper.js` and `js/draw-sea.js`. The Deep sea map already works this way: `SEA_MAKERS` maps each sea obstacle to the notebook generator whose mechanic it reuses.
 
@@ -190,32 +190,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 - **Reach:** piston and beam length, sweep radius, blast radius, push strength and band height.
 - **Unlock depth:** when the mechanic joins that map's obstacle pool, and how often it is picked.
 
-### 6.3 Reuse ideas for the planned sections
-
-| Mechanic | Sky dive (0–1,000 m) | Skyscraper (1,000–2,000 m) |
-|---|---|---|
-| Gap Wall | Cloud banks from both sides | Balconies or scaffolding from both sides |
-| Closing Jaws | Two storm clouds drifting together and apart | Sliding window shutters or elevator doors |
-| Static Hazards | Hailstones or floating balloons | Flower pots or bricks on ledges |
-| Wall Bulge | A thundercloud bulging from the edge | An AC unit or a rounded balcony |
-| Bouncing Slider | A glider or small plane crossing | A window-washer platform sliding along |
-| Rising Projectile | A firework rocket or a loose balloon rising | A pigeon flying up |
-| Drifting Swarm | Falling leaves or paper lanterns | Falling laundry or loose papers |
-| Conveyor | Geese flying across in a line | Cable-car cabins on a wire |
-| Spinning Drifter | A spinning maple seed | A tumbling frisbee or hubcap |
-| Spinning Blades | A helicopter rotor | A rooftop ventilation turbine |
-| Sweeping Arm | A windmill blade | A construction crane boom |
-| Wall Piston | — (no walls; could become a drone that darts in) | An extending window-washer ladder or flagpole |
-| Wall Turret | A cloud spitting hail sideways | A sprinkler or water jet from a window |
-| Charged Beam | Lightning arcing between two clouds | A security laser or welding spark |
-| Telegraphed Sweep | A kite tail swinging | A swinging sign or crane hook |
-| Telegraphed Slam | A lightning strike on a marked spot | A falling flower pot with its landing spot marked |
-| Proximity Blast | A firework that bursts as you pass | A sparking neon sign that shorts out |
-| Push Zone | A wind gust | An AC exhaust or air vent blast |
-| Effect Zone | Warm updraft (falls slower) or rain cloud (soggy) | Steam vent (falls slower) or a paint spill (debuff) |
-| Spring Line | A kite string or power line | A shop awning that bounces you |
-
-Sky dive has no walls at its edges, so wall-based mechanics there need a floating source on the side (a cloud, a balloon basket) or a different mechanic.
+---
 
 ## 7. Shop and progression
 
@@ -338,12 +313,4 @@ There is no build step and nothing to install. To play locally, open `index.html
 
 ## 11. Direction
 
-**Current focus (since v30): two maps, Paper and Deep sea,** each chosen from the menu.
-
-**On hold: one continuous map.** An earlier plan is paused, not cancelled:
-
-1. **Sky dive**, from 0 to 1,000 m: open sky going from space to blue to sunset to fields, with clouds and planes in the background and floating obstacles.
-2. **Skyscraper**, from 1,000 to 2,000 m: falling down a city tower from day to night, with obstacles sticking out from the building sides.
-3. **Deep sea**, from 2,000 m onward with no end: the existing sea map. Its look, fish and obstacle unlocks start again from the sea's own 0 m (clear water), while the depth counter, fall speed and difficulty keep following the total depth.
-
-In that plan the Paper map would be removed. Any new map or section should be built from the mechanics in section 6, with new art. Section 6.3 lists a starting idea for each mechanic.
+**Current focus: two maps, Paper and Deep sea,** each chosen from the menu. Any new map should be built from the mechanics in section 6, with new art.
