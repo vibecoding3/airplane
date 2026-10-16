@@ -23,6 +23,7 @@ const medalsAnnounced = new Set();   // medals already celebrated this run
 const POWER_MAX = 3;
 const MAGNET_RANGES = [0, 120, 180, 240];   // by magnet level
 const SLOWMO_TIME = 4, SLOWMO_SCALE = 0.5;    // slow-motion power-up: 4 real seconds at half speed
+const SLOWMO_FROM_M = 300;                    // it only appears from this depth on
 const timeScale = () => (plane.slowmo > 0 && state === 'play' ? SLOWMO_SCALE : 1);
 const NEAR_PULL = 60;                      // every star and power-up this close is pulled in, magnet or not
 const magnetRange = () => MAGNET_RANGES[plane.magnet];

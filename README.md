@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v57** (2026-10-15)
+Current version: **v58** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v57 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v58 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -251,7 +251,7 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
 | Magnet | White badge with a red rim and a horseshoe magnet | Pulls stars and power-ups from 120 units away | 180 units | 240 units |
 | Shield | White badge with a blue rim and a blue shield crest | 1 spare life | 2 spare lives | 3 spare lives |
 
-**Slow motion** (since v54, timed, no levels): a white badge with a purple rim and an hourglass. Picking it up runs the whole game at half speed for 4 seconds (falling, obstacles, steering), with a soft purple tint and a purple bar above the plane showing the time left, plus a falling "whoosh" sound. It is only offered when slow motion is not already running.
+**Slow motion** (since v54, timed, no levels): a white badge with a purple rim and an hourglass. Picking it up runs the whole game at half speed for 4 seconds (falling, obstacles, steering), with a soft purple tint and a purple bar just above the plane that shrinks toward its centre as time runs out (since v58), plus a falling "whoosh" sound. It only appears from 300 m on (since v58), and only when slow motion is not already running.
 
 - **Spawning:** from about 30 m on, a row can carry a power-up instead of a star, with at least about 45 m between power-ups (so roughly one every 50–80 m). A magnet or shield already at level 3 is not offered (a used shield level can be picked up again); once both are at level 3, slow motion is the only power-up still offered.
 - **Feedback:** "Magnet level 2!", "Shield level 3!" or "Slow motion!" pops up in the power's colour, with a burst of sparks and a chime. Using a shield shows "Shield used! N left".

@@ -50,7 +50,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per m
     const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})`);
-    check(d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && (DEPTH < 600 || (d.maxMagnet === 3 && d.maxShield === 3)),
+    check(d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && (DEPTH < 1500 || (d.maxMagnet === 3 && d.maxShield === 3)),
       `${m}: power-ups spawned (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
   }
 

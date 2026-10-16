@@ -329,7 +329,7 @@ function pickPower(y) {
   const options = [];
   if (plane.magnet < POWER_MAX) options.push('magnet');
   if (plane.lives < POWER_MAX) options.push('shield');
-  if (plane.slowmo <= 0) options.push('slowmo');
+  if (plane.slowmo <= 0 && y / PX_PER_M >= SLOWMO_FROM_M) options.push('slowmo');
   if (!options.length) return null;
   lastPowerY = y;
   return options[ri(0, options.length - 1)];

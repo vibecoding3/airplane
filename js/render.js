@@ -224,10 +224,11 @@ function render() {
     ctx.fillText(f.text, f.x, f.y - dist - (1 - f.life) * 40);
   }
   ctx.globalAlpha = 1;
-  if (plane.slowmo > 0 && state === 'play') {   // slow motion: a soft purple tint and a bar showing the time left
+  if (plane.slowmo > 0 && state === 'play') {   // slow motion: a soft purple tint and a bar over the plane showing the time left
     ctx.fillStyle = 'rgba(150,110,230,.10)'; ctx.fillRect(0, 0, W, H);
-    const w = (W - 120) * plane.slowmo / SLOWMO_TIME;
-    ctx.fillStyle = 'rgba(138,79,194,.85)'; ctx.fillRect(60, planeScreenY() - 52, w, 5);
+    // the bar sits just above the plane and shrinks toward its centre
+    const w = 110 * plane.slowmo / SLOWMO_TIME;
+    ctx.fillStyle = 'rgba(138,79,194,.9)'; ctx.beginPath(); roundRectPath(plane.x - w / 2, planeScreenY() - 34, w, 6, 3); ctx.fill();
   }
   if (flash > 0 && !reduceMotion) {           // milestone flash over the whole playfield
     ctx.fillStyle = `rgba(${flashCol},${(flash * 0.6).toFixed(3)})`;
