@@ -13,18 +13,12 @@ const COL = {
 const SKINS = [
   { id: 'classic', name: 'Classic', light: '#ffffff', dark: '#e9e7dd', keel: '#d6d3c6', line: COL.ink },
   { id: 'notebook', name: 'Notebook', light: '#fbf9f1', dark: '#eeebdf', keel: '#dcd7c4', line: COL.ink, pattern: 'lines' },
-  { id: 'news', name: 'Newspaper', light: '#ecebe5', dark: '#d8d6ce', keel: '#c3c0b5', line: '#2b2b2b', pattern: 'news',
-    trail: 'rgba(43,43,43,.4)' },
-  { id: 'kraft', name: 'Kraft', light: '#d6ad7e', dark: '#c09463', keel: '#a97f4e', line: '#5a3b1c',
-    trail: 'rgba(90,59,28,.4)' },
-  { id: 'red', name: 'Origami red', light: '#e2493b', dark: '#c4372b', keel: '#a82c22', line: '#5e1610',
-    trail: 'rgba(196,55,43,.45)' },
-  { id: 'cash', name: 'Banknote', light: '#d3e6c7', dark: '#b8d3a9', keel: '#9cbd8b', line: '#2f5a2a', pattern: 'cash',
-    trail: 'rgba(47,90,42,.45)' },
-  { id: 'gold', name: 'Gold foil', light: '#f6d66e', dark: '#dbb03a', keel: '#c49520', line: '#7a5508', pattern: 'shine',
-    trail: 'rgba(196,149,32,.55)' },
-  { id: 'stealth', name: 'Stealth', light: '#3c414c', dark: '#2a2e37', keel: '#1d2027', line: '#0d0f13', pattern: 'stealth',
-    trail: 'rgba(29,32,39,.5)' }
+  { id: 'news', name: 'Newspaper', light: '#ecebe5', dark: '#d8d6ce', keel: '#c3c0b5', line: '#2b2b2b', pattern: 'news' },
+  { id: 'kraft', name: 'Kraft', light: '#d6ad7e', dark: '#c09463', keel: '#a97f4e', line: '#5a3b1c' },
+  { id: 'red', name: 'Origami red', light: '#e2493b', dark: '#c4372b', keel: '#a82c22', line: '#5e1610' },
+  { id: 'cash', name: 'Banknote', light: '#d3e6c7', dark: '#b8d3a9', keel: '#9cbd8b', line: '#2f5a2a', pattern: 'cash' },
+  { id: 'gold', name: 'Gold foil', light: '#f6d66e', dark: '#dbb03a', keel: '#c49520', line: '#7a5508', pattern: 'shine' },
+  { id: 'stealth', name: 'Stealth', light: '#3c414c', dark: '#2a2e37', keel: '#1d2027', line: '#0d0f13', pattern: 'stealth' }
 ];
 const $ = id => document.getElementById(id);
 const rand = (a, b) => a + Math.random() * (b - a);

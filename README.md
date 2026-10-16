@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v35** (2026-10-15)
+Current version: **v36** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -14,7 +14,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v35 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v36 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -202,8 +202,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 | Extra life | 1 spare life per run — ★ 20 | 2 spare lives — ★ 40 | 3 spare lives — ★ 70 |
 | Star magnet (pull range) | 120 units — ★ 10 | 180 units — ★ 25 | 240 units — ★ 45 |
 
-- **Trails:** Pencil (free, default), Ink ★ 5, Dots ★ 5, Crayon ★ 10, Rainbow ★ 15, Sparkles ★ 20. Bought once, then switched with "Use".
-- **Skins** (all free for now): Classic, Notebook, Newspaper, Kraft, Origami red, Banknote, Gold foil, Stealth. The trail, the crumpled ball and the paper scraps follow the skin colour.
+- **Skins** (all free for now): Classic, Notebook, Newspaper, Kraft, Origami red, Banknote, Gold foil, Stealth. The crumpled ball and the paper scraps follow the skin colour. The plane leaves no trail (trails were removed in v36).
 
 ---
 
@@ -217,7 +216,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 | Map | Start and game-over screens | Paper / Deep sea picture tiles |
 
 ### Saved data (browser localStorage)
-`nosedive-best`, `nosedive-bank`, `nosedive-upgrades` (upgrade levels and owned trails), `nosedive-skin`, `nosedive-trail`, `nosedive-map`, `nosedive-muted`, `nosedive-cap60`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
+`nosedive-best`, `nosedive-bank`, `nosedive-upgrades` (upgrade levels), `nosedive-skin`, `nosedive-map`, `nosedive-muted`, `nosedive-cap60`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
 
 ---
 
@@ -230,7 +229,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 | Background as browser layers | The page colour, ruled lines, margin and holes (or the rising bubbles and the sea's sun rays) are CSS layers behind a transparent canvas. The compositor slides them into place each frame, so the canvas only draws formulas, fish, markers, obstacles and the plane. Screen shake moves the whole playfield with one CSS transform. |
 | No per-frame gradients | Scissor blades, glows and blasts use pre-painted sprites instead of creating gradients every frame |
 | Fewer large see-through fills | The desk fan's wind band tint was removed, and the cat paw and kelp warnings are dashed outlines |
-| Less garbage collection | Lists are pruned in place, and the plane's hit circles, trail points and static collision shapes are reused. The top bar only touches the page when a number changes. |
+| Less garbage collection | Lists are pruned in place, and the plane's hit circles and static collision shapes are reused. The top bar only touches the page when a number changes. |
 | Adaptive resolution | Render resolution goes up to 2×. Screens denser than 2.5× start at 1.5×. If play stays below about 48 fps for 1.5 s, the resolution steps down by 0.25 (never below 1×) and is remembered. |
 | Frame pacing | Gameplay runs at the display rate (or 60 fps with the option on); menus draw at 30 fps and the pause screen at 4 fps |
 | Text drawn directly | Measurements showed formula text is cheap to draw directly (the browser caches glyphs), so it isn't cached |
@@ -263,7 +262,7 @@ airplane/
     ├── maps.js             map definitions, page and water colours, paper background drawing
     ├── draw-paper.js       Paper obstacle art
     ├── draw-sea.js         Deep sea obstacle art
-    ├── render.js           plane, skins, trails, screen shake, frame drawing, map switching
+    ├── render.js           plane, skins, screen shake, frame drawing, map switching
     ├── ui.js               top bar, menus, start / pause / game over, skins, shop
     └── main.js             keyboard and touch input, main loop (loads last, starts the game)
 ```
@@ -288,8 +287,8 @@ There is no build step and nothing to install. To play locally, open `index.html
 | How an obstacle looks | `js/draw-paper.js` or `js/draw-sea.js` (`draw*` / `paint*`) |
 | Background decorations | `js/paper-background.js` (formulas) or `js/sea-background.js` (fish, specks, silhouettes) |
 | Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`) and the map tiles in `index.html` |
-| Plane, skins, trails | `js/core.js` (`SKINS`), `js/state.js` (`TRAILS`), `js/render.js` (`paintPlane`, `paintTrail`) |
-| Shop prices and upgrades | `js/state.js` (`UPGRADES`, `MAGNET_RANGES`, `TRAILS`) and `js/ui.js` (shop screen) |
+| Plane and skins | `js/core.js` (`SKINS`), `js/render.js` (`paintPlane`) |
+| Shop prices and upgrades | `js/state.js` (`UPGRADES`, `MAGNET_RANGES`) and `js/ui.js` (shop screen) |
 | Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js` |
 | Sounds | `js/audio.js` (`sfx`) |
 | Frame rate, resolution, input | `js/main.js`, plus `resize` in `js/core.js` |
@@ -303,14 +302,14 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `audio.js` | `sfx`, `tone`, `muted` |
 | `paper-background.js` | `FORMULA_TIERS`, `pickFormula`, `spawnFormula`, `updateFormulas` |
 | `sea-background.js` | `FISH`, `FISH_TIERS`, `spawnFish`, `drawFishes`, `drawSeaParticles` |
-| `state.js` | `state`, `plane`, `obstacles`, `dist`, `speed`, `UPGRADES`, `TRAILS`, `press` / `release`, `depthM`, `difficulty`, `baseFallSpeed`, `reset` |
+| `state.js` | `state`, `plane`, `obstacles`, `dist`, `speed`, `UPGRADES`, `press` / `release`, `depthM`, `difficulty`, `baseFallSpeed`, `reset` |
 | `obstacles.js` | `make` (generators), `PALETTES`, `SEA_MAKERS`, `seaPool`, `spawnRow`, `spawnFromPool`, `spawnRows` |
 | `physics.js` | `computeShapes` / `shapes`, `circleHits` (circles, rotated boxes, convex polygons), `planeCircles`, `updateObstacle`, `steer`, `update`, `crash` |
 | `maps.js` | `MAPS`, `mapId`, `SEA`, `RAINBOW`, `isDark`, `syncHudPage`, `drawPaper`, `drawFormulas`, `drawDepthMarkers` |
 | `draw-paper.js` | Paper obstacle `draw*` / `paint*` functions (`drawRuler`, `paintPencil`, `drawScissors`, `drawFan`, `drawStamp`, `drawPaw`, …) |
 | `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
-| `render.js` | `paintPlane`, `drawPlane`, `paintTrail`, `syncPaperLayers`, `render`, `applyMap` |
-| `ui.js` | `updateHud`, `showCard`, `start`, `pause`, `resume`, `gameOver`, `renderShop`, `buyUpgrade`, `chooseTrail` |
+| `render.js` | `paintPlane`, `drawPlane`, `syncPaperLayers`, `render`, `applyMap` |
+| `ui.js` | `updateHud`, `showCard`, `start`, `pause`, `resume`, `gameOver`, `renderShop`, `buyUpgrade` |
 | `main.js` | `watchFrameRate`, `frameInterval`, `frame` |
 
 ### 10.5 Dev tools (`tools/`)

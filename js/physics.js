@@ -275,15 +275,6 @@ function steer(dt) {
   if (plane.x > W - 16) { plane.x = W - 16; plane.vx = Math.min(0, plane.vx); }
 }
 
-function updateTrail() {
-  const th = -plane.ang;
-  // reuse the oldest point once the trail is full instead of allocating a new one every frame
-  const p = trail.length >= 34 ? trail.shift() : {};
-  p.x = plane.x + 12 * Math.sin(th);
-  p.y = dist + planeScreenY() - 12 * Math.cos(th);
-  trail.push(p);
-}
-
 function update(dt) {
   updateFormulas(dt);
   if (state === 'title' || state === 'over') {
@@ -294,7 +285,6 @@ function update(dt) {
       plane.vx = (nx - plane.x) / Math.max(dt, 1e-3);
       plane.x = nx;
       plane.ang = Math.atan2(plane.vx, 150);
-      updateTrail();
     }
     updateParticles(dt);
     return;
@@ -357,7 +347,6 @@ function update(dt) {
   }
   const targetAng = Math.atan2(plane.vx, speed + 60);
   plane.ang += (targetAng - plane.ang) * Math.min(1, 12 * dt);
-  updateTrail();
 
   spawnRows();
   for (const o of obstacles) updateObstacle(o, dt);

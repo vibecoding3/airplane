@@ -221,57 +221,8 @@ function renderShop() {
     row.append(cv, info, btn);
     list.append(row);
   }
-  renderTrails(pr);
 }
 
-// trails: buy once with stars, then pick which one to use
-function renderTrails(pr) {
-  const list = $('trailList');
-  list.replaceChildren();
-  const sample = Array.from({ length: 24 }, (_, i) => ({ x: 4 + i * 3.4, y: 15 + Math.sin(i * 0.45) * 7 }));
-  for (const t of TRAILS) {
-    const tile = document.createElement('div');
-    tile.className = 'trail' + (t.id === trailStyle ? ' selected' : '');
-    const cv = document.createElement('canvas');
-    cv.width = Math.round(84 * pr); cv.height = Math.round(30 * pr);
-    const c = cv.getContext('2d'); c.scale(pr, pr);
-    paintTrail(c, sample, t.id, 0.4);
-    const name = document.createElement('span'); name.textContent = t.name;
-    const btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'buy'; btn.dataset.trail = t.id;
-    if (t.id === trailStyle) {
-      btn.textContent = 'In use'; btn.disabled = true; btn.classList.add('owned');
-    } else if (ownsTrail(t)) {
-      btn.textContent = 'Use';
-      btn.setAttribute('aria-label', 'Use the ' + t.name + ' trail');
-      btn.addEventListener('click', () => chooseTrail(t));
-    } else {
-      btn.textContent = '★ ' + t.price;
-      btn.disabled = bank < t.price;
-      btn.setAttribute('aria-label', bank < t.price
-        ? `${t.name} trail costs ${t.price} stars. You need ${t.price - bank} more.`
-        : `Buy the ${t.name} trail for ${t.price} stars`);
-      btn.addEventListener('click', () => chooseTrail(t));
-    }
-    tile.append(cv, name, btn);
-    list.append(tile);
-  }
-}
-function chooseTrail(t) {
-  if (!ownsTrail(t)) {
-    if (bank < t.price) return;
-    bank -= t.price;
-    owned['trail-' + t.id] = true;
-    store.set('nosedive-bank', String(bank));
-    store.set('nosedive-upgrades', JSON.stringify(owned));
-    sfx.buy();
-  }
-  trailStyle = t.id;
-  store.set('nosedive-trail', t.id);
-  renderShop();
-  const btn = $('trailList').querySelector(`[data-trail="${t.id}"]`);
-  if (btn) btn.focus({ preventScroll: true });
-}
 $('shopBtn').addEventListener('click', openShop);
 $('shopBtnOver').addEventListener('click', openShop);
 $('shopDone').addEventListener('click', closeShop);

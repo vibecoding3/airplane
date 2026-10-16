@@ -1,4 +1,4 @@
-// Paper Nosedive — The plane, skins, trails, screen shake, the frame renderer and map switching.
+// Paper Nosedive — The plane, skins, screen shake, the frame renderer and map switching.
 'use strict';
 
 function planeOutline(c = ctx) {
@@ -105,67 +105,6 @@ function drawCrumple(x, y) {
   ctx.restore();
 }
 
-const trailPts = [];   // reused screen-space copy of the trail
-function drawTrail() {
-  for (let i = 0; i < trail.length; i++) {
-    const p = trailPts[i] || (trailPts[i] = { x: 0, y: 0 });
-    p.x = trail[i].x; p.y = trail[i].y - dist;
-  }
-  trailPts.length = trail.length;
-  paintTrail(ctx, trailPts, trailStyle, titleTime + time);
-}
-
-// trail styles from the Shop; pts run oldest (furthest behind the plane) to newest
-function paintTrail(c, pts, style, t) {
-  if (pts.length < 2) return;
-  c.save();
-  c.lineCap = 'round'; c.lineJoin = 'round';
-  const path = (jitter = 0) => {
-    c.beginPath();
-    pts.forEach((p, i) => {
-      const j = jitter ? Math.sin(i * 2.3) * jitter : 0;
-      i ? c.lineTo(p.x + j, p.y) : c.moveTo(p.x + j, p.y);
-    });
-  };
-  switch (style) {
-    case 'ink':
-      c.strokeStyle = 'rgba(31,63,168,.75)'; c.lineWidth = 2.2; path(); c.stroke();
-      break;
-    case 'dots':
-      c.fillStyle = skin.trail || 'rgba(85,88,94,.5)';
-      for (let i = 0; i < pts.length; i += 2) {
-        c.beginPath(); c.arc(pts[i].x, pts[i].y, 1.2 + 2 * i / pts.length, 0, Math.PI * 2); c.fill();
-      }
-      break;
-    case 'crayon':
-      c.strokeStyle = 'rgba(217,68,58,.4)'; c.lineWidth = 5.5; path(); c.stroke();
-      c.strokeStyle = 'rgba(217,68,58,.35)'; c.lineWidth = 2; path(1.6); c.stroke();
-      break;
-    case 'rainbow':
-      c.lineWidth = 3.2;
-      for (let i = 1; i < pts.length; i++) {
-        c.strokeStyle = `hsla(${(i * 14 + t * 120) % 360}, 85%, 55%, .8)`;
-        c.beginPath(); c.moveTo(pts[i - 1].x, pts[i - 1].y); c.lineTo(pts[i].x, pts[i].y); c.stroke();
-      }
-      break;
-    case 'sparkle':
-      c.strokeStyle = 'rgba(242,181,58,.35)'; c.lineWidth = 1.2; path(); c.stroke();
-      c.fillStyle = '#f2b53a';
-      for (let i = pts.length - 1; i >= 0; i -= 3) {
-        const s = Math.max(0.6, 2 + 1.6 * Math.sin(t * 9 + i)), { x, y } = pts[i];
-        c.beginPath();
-        c.moveTo(x, y - 2 * s); c.lineTo(x + s * 0.5, y - s * 0.5); c.lineTo(x + 2 * s, y); c.lineTo(x + s * 0.5, y + s * 0.5);
-        c.lineTo(x, y + 2 * s); c.lineTo(x - s * 0.5, y + s * 0.5); c.lineTo(x - 2 * s, y); c.lineTo(x - s * 0.5, y - s * 0.5);
-        c.closePath(); c.fill();
-      }
-      break;
-    default:                       // pencil: the original dashed graphite line
-      c.setLineDash([5, 7]);
-      c.strokeStyle = skin.trail || 'rgba(85,88,94,.45)'; c.lineWidth = 1.4; path(); c.stroke();
-  }
-  c.restore();
-}
-
 // screen shake moves the whole playfield (paper layers + canvas) in one compositor transform
 let shaking = false;
 function applyShake() {
@@ -246,7 +185,6 @@ function render() {
   }
   for (const p of pickups) drawStar(p, p.y - dist);
 
-  drawTrail();
   const py = planeScreenY();
   if (has('magnet') && plane.alive && state === 'play') {     // faint ring showing the magnet's reach
     ctx.save();

@@ -20,6 +20,7 @@ Tools setup (once): `cd tools && npm install`. Chrome is auto-detected (or set `
 - Deep sea has no rock-wall side columns (removed v31).
 - Removed obstacles — avoid similar mechanics: pen wall line, stylus ripple rings, sharpener pull, whiteout patch, thumbtack rows, magnifier homing.
 - Stars are Shop currency only (no metres). Skins are free.
+- No plane trail and no trails in the Shop (removed v36).
 - No Sky dive / Skyscraper / single-journey map — dropped for good. New maps reuse the 20 mechanics in README section 6 with new art.
 
 ## Style

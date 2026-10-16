@@ -1,9 +1,9 @@
-// Paper Nosedive — Game state, shop data (upgrades, trails), controls and speed rules.
+// Paper Nosedive — Game state, shop data (upgrades), controls and speed rules.
 'use strict';
 
 // ---------- game state ----------
 let state = 'title';          // title | play | paused | dying | over
-let plane, obstacles, pickups, particles, floaters, trail;
+let plane, obstacles, pickups, particles, floaters;
 let dist, speed, time, nextRowY, stars, shake, overTimer;
 let best = +store.get('nosedive-best') || 0;
 let skin = SKINS.find(s => s.id === store.get('nosedive-skin')) || SKINS[0];
@@ -23,14 +23,6 @@ const UPGRADES = [
   ] }
 ];
 const MAGNET_RANGES = [0, 120, 180, 240];   // by magnet level
-const TRAILS = [
-  { id: 'pencil', name: 'Pencil', price: 0 },
-  { id: 'ink', name: 'Ink', price: 5 },
-  { id: 'dots', name: 'Dots', price: 5 },
-  { id: 'crayon', name: 'Crayon', price: 10 },
-  { id: 'rainbow', name: 'Rainbow', price: 15 },
-  { id: 'sparkle', name: 'Sparkles', price: 20 }
-];
 let bank = +store.get('nosedive-bank') || 0;
 let owned = {};
 try { owned = JSON.parse(store.get('nosedive-upgrades') || '{}') || {}; } catch (e) { owned = {}; }
@@ -38,9 +30,6 @@ try { owned = JSON.parse(store.get('nosedive-upgrades') || '{}') || {}; } catch 
 const level = id => (owned[id] === true ? 1 : Math.max(0, Math.floor(+owned[id] || 0)));
 const has = id => level(id) > 0;
 const magnetRange = () => MAGNET_RANGES[Math.min(level('magnet'), MAGNET_RANGES.length - 1)];
-const ownsTrail = t => t.price === 0 || has('trail-' + t.id);
-let trailStyle = store.get('nosedive-trail') || 'pencil';
-if (!TRAILS.some(t => t.id === trailStyle && ownsTrail(t))) trailStyle = 'pencil';
 let titleTime = 0;
 
 // One control scheme for every device (tap/click a screen side, or press an arrow key):
@@ -73,7 +62,7 @@ const score = () => Math.floor(dist / PX_PER_M);   // stars are Shop money, not 
 
 function reset() {
   plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: level('life'), invuln: 0, soggy: 0, bubbled: 0 };
-  obstacles = []; pickups = []; particles = []; floaters = []; trail = [];
+  obstacles = []; pickups = []; particles = []; floaters = [];
   dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
   nextRowY = H + 140;
   formulas = []; nextFormulaY = 60; usedFormulas.clear(); fishes.length = 0; lastSceneryY = -1e9;
