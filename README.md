@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v41** (2026-10-15)
+Current version: **v42** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -11,11 +11,11 @@ Repository: https://github.com/vibecoding3/airplane
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
 - **Files:** `index.html`, `style.css` and 13 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
-- **Start menu:** a regular game menu (big title, best score and star count, map tiles, Play, Skins, Shop, a fold-out "How to play" and the 60 fps option) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, best depth, time and stars caught, the map tiles, Play again, Skins and Shop. The Skins and Shop cards are still sticky notes.
+- **Start menu:** a regular game menu (big title, best score and star count, map tiles, Play, Shop, a fold-out "How to play" and the 60 fps option) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, best depth, time and stars caught, the map tiles, Play again and Shop. The Shop card is still a sticky note.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v41 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v42 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -202,7 +202,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 | Extra life | 1 spare life per run — ★ 20 | 2 spare lives — ★ 40 | 3 spare lives — ★ 70 |
 | Star magnet (pull range) | 120 units — ★ 10 | 180 units — ★ 25 | 240 units — ★ 45 |
 
-- **Skins** (all free for now): Classic, Notebook, Newspaper, Kraft, Origami red, Banknote, Gold foil, Stealth. The crumpled ball and the paper scraps follow the skin colour. The plane leaves no trail (trails were removed in v36).
+- **Plane:** one classic white paper plane; the crumpled ball and paper scraps match it. There are no skins (removed in v42) and no trail (removed in v36).
 
 ---
 
@@ -216,7 +216,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 | Map | Start and game-over screens | Paper / Deep sea picture tiles |
 
 ### Saved data (browser localStorage)
-`nosedive-best`, `nosedive-bank`, `nosedive-upgrades` (upgrade levels), `nosedive-skin`, `nosedive-map`, `nosedive-muted`, `nosedive-cap60`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
+`nosedive-best`, `nosedive-bank`, `nosedive-upgrades` (upgrade levels), `nosedive-map`, `nosedive-muted`, `nosedive-cap60`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
 
 ---
 
@@ -264,8 +264,8 @@ airplane/
     ├── maps.js             map definitions, page and water colours, paper background drawing
     ├── draw-paper.js       Paper obstacle art
     ├── draw-sea.js         Deep sea obstacle art
-    ├── render.js           plane, skins, screen shake, frame drawing, map switching
-    ├── ui.js               top bar, menus, start / pause / game over, skins, shop
+    ├── render.js           plane, screen shake, frame drawing, map switching
+    ├── ui.js               top bar, menus, start / pause / game over, shop
     └── main.js             keyboard and touch input, main loop (loads last, starts the game)
 ```
 
@@ -289,7 +289,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | How an obstacle looks | `js/draw-paper.js` or `js/draw-sea.js` (`draw*` / `paint*`) |
 | Background decorations | `js/paper-background.js` (formulas) or `js/sea-background.js` (fish, specks, silhouettes) |
 | Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`) and the map tiles in `index.html` |
-| Plane and skins | `js/core.js` (`SKINS`), `js/render.js` (`paintPlane`) |
+| Plane look | `js/core.js` (`PLANE` colours), `js/render.js` (`paintPlane`) |
 | Shop prices and upgrades | `js/state.js` (`UPGRADES`, `MAGNET_RANGES`) and `js/ui.js` (shop screen) |
 | Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js`; start-menu picture in `img/menu-bg.svg` |
 | Sounds | `js/audio.js` (`sfx`) |
@@ -300,7 +300,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 
 | File | Key names |
 |---|---|
-| `core.js` | `W` (playfield width 400), `PX_PER_M`, `COL`, `SKINS`, `rand`, `clamp`, `lerp`, `prune`, `store`, `resize`, `dprCap`, `makeSprite`, `sharedSprite`, `ownSprite`, `blit`, `invalidateSprites` |
+| `core.js` | `W` (playfield width 400), `PX_PER_M`, `COL`, `PLANE`, `rand`, `clamp`, `lerp`, `prune`, `store`, `resize`, `dprCap`, `makeSprite`, `sharedSprite`, `ownSprite`, `blit`, `invalidateSprites` |
 | `audio.js` | `sfx`, `tone`, `muted` |
 | `paper-background.js` | `FORMULA_TIERS`, `pickFormula`, `spawnFormula`, `updateFormulas` |
 | `sea-background.js` | `FISH`, `FISH_TIERS`, `spawnFish`, `drawFishes`, `drawSeaParticles` |

@@ -1,4 +1,4 @@
-// Paper Nosedive — The plane, skins, screen shake, the frame renderer and map switching.
+// Paper Nosedive — The plane, screen shake, the frame renderer and map switching.
 'use strict';
 
 function planeOutline(c = ctx) {
@@ -7,55 +7,9 @@ function planeOutline(c = ctx) {
   c.lineTo(2, -9); c.lineTo(14, -14); c.closePath();
 }
 
-// surface detail for a skin, drawn in plane space and clipped to the plane outline
-function skinPattern(c, pattern) {
-  c.lineCap = 'round';
-  switch (pattern) {
-    case 'lines':
-      c.strokeStyle = 'rgba(110,150,200,.6)'; c.lineWidth = 0.7; c.beginPath();
-      for (let y = -12; y < 20; y += 4.5) { c.moveTo(-15, y); c.lineTo(15, y); }
-      c.stroke();
-      c.strokeStyle = 'rgba(220,110,110,.7)'; c.beginPath(); c.moveTo(-8, -15); c.lineTo(-8, 20); c.stroke();
-      break;
-    case 'news': {
-      c.fillStyle = 'rgba(40,40,40,.75)'; c.fillRect(-12, -13, 24, 2.4);
-      c.strokeStyle = 'rgba(40,40,40,.45)'; c.lineWidth = 0.9; c.beginPath();
-      const cuts = [3, 7, 4, 9, 5, 6, 8, 3, 6, 5];
-      for (let y = -8, r = 0; y < 18; y += 3, r++) {
-        for (let x = -14, i = r; x < 14; i++) {
-          const len = cuts[i % cuts.length];
-          c.moveTo(x, y); c.lineTo(Math.min(14, x + len), y);
-          x += len + 1.6;
-        }
-      }
-      c.stroke();
-      break;
-    }
-    case 'cash':
-      c.strokeStyle = 'rgba(47,90,42,.6)'; c.lineWidth = 0.6; c.beginPath();
-      for (let k = -30; k < 30; k += 3) { c.moveTo(k, -15); c.lineTo(k + 20, 20); }
-      c.stroke();
-      c.fillStyle = '#e6f0de'; c.beginPath(); c.ellipse(0, 0, 4.2, 6, 0, 0, Math.PI * 2); c.fill();
-      c.strokeStyle = '#2f5a2a'; c.lineWidth = 1; c.stroke();
-      c.fillStyle = '#2f5a2a'; c.font = '700 8px Georgia, serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.fillText('$', 0, 0.5);
-      break;
-    case 'shine':
-      c.fillStyle = 'rgba(255,255,255,.6)';
-      c.beginPath(); c.moveTo(-16, -2); c.lineTo(-8, -15); c.lineTo(-3, -15); c.lineTo(-11, -2); c.closePath(); c.fill();
-      c.beginPath(); c.moveTo(-2, 14); c.lineTo(8, -4); c.lineTo(10, -4); c.lineTo(0, 14); c.closePath(); c.fill();
-      break;
-    case 'stealth':
-      c.strokeStyle = 'rgba(150,180,230,.55)'; c.lineWidth = 0.8; c.beginPath();
-      c.moveTo(0, 16); c.lineTo(-11, -11); c.moveTo(0, 16); c.lineTo(11, -11);
-      c.moveTo(-7, -4); c.lineTo(-3, -6); c.moveTo(7, -4); c.lineTo(3, -6);
-      c.stroke();
-      break;
-  }
-}
-
 // the plane at the origin, nose pointing down (+y); bank > 0 means it is moving right
-function paintPlane(c, s, bank) {
+function paintPlane(c, bank) {
+  const s = PLANE;
   c.lineJoin = 'round'; c.lineCap = 'round';
   c.fillStyle = bank > 0 ? s.dark : s.light;
   c.beginPath(); c.moveTo(0, 20); c.lineTo(-14, -14); c.lineTo(-2, -9); c.closePath(); c.fill();
@@ -63,9 +17,6 @@ function paintPlane(c, s, bank) {
   c.beginPath(); c.moveTo(0, 20); c.lineTo(14, -14); c.lineTo(2, -9); c.closePath(); c.fill();
   c.fillStyle = s.keel;
   c.beginPath(); c.moveTo(0, 20); c.lineTo(-2, -9); c.lineTo(0, -12); c.lineTo(2, -9); c.closePath(); c.fill();
-  if (s.pattern) {
-    c.save(); planeOutline(c); c.clip(); skinPattern(c, s.pattern); c.restore();
-  }
   c.strokeStyle = s.line;
   planeOutline(c); c.lineWidth = 1.4; c.stroke();
   c.beginPath(); c.moveTo(0, 20); c.lineTo(0, -12); c.lineWidth = 1; c.stroke();
@@ -84,13 +35,13 @@ function drawPlane(x, y, ang) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(-ang);
   if (plane.invuln > 0) ctx.globalAlpha = Math.floor(plane.invuln * 12) % 2 ? 0.3 : 1;
   if (plane.lives > 0) paintLifeOutline(ctx);
-  paintPlane(ctx, skin, clamp(plane.vx / 400, -1, 1));
+  paintPlane(ctx, clamp(plane.vx / 400, -1, 1));
   ctx.restore();
 }
 
 function drawCrumple(x, y) {
   ctx.save(); ctx.translate(x, y);
-  ctx.fillStyle = skin.light;
+  ctx.fillStyle = PLANE.light;
   ctx.beginPath();
   const pts = [[0, -13], [9, -10], [13, -1], [10, 9], [1, 13], [-9, 10], [-13, 1], [-10, -9]];
   pts.forEach(([a, b], i) => i ? ctx.lineTo(a, b) : ctx.moveTo(a, b));
@@ -189,7 +140,7 @@ function render() {
     ctx.save(); ctx.globalAlpha = clamp(p.life, 0, 1);
     ctx.translate(p.x, sy); ctx.rotate(p.rot);
     if (p.kind === 'scrap') {
-      ctx.fillStyle = skin.light;
+      ctx.fillStyle = PLANE.light;
       ctx.beginPath(); ctx.moveTo(-p.size, -p.size * 0.6); ctx.lineTo(p.size, -p.size * 0.3); ctx.lineTo(p.size * 0.4, p.size * 0.7); ctx.closePath();
       ctx.fill(); inkStroke(1);
     } else {

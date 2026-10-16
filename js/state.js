@@ -6,7 +6,6 @@ let state = 'title';          // title | play | paused | dying | over
 let plane, obstacles, pickups, particles, floaters;
 let dist, speed, time, nextRowY, stars, shake, overTimer;
 let best = +store.get('nosedive-best') || 0;
-let skin = SKINS.find(s => s.id === store.get('nosedive-skin')) || SKINS[0];
 
 // ---------- shop: stars collected in runs go into a bank and buy permanent upgrades ----------
 // each upgrade has three levels, bought one after another

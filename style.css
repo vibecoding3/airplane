@@ -149,16 +149,6 @@ body {
   padding: 5px 16px 3px; border-radius: 8px 12px 7px 10px;
 }
 .card .ghost:hover { background: rgba(255,255,255,.35); }
-.skins { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-.skin {
-  display: grid; justify-items: center; gap: 2px; padding: 6px 2px 5px;
-  font-family: var(--body); font-size: 13px; line-height: 1.05; color: var(--ink); text-align: center;
-  background: transparent; border: 1.5px dashed rgba(34,53,107,.35); border-radius: 8px; cursor: pointer;
-}
-.skin canvas { width: 52px; height: 52px; }
-.skin .tag { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; opacity: .6; }
-.skin[aria-checked="true"] { border: 2px solid var(--ink); background: rgba(255,255,255,.55); }
-.skin:hover { background: rgba(255,255,255,.35); }
 .card h3 { font-family: var(--display); font-weight: 700; font-size: 20px; margin: 4px 0 -4px; }
 .bank { font-size: 18px; }
 .bank strong { font-family: var(--display); font-size: 22px; color: #a8740f; font-variant-numeric: tabular-nums; }
@@ -187,7 +177,7 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .card .play:hover, .card .play:active { transform: none; } }
 
 /* ---------- start menu: a regular game menu over an illustrated sky (not a sticky note, since it
-   serves every map). The background image also stays behind the Skins and Shop cards opened from it. ---------- */
+   serves every map). The background image also stays behind the Shop card opened from it. ---------- */
 .overlay.menu-bg { background: #7fbbe8 url("img/menu-bg.svg") center / cover no-repeat; }
 .overlay > .menu { margin: auto; }
 .menu {

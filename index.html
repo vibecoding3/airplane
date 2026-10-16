@@ -19,7 +19,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v41</div>
+    <div class="version" id="version">v42</div>
 
     <div class="hud">
       <div>
@@ -45,10 +45,7 @@
           <button class="map-tile" type="button" data-map="sea" aria-pressed="false"><span class="map-thumb sea"></span>Deep sea</button>
         </div>
         <button class="menu-btn primary" id="startBtn" type="button">Play</button>
-        <div class="menu-row">
-          <button class="menu-btn" id="skinsBtn" type="button">Skins</button>
-          <button class="menu-btn" id="shopBtn" type="button">Shop</button>
-        </div>
+        <button class="menu-btn" id="shopBtn" type="button">Shop</button>
         <details class="menu-help">
           <summary>How to play</summary>
           <ul>
@@ -59,13 +56,6 @@
           </ul>
         </details>
         <label class="opt menu-opt"><input type="checkbox" id="cap60"> Limit to 60 fps (saves battery)</label>
-      </div>
-
-      <div class="card" id="skinsCard" hidden>
-        <h2>Skins</h2>
-        <p>Pick the paper for your plane. Every skin is free for now.</p>
-        <div class="skins" id="skinGrid" role="radiogroup" aria-label="Plane skins"></div>
-        <button class="play" id="skinsDone" type="button">Done</button>
       </div>
 
       <div class="card" id="shopCard" hidden>
@@ -97,10 +87,7 @@
           <button class="map-tile" type="button" data-map="sea" aria-pressed="false"><span class="map-thumb sea"></span>Deep sea</button>
         </div>
         <button class="menu-btn primary" id="againBtn" type="button">Play again</button>
-        <div class="menu-row">
-          <button class="menu-btn" id="skinsBtnOver" type="button">Skins</button>
-          <button class="menu-btn" id="shopBtnOver" type="button">Shop</button>
-        </div>
+        <button class="menu-btn" id="shopBtnOver" type="button">Shop</button>
       </div>
     </div>
   </div>

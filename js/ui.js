@@ -1,10 +1,10 @@
-// Paper Nosedive — HUD, menu cards, pause / game over, the skin picker and the shop.
+// Paper Nosedive — HUD, menu cards, pause / game over, and the shop.
 'use strict';
 
 // ---------- HUD & screens ----------
 const ui = {
   depth: $('depth'), stars: $('starCount'), best: $('best'),
-  overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'), skins: $('skinsCard'),
+  overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'),
   shop: $('shopCard'), overBank: $('overBank'),
   overTitle: $('overTitle'), overDetail: $('overDetail'), overBest: $('overBest'), stamp: $('recordStamp'),
   pauseBtn: $('pauseBtn'), muteBtn: $('muteBtn')
@@ -27,9 +27,8 @@ function showCard(which) {
   ui.title.hidden = which !== 'title';
   ui.pause.hidden = which !== 'pause';
   ui.over.hidden = which !== 'over';
-  ui.skins.hidden = which !== 'skins';
   ui.shop.hidden = which !== 'shop';
-  // the start menu (and the Skins / Shop cards opened from it) sit on the sky picture instead of the map
+  // the start menu (and the Shop card opened from it) sit on the sky picture instead of the map
   ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
   ui.overlay.classList.toggle('dim', !!which && state !== 'title');   // pause / game over: dim the game behind
   if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); }
@@ -96,49 +95,6 @@ $('startBtn').addEventListener('click', start);
 $('againBtn').addEventListener('click', start);
 $('resumeBtn').addEventListener('click', resume);
 
-// ---------- skin picker ----------
-let skinsReturn = 'title';
-const skinButtons = [];
-function openSkins() {
-  skinsReturn = state === 'over' ? 'over' : 'title';
-  showCard('skins');
-  const current = skinButtons.find(b => b.dataset.skin === skin.id);
-  if (current) current.focus({ preventScroll: true });
-}
-function closeSkins() { showCard(skinsReturn); }
-function selectSkin(s) {
-  skin = s;
-  store.set('nosedive-skin', s.id);
-  for (const b of skinButtons) b.setAttribute('aria-checked', String(b.dataset.skin === s.id));
-}
-function buildSkinGrid() {
-  const grid = $('skinGrid');
-  const pr = Math.min(window.devicePixelRatio || 1, 2);
-  for (const s of SKINS) {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'skin';
-    b.setAttribute('role', 'radio');
-    b.dataset.skin = s.id;
-    const cv = document.createElement('canvas');
-    cv.width = cv.height = Math.round(52 * pr);
-    const c = cv.getContext('2d');
-    c.scale(pr, pr);
-    c.translate(26, 24); c.rotate(-0.35); c.scale(1.3, 1.3);
-    paintPlane(c, s, -0.5);
-    const name = document.createElement('span'); name.textContent = s.name;
-    const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = 'Free';
-    b.append(cv, name, tag);
-    b.addEventListener('click', () => selectSkin(s));
-    grid.append(b);
-    skinButtons.push(b);
-  }
-  selectSkin(skin);
-}
-buildSkinGrid();
-$('skinsBtn').addEventListener('click', openSkins);
-$('skinsBtnOver').addEventListener('click', openSkins);
-$('skinsDone').addEventListener('click', closeSkins);
-
 // ---------- shop ----------
 let shopReturn = 'title';
 function openShop() {
@@ -165,7 +121,7 @@ function drawUpgradeIcon(c, id) {
   if (id === 'life') {
     c.rotate(-0.35); c.scale(0.95, 0.95);
     paintLifeOutline(c);
-    paintPlane(c, skin, -0.5);
+    paintPlane(c, -0.5);
   } else {
     // horseshoe magnet with silver tips, scaled so the whole shape sits inside the 44px icon
     c.translate(0, 3); c.rotate(0.55); c.scale(0.72, 0.72);

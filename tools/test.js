@@ -14,8 +14,8 @@ const EXPECTED = { notebook: 16, sea: 12 };   // obstacle types per map; update 
   console.log('     version label: ' + await page.evaluate(() => document.getElementById('version').textContent));
 
   // menus
-  for (const id of ['shopBtn', 'shopDone', 'skinsBtn', 'skinsDone']) { await page.click('#' + id); await wait(100); }
-  check(await page.evaluate(() => !document.getElementById('titleCard').hidden), 'shop and skins open and close');
+  for (const id of ['shopBtn', 'shopDone']) { await page.click('#' + id); await wait(100); }
+  check(await page.evaluate(() => !document.getElementById('titleCard').hidden), 'shop opens and closes');
 
   // deep runs with endless lives: every obstacle type should appear, no errors
   const deep = await page.evaluate(depth => {

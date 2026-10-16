@@ -19,7 +19,7 @@ Tools setup (once): `cd tools && npm install`. Chrome is auto-detected (or set `
 - No drop shadows anywhere (removed v29).
 - Deep sea has no rock-wall side columns (removed v31) and no sun rays (removed v39). Background fish never collide; new ones are background only unless asked.
 - Removed obstacles — avoid similar mechanics: pen wall line, stylus ripple rings, sharpener pull, whiteout patch, thumbtack rows, magnifier homing, coffee spill (soggy), rubber stamp (slam).
-- Stars are Shop currency only (no metres). Skins are free.
+- Stars are Shop currency only (no metres). No skins: one classic white plane (skins removed v42).
 - No plane trail and no trails in the Shop (removed v36).
 - No Sky dive / Skyscraper / single-journey map — dropped for good. New maps reuse the 20 mechanics in README section 6 with new art.
 

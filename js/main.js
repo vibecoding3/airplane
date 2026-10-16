@@ -4,8 +4,8 @@
 // ---------- input ----------
 window.addEventListener('keydown', e => {
   const k = e.key;
-  if (!ui.skins.hidden || !ui.shop.hidden) {   // a menu is open: let its buttons handle Enter/Space natively
-    if (k === 'Escape') ui.shop.hidden ? closeSkins() : closeShop();
+  if (!ui.shop.hidden) {   // the shop is open: let its buttons handle Enter/Space natively
+    if (k === 'Escape') closeShop();
     return;
   }
   const side = keySide(k);
