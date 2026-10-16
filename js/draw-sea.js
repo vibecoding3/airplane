@@ -267,8 +267,10 @@ function drawBoom(o, sy, T) {
 
 // naval mine on a chain: blinks with its blast circle showing, then explodes
 function drawMine(o, sy) {
-  ctx.strokeStyle = 'rgba(70,80,92,.7)'; ctx.lineWidth = 1.6;
-  ctx.beginPath(); for (let y = 18; y < 130; y += 9) { ctx.moveTo(o.x - 2, sy + y); ctx.lineTo(o.x + 2, sy + y + 6); } ctx.stroke();
+  if (!o.space) {                                  // the chain (space mines just float)
+    ctx.strokeStyle = 'rgba(70,80,92,.7)'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); for (let y = 18; y < 130; y += 9) { ctx.moveTo(o.x - 2, sy + y); ctx.lineTo(o.x + 2, sy + y + 6); } ctx.stroke();
+  }
   if (o.phase === 'boom' || (o.phase === 'gone' && o.t < BOOM_END - 0.35)) {
     drawBoom(o, sy, o.phase === 'boom' ? o.t : 0.35 + o.t);
     return;
@@ -280,14 +282,15 @@ function drawMine(o, sy) {
     ctx.beginPath(); ctx.arc(o.x, sy, o.blast, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
   }
-  blit(sharedSprite('mine', 50, 50, 25, 25, () => {
-    ctx.strokeStyle = COL.ink; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+  const sp = !!o.space;                            // in space: a lighter metal shell with pale outlines
+  blit(sharedSprite(sp ? 'mineSpace' : 'mine', 50, 50, 25, 25, () => {
+    ctx.strokeStyle = sp ? SPACE_LINE : COL.ink; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
     for (let i = 0; i < 8; i++) {
       const a = i / 8 * Math.PI * 2;
       ctx.beginPath(); ctx.moveTo(Math.cos(a) * 12, Math.sin(a) * 12); ctx.lineTo(Math.cos(a) * 19, Math.sin(a) * 19); ctx.stroke();
-      ctx.fillStyle = '#6b727c'; ctx.beginPath(); ctx.arc(Math.cos(a) * 19, Math.sin(a) * 19, 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = sp ? '#c9d1da' : '#6b727c'; ctx.beginPath(); ctx.arc(Math.cos(a) * 19, Math.sin(a) * 19, 2.6, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.fillStyle = '#4a4f58'; ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
+    ctx.fillStyle = sp ? '#9aa6b8' : '#4a4f58'; ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI * 2); ctx.fill(); sp ? spaceStroke(1.3) : inkStroke(1.3);
     ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(-4, -4, 4, 0, Math.PI * 2); ctx.fill();
   }), o.x, sy);
   const on = o.phase === 'blink' ? Math.floor(o.t * 12) % 2 === 0 : Math.floor(o.t * 1.5) % 2 === 0;

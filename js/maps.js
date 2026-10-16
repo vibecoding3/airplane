@@ -11,9 +11,12 @@ const pageTop = k => k * PAGE_M * PX_PER_M + planeScreenY();
 // ---------- maps: only the background changes; obstacles and rules stay the same ----------
 // deep sea: the water darkens every 100 m and stays at the darkest shade below 1,000 m
 const SEA = ['#c4ecf4', '#a3dcec', '#80c8e2', '#5daed3', '#3f92c0', '#2c76a6', '#205c88', '#18456b', '#123352', '#0d253d', '#091a2c'];
+// space: deep blue sky turning to black, then faintly tinted nebula darks, near-black below 1,000 m
+const SPACE = ['#2a5298', '#1a3570', '#10204a', '#0b1432', '#140f33', '#0a1b2e', '#1a0e2c', '#0c1533', '#120a28', '#0a1026', '#06070f'];
 const MAPS = {
   notebook: { name: 'Paper', colour: k => (k < 1 ? COL.paper : RAINBOW[(k - 1) % RAINBOW.length]), formulas: true },
-  sea: { name: 'Deep sea', colour: k => SEA[clamp(k, 0, SEA.length - 1)], formulas: false }
+  sea: { name: 'Deep sea', colour: k => SEA[clamp(k, 0, SEA.length - 1)], formulas: false },
+  space: { name: 'Space', colour: k => SPACE[clamp(k, 0, SPACE.length - 1)], formulas: false }
 };
 let mapId = MAPS[store.get('nosedive-map')] ? store.get('nosedive-map') : 'notebook';
 const pageColor = k => MAPS[mapId].colour(k);
@@ -38,7 +41,7 @@ function syncHudPage() {         // the HUD's fade matches the page colour behin
 // (see syncPaperLayers); the canvas only adds the pencilled formulas and the depth markers
 function drawPaper() {
   if (MAPS[mapId].formulas) drawFormulas();
-  else { drawSeaParticles(); drawFishes(); }
+  else { mapId === 'space' ? drawSpaceDetails() : drawSeaParticles(); drawFishes(); }
   drawDepthMarkers();
   drawBestLine();
 }
@@ -72,7 +75,7 @@ function drawBestLine() {
   if (best <= 0 || !(state === 'play' || state === 'paused' || state === 'dying')) return;
   const y = best * PX_PER_M + planeScreenY() - dist;   // where the plane will be when the depth reaches the record
   if (y < -30 || y > H + 30) return;
-  const left = mapId === 'sea' ? 12 : 66, text = 'Your best · ' + fmt(best) + ' m';
+  const left = mapId === 'notebook' ? 66 : 12, text = 'Your best · ' + fmt(best) + ' m';
   ctx.save();
   ctx.strokeStyle = COL.ink; ctx.lineWidth = 5; ctx.setLineDash([14, 8]);
   ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
@@ -91,7 +94,7 @@ function drawDepthMarkers() {
     const col = isDark(pageColor(k)) ? '#d8eefa' : COL.graphite;
     ctx.save();
     ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.3; ctx.setLineDash([8, 6]);
-    ctx.beginPath(); ctx.moveTo(mapId === 'sea' ? 24 : 60, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(mapId === 'notebook' ? 60 : 24, y); ctx.lineTo(W, y); ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = col; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = 'right';
     ctx.fillText(fmt(k * PAGE_M) + ' m', W - 10, y - 6);

@@ -9,7 +9,8 @@
 const CH = {
   Dm: [50, 57, 62, 65], C: [48, 55, 60, 64], Bb: [46, 53, 58, 62], A: [45, 52, 57, 61], G: [43, 50, 55, 59],
   Am: [45, 52, 57, 60], F: [41, 48, 53, 57], E: [40, 47, 52, 56], Em: [40, 47, 52, 55], D: [38, 45, 50, 54],
-  Bm: [47, 54, 59, 62], B: [47, 54, 59, 63], Dm2: [38, 45, 50, 53]
+  Bm: [47, 54, 59, 62], B: [47, 54, 59, 63], Dm2: [38, 45, 50, 53],
+  Fmaj7: [41, 48, 52, 57], Em7: [40, 47, 50, 55], Am7: [45, 52, 55, 60], Cmaj7: [36, 43, 47, 52], Dm7: [38, 45, 48, 53]
 };
 // melody: one array per bar of [note, beats] (null = rest); every bar adds up to 4 beats
 const THEMES = {
@@ -29,6 +30,15 @@ const THEMES = {
     melody: [
       [[69, 1.5], [67, 0.5], [65, 1], [64, 1]], [[62, 1], [64, 1], [67, 2]], [[65, 1.5], [64, 0.5], [62, 1], [60, 1]], [[64, 3], [null, 1]],
       [[69, 1], [72, 1], [74, 1.5], [72, 0.5]], [[72, 1], [69, 1], [67, 2]], [[65, 1], [67, 1], [69, 1], [65, 1]], [[64, 2], [61, 1], [null, 1]]
+    ]
+  },
+  // Space: dreamy and floating — shimmering harp with echo over soft major-seventh chords and a high, slow lead
+  space: {
+    bpm: 70, lead: 'space', harp: [0, 2, 4, 3, 1, 3, 4, 2], harpStep: 0.5, echo: 0.4,
+    chords: ['Fmaj7', 'Em7', 'Am7', 'Cmaj7', 'Fmaj7', 'Em7', 'Dm7', 'E'],
+    melody: [
+      [[72, 1], [76, 1], [79, 2]], [[79, 1], [76, 3]], [[72, 2], [74, 1], [76, 1]], [[71, 4]],
+      [[69, 1], [72, 1], [77, 2]], [[76, 2], [74, 2]], [[72, 1], [74, 1], [77, 2]], [[76, 3], [null, 1]]
     ]
   },
   // Deep sea: slow and dark, long echoing harp notes and a lonely low flute
@@ -142,9 +152,9 @@ function lead(bus, kind, f, t, dur) {
   const a = actx, osc = a.createOscillator(), g = a.createGain(), vib = a.createOscillator(), vg = a.createGain();
   const horn = kind === 'horn';
   osc.type = horn ? 'sawtooth' : 'sine'; osc.frequency.value = f;
-  vib.frequency.value = kind === 'deep' ? 4 : 5.5; vg.gain.value = f * 0.006;
+  vib.frequency.value = kind === 'deep' ? 4 : kind === 'space' ? 3 : 5.5; vg.gain.value = f * (kind === 'space' ? 0.009 : 0.006);
   vib.connect(vg).connect(osc.frequency);
-  const vol = horn ? 0.035 : kind === 'deep' ? 0.07 : 0.06, att = horn ? 0.12 : 0.08;
+  const vol = horn ? 0.035 : kind === 'deep' ? 0.07 : kind === 'space' ? 0.05 : 0.06, att = horn ? 0.12 : kind === 'space' ? 0.25 : 0.08;
   g.gain.setValueAtTime(0, t);
   g.gain.linearRampToValueAtTime(vol, t + att);
   g.gain.setValueAtTime(vol * 0.85, Math.max(t + att, t + dur - 0.15));
@@ -152,7 +162,7 @@ function lead(bus, kind, f, t, dur) {
   let out = osc;
   if (horn) { const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1300; osc.connect(lp); out = lp; }
   out.connect(g).connect(bus);
-  if (kind === 'deep') { const e = a.createGain(); e.gain.value = 0.3; g.connect(e).connect(music.echo); }
+  if (kind === 'deep' || kind === 'space') { const e = a.createGain(); e.gain.value = kind === 'space' ? 0.45 : 0.3; g.connect(e).connect(music.echo); }
   osc.start(t); vib.start(t); osc.stop(t + dur + 0.1); vib.stop(t + dur + 0.1);
 }
 // a soft low drum (for the title theme)

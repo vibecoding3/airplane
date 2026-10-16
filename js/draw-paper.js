@@ -270,7 +270,7 @@ function drawFan(o, sy) {
   const cx = o.side < 0 ? 0 : W, dir = -o.side;
   // the wind band: gusts travelling away from the fan (no full-width tint, which costs a large blended fill)
   ctx.save();
-  ctx.strokeStyle = o.sea ? 'rgba(225,245,255,.6)' : 'rgba(90,130,190,.6)'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+  ctx.strokeStyle = o.space ? 'rgba(255,214,120,.65)' : o.sea ? 'rgba(225,245,255,.6)' : 'rgba(90,130,190,.6)'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
   for (let k = 0; k < 6; k++) {
     const yy = sy - o.band / 2 + (k + 0.5) * o.band / 6;
     const run = (o.t * 170 + k * 71) % (W + 60);
@@ -281,7 +281,7 @@ function drawFan(o, sy) {
     }
   }
   ctx.restore();
-  if (o.sea) return;                 // an ocean current: just moving water, no fan
+  if (o.sea || o.space) return;      // an ocean current or solar wind: no fan
   // the fan, half off the page edge: a still body plus a spinning blade sprite
   const p = o.pal || PALETTES.fan[0], k = palKey(p);
   const body = sharedSprite('fanBody' + k, 64, 68, 30, 30, () => {

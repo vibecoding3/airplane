@@ -260,6 +260,35 @@ const SEA_COLS = {
   glue: ['#e0a21a', '#7f8fa1', '#c0392b', '#3a66c4'],                         // submarine hulls
   starfish: ['#f28c28', '#e0503a', '#c75b9b', '#f2c84b', '#8a4fc2']
 };
+// Space obstacles: every one reuses a Paper or Deep sea obstacle's movement and collision with space art
+const SPACE_MAKERS = { girders: 'gate', asteroids: 'blots', ice: 'notes', airlock: 'erasers', probe: 'cutter',
+                       satellite: 'pencil', rocket: 'wad', sattrain: 'clips', tumbler: 'starfish', arm: 'compass',
+                       laser: 'zap', spacemine: 'mine', wind: 'fan', lowgrav: 'bubbles', moon: 'protractor' };
+const SPACE_COLS = {
+  gate: ['#c9ced6', '#e0a21a', '#d9443a', '#8fa3b8'],                         // girders
+  blot: ['#8a8178', '#6f6a73', '#9a7b62', '#7d8590'],                         // asteroids
+  note: ['#bfe8ff', '#d6f1ff', '#a8d8f0'],                                    // ice chunks
+  erasers: ['#d9dde3', '#c0c7cf', '#e6e0d0'],                                 // airlock doors
+  cutter: ['#c9ced6', '#e8913a', '#9fb3c8'],                                  // docking probes
+  pencil: ['#4f8ff0', '#7a8cf0', '#3fb8c8'],                                  // satellite panels
+  wad: ['#e2493b', '#2f6fd1', '#f2c84b'],                                     // rockets
+  clips: ['#f2c84b', '#c9ced6', '#e2493b'],                                   // tiny satellites
+  starfish: ['#8a8178', '#9a7b62', '#6f6a73'],                                // tumbling asteroids
+  compass: ['#f2f2f2', '#f2c84b'],                                            // robot arms
+  zap: ['#ff4a5a', '#3cff9a', '#4ab8ff'],                                     // laser beams
+  protractor: ['#d8d4c8', '#c9b9a6', '#b8c4d0']                               // moons
+};
+function spacePool(d) {
+  const pool = [['girders', 3], ['asteroids', 2], ['ice', 1.3], ['tumbler', 1.4], ['lowgrav', 1], ['satellite', 1 + 1.5 * d]];
+  if (d > 0.06) pool.push(['rocket', 1.2]);
+  if (d > 0.08) pool.push(['sattrain', 1.3], ['spacemine', 1.2]);
+  if (d > 0.1) pool.push(['moon', 1.3]);
+  if (d > 0.12) pool.push(['wind', 1.1]);
+  if (d > 0.15) pool.push(['airlock', 1.3], ['probe', 1.3]);
+  if (d > 0.2) pool.push(['laser', 1.2]);
+  if (d > 0.3) pool.push(['arm', 1.3]);
+  return pool;
+}
 function seaPool(d) {
   const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1]];
   if (d > 0.08) pool.push(['mine', 1.3]);
@@ -283,6 +312,7 @@ function pickPower(y) {
 
 function spawnRow(y, d) {
   if (mapId === 'sea') return spawnFromPool(y, d, seaPool(d));
+  if (mapId === 'space') return spawnFromPool(y, d, spacePool(d));
   const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
   if (d > 0.08) pool.push(['clips', 1.4]);
   if (d > 0.12) pool.push(['scissors', 0.6 + 1.6 * d]);
@@ -304,7 +334,7 @@ function spawnFromPool(y, d, pool) {
   for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
   lastType = type;
   const before = obstacles.length;
-  const extra = make[SEA_MAKERS[type] || type](y, d) || 0;
+  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || type](y, d) || 0;
   const rowPal = {}, rowSea = {};    // obstacles of the same kind in one row share a colour
   for (let i = before; i < obstacles.length; i++) {
     const o = obstacles[i];
@@ -313,9 +343,13 @@ function spawnFromPool(y, d, pool) {
       o.sea = true;
       const cols = SEA_COLS[o.type];
       if (cols) o.seaCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
+    } else if (mapId === 'space') {
+      o.space = true;
+      const cols = SPACE_COLS[o.type];
+      if (cols) o.spaceCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
     }
   }
-  if (type !== 'gate' && type !== 'coral' && type !== 'protractor') {
+  if (!['gate', 'coral', 'girders', 'protractor', 'moon'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
     else if (Math.random() < 0.28) pickups.push({ x: rand(40, W - 40), y: py, r: 10, spin: rand(0, 6) });

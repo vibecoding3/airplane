@@ -49,12 +49,27 @@ body {
   background-size: 100% calc(var(--u) * 250), 100% calc(var(--u) * 250), 100% calc(var(--u) * 375), 100% calc(var(--u) * 375), 100% calc(var(--u) * 375), 100% calc(var(--u) * 250);
   background-repeat: repeat-y;
 }
+/* Space map: a field of small stars of a few sizes (repeats divide 750 units, so scrolling stays seamless) */
+#world.map-space #ruling {
+  background-image:
+    radial-gradient(circle at calc(var(--u) * 40) calc(var(--u) * 30), rgba(255,255,255,.9) calc(var(--u) * 1.4), transparent calc(var(--u) * 1.6)),
+    radial-gradient(circle at calc(var(--u) * 230) calc(var(--u) * 90), rgba(255,255,255,.7) calc(var(--u) * 1), transparent calc(var(--u) * 1.2)),
+    radial-gradient(circle at calc(var(--u) * 330) calc(var(--u) * 160), rgba(255,240,200,.85) calc(var(--u) * 1.8), transparent calc(var(--u) * 2)),
+    radial-gradient(circle at calc(var(--u) * 120) calc(var(--u) * 200), rgba(200,220,255,.7) calc(var(--u) * 1.1), transparent calc(var(--u) * 1.3)),
+    radial-gradient(circle at calc(var(--u) * 300) calc(var(--u) * 40), rgba(255,255,255,.6) calc(var(--u) * 0.9), transparent calc(var(--u) * 1.1)),
+    radial-gradient(circle at calc(var(--u) * 180) calc(var(--u) * 320), rgba(255,255,255,.8) calc(var(--u) * 1.3), transparent calc(var(--u) * 1.5)),
+    radial-gradient(circle at calc(var(--u) * 70) calc(var(--u) * 140), rgba(255,255,255,.55) calc(var(--u) * 0.9), transparent calc(var(--u) * 1.1)),
+    radial-gradient(circle at calc(var(--u) * 370) calc(var(--u) * 290), rgba(255,220,240,.7) calc(var(--u) * 1.2), transparent calc(var(--u) * 1.4));
+  background-size: 100% calc(var(--u) * 250), 100% calc(var(--u) * 250), 100% calc(var(--u) * 250), 100% calc(var(--u) * 250),
+                   100% calc(var(--u) * 375), 100% calc(var(--u) * 375), 100% calc(var(--u) * 375), 100% calc(var(--u) * 375);
+  background-repeat: repeat-y;
+}
 /* readable top bar on dark water */
 #wrap.dark-page .hud { color: #e4f3fb; }
 #wrap.dark-page .hud button { color: #e4f3fb; border-color: #e4f3fb; }
 #wrap.dark-page .version { color: #e4f3fb; }
 /* map picker: two big picture tiles, on the start and game-over screens */
-.map-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.map-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .map-tile {
   display: grid; gap: 4px; justify-items: stretch; padding: 6px 6px 4px; cursor: pointer;
   font-family: var(--display); font-weight: 700; font-size: 17px; color: var(--ink); text-align: center;
@@ -67,6 +82,16 @@ body {
   background:
     linear-gradient(to right, transparent 16%, #e7a1a1 16%, #e7a1a1 18%, transparent 18%),
     repeating-linear-gradient(to bottom, #fbf9f1 0, #fbf9f1 9px, #bcd3ea 9px, #bcd3ea 10px);
+}
+.map-thumb.space {
+  background:
+    radial-gradient(circle at 70% 55%, #e3b778 0, #e3b778 7px, transparent 7.5px),
+    radial-gradient(ellipse 15px 4px at 70% 55%, transparent 9px, #e8d7a8 9px, #e8d7a8 11px, transparent 11.5px),
+    radial-gradient(circle at 20% 30%, #fff 0, #fff 1.2px, transparent 1.6px),
+    radial-gradient(circle at 42% 70%, #fff 0, #fff 1px, transparent 1.4px),
+    radial-gradient(circle at 88% 22%, #fff 0, #fff 1.2px, transparent 1.6px),
+    radial-gradient(circle at 30% 85%, #cfe0ff 0, #cfe0ff 1px, transparent 1.4px),
+    linear-gradient(#1a3570, #06070f);
 }
 .map-thumb.sea {
   background:

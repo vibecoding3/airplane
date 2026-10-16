@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v51** (2026-10-15)
+Current version: **v53** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,12 +10,12 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css` and 14 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
+- **Files:** `index.html`, `style.css` and 16 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
 - **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, the map tiles and Play again (the run time was removed in v45). There is no Shop (removed in v46).
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v51 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v53 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -102,6 +102,22 @@ The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fi
 
 **Colour variants:** most species come in 2–4 colour schemes, picked at random when each fish appears (60 looks across 28 species). For example: clownfish in orange, maroon, dark-banded or golden; tangs in blue, yellow or purple; jellyfish in pink, blue, violet or amber; octopuses in red, purple or orange; lanternfish with blue, green or pink lights. Background fish never collide with the plane.
 
+### 4.3 Space (since v53)
+The plane is thrown out of orbit and falls away from Earth into deeper and stranger space. Cartoon and playful in tone.
+- **Background colour:** deep blue sky at the start, turning to black by about 300 m, then faintly tinted nebula darks (purple, teal), near-black below 1,000 m.
+- **Stars:** a field of small stars of a few sizes slides past (one CSS layer, like the sea bubbles).
+- **Earth:** its glowing blue edge curves across the top of the first screen and slides away.
+- **Background scenery** (faded, never collides):
+
+| Depth | Scenery |
+|---|---|
+| 0–150 m | Small satellites, the space station, a waving astronaut |
+| 150–400 m | Satellites, astronauts, the Moon, comets |
+| 400–800 m | Mars, Saturn, the Moon, comets |
+| 800–1,500 m | Saturn, Mars, spiral galaxies, comets |
+| 1,500 m + | Galaxies, a black hole with a glowing ring, comets, and deeper down a whale made of stars |
+| Anywhere below 300 m | Rarely, a small UFO zipping past |
+
 ---
 
 ## 5. Obstacles
@@ -149,7 +165,28 @@ Eight sea obstacles reuse the movement and collision of a notebook obstacle with
 | Electric eel | Charges with a dashed preview line, then zaps a short lightning bolt out from the wall (14–22% of the width) | New | ~135 m |
 | Kelp | Seaweed frond sweeps out from the wall after a green dashed warning | Cat paw | ~135 m |
 
-### 5.3 Removed obstacles (history)
+### 5.3 Space map (15 types, since v53)
+Every Space obstacle reuses the movement and collision of a Paper or Deep sea obstacle (see `SPACE_MAKERS` in `js/obstacles.js`) with new art in `js/draw-space.js`. Outlines are pale so they read on black.
+
+| Space obstacle | Behaviour | Based on | Starts at |
+|---|---|---|---|
+| Station girders | Steel trusses from both walls with a gap; red lights blink on the end plates | Rulers | 0 m |
+| Asteroids | 1–3 cratered rocks that stay put | Ink blots | 0 m |
+| Ice chunks | 2–3 hexagonal ice chunks drifting down and swaying | Sticky notes | 0 m |
+| Tumbling asteroid | Spins while drifting, bouncing off the screen edges | Starfish | 0 m |
+| Satellite | A satellite with long solar panels sliding side to side | Pencil | 0 m |
+| Low-gravity field | A dashed purple zone with rising sparkles; slows the fall, never hurts | Bubble column | 0 m |
+| Rocket | A small rocket with a flickering flame launched up toward the plane | Paper wad | ~35 m |
+| Satellite train | A line of tiny satellites crossing | Paper clips | ~50 m |
+| Space mine | Floats (no chain); blinks with a dashed blast circle, then explodes in the cartoon burst | Naval mine | ~50 m |
+| Moon edge | A cratered moon bulging in from one side; slalom pairs deeper down | Protractor | ~65 m |
+| Solar wind | Golden streaks pushing the plane sideways (no body) | Ocean current | ~75 m |
+| Airlock doors | Two heavy doors with hazard stripes sliding shut and open | Erasers | ~100 m |
+| Docking probe | Shoots out of a hull, holds, slides back | Cutter | ~100 m |
+| Laser gate | Charges with a dashed line, then fires a short laser beam from the wall | Electric eel | ~135 m |
+| Robot arm | A station arm with a claw swinging all the way round its base | Drawing compass | ~215 m |
+
+### 5.4 Removed obstacles (history)
 These were built and then removed at the player's request: the pen (drew a wall line from the side), the stylus (expanding ripple rings), the pencil sharpener (pulled the plane), the whiteout patch (hid hazards), thumbtack rows, the magnifying glass (its sun spot chased the plane), and in v37 the coffee spill (made the plane soggy) and the rubber stamp (slammed down on a marked spot). Avoid these kinds of mechanics in future obstacles.
 
 ---
@@ -162,28 +199,28 @@ In the code, the mechanic lives in the generator (`make.<name>` in `js/obstacles
 
 ### 6.1 Mechanic catalogue
 
-| # | Mechanic | How it works | Warning | What hurts | Paper | Deep sea |
-|---|---|---|---|---|---|---|
-| 1 | **Gap Wall** | Two barriers from both walls leaving one gap; deeper down the gap slides side to side | The gap is visible | Both barriers | Rulers | Coral ledges |
-| 2 | **Closing Jaws** | Two blocks from both walls whose gap keeps opening and closing | The rhythm is visible | Both blocks | Erasers | Giant clam |
-| 3 | **Static Hazards** | 1–3 round hazards that don't move | — | The hazards | Ink blots | Sea urchins |
-| 4 | **Wall Bulge** | A large half-disc stuck to one wall; deeper down a pair on opposite walls forms a slalom | — | The bulge | Protractor | — |
-| 5 | **Bouncing Slider** | A long bar sliding sideways and bouncing off the walls | — | The bar | Pencil | — |
-| 6 | **Rising Projectile** | Thrown up the screen toward the plane, bouncing off the walls | — | The projectile | Paper wad | — |
-| 7 | **Drifting Swarm** | 2–3 items sinking slower than the plane while swaying side to side | — | Each item | Sticky notes | Jellyfish |
-| 8 | **Conveyor** | A row of evenly spaced pieces sliding across the screen | The gaps move with the row | Each piece | Paper clips | — |
-| 9 | **Spinning Drifter** | One shape spinning while it drifts sideways and bounces off the walls | — | The shape (triangle or circle) | Set square | Starfish |
-| 10 | **Spinning Blades** | Two blades spinning around a pivot while opening and closing, drifting slowly | — | Blades and handles | Scissors | — |
-| 11 | **Sweeping Arm** | An arm rotating all the way around a fixed pivot | The arc it traces | Arm and pivot | Drawing compass | — |
-| 12 | **Wall Piston** | Shoots out from a wall, holds, then retracts on a loop | The body at the wall | Base and extended part | Cutter | Moray eel |
-| 13 | **Wall Turret** | Mounted on a wall, fires projectiles straight across on a timer | Bow or nozzle cue before firing (sea version) | Base and projectiles | Glue tube | Submarine |
-| 14 | **Charged Beam** | On a wall; charges, then a beam crosses part of the screen for a moment | Dashed preview line while charging | Base and beam | — | Electric eel |
-| 15 | **Telegraphed Sweep** | A dashed wedge shows the danger area, then an arm swipes through it in an arc from a wall | Dashed wedge | The arm and its tip, only mid-swipe | Cat paw | Kelp |
-| 16 | **Telegraphed Slam** | A target appears at a spot, then something slams down there, lifts, and moves to a new spot | Darkening spot and dashed target | Only the moment it is down | — (was the rubber stamp, removed in v37) | — |
-| 17 | **Proximity Blast** | Sits still; when the plane gets close it arms, shows its blast radius, then explodes as the plane arrives | Fast blinking and a dashed blast circle | The body, then the blast | — | Naval mine |
-| 18 | **Push Zone** | A horizontal band that pushes the plane sideways while inside it; may have a solid source on the wall | Moving streaks | Only the source, if there is one | Desk fan (fan is solid) | Ocean current (no source) |
-| 19 | **Effect Zone** | A zone that never hurts but changes the plane for a while: a debuff or a buff | The zone itself | Nothing (can be paired with a hazard placed after it) | — (was the coffee spill, removed in v37) | Bubble column (falls slower) |
-| 20 | **Spring Line** | A line between two anchors; touching the line kicks the plane sideways instead of crashing it | — | Only the anchors | Rubber band | — |
+| # | Mechanic | How it works | Warning | What hurts | Paper | Deep sea | Space |
+|---|---|---|---|---|---|---|---|
+| 1 | **Gap Wall** | Two barriers from both walls leaving one gap; deeper down the gap slides side to side | The gap is visible | Both barriers | Rulers | Coral ledges | Station girders |
+| 2 | **Closing Jaws** | Two blocks from both walls whose gap keeps opening and closing | The rhythm is visible | Both blocks | Erasers | Giant clam | Airlock doors |
+| 3 | **Static Hazards** | 1–3 round hazards that don't move | — | The hazards | Ink blots | Sea urchins | Asteroids |
+| 4 | **Wall Bulge** | A large half-disc stuck to one wall; deeper down a pair on opposite walls forms a slalom | — | The bulge | Protractor | — | Moon edge |
+| 5 | **Bouncing Slider** | A long bar sliding sideways and bouncing off the walls | — | The bar | Pencil | — | Satellite |
+| 6 | **Rising Projectile** | Thrown up the screen toward the plane, bouncing off the walls | — | The projectile | Paper wad | — | Rocket |
+| 7 | **Drifting Swarm** | 2–3 items sinking slower than the plane while swaying side to side | — | Each item | Sticky notes | Jellyfish | Ice chunks |
+| 8 | **Conveyor** | A row of evenly spaced pieces sliding across the screen | The gaps move with the row | Each piece | Paper clips | — | Satellite train |
+| 9 | **Spinning Drifter** | One shape spinning while it drifts sideways and bounces off the walls | — | The shape (triangle or circle) | Set square | Starfish | Tumbling asteroid |
+| 10 | **Spinning Blades** | Two blades spinning around a pivot while opening and closing, drifting slowly | — | Blades and handles | Scissors | — | — |
+| 11 | **Sweeping Arm** | An arm rotating all the way around a fixed pivot | The arc it traces | Arm and pivot | Drawing compass | — | Robot arm |
+| 12 | **Wall Piston** | Shoots out from a wall, holds, then retracts on a loop | The body at the wall | Base and extended part | Cutter | Moray eel | Docking probe |
+| 13 | **Wall Turret** | Mounted on a wall, fires projectiles straight across on a timer | Bow or nozzle cue before firing (sea version) | Base and projectiles | Glue tube | Submarine | — |
+| 14 | **Charged Beam** | On a wall; charges, then a beam crosses part of the screen for a moment | Dashed preview line while charging | Base and beam | — | Electric eel | Laser gate |
+| 15 | **Telegraphed Sweep** | A dashed wedge shows the danger area, then an arm swipes through it in an arc from a wall | Dashed wedge | The arm and its tip, only mid-swipe | Cat paw | Kelp | — |
+| 16 | **Telegraphed Slam** | A target appears at a spot, then something slams down there, lifts, and moves to a new spot | Darkening spot and dashed target | Only the moment it is down | — (was the rubber stamp, removed in v37) | — | — |
+| 17 | **Proximity Blast** | Sits still; when the plane gets close it arms, shows its blast radius, then explodes as the plane arrives | Fast blinking and a dashed blast circle | The body, then the blast | — | Naval mine | Space mine |
+| 18 | **Push Zone** | A horizontal band that pushes the plane sideways while inside it; may have a solid source on the wall | Moving streaks | Only the source, if there is one | Desk fan (fan is solid) | Ocean current (no source) | Solar wind (no source) |
+| 19 | **Effect Zone** | A zone that never hurts but changes the plane for a while: a debuff or a buff | The zone itself | Nothing (can be paired with a hazard placed after it) | — (was the coffee spill, removed in v37) | Bubble column (falls slower) | Low-gravity field (falls slower) |
+| 20 | **Spring Line** | A line between two anchors; touching the line kicks the plane sideways instead of crashing it | — | Only the anchors | Rubber band | — | — |
 
 ### 6.2 Tunable parameters
 
@@ -221,6 +258,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Title | Start menu and game over | Slow, noble horn melody in E minor over strings, with a soft drum (72 bpm, about 27 s loop) |
 | Paper | During Paper runs | Light pastoral town theme in D minor: flute over flowing harp eighths (88 bpm, about 22 s loop) |
 | Deep sea | During Deep sea runs | Slow and dark in A minor: echoing harp, low lonely flute, deep bass (64 bpm, about 30 s loop) |
+| Space | During Space runs | Dreamy and floating: shimmering echoing harp over soft major-seventh chords and a slow, high, wavering lead (70 bpm, about 27 s loop) |
 
 - Themes cross-fade when they change. Pausing lowers the music to 30%; hiding the tab silences it.
 - The music sits below the sound effects (peaks about 0.08 against about 0.10 for a star chime).
@@ -235,7 +273,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Map | Start and game-over screens | Paper / Deep sea picture tiles |
 
 ### Saved data (browser localStorage)
-`nosedive-best-notebook`, `nosedive-best-sea` (best depth per map), `nosedive-bank`, `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
+`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space` (best depth per map), `nosedive-bank`, `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
 
 ---
 
@@ -272,18 +310,20 @@ airplane/
 ├── README.md               this document
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
-└── js/                     14 game scripts, listed in the order they load
+└── js/                     16 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
     ├── paper-background.js Paper map: pencil formulas by depth
     ├── sea-background.js   Deep sea map: fish, specks, whales, shipwrecks
+    ├── space-background.js Space map: Earth glow, satellites, planets, comets, galaxies
     ├── state.js            game state, power-up levels, controls, speed and difficulty rules
-    ├── obstacles.js        obstacle generators and row spawning, for both maps
+    ├── obstacles.js        obstacle generators and row spawning, for all maps
     ├── physics.js          collision, obstacle movement, steering, per-frame update
     ├── maps.js             map definitions, page and water colours, paper background drawing
     ├── draw-paper.js       Paper obstacle art
     ├── draw-sea.js         Deep sea obstacle art
+    ├── draw-space.js       Space obstacle art
     ├── render.js           plane, screen shake, frame drawing, map switching
     ├── ui.js               top bar, menus, start / pause / game over
     └── main.js             keyboard and touch input, main loop (loads last, starts the game)
@@ -342,7 +382,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 | Command | What it does |
 |---|---|
-| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on both maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
+| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all three maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
 | `node tools/shot.js <notebook|sea> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
 | `node tools/shot.js title [sea]` | Title screen screenshot |
 | `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs) and the scripts into one page (for a single-file copy) |
@@ -351,7 +391,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 ## 11. Direction
 
-**Current focus: two maps, Paper and Deep sea,** each chosen from the menu. Any new map should be built from the mechanics in section 6, with new art.
+**Current focus: three maps, Paper, Deep sea and Space,** each chosen from the menu. Any new map should be built from the mechanics in section 6, with new art.
 
 ---
 
@@ -390,7 +430,7 @@ Suggestions; only the ones marked ✅ are built. They respect the decisions reco
 New maps should reuse the 20 mechanics in section 6 with new art (see 11). Settings that suit a falling paper plane and are not the dropped Sky dive / Skyscraper ideas:
 - **Kitchen:** falling past shelves, with knives (Wall Piston), a whisk (Spinning Blades), steam from pots (Effect Zone) and rolling oranges (Bouncing Slider).
 - **Library:** tall bookshelves as Gap Walls, a swinging reading lamp (Telegraphed Sweep), falling loose pages (Drifting Swarm) and a book cart conveyor.
-- **Space:** drifting asteroids (Static Hazards and Spinning Drifter), satellites with solar panels (Sweeping Arm), laser gates (Charged Beam) and gravity wells (Push Zone).
+- **Space** (worked out in section 13): drifting asteroids (Static Hazards and Spinning Drifter), satellites with solar panels (Sweeping Arm), laser gates (Charged Beam) and solar wind bands (Push Zone).
 
 ### 12.6 Suggested order
 1. Best-depth line, "Crumpled by…", star paths (quick wins that change how runs feel).
@@ -398,3 +438,84 @@ New maps should reuse the 20 mechanics in section 6 with new art (see 11). Setti
 3. Missions and medals.
 4. Power-ups and breathers / rushes.
 5. Daily dive, music, a third map.
+
+---
+
+## 13. Space map — brainstorm (built in v53)
+
+The original ideas for the third map, kept for reference. **Built in v53** as described in sections 4.3 and 5.3, with these choices: premise **A. Re-entry**, a **cartoon and playful** tone, the name **Space**, and 15 of the obstacles below (Spinning Blades, Telegraphed Sweep and Spring Line were left out for now).
+
+### 13.1 The premise: why is the plane falling in space?
+
+| Option | Idea | Feel |
+|---|---|---|
+| **A. Re-entry** (recommended) | The plane is thrown from a space station and falls back toward Earth: near orbit first, then deeper and stranger space as the depth grows. | Fits "how deep can you fall" best. |
+| B. Station shaft | Falling down the inside of a huge space station. | Lots of walls and machines, but feels like a building (close to the dropped Skyscraper idea). |
+| C. Deep space dive | Falling "down" toward a black hole, getting stranger with depth. | Dramatic, but the black hole could only be scenery: a pull toward it would be too close to the removed sharpener. |
+
+Name ideas: **Space**, **Orbit**, **Starfall**.
+
+### 13.2 Background by depth
+
+Like the water darkening in Deep sea, the background changes every so often:
+
+| Depth | Look |
+|---|---|
+| 0–100 m | Dark blue upper sky fading to black, the curve of Earth glowing at the edge |
+| 100–400 m | Black space with twinkling stars sliding slowly past (one cheap CSS layer, like the sea bubbles) |
+| 400–1,000 m | Soft coloured nebula clouds: purple, teal, pink |
+| 1,000 m + | Deep space: distant spiral galaxies, rare shooting stars |
+
+**Background scenery** (never collides, like the fish):
+
+| Depth | Scenery |
+|---|---|
+| Shallow | Small satellites, the space station, a floating astronaut waving |
+| Middle | Saturn, Mars and the Moon drifting by, comets with tails |
+| Deep | Galaxies, a faint black hole with a glowing ring |
+| Rare surprises | A tiny distant UFO, a "space whale" made of stars |
+
+### 13.3 Obstacles, reusing the 20 mechanics (section 6)
+
+| Mechanic | Space obstacle |
+|---|---|
+| Gap Wall | Station girders from both sides with a gap |
+| Closing Jaws | Airlock doors sliding shut and open |
+| Static Hazards | Small asteroids and space junk |
+| Wall Bulge | A half-moon or planet edge bulging in from the side |
+| Bouncing Slider | A satellite with long solar panels sliding side to side |
+| Rising Projectile | A small rocket launching up toward the plane |
+| Drifting Swarm | Floating ice chunks or lost astronaut tools |
+| Conveyor | A train of mini satellites crossing in a line |
+| Spinning Drifter | A tumbling asteroid |
+| Spinning Blades | A rotating satellite with two solar-panel blades |
+| Sweeping Arm | A robotic station arm swinging around its base |
+| Wall Piston | A docking probe shooting out from a hull |
+| Charged Beam | A laser gate that charges (dashed line), then fires |
+| Telegraphed Sweep | A UFO searchlight sweeping across after a warning |
+| Proximity Blast | A space mine or unstable fuel pod that bursts as the plane passes |
+| Push Zone | A band of solar wind pushing the plane sideways |
+| Effect Zone (helpful only) | A low-gravity bubble that slows the fall (like the sea's bubble column) |
+| Spring Line | A loose tether cable that bounces the plane sideways |
+
+About 12 of these would be a good set (Deep sea has 12).
+
+**Avoid** (too close to removed obstacles):
+- Black holes or gravity wells that pull the plane in (like the removed sharpener).
+- Meteors that slam onto a marked spot (like the removed rubber stamp).
+- Anything that chases the plane (like the removed magnifier).
+- Zones that make the plane worse to control (like the removed coffee spill).
+
+### 13.4 Extras
+
+- **Pickups:** gold stars fit space naturally. The magnet could look like a tractor beam and the shield like a force field.
+- **Music:** a slow, dreamy synth theme with a soft arpeggio: still fantasy-flavoured, but more cosmic than the harp themes.
+- **Map tile:** black with tiny stars and a small ringed planet.
+- **Space moments:** every 500 m a comet streaks across the screen; a rare UFO in the distance beams up stars (decoration only).
+
+### 13.5 Open questions
+
+1. Premise: **re-entry**, station shaft, or deep space dive?
+2. Tone: **cartoon and playful** (aliens, UFOs) or more **realistic** (NASA-style)?
+3. Name: Space, Orbit, Starfall, or something else?
+4. Which obstacles to keep or drop from the list above?

@@ -131,6 +131,7 @@ function render() {
       case 'gate': {
         const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
         if (o.sea) { drawCoral(-10, l, sy, l, -1, o.seaCol); drawCoral(r, W + 10, sy, r, 1, o.seaCol); break; }
+        if (o.space) { drawGirder(-10, l, sy, l, -1, o.spaceCol); drawGirder(r, W + 10, sy, r, 1, o.spaceCol); break; }
         drawRuler(-10, l, sy, l, -1, o.pal);
         drawRuler(r, W + 10, sy, r, 1, o.pal);
         break;
@@ -138,25 +139,26 @@ function render() {
       case 'erasers': {
         const l = o.cx - o.gap / 2, r = o.cx + o.gap / 2;
         if (o.sea) { drawClam(-10, l, sy, l, -1, o.seaCol); drawClam(r, W + 10, sy, r, 1, o.seaCol); break; }
+        if (o.space) { drawAirlock(-10, l, sy, l, -1, o.spaceCol); drawAirlock(r, W + 10, sy, r, 1, o.spaceCol); break; }
         drawEraser(-10, l, sy, l, -1, o.pal);
         drawEraser(r, W + 10, sy, r, 1, o.pal);
         break;
       }
-      case 'pencil': drawPencil(o, sy); break;
+      case 'pencil': o.space ? drawSatellite(o, sy) : drawPencil(o, sy); break;
       case 'scissors': drawScissors(o, sy); break;
-      case 'blot': o.sea ? drawUrchin(o, sy) : drawBlot(o, sy); break;
-      case 'starfish': drawStarfish(o, sy); break;
-      case 'zap': drawZap(o, sy); break;
+      case 'blot': o.space ? drawAsteroid(o, sy) : o.sea ? drawUrchin(o, sy) : drawBlot(o, sy); break;
+      case 'starfish': o.space ? drawTumbler(o, sy) : drawStarfish(o, sy); break;
+      case 'zap': o.space ? drawLaser(o, sy) : drawZap(o, sy); break;
       case 'mine': drawMine(o, sy); break;
-      case 'bubbles': drawBubbleColumn(o, sy); break;
-      case 'protractor': drawProtractor(o, sy); break;
-      case 'wad': drawWad(o, sy); break;
-      case 'clips': for (const x of clipXs(o)) drawClip(x, sy, o.col); break;
-      case 'compass': drawCompass(o, sy); break;
+      case 'bubbles': o.space ? drawLowGrav(o, sy) : drawBubbleColumn(o, sy); break;
+      case 'protractor': o.space ? drawMoonEdge(o, sy) : drawProtractor(o, sy); break;
+      case 'wad': o.space ? drawRocket(o, sy) : drawWad(o, sy); break;
+      case 'clips': for (const x of clipXs(o)) o.space ? drawCubesat(x, sy, o.spaceCol) : drawClip(x, sy, o.col); break;
+      case 'compass': o.space ? drawRobotArm(o, sy) : drawCompass(o, sy); break;
       case 'fan': drawFan(o, sy); break;
       case 'glue': o.sea ? drawSub(o, sy) : drawGlue(o, sy); break;
-      case 'cutter': o.sea ? drawMoray(o, sy) : drawCutter(o, sy); break;
-      case 'note': o.sea ? drawJelly(o, sy) : drawNote(o, sy); break;
+      case 'cutter': o.space ? drawProbe(o, sy) : o.sea ? drawMoray(o, sy) : drawCutter(o, sy); break;
+      case 'note': o.space ? drawIce(o, sy) : o.sea ? drawJelly(o, sy) : drawNote(o, sy); break;
       case 'setsquare': drawSetSquare(o, sy); break;
       case 'band': drawBand(o, sy); break;
       case 'paw': o.sea ? drawKelp(o, sy) : drawPaw(o, sy); break;
@@ -208,6 +210,7 @@ function render() {
 // switch the background between maps (the world's CSS class picks the ruling pattern)
 function applyMap() {
   world.classList.toggle('map-sea', mapId === 'sea');
+  world.classList.toggle('map-space', mapId === 'space');
   best = bests[mapId];
   // swap the background decorations right away: clear them and refill from just above the screen
   formulas = []; fishes.length = 0; lastSceneryY = -1e9;

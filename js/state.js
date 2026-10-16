@@ -6,7 +6,8 @@ let state = 'title';          // title | play | paused | dying | over
 let plane, obstacles, pickups, particles, floaters;
 let dist, speed, time, nextRowY, stars, shake, overTimer;
 // best depth per map (the medals depend on it); `best` is the current map's, set by applyMap
-const bests = { notebook: +store.get('nosedive-best-notebook') || 0, sea: +store.get('nosedive-best-sea') || 0 };
+const bests = { notebook: +store.get('nosedive-best-notebook') || 0, sea: +store.get('nosedive-best-sea') || 0,
+                space: +store.get('nosedive-best-space') || 0 };
 if (store.get('nosedive-best-notebook') == null && +store.get('nosedive-best') > 0) {
   // before v49 there was one best for all maps: it goes to Paper, the original map
   bests.notebook = +store.get('nosedive-best');

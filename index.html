@@ -19,7 +19,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v51</div>
+    <div class="version" id="version">v53</div>
 
     <div class="hud">
       <div>
@@ -43,6 +43,7 @@
         <div class="map-pick" role="group" aria-label="Choose a map">
           <button class="map-tile" type="button" data-map="notebook" aria-pressed="true"><span class="map-thumb paper"></span>Paper</button>
           <button class="map-tile" type="button" data-map="sea" aria-pressed="false"><span class="map-thumb sea"></span>Deep sea</button>
+          <button class="map-tile" type="button" data-map="space" aria-pressed="false"><span class="map-thumb space"></span>Space</button>
         </div>
         <button class="menu-btn primary" id="startBtn" type="button">Play</button>
       </div>
@@ -63,6 +64,7 @@
         <div class="map-pick" role="group" aria-label="Choose a map for the next run">
           <button class="map-tile" type="button" data-map="notebook" aria-pressed="true"><span class="map-thumb paper"></span>Paper</button>
           <button class="map-tile" type="button" data-map="sea" aria-pressed="false"><span class="map-thumb sea"></span>Deep sea</button>
+          <button class="map-tile" type="button" data-map="space" aria-pressed="false"><span class="map-thumb space"></span>Space</button>
         </div>
         <button class="menu-btn primary" id="againBtn" type="button">Play again</button>
       </div>
@@ -75,12 +77,14 @@
 <script src="js/music.js"></script>
 <script src="js/paper-background.js"></script>
 <script src="js/sea-background.js"></script>
+<script src="js/space-background.js"></script>
 <script src="js/state.js"></script>
 <script src="js/obstacles.js"></script>
 <script src="js/physics.js"></script>
 <script src="js/maps.js"></script>
 <script src="js/draw-paper.js"></script>
 <script src="js/draw-sea.js"></script>
+<script src="js/draw-space.js"></script>
 <script src="js/render.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>

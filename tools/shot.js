@@ -2,7 +2,7 @@
 //   node tools/shot.js title              title screen (Paper map)
 //   node tools/shot.js title sea          title screen (Deep sea map)
 //   node tools/shot.js sea 0 250 1300     gameplay on a map at these depths (metres)
-//   node tools/shot.js notebook 50        (the Paper map's id is `notebook`)
+//   node tools/shot.js space 0 500        (map ids: notebook = Paper, sea, space)
 const { openGame, wait, outFile } = require('./lib');
 const [what = 'title', ...rest] = process.argv.slice(2);
 
