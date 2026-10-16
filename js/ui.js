@@ -31,6 +31,7 @@ function showCard(which) {
   ui.shop.hidden = which !== 'shop';
   // the start menu (and the Skins / Shop cards opened from it) sit on the sky picture instead of the map
   ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
+  ui.overlay.classList.toggle('dim', !!which && state !== 'title');   // pause / game over: dim the game behind
   if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); }
   const btn = which && ui[which].querySelector('.play, .primary');
   if (btn) btn.focus({ preventScroll: true });
@@ -82,13 +83,12 @@ function gameOver() {
   const s = score();
   const record = s > best;
   if (record) { best = s; store.set('nosedive-best', String(best)); }
-  ui.overTitle.textContent = 'Crumpled at ' + fmt(s) + ' m';
-  ui.overDetail.textContent = 'You fell for ' + time.toFixed(1) + ' s' +
-    (stars ? ' and caught ' + stars + (stars === 1 ? ' star.' : ' stars.') : '.');
-  ui.overBest.textContent = record ? 'That is your deepest dive yet.' : 'Your best is ' + fmt(best) + ' m.';
+  ui.overTitle.textContent = fmt(s) + ' m';
+  ui.overDetail.textContent = time.toFixed(1) + ' s' + (stars ? ' · ★ +' + stars : '');
+  ui.overBest.textContent = 'Best ' + fmt(best) + ' m';
   ui.stamp.hidden = !record;
   if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
-  ui.overBank.textContent = (stars ? '★ ' + stars + ' added to your stars. ' : '') + 'You have ★ ' + fmt(bank) + ' to spend in the Shop.';
+  ui.overBank.textContent = 'You have ★ ' + fmt(bank) + ' to spend in the Shop';
   showCard('over');
 }
 

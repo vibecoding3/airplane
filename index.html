@@ -19,7 +19,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v40</div>
+    <div class="version" id="version">v41</div>
 
     <div class="hud">
       <div>
@@ -77,26 +77,29 @@
         <button class="play" id="shopDone" type="button">Done</button>
       </div>
 
-      <div class="card" id="pauseCard" hidden>
-        <h2>Paused</h2>
-        <p>The plane is hanging in mid-air, waiting for you.</p>
-        <button class="play" id="resumeBtn" type="button">Keep falling</button>
+      <div class="menu" id="pauseCard" hidden>
+        <h2 class="menu-title small">Paused</h2>
+        <p class="menu-tag">Your plane is hanging in mid-air.</p>
+        <button class="menu-btn primary" id="resumeBtn" type="button">Resume</button>
       </div>
 
-      <div class="card" id="overCard" hidden>
-        <h2 id="overTitle">Crumpled at 0 m</h2>
-        <span class="stamp" id="recordStamp" hidden>New best!</span>
-        <p id="overDetail"></p>
-        <div class="meta" id="overBest"></div>
-        <div class="meta" id="overBank"></div>
+      <div class="menu" id="overCard" hidden>
+        <h2 class="menu-title small">Crumpled!</h2>
+        <div class="menu-score" id="overTitle">0 m</div>
+        <span class="menu-record" id="recordStamp" hidden>New best!</span>
+        <div class="menu-stats">
+          <span id="overBest">Best 0 m</span>
+          <span id="overDetail">0.0 s</span>
+        </div>
+        <p class="menu-note" id="overBank"></p>
         <div class="map-pick" role="group" aria-label="Choose a map for the next run">
           <button class="map-tile" type="button" data-map="notebook" aria-pressed="true"><span class="map-thumb paper"></span>Paper</button>
           <button class="map-tile" type="button" data-map="sea" aria-pressed="false"><span class="map-thumb sea"></span>Deep sea</button>
         </div>
-        <div class="actions">
-          <button class="play" id="againBtn" type="button">Throw again</button>
-          <button class="ghost" id="skinsBtnOver" type="button">Skins</button>
-          <button class="ghost" id="shopBtnOver" type="button">Shop</button>
+        <button class="menu-btn primary" id="againBtn" type="button">Play again</button>
+        <div class="menu-row">
+          <button class="menu-btn" id="skinsBtnOver" type="button">Skins</button>
+          <button class="menu-btn" id="shopBtnOver" type="button">Shop</button>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v40** (2026-10-15)
+Current version: **v41** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -11,11 +11,11 @@ Repository: https://github.com/vibecoding3/airplane
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
 - **Files:** `index.html`, `style.css` and 13 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
-- **Start menu:** a regular game menu (big title, best score and star count, map tiles, Play, Skins, Shop, a fold-out "How to play" and the 60 fps option) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens, and the Skins and Shop cards, are still sticky notes.
+- **Start menu:** a regular game menu (big title, best score and star count, map tiles, Play, Skins, Shop, a fold-out "How to play" and the 60 fps option) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, best depth, time and stars caught, the map tiles, Play again, Skins and Shop. The Skins and Shop cards are still sticky notes.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v40 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v41 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 

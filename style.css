@@ -230,3 +230,16 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
 .menu-help kbd { font-family: var(--body); font-size: 14px; border: 1.5px solid var(--ink); border-radius: 4px; padding: 0 4px; background: #fff; }
 .menu-opt { justify-self: center; background: rgba(255,255,255,.7); border-radius: 999px; padding: 2px 12px; font-size: 15px; }
 @media (prefers-reduced-motion: reduce) { .menu-btn:active { transform: none; } }
+
+/* pause and game-over screens: the same menu style over the dimmed game */
+.overlay.dim { background: rgba(14,22,40,.62); }
+.menu-title.small { font-size: 48px; }
+.menu-score {
+  font-family: var(--display); font-weight: 700; font-size: 64px; line-height: 1; color: #ffd23f;
+  -webkit-text-stroke: 8px var(--ink); paint-order: stroke fill; font-variant-numeric: tabular-nums;
+}
+.menu-record {
+  justify-self: center; margin-top: -6px; font-family: var(--display); font-weight: 700; font-size: 20px; color: var(--ink);
+  background: #ffd23f; border: 3px solid var(--ink); border-radius: 999px; padding: 2px 16px 0; transform: rotate(-3deg);
+}
+.menu-note { margin: -4px 0 0; font-size: 18px; color: #ffffff; -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill; }
