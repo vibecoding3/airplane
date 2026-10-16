@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v47** (2026-10-15)
+Current version: **v48** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v47 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v48 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -48,6 +48,7 @@ There are no on-screen steering arrows (removed in v44).
 | Stars | About 28% of rows carry a gold star. Stars are a collected total (shown in the menu and top bar) and add nothing to the score. |
 | Fast-fall safety | At high speed each frame is split into sub-steps, so the plane can't skip through thin obstacles |
 | Best score | Saved per device. During a run, a gold dashed line labelled "Your best · N m" marks the record depth, so you can see it coming; passing it pops "New best!" with a short fanfare |
+| Milestones | Every 100 m: "100 m!" pops up, the screen flashes white for a moment, the depth counter bounces and a two-note chime plays. Every 500 m it is bigger: a gold flash, a larger gold "500 m!", a burst of coloured sparks, a bigger bounce and a four-note arpeggio. Flashes and bounces are skipped when the device asks for reduced motion |
 
 ### Plane states
 - **Shielded** (shield power-up): the plane has a blue outline while it has at least one shield level. A hit uses one level instead of ending the run: the plane blinks and can't be hit for 2 seconds.
@@ -352,7 +353,7 @@ Suggestions; only the ones marked ✅ are built. They respect the decisions reco
 ### 12.2 More things to do during a run
 - **More power-ups** next to the magnet and shield (rare pickups, a few seconds each): slow motion, a star rush that turns the next rows into stars, or a tiny plane that fits through narrow gaps.
 - **Breathers and rushes:** every few hundred metres, a calm stretch with only stars, followed by a short "rush" of tightly packed obstacles. Changing the pace makes runs feel less flat than a constant difficulty curve.
-- **Milestone moments:** a small chime and flash each 100 m (and a bigger one each 500 m), so progress feels rewarding before the run ends.
+- **Milestone moments** ✅ built in v48 (see section 3): a small chime and flash each 100 m (and a bigger one each 500 m), so progress feels rewarding before the run ends.
 - **Rare big star** worth 5, placed in a slightly risky spot.
 
 ### 12.3 Goals between runs

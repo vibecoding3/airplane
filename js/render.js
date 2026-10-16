@@ -189,13 +189,17 @@ function render() {
     ctx.restore();
   }
   ctx.textAlign = 'center';
-  ctx.font = '700 18px Kalam, cursive';
   for (const f of floaters) {
+    ctx.font = `700 ${f.size || 18}px Kalam, cursive`;
     ctx.globalAlpha = clamp(f.life, 0, 1);
     ctx.fillStyle = f.col || '#a8740f';
     ctx.fillText(f.text, f.x, f.y - dist - (1 - f.life) * 40);
   }
   ctx.globalAlpha = 1;
+  if (flash > 0 && !reduceMotion) {           // milestone flash over the whole playfield
+    ctx.fillStyle = `rgba(${flashCol},${(flash * 0.6).toFixed(3)})`;
+    ctx.fillRect(0, 0, W, H);
+  }
   syncHudPage();
 }
 

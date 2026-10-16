@@ -22,6 +22,14 @@ function updateHud() {
   ui.stars.textContent = '★ ' + fmt(total);
   ui.best.textContent = fmt(best);
 }
+// the depth counter in the top bar gives a quick bounce at each 100 m milestone (a bigger one every 500 m)
+function popHudDepth(big) {
+  if (reduceMotion) return;
+  const el = ui.depth.parentElement;
+  el.classList.remove('pop', 'pop-big');
+  void el.offsetWidth;                         // restart the animation
+  el.classList.add(big ? 'pop-big' : 'pop');
+}
 function showCard(which) {
   ui.overlay.hidden = !which;
   ui.title.hidden = which !== 'title';

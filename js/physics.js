@@ -324,6 +324,9 @@ function update(dt) {
     floaters.push({ x: W / 2, y: dist + planeScreenY() - 40, life: 1.6, col: '#c47a00', text: 'New best!' });
     sfx.record();
   }
+  const mile = Math.floor(score() / 100);
+  if (mile > lastMilestone) { lastMilestone = mile; milestone(mile * 100); }
+  flash = Math.max(0, flash - dt);
   spawnRows();
   for (const o of obstacles) updateObstacle(o, dt);
   prune(obstacles, o => o.y > dist - 160);
@@ -373,6 +376,20 @@ function updateParticles(dt) {
   prune(particles, p => p.life > 0);
   for (const f of floaters) { f.life -= dt; f.y -= 0; }
   prune(floaters, f => f.life > 0);
+}
+
+// every 100 m a small chime and flash; every 500 m a bigger one with a burst of coloured sparks
+function milestone(m) {
+  const big = m % 500 === 0, py = dist + planeScreenY();
+  floaters.push({ x: W / 2, y: py + 70, life: big ? 1.8 : 1.2, size: big ? 36 : 26,
+    col: big ? '#c47a00' : (darkPage ? '#d8eefa' : '#2f6fb8'), text: fmt(m) + ' m!' });
+  flash = big ? 0.5 : 0.25; flashCol = big ? '255,210,63' : '255,255,255';
+  if (big) {
+    const cols = ['#ffd23f', '#f28c28', '#2f8fe0', '#e2493b'];
+    for (let k = 0; k < 24; k++) { const s = spark(plane.x, py); s.col = cols[k % 4]; s.size += 1.5; particles.push(s); }
+  }
+  sfx.milestone(big);
+  popHudDepth(big);
 }
 
 function spark(x, y) {

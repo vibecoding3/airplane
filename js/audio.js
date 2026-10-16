@@ -58,5 +58,8 @@ const sfx = {
   save: () => { crunch(); tone(330, 990, 0.35, 'triangle', 0.1); },
   twang: () => { tone(180, 420, 0.08, 'triangle', 0.09); tone(420, 160, 0.3, 'triangle', 0.07, 0.07); },
   record: () => { tone(660, 660, 0.12, 'triangle', 0.09); tone(880, 880, 0.12, 'triangle', 0.09, 0.11); tone(1320, 1320, 0.25, 'triangle', 0.09, 0.22); },
+  milestone: big => big
+    ? [523, 659, 784, 1047].forEach((f, i) => tone(f, f, i === 3 ? 0.35 : 0.14, 'triangle', 0.08, i * 0.09))
+    : (tone(1047, 1047, 0.1, 'sine', 0.07), tone(1568, 1568, 0.2, 'sine', 0.06, 0.08)),
   power: () => { tone(660, 990, 0.1, 'sine', 0.1); tone(990, 1480, 0.18, 'sine', 0.08, 0.09); }
 };

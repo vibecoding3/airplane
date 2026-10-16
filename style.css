@@ -160,3 +160,10 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
   background: #ffd23f; border: 3px solid var(--ink); border-radius: 999px; padding: 2px 16px 0; transform: rotate(-3deg);
 }
 .menu-note { margin: -4px 0 0; font-size: 18px; color: #ffffff; -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill; }
+
+/* milestone bounce of the depth counter (every 100 m, bigger every 500 m) */
+.hud .depth { transform-origin: left center; }
+.hud .depth.pop { animation: depth-pop .45s ease-out; }
+.hud .depth.pop-big { animation: depth-pop-big .8s ease-out; }
+@keyframes depth-pop { 30% { transform: scale(1.3); } }
+@keyframes depth-pop-big { 25% { transform: scale(1.6); color: #e8a317; } 60% { transform: scale(1.2); color: #e8a317; } }
