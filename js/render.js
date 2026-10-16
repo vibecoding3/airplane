@@ -130,6 +130,18 @@ function syncPaperLayers() {
   pageNext.style.transform = `translate3d(0, ${px(Math.min(boundary, H + 10))}px, 0)`;
 }
 
+// the magnet ring is a shade of the map colour behind the plane: darker on light pages, lighter on dark ones
+const ringCache = new Map();
+function ringColour(hex) {
+  let c = ringCache.get(hex);
+  if (!c) {
+    const n = parseInt(hex.slice(1), 16), dark = isDark(hex);
+    const mix = v => Math.round(dark ? v + (255 - v) * 0.55 : v * 0.6);
+    c = `rgba(${mix(n >> 16)},${mix((n >> 8) & 255)},${mix(n & 255)},.7)`;
+    ringCache.set(hex, c);
+  }
+  return c;
+}
 function render() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -181,9 +193,9 @@ function render() {
   for (const p of pickups) p.kind ? drawPower(p, p.y - dist) : drawStar(p, p.y - dist);
 
   const py = planeScreenY();
-  if (plane.magnet > 0 && plane.alive && state === 'play') {     // faint ring showing the magnet's reach
+  if (plane.magnet > 0 && plane.alive && state === 'play') {     // dotted ring showing the magnet's reach
     ctx.save();
-    ctx.strokeStyle = 'rgba(200,70,59,.18)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 7]);
+    ctx.strokeStyle = ringColour(pageColor(pageIndexAt(dist + py))); ctx.lineWidth = 1.8; ctx.setLineDash([3, 7]);
     ctx.beginPath(); ctx.arc(plane.x, py, magnetRange(), 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
   }

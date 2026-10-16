@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v55** (2026-10-15)
+Current version: **v56** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v55 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v56 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -54,7 +54,7 @@ There are no on-screen steering arrows (removed in v44).
 
 ### Plane states
 - **Shielded** (shield power-up): the plane has a blue outline while it has at least one shield level, and its look shows the level: pale thin sky blue (1), bright blue (2), deep blue with a soft glow (3). A hit uses one level instead of ending the run: the plane blinks and can't be hit for 2 seconds.
-- **Magnet** (magnet power-up): a faint dashed red ring shows how far stars are pulled in.
+- **Magnet** (magnet power-up): a dotted ring shows how far stars and power-ups are pulled in. Since v56 the ring is a shade of the map colour behind the plane (darker on light pages and shallow water, lighter on deep water and space), so it matches every map.
 - **Bubbled** (Deep sea map, bubble column): the plane falls 50% slower while inside the column.
 
 ---
