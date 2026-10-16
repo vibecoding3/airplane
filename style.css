@@ -218,7 +218,6 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
 .menu-help summary { font-family: var(--display); font-weight: 700; font-size: 18px; cursor: pointer; text-align: center; }
 .menu-help ul { margin: 6px 0 4px; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 16px; line-height: 1.25; }
 .menu-help kbd { font-family: var(--body); font-size: 14px; border: 1.5px solid var(--ink); border-radius: 4px; padding: 0 4px; background: #fff; }
-.menu-opt { justify-self: center; background: rgba(255,255,255,.7); border-radius: 999px; padding: 2px 12px; font-size: 15px; }
 @media (prefers-reduced-motion: reduce) { .menu-btn:active { transform: none; } }
 
 /* pause and game-over screens: the same menu style over the dimmed game */

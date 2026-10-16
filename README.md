@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v42** (2026-10-15)
+Current version: **v43** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -11,11 +11,11 @@ Repository: https://github.com/vibecoding3/airplane
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
 - **Files:** `index.html`, `style.css` and 13 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
-- **Start menu:** a regular game menu (big title, best score and star count, map tiles, Play, Shop, a fold-out "How to play" and the 60 fps option) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, best depth, time and stars caught, the map tiles, Play again and Shop. The Shop card is still a sticky note.
+- **Start menu:** a regular game menu (big title, best score and star count, map tiles, Play, Shop and a fold-out "How to play") over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, best depth, time and stars caught, the map tiles, Play again and Shop. The Shop card is still a sticky note.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v42 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v43 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -212,11 +212,10 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 |---|---|---|
 | Sound on/off | Top bar (speaker icon, crossed out when muted) | Sound effects are generated in code (Web Audio) |
 | Pause / Resume | Top bar (pause icon, becomes a play icon while paused), P, Esc | Also pauses automatically when the tab is hidden |
-| Limit to 60 fps | Start screen | Keeps a steady 60 fps on 90, 120 and 144 Hz screens to save battery and heat |
 | Map | Start and game-over screens | Paper / Deep sea picture tiles |
 
 ### Saved data (browser localStorage)
-`nosedive-best`, `nosedive-bank`, `nosedive-upgrades` (upgrade levels), `nosedive-map`, `nosedive-muted`, `nosedive-cap60`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
+`nosedive-best`, `nosedive-bank`, `nosedive-upgrades` (upgrade levels), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
 
 ---
 
@@ -231,7 +230,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 | Fewer large see-through fills | The desk fan's wind band tint was removed, and the cat paw and kelp warnings are dashed outlines |
 | Less garbage collection | Lists are pruned in place, and the plane's hit circles and static collision shapes are reused. The top bar only touches the page when a number changes. |
 | Adaptive resolution | Render resolution goes up to 2×. Screens denser than 2.5× start at 1.5×. If play stays below about 48 fps for 1.5 s, the resolution steps down by 0.25 (never below 1×) and is remembered. |
-| Frame pacing | Gameplay runs at the display rate (or 60 fps with the option on); menus draw at 30 fps and the pause screen at 4 fps |
+| Frame pacing | Gameplay is always capped at 60 fps (since v43; before it was an option), so 90, 120 and 144 Hz screens don't draw extra frames; menus draw at 30 fps and the pause screen at 4 fps |
 | Audio ready before play | The audio engine is built while the title screen is up and switched on by the first tap or key press. Building it on the first sound used to freeze the start of the first run for 50–85 ms. The crash / explosion noise is generated once and reused instead of rebuilt on every crash, extra life and mine blast. |
 | Text drawn directly | Measurements showed formula text is cheap to draw directly (the browser caches glyphs), so it isn't cached |
 

@@ -13,7 +13,6 @@ window.addEventListener('keydown', e => {
   else if (k === 'p' || k === 'P' || k === 'Escape') { state === 'paused' ? resume() : pause(); }
   else if ((k === ' ' || k === 'Enter') && (state === 'title' || state === 'over' || state === 'paused')) {
     if (e.target instanceof HTMLButtonElement && !e.target.classList.contains('play')) return;
-    if (e.target instanceof HTMLInputElement) return;       // Space toggles the 60 fps checkbox, not the game
     e.preventDefault();
     state === 'paused' ? resume() : start();
   } else if (k === ' ' && state === 'play') { e.preventDefault(); }
@@ -75,15 +74,12 @@ function countFrame(now) {
   fpsFrames = 0; fpsSince = now;
 }
 
-// Frame pacing: full speed while playing (or at most 60 fps when the player asks for it); menus need
-// much less, so the start / game-over screens run at 30 fps and the pause screen at 4 fps.
-const cap60Box = $('cap60');
-let cap60 = store.get('nosedive-cap60') === '1';
-cap60Box.checked = cap60;
-cap60Box.addEventListener('change', () => { cap60 = cap60Box.checked; store.set('nosedive-cap60', cap60 ? '1' : '0'); });
+// Frame pacing: play is capped at 60 fps (90/120/144 Hz screens would otherwise draw up to 2.4x as often,
+// costing battery and heat); menus need much less, so the start / game-over screens run at 30 fps and the
+// pause screen at 4 fps.
 let nextDraw = 0;
 function frameInterval() {
-  if (state === 'play' || state === 'dying') return cap60 ? 1000 / 60 : 0;
+  if (state === 'play' || state === 'dying') return 1000 / 60;
   return state === 'paused' ? 250 : 1000 / 30;
 }
 
