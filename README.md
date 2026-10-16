@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v58** (2026-10-15)
+Current version: **v59** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v58 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v59 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -253,8 +253,10 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
 
 **Slow motion** (since v54, timed, no levels): a white badge with a purple rim and an hourglass. Picking it up runs the whole game at half speed for 4 seconds (falling, obstacles, steering), with a soft purple tint and a purple bar just above the plane that shrinks toward its centre as time runs out (since v58), plus a falling "whoosh" sound. It only appears from 300 m on (since v58), and only when slow motion is not already running.
 
+**Invincibility star** (since v59, timed, no levels; an original design inspired by the classic platformer star): a white badge with a gold rim and a shining yellow star. For 6 seconds nothing can hurt the plane: it flies straight through obstacles with a rainbow outline cycling through the colours, rainbow sparkles and a gold bar over the plane showing the time left (above the slow-motion bar). The outline flickers in the last 1.5 seconds as a warning. Picking it up shows "Invincible!" with a quick twinkling run of notes. It is the rarest power-up (offered half as often as the others), appears from 150 m on, and only when no star is running.
+
 - **Spawning:** from about 30 m on, a row can carry a power-up instead of a star, with at least about 45 m between power-ups (so roughly one every 50–80 m). A magnet or shield already at level 3 is not offered (a used shield level can be picked up again); once both are at level 3, slow motion is the only power-up still offered.
-- **Feedback:** "Magnet level 2!", "Shield level 3!" or "Slow motion!" pops up in the power's colour, with a burst of sparks and a chime. Using a shield shows "Shield used! N left".
+- **Feedback:** "Magnet level 2!", "Shield level 3!", "Slow motion!" or "Invincible!" pops up in the power's colour, with a burst of sparks and a chime. Using a shield shows "Shield used! N left".
 - **Stars:** stars caught in a run are added to a saved total when the run ends. The top bar shows the total during a run.
 - **Plane:** one classic white paper plane; the crumpled ball and paper scraps match it. There are no skins (removed in v42) and no trail (removed in v36).
 
@@ -361,7 +363,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | Background decorations | `js/paper-background.js` (formulas) or `js/sea-background.js` (fish, specks, silhouettes) |
 | Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`) and the map tiles in `index.html` |
 | Plane look | `js/core.js` (`PLANE` colours), `js/render.js` (`paintPlane`) |
-| Power-ups | `js/state.js` (`POWER_MAX`, `MAGNET_RANGES`, `POWER_GAP`, `SLOWMO_TIME`, `timeScale`), `js/obstacles.js` (`pickPower`), `js/physics.js` (`collectPower`, `useExtraLife`), `js/render.js` (`drawPower`, `paintPowerIcon`) |
+| Power-ups | `js/state.js` (`POWER_MAX`, `MAGNET_RANGES`, `POWER_GAP`, `SLOWMO_TIME`, `STAR_TIME`, `timeScale`), `js/obstacles.js` (`pickPower`), `js/physics.js` (`collectPower`, `useExtraLife`), `js/render.js` (`drawPower`, `paintPowerIcon`) |
 | Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js`; start-menu picture in `img/menu-bg.svg` |
 | Sounds | `js/audio.js` (`sfx`) |
 | Music | `js/music.js` (`THEMES`: chords, melody and tempo per theme; `setMusic`, `duckMusic`) |

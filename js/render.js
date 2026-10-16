@@ -39,7 +39,14 @@ function paintLifeOutline(c, lvl = 2) {
 // power-up icons, drawn in a 44px box: the shield is a blue crest with a small plane, the magnet a horseshoe
 function paintPowerIcon(c, id) {
   c.translate(22, 22);
-  if (id === 'slowmo') {                        // an hourglass
+  if (id === 'superstar') {                     // a shining five-pointed star
+    c.beginPath();
+    for (let i = 0; i < 10; i++) { const r = i % 2 ? 7 : 16, a = -Math.PI / 2 + i * Math.PI / 5; c.lineTo(Math.cos(a) * r, Math.sin(a) * r + 1); }
+    c.closePath(); c.fillStyle = '#ffd23f'; c.fill();
+    c.strokeStyle = COL.ink; c.lineWidth = 2; c.lineJoin = 'round'; c.stroke();
+    c.fillStyle = 'rgba(255,255,255,.75)'; c.beginPath(); c.ellipse(-4, -3, 3, 5, -0.4, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#ff6fa8'; for (const [x, y] of [[-17, -12], [16, -14], [15, 13]]) { c.beginPath(); c.arc(x, y, 1.8, 0, Math.PI * 2); c.fill(); }
+  } else if (id === 'slowmo') {                        // an hourglass
     c.fillStyle = '#efe6ff'; c.strokeStyle = COL.ink; c.lineWidth = 2; c.lineJoin = 'round';
     c.beginPath(); c.moveTo(-10, -14); c.lineTo(10, -14); c.lineTo(1.5, 0); c.lineTo(10, 14); c.lineTo(-10, 14); c.lineTo(-1.5, 0); c.closePath();
     c.fill(); c.stroke();
@@ -75,7 +82,7 @@ function paintPowerIcon(c, id) {
 function drawPower(p, sy) {
   const s = sharedSprite('power-' + p.kind, 48, 48, 24, 24, () => {
     ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 21, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = p.kind === 'magnet' ? '#d9443a' : p.kind === 'slowmo' ? '#8a4fc2' : '#2f8fe0'; ctx.lineWidth = 3.5; ctx.stroke();
+    ctx.strokeStyle = p.kind === 'magnet' ? '#d9443a' : p.kind === 'slowmo' ? '#8a4fc2' : p.kind === 'superstar' ? '#f2b53a' : '#2f8fe0'; ctx.lineWidth = 3.5; ctx.stroke();
     ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 23, 0, Math.PI * 2); ctx.stroke();
     ctx.save(); ctx.translate(-22, -22); paintPowerIcon(ctx, p.kind); ctx.restore();
   });
@@ -87,7 +94,12 @@ function drawPlane(x, y, ang) {
 
   ctx.save(); ctx.translate(x, y); ctx.rotate(-ang);
   if (plane.invuln > 0) ctx.globalAlpha = Math.floor(plane.invuln * 12) % 2 ? 0.3 : 1;
-  if (plane.lives > 0) paintLifeOutline(ctx, plane.lives);
+  if (plane.star > 0) {                          // invincible: a rainbow outline cycling through the colours
+    const fading = plane.star < 1.5 && Math.floor(plane.star * 8) % 2;   // flickers just before it ends
+    planeOutline(ctx); ctx.lineJoin = 'round';
+    ctx.strokeStyle = `hsla(${(performance.now() * 0.6) % 360},95%,60%,${fading ? 0.3 : 0.55})`; ctx.lineWidth = 12; ctx.stroke();
+    ctx.strokeStyle = `hsl(${(performance.now() * 0.6 + 120) % 360},95%,60%)`; ctx.lineWidth = 4.5; ctx.stroke();
+  } else if (plane.lives > 0) paintLifeOutline(ctx, plane.lives);
   paintPlane(ctx, clamp(plane.vx / 400, -1, 1));
   ctx.restore();
 }
@@ -229,6 +241,10 @@ function render() {
     // the bar sits just above the plane and shrinks toward its centre
     const w = 110 * plane.slowmo / SLOWMO_TIME;
     ctx.fillStyle = 'rgba(138,79,194,.9)'; ctx.beginPath(); roundRectPath(plane.x - w / 2, planeScreenY() - 34, w, 6, 3); ctx.fill();
+  }
+  if (plane.star > 0 && state === 'play') {      // invincibility time left: a gold bar over the plane (above the slow-motion one)
+    const w = 110 * plane.star / STAR_TIME;
+    ctx.fillStyle = 'rgba(242,181,58,.95)'; ctx.beginPath(); roundRectPath(plane.x - w / 2, planeScreenY() - 44, w, 6, 3); ctx.fill();
   }
   if (flash > 0 && !reduceMotion) {           // milestone flash over the whole playfield
     ctx.fillStyle = `rgba(${flashCol},${(flash * 0.6).toFixed(3)})`;

@@ -296,6 +296,13 @@ function update(dt) {
   if (plane.bubbled > 0) speed *= 0.5;         // rising bubbles hold the plane up
   dist += speed * dt;
   plane.bubbled = Math.max(0, plane.bubbled - dt);
+  if (plane.star > 0) {                                     // invincibility star: real seconds, rainbow sparkles
+    plane.star = Math.max(0, plane.star - dt / timeScale());
+    if (Math.random() < dt * 30) {
+      const s = spark(plane.x + rand(-14, 14), dist + planeScreenY() + rand(-14, 14));
+      s.col = `hsl(${Math.floor(rand(0, 360))},90%,65%)`; s.vy -= 60; particles.push(s);
+    }
+  }
   if (plane.slowmo > 0) plane.slowmo = Math.max(0, plane.slowmo - dt / SLOWMO_SCALE);   // real seconds
   for (const o of obstacles) {
     if (o.type !== 'bubbles' || Math.abs(plane.x - o.x) > o.w / 2 || Math.abs(dist + planeScreenY() - o.y) > o.h / 2) continue;
@@ -365,7 +372,7 @@ function update(dt) {
   // obstacles
   outer:
   for (const o of obstacles) {
-    if (plane.invuln > 0) break;   // still blinking after using the extra life
+    if (plane.invuln > 0 || plane.star > 0) break;   // blinking after a shield hit, or the invincibility star
     if (Math.abs(o.y - (dist + planeScreenY())) > 160) continue;
     for (const s of shapes(o)) {
       for (const c of circles) {
@@ -413,6 +420,9 @@ function collectPower(p) {
   if (p.kind === 'magnet') {
     plane.magnet = Math.min(POWER_MAX, plane.magnet + 1);
     floaters.push({ x: fx, y: p.y, life: 1.4, col: '#c0392b', text: `Magnet level ${plane.magnet}!` });
+  } else if (p.kind === 'superstar') {
+    plane.star = STAR_TIME;
+    floaters.push({ x: fx, y: p.y, life: 1.6, col: '#e8a317', size: 26, text: 'Invincible!' });
   } else if (p.kind === 'slowmo') {
     plane.slowmo = SLOWMO_TIME;
     floaters.push({ x: fx, y: p.y, life: 1.4, col: '#8a4fc2', text: 'Slow motion!' });
@@ -420,9 +430,9 @@ function collectPower(p) {
     plane.lives = Math.min(POWER_MAX, plane.lives + 1);
     floaters.push({ x: fx, y: p.y, life: 1.4, col: '#2f6fb8', text: `Shield level ${plane.lives}!` });
   }
-  const col = p.kind === 'magnet' ? '#d9443a' : p.kind === 'slowmo' ? '#8a4fc2' : '#2f8fe0';
+  const col = p.kind === 'magnet' ? '#d9443a' : p.kind === 'slowmo' ? '#8a4fc2' : p.kind === 'superstar' ? '#ffd23f' : '#2f8fe0';
   for (let k = 0; k < 12; k++) { const s = spark(p.x, p.y); s.col = col; particles.push(s); }
-  p.kind === 'slowmo' ? sfx.slowmo() : sfx.power();
+  p.kind === 'slowmo' ? sfx.slowmo() : p.kind === 'superstar' ? sfx.superstar() : sfx.power();
 }
 
 // a shield level is used up: the hit is forgiven and the plane blinks through obstacles for a moment

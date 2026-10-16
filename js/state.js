@@ -24,6 +24,7 @@ const POWER_MAX = 3;
 const MAGNET_RANGES = [0, 120, 180, 240];   // by magnet level
 const SLOWMO_TIME = 4, SLOWMO_SCALE = 0.5;    // slow-motion power-up: 4 real seconds at half speed
 const SLOWMO_FROM_M = 300;                    // it only appears from this depth on
+const STAR_TIME = 6, STAR_FROM_M = 150;       // invincibility star: 6 real seconds, appears from 150 m
 const timeScale = () => (plane.slowmo > 0 && state === 'play' ? SLOWMO_SCALE : 1);
 const NEAR_PULL = 60;                      // every star and power-up this close is pulled in, magnet or not
 const magnetRange = () => MAGNET_RANGES[plane.magnet];
@@ -66,7 +67,7 @@ const maxSideSpeed = () => 300 + 0.4 * (baseFallSpeed() - 150);
 const score = () => Math.floor(dist / PX_PER_M);   // stars are a collected total, not metres
 
 function reset() {
-  plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, slowmo: 0, invuln: 0, bubbled: 0 };
+  plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, slowmo: 0, star: 0, invuln: 0, bubbled: 0 };
   obstacles = []; pickups = []; particles = []; floaters = [];
   dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
   nextRowY = H + 140; lastPowerY = 0; passedBest = false; lastMilestone = 0; flash = 0; medalsAnnounced.clear();
