@@ -107,30 +107,11 @@ body {
 
 /* flex + margin:auto keeps a tall menu centred but scrollable on short screens */
 .overlay { position: absolute; inset: 0; display: flex; overflow-y: auto; padding: 16px; background: rgba(36,49,63,.18); }
-/* shop: upgrade rows as white panels with chunky buy buttons, in the menu style */
-.shop { display: grid; gap: 10px; text-align: left; }
-.upgrade {
-  display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 10px; align-items: center;
-  padding: 10px 10px 10px 8px; background: #ffffff; border: 3px solid var(--ink); border-radius: 16px;
-}
-.upgrade canvas { width: 44px; height: 44px; justify-self: center; }
-.upgrade .info { display: grid; gap: 3px; min-width: 0; font-size: 15px; line-height: 1.15; }
-.upgrade .info strong { font-family: var(--display); font-size: 20px; line-height: 1; }
-.pips { display: flex; align-items: center; gap: 3px; font-size: 13px; opacity: .85; }
-.pips i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ink); }
-.pips i.on { background: #f28c28; }
-.buy {
-  font-family: var(--display); font-weight: 700; font-size: 20px; white-space: nowrap; cursor: pointer;
-  color: #ffffff; background: #f28c28; -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill;
-  border: 3px solid var(--ink); border-bottom-width: 5px; border-radius: 12px; padding: 5px 12px 1px;
-}
-.buy:active { transform: translateY(2px); border-bottom-width: 3px; }
-.buy:disabled { color: var(--ink); background: #e3e7ee; -webkit-text-stroke: 0; opacity: .7; cursor: default; transform: none; border-bottom-width: 5px; }
-.buy.owned { background: #ffd23f; opacity: 1; }
+
 button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
 
 /* ---------- start menu: a regular game menu over an illustrated sky (not a sticky note, since it
-   serves every map). The background image also stays behind the Shop opened from it. ---------- */
+   serves every map). ---------- */
 .overlay.menu-bg { background: #7fbbe8 url("img/menu-bg.svg") center / cover no-repeat; }
 .overlay > .menu { margin: auto; }
 .menu {

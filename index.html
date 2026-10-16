@@ -19,7 +19,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v45</div>
+    <div class="version" id="version">v46</div>
 
     <div class="hud">
       <div>
@@ -45,16 +45,8 @@
           <button class="map-tile" type="button" data-map="sea" aria-pressed="false"><span class="map-thumb sea"></span>Deep sea</button>
         </div>
         <button class="menu-btn primary" id="startBtn" type="button">Play</button>
-        <button class="menu-btn" id="shopBtn" type="button">Shop</button>
       </div>
 
-      <div class="menu" id="shopCard" hidden>
-        <h2 class="menu-title small">Shop</h2>
-        <p class="menu-tag">Upgrades you keep forever</p>
-        <div class="menu-stats"><span>You have <b id="bankCount">★ 0</b></span></div>
-        <div class="shop" id="shopList"></div>
-        <button class="menu-btn" id="shopDone" type="button">Back</button>
-      </div>
 
       <div class="menu" id="pauseCard" hidden>
         <h2 class="menu-title small">Paused</h2>
@@ -73,7 +65,6 @@
           <button class="map-tile" type="button" data-map="sea" aria-pressed="false"><span class="map-thumb sea"></span>Deep sea</button>
         </div>
         <button class="menu-btn primary" id="againBtn" type="button">Play again</button>
-        <button class="menu-btn" id="shopBtnOver" type="button">Shop</button>
       </div>
     </div>
   </div>

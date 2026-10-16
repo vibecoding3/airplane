@@ -4,10 +4,6 @@
 // ---------- input ----------
 window.addEventListener('keydown', e => {
   const k = e.key;
-  if (!ui.shop.hidden) {   // the shop is open: let its buttons handle Enter/Space natively
-    if (k === 'Escape') closeShop();
-    return;
-  }
   const side = keySide(k);
   if (side) { e.preventDefault(); if (!e.repeat) press(side, 'key' + side); }
   else if (k === 'p' || k === 'P' || k === 'Escape') { state === 'paused' ? resume() : pause(); }

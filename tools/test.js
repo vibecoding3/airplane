@@ -13,21 +13,25 @@ const EXPECTED = { notebook: 16, sea: 12 };   // obstacle types per map; update 
   check(await page.evaluate(() => state) === 'title', 'loads to the title screen');
   console.log('     version label: ' + await page.evaluate(() => document.getElementById('version').textContent));
 
-  // menus
-  for (const id of ['shopBtn', 'shopDone']) { await page.click('#' + id); await wait(100); }
-  check(await page.evaluate(() => !document.getElementById('titleCard').hidden), 'shop opens and closes');
-
-  // deep runs with endless lives: every obstacle type should appear, no errors
+  // deep runs where the plane can't be hit: every obstacle type should appear, power-ups should spawn
+  // and level up to 3, no errors
   const deep = await page.evaluate(depth => {
     const out = {};
     for (const m of ['notebook', 'sea']) {
-      mapId = m; applyMap(); start(); plane.lives = 1e9; let f = 0; const seen = new Set();
+      mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0 }, counted = new Set();
+      let maxMagnet = 0, maxShield = 0;
       while (dist / PX_PER_M < depth && f < 60 * 1200) {
         if (f % 45 === 0) { const s = Math.random() < 0.5 ? -1 : 1; press(s, 'sim'); release('sim'); }
+        plane.invuln = 1;
+        // steer toward the nearest power-up below so they actually get collected
+        const pw = pickups.find(p => p.kind && p.y > dist + planeScreenY());
+        if (pw) plane.x += clamp(pw.x - plane.x, -6, 6);
         update(1 / 60); if (f % 3 === 0) render(); f++;
         for (const o of obstacles) seen.add(o.type);
+        for (const p of pickups) if (p.kind && !counted.has(p)) { counted.add(p); powers[p.kind]++; }
+        maxMagnet = Math.max(maxMagnet, plane.magnet); maxShield = Math.max(maxShield, plane.lives);
       }
-      out[m] = { depth: Math.round(dist / PX_PER_M), types: [...seen].sort() };
+      out[m] = { depth: Math.round(dist / PX_PER_M), types: [...seen].sort(), powers, maxMagnet, maxShield };
     }
     return out;
   }, DEPTH);
@@ -35,6 +39,8 @@ const EXPECTED = { notebook: 16, sea: 12 };   // obstacle types per map; update 
     const d = deep[m], full = DEPTH >= 300;
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})`);
+    check(d.powers.magnet > 0 && d.powers.shield > 0 && (DEPTH < 600 || (d.maxMagnet === 3 && d.maxShield === 3)),
+      `${m}: power-ups spawned (magnet ${d.powers.magnet}, shield ${d.powers.shield}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
   }
 
   // normal runs (3 lives) end in a game over

@@ -22,12 +22,51 @@ function paintPlane(c, bank) {
   c.beginPath(); c.moveTo(0, 20); c.lineTo(0, -12); c.lineWidth = 1; c.stroke();
 }
 
-// blue glow around the plane while the Extra life is still unused
+// blue glow around the plane while it has a shield
 function paintLifeOutline(c) {
   planeOutline(c);
   c.lineJoin = 'round';
   c.strokeStyle = 'rgba(47,143,224,.35)'; c.lineWidth = 9; c.stroke();
   c.strokeStyle = '#2f8fe0'; c.lineWidth = 4.5; c.stroke();
+}
+
+// power-up icons, drawn in a 44px box: the shield is a blue crest with a small plane, the magnet a horseshoe
+function paintPowerIcon(c, id) {
+  c.translate(22, 22);
+  if (id === 'shield') {
+    c.beginPath();
+    c.moveTo(-13, -11); c.lineTo(0, -16); c.lineTo(13, -11); c.lineTo(12, 2);
+    c.quadraticCurveTo(9, 12, 0, 17); c.quadraticCurveTo(-9, 12, -12, 2); c.closePath();
+    c.fillStyle = '#2f8fe0'; c.fill();
+    c.strokeStyle = COL.ink; c.lineWidth = 2; c.lineJoin = 'round'; c.stroke();
+    c.save(); c.translate(0, 0.5); c.scale(0.5, 0.5); paintPlane(c, 0); c.restore();
+  } else {
+    // horseshoe magnet with silver tips, scaled so the whole shape sits inside the 44px icon
+    c.translate(0, 3); c.rotate(0.55); c.scale(0.72, 0.72);
+    const arm = y2 => {
+      c.beginPath();
+      c.arc(0, -6, 12, Math.PI, 0, false);
+      c.moveTo(-12, -6); c.lineTo(-12, y2); c.moveTo(12, -6); c.lineTo(12, y2);
+    };
+    c.lineCap = 'butt';
+    c.strokeStyle = COL.ink; c.lineWidth = 13; arm(16); c.stroke();
+    c.strokeStyle = '#d9443a'; c.lineWidth = 9.5; arm(7); c.stroke();
+    c.strokeStyle = '#c3c9d3';
+    c.beginPath(); c.moveTo(-12, 7); c.lineTo(-12, 15); c.moveTo(12, 7); c.lineTo(12, 15); c.stroke();
+    c.strokeStyle = 'rgba(255,255,255,.4)'; c.lineWidth = 2;   // shine along the curve
+    c.beginPath(); c.arc(0, -6, 14, Math.PI * 1.15, Math.PI * 1.5, false); c.stroke();
+  }
+}
+// a power-up pickup: its icon in a round white badge with a coloured rim, gently pulsing
+function drawPower(p, sy) {
+  const s = sharedSprite('power-' + p.kind, 48, 48, 24, 24, () => {
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 21, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = p.kind === 'magnet' ? '#d9443a' : '#2f8fe0'; ctx.lineWidth = 3.5; ctx.stroke();
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 23, 0, Math.PI * 2); ctx.stroke();
+    ctx.save(); ctx.translate(-22, -22); paintPowerIcon(ctx, p.kind); ctx.restore();
+  });
+  const k = 1 + 0.07 * Math.sin(p.spin * 2.5);
+  blit(s, p.x, sy, 0, k, k);
 }
 
 function drawPlane(x, y, ang) {
@@ -123,10 +162,10 @@ function render() {
       case 'paw': o.sea ? drawKelp(o, sy) : drawPaw(o, sy); break;
     }
   }
-  for (const p of pickups) drawStar(p, p.y - dist);
+  for (const p of pickups) p.kind ? drawPower(p, p.y - dist) : drawStar(p, p.y - dist);
 
   const py = planeScreenY();
-  if (has('magnet') && plane.alive && state === 'play') {     // faint ring showing the magnet's reach
+  if (plane.magnet > 0 && plane.alive && state === 'play') {     // faint ring showing the magnet's reach
     ctx.save();
     ctx.strokeStyle = 'rgba(200,70,59,.18)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 7]);
     ctx.beginPath(); ctx.arc(plane.x, py, magnetRange(), 0, Math.PI * 2); ctx.stroke();

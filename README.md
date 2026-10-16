@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v45** (2026-10-15)
+Current version: **v46** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -11,11 +11,11 @@ Repository: https://github.com/vibecoding3/airplane
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
 - **Files:** `index.html`, `style.css` and 13 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
-- **Start menu:** a regular game menu (big title, best score and star count, map tiles, Play and Shop; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the stars to spend, the map tiles, Play again and Shop (the run time was removed in v45). The Shop uses the same style too: upgrade rows as white panels with orange star-price buttons ("Maxed" in yellow), and a Back button. There are no sticky-note screens left.
+- **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, the map tiles and Play again (the run time was removed in v45). There is no Shop (removed in v46).
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v45 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v46 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -45,12 +45,13 @@ There are no on-screen steering arrows (removed in v44).
 | Sideways slowdown | Gliding sideways at full speed makes the plane fall up to 40% slower |
 | Difficulty | `1 − e^(−depth / 600)`. It controls when obstacles unlock, gap sizes, row spacing and obstacle speeds, and is nearly maxed by about 2,000 m. |
 | Obstacle rows | Rows spawn ahead of the plane. The same obstacle type never appears twice in a row. |
-| Stars | About 28% of rows carry a gold star. Stars are Shop currency only and add nothing to the score. |
+| Stars | About 28% of rows carry a gold star. Stars are a collected total (shown in the menu and top bar) and add nothing to the score. |
 | Fast-fall safety | At high speed each frame is split into sub-steps, so the plane can't skip through thin obstacles |
 | Best score | Saved per device |
 
 ### Plane states
-- **Extra life** (Shop upgrade): the plane has a blue outline while a spare life is ready. When a life is used, the plane blinks and can't be hit for 2 seconds.
+- **Shielded** (shield power-up): the plane has a blue outline while it has at least one shield level. A hit uses one level instead of ending the run: the plane blinks and can't be hit for 2 seconds.
+- **Magnet** (magnet power-up): a faint dashed red ring shows how far stars are pulled in.
 - **Bubbled** (Deep sea map, bubble column): the plane falls 50% slower while inside the column.
 
 ---
@@ -192,16 +193,18 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 
 ---
 
-## 7. Shop and progression
+## 7. Power-ups and progression
 
-- **Star bank:** stars caught in a run are added to a saved bank when the run ends. The top bar shows the total during a run (bank plus stars caught so far).
-- **Upgrades** (bought one level at a time):
+There is no Shop (removed in v46). Instead, two power-ups appear in the map during a run, picked up by flying through them like stars. Each pickup raises that power one level, up to level 3. Levels last for the rest of the run only; every run starts with none.
 
-| Upgrade | Level 1 | Level 2 | Level 3 |
-|---|---|---|---|
-| Extra life | 1 spare life per run — ★ 20 | 2 spare lives — ★ 40 | 3 spare lives — ★ 70 |
-| Star magnet (pull range) | 120 units — ★ 10 | 180 units — ★ 25 | 240 units — ★ 45 |
+| Power-up | Looks like | Level 1 | Level 2 | Level 3 |
+|---|---|---|---|---|
+| Magnet | White badge with a red rim and a horseshoe magnet | Pulls stars from 120 units away | 180 units | 240 units |
+| Shield | White badge with a blue rim and a blue shield crest | 1 spare life | 2 spare lives | 3 spare lives |
 
+- **Spawning:** from about 30 m on, a row can carry a power-up instead of a star, with at least about 45 m between power-ups (so roughly one every 50–80 m). A power-up already at level 3 is not offered; a used shield level can be picked up again.
+- **Feedback:** "Magnet level 2!" or "Shield level 3!" pops up in the power's colour, with a burst of sparks and a chime. Using a shield shows "Shield used! N left".
+- **Stars:** stars caught in a run are added to a saved total when the run ends. The top bar shows the total during a run.
 - **Plane:** one classic white paper plane; the crumpled ball and paper scraps match it. There are no skins (removed in v42) and no trail (removed in v36).
 
 ---
@@ -215,7 +218,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 | Map | Start and game-over screens | Paper / Deep sea picture tiles |
 
 ### Saved data (browser localStorage)
-`nosedive-best`, `nosedive-bank`, `nosedive-upgrades` (upgrade levels), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
+`nosedive-best`, `nosedive-bank`, `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
 
 ---
 
@@ -257,14 +260,14 @@ airplane/
     ├── audio.js            sound effects
     ├── paper-background.js Paper map: pencil formulas by depth
     ├── sea-background.js   Deep sea map: fish, specks, whales, shipwrecks
-    ├── state.js            game state, shop data, controls, speed and difficulty rules
+    ├── state.js            game state, power-up levels, controls, speed and difficulty rules
     ├── obstacles.js        obstacle generators and row spawning, for both maps
     ├── physics.js          collision, obstacle movement, steering, per-frame update
     ├── maps.js             map definitions, page and water colours, paper background drawing
     ├── draw-paper.js       Paper obstacle art
     ├── draw-sea.js         Deep sea obstacle art
     ├── render.js           plane, screen shake, frame drawing, map switching
-    ├── ui.js               top bar, menus, start / pause / game over, shop
+    ├── ui.js               top bar, menus, start / pause / game over
     └── main.js             keyboard and touch input, main loop (loads last, starts the game)
 ```
 
@@ -289,7 +292,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | Background decorations | `js/paper-background.js` (formulas) or `js/sea-background.js` (fish, specks, silhouettes) |
 | Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`) and the map tiles in `index.html` |
 | Plane look | `js/core.js` (`PLANE` colours), `js/render.js` (`paintPlane`) |
-| Shop prices and upgrades | `js/state.js` (`UPGRADES`, `MAGNET_RANGES`) and `js/ui.js` (shop screen) |
+| Power-ups | `js/state.js` (`POWER_MAX`, `MAGNET_RANGES`, `POWER_GAP`), `js/obstacles.js` (`pickPower`), `js/physics.js` (`collectPower`, `useExtraLife`), `js/render.js` (`drawPower`, `paintPowerIcon`) |
 | Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js`; start-menu picture in `img/menu-bg.svg` |
 | Sounds | `js/audio.js` (`sfx`) |
 | Frame rate, resolution, input | `js/main.js`, plus `resize` in `js/core.js` |
@@ -303,14 +306,14 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `audio.js` | `sfx`, `tone`, `muted` |
 | `paper-background.js` | `FORMULA_TIERS`, `pickFormula`, `spawnFormula`, `updateFormulas` |
 | `sea-background.js` | `FISH`, `FISH_TIERS`, `spawnFish`, `drawFishes`, `drawSeaParticles` |
-| `state.js` | `state`, `plane`, `obstacles`, `dist`, `speed`, `UPGRADES`, `press` / `release`, `depthM`, `difficulty`, `baseFallSpeed`, `reset` |
+| `state.js` | `state`, `plane`, `obstacles`, `dist`, `speed`, `POWER_MAX`, `MAGNET_RANGES`, `press` / `release`, `depthM`, `difficulty`, `baseFallSpeed`, `reset` |
 | `obstacles.js` | `make` (generators), `PALETTES`, `SEA_MAKERS`, `seaPool`, `spawnRow`, `spawnFromPool`, `spawnRows` |
 | `physics.js` | `computeShapes` / `shapes`, `circleHits` (circles, rotated boxes, convex polygons), `planeCircles`, `updateObstacle`, `steer`, `update`, `crash` |
 | `maps.js` | `MAPS`, `mapId`, `SEA`, `RAINBOW`, `isDark`, `syncHudPage`, `drawPaper`, `drawFormulas`, `drawDepthMarkers` |
 | `draw-paper.js` | Paper obstacle `draw*` / `paint*` functions (`drawRuler`, `paintPencil`, `drawScissors`, `drawFan`, `drawPaw`, …) |
 | `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
 | `render.js` | `paintPlane`, `drawPlane`, `syncPaperLayers`, `render`, `applyMap` |
-| `ui.js` | `updateHud`, `showCard`, `start`, `pause`, `resume`, `gameOver`, `renderShop`, `buyUpgrade` |
+| `ui.js` | `updateHud`, `showCard`, `start`, `pause`, `resume`, `gameOver` |
 | `main.js` | `watchFrameRate`, `frameInterval`, `frame` |
 
 ### 10.5 Dev tools (`tools/`)
@@ -329,3 +332,49 @@ Not used by the game; for testing during development. Set up once with `cd tools
 ## 11. Direction
 
 **Current focus: two maps, Paper and Deep sea,** each chosen from the menu. Any new map should be built from the mechanics in section 6, with new art.
+
+---
+
+## 12. Ideas to make it more fun
+
+Suggestions only: none of these are built yet. They respect the decisions recorded so far (no trails, no skins, no tutorial screens or steering arrows, no shadows, and none of the removed obstacle mechanics). Effort: **S** = an hour or two, **M** = an evening, **L** = several sessions.
+
+### 12.1 Top picks
+
+| # | Idea | Why it is fun | Effort |
+|---|---|---|---|
+| 1 | **Best-depth line** | A dashed line with "Your best" appears in the world at your record depth. Seeing it coming is the strongest "one more run" pull a high-score game has. | S |
+| 2 | **Close calls** | Passing very near an obstacle without touching it pops "Close call!" and gives a bonus star. It rewards risky lines instead of only safe ones. | M |
+| 3 | **Star paths** | Instead of single stars, place short lines or arcs of stars that lead through gaps or around hazards, so collecting them is a small route-finding puzzle. | S |
+| 4 | **"Crumpled by…" on game over** | Name what got you ("Crumpled by the scissors at 138 m", "Zapped by an electric eel"). It feels fairer and is often funny. | S |
+| 5 | **Daily dive** | One run per day with the same obstacle sequence for everyone (seeded from the date) and its own best score. Gives a reason to come back each day. | M |
+
+### 12.2 More things to do during a run
+- **More power-ups** next to the magnet and shield (rare pickups, a few seconds each): slow motion, a star rush that turns the next rows into stars, or a tiny plane that fits through narrow gaps.
+- **Breathers and rushes:** every few hundred metres, a calm stretch with only stars, followed by a short "rush" of tightly packed obstacles. Changing the pace makes runs feel less flat than a constant difficulty curve.
+- **Milestone moments:** a small chime and flash each 100 m (and a bigger one each 500 m), so progress feels rewarding before the run ends.
+- **Rare big star** worth 5, placed in a slightly risky spot.
+
+### 12.3 Goals between runs
+- **Missions:** three small goals at a time, replaced when done ("Pass 3 mines in one run", "Collect 10 stars", "Reach 300 m in Deep sea"). They pay stars and point players at things they would not try on their own.
+- **Medals per map:** bronze / silver / gold depths (for example 250 / 750 / 1,500 m) shown on the map tiles.
+- **A use for stars** now that the Shop is gone: for example unlocking the second map, or medals at star totals.
+
+### 12.4 Feel and polish
+- **Phone vibration** on crashes, close calls and mine blasts (the Vibration API, Android only; easy to switch off).
+- **A simple music loop** generated in code like the sound effects, getting a little faster with depth, with its own on/off toggle.
+- **Speed feel at depth:** faint motion streaks at the screen edges once the fall gets fast (screen-edge streaks, not a trail behind the plane).
+- **Share button** on game over (the Web Share API on phones): "I fell 1,240 m in Paper Nosedive!" with the game link.
+
+### 12.5 New maps
+New maps should reuse the 20 mechanics in section 6 with new art (see 11). Settings that suit a falling paper plane and are not the dropped Sky dive / Skyscraper ideas:
+- **Kitchen:** falling past shelves, with knives (Wall Piston), a whisk (Spinning Blades), steam from pots (Effect Zone) and rolling oranges (Bouncing Slider).
+- **Library:** tall bookshelves as Gap Walls, a swinging reading lamp (Telegraphed Sweep), falling loose pages (Drifting Swarm) and a book cart conveyor.
+- **Space:** drifting asteroids (Static Hazards and Spinning Drifter), satellites with solar panels (Sweeping Arm), laser gates (Charged Beam) and gravity wells (Push Zone).
+
+### 12.6 Suggested order
+1. Best-depth line, "Crumpled by…", star paths (quick wins that change how runs feel).
+2. Close calls and milestone moments.
+3. Missions and medals.
+4. Power-ups and breathers / rushes.
+5. Daily dive, music, a third map.

@@ -328,7 +328,7 @@ function update(dt) {
   // stars
   for (let i = pickups.length - 1; i >= 0; i--) {
     const p = pickups[i]; p.spin += dt * 2;
-    if (has('magnet') && plane.alive) {
+    if (plane.magnet > 0 && plane.alive && !p.kind) {   // the magnet pulls stars only
       const py = dist + planeScreenY(), dx = plane.x - p.x, dy = py - p.y, dd = Math.hypot(dx, dy);
       if (dd < magnetRange() && dd > 1) {
         const step = Math.min(dd, (300 + speed) * dt);
@@ -337,8 +337,9 @@ function update(dt) {
     }
     if (circles.some(c => (c.x - p.x) ** 2 + (c.y - p.y) ** 2 < (c.r + p.r + 4) ** 2)) {
       pickups.splice(i, 1);
+      if (p.kind) { collectPower(p); continue; }
       stars++;
-      floaters.push({ x: p.x, y: p.y, text: '+1 ★', life: 1 });   // stars are Shop money; they no longer add metres
+      floaters.push({ x: p.x, y: p.y, text: '+1 ★', life: 1 });   // stars are a collected total; they don't add metres
       for (let k = 0; k < 8; k++) particles.push(spark(p.x, p.y));
       sfx.star();
     }
@@ -374,7 +375,22 @@ function spark(x, y) {
   return { kind: 'spark', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 0, rot: 0, vr: 0, life: 1, ttl: 0.45, size: rand(2, 4) };
 }
 
-// the Extra life upgrade: the hit is forgiven and the plane blinks through obstacles for a moment
+// a magnet or shield pickup raises that power one level (up to 3) for the rest of the run
+function collectPower(p) {
+  const fx = clamp(p.x, 90, W - 90);
+  if (p.kind === 'magnet') {
+    plane.magnet = Math.min(POWER_MAX, plane.magnet + 1);
+    floaters.push({ x: fx, y: p.y, life: 1.4, col: '#c0392b', text: `Magnet level ${plane.magnet}!` });
+  } else {
+    plane.lives = Math.min(POWER_MAX, plane.lives + 1);
+    floaters.push({ x: fx, y: p.y, life: 1.4, col: '#2f6fb8', text: `Shield level ${plane.lives}!` });
+  }
+  const col = p.kind === 'magnet' ? '#d9443a' : '#2f8fe0';
+  for (let k = 0; k < 12; k++) { const s = spark(p.x, p.y); s.col = col; particles.push(s); }
+  sfx.power();
+}
+
+// a shield level is used up: the hit is forgiven and the plane blinks through obstacles for a moment
 function useExtraLife() {
   plane.lives--;
   plane.invuln = 2;
@@ -382,7 +398,7 @@ function useExtraLife() {
   const px = plane.x, py = dist + planeScreenY();
   for (let i = 0; i < 16; i++) { const p = spark(px, py); p.col = '#2f8fe0'; p.size += 1; particles.push(p); }
   floaters.push({ x: clamp(px, 90, W - 90), y: py - 30, life: 1.4, col: '#2f6fb8',
-    text: plane.lives > 0 ? `Extra life used! ${plane.lives} left` : 'Extra life used!' });
+    text: plane.lives > 0 ? `Shield used! ${plane.lives} left` : 'Shield used!' });
   sfx.save();
 }
 

@@ -270,6 +270,17 @@ function seaPool(d) {
   return pool;
 }
 
+// a magnet or shield every so often, never one the plane already has at the top level
+function pickPower(y) {
+  if (y < 30 * PX_PER_M || y - lastPowerY < POWER_GAP || Math.random() > 0.3) return null;
+  const options = [];
+  if (plane.magnet < POWER_MAX) options.push('magnet');
+  if (plane.lives < POWER_MAX) options.push('shield');
+  if (!options.length) return null;
+  lastPowerY = y;
+  return options[ri(0, options.length - 1)];
+}
+
 function spawnRow(y, d) {
   if (mapId === 'sea') return spawnFromPool(y, d, seaPool(d));
   const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
@@ -304,8 +315,10 @@ function spawnFromPool(y, d, pool) {
       if (cols) o.seaCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
     }
   }
-  if (type !== 'gate' && type !== 'coral' && type !== 'protractor' && Math.random() < 0.28) {
-    pickups.push({ x: rand(40, W - 40), y: y + extra + rand(95, 125), r: 10, spin: rand(0, 6) });
+  if (type !== 'gate' && type !== 'coral' && type !== 'protractor') {
+    const py = y + extra + rand(95, 125), power = pickPower(py);
+    if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
+    else if (Math.random() < 0.28) pickups.push({ x: rand(40, W - 40), y: py, r: 10, spin: rand(0, 6) });
   }
   return extra;
 }
