@@ -157,28 +157,10 @@ function render() {
     ctx.fillText(f.text, f.x, f.y - dist - (1 - f.life) * 40);
   }
   ctx.globalAlpha = 1;
-  if (state === 'play') drawSteerHints();
   syncHudPage();
 }
 
 // chevrons in the bottom corners show which way the plane is drifting
-function drawSteerHints() {
-  const y = H - 46;
-  for (const side of [-1, 1]) {
-    const x = side < 0 ? 44 : W - 44;
-    const active = drift === side;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.globalAlpha = active ? (holdSide === side ? 0.75 : 0.5) : 0.18;
-    ctx.beginPath();
-    for (const o of [-7, 7]) {
-      ctx.moveTo(o - side * 6, -12); ctx.lineTo(o + side * 6, 0); ctx.lineTo(o - side * 6, 12);
-    }
-    inkStroke(4);
-    if (darkPage) { ctx.strokeStyle = '#d8eefa'; ctx.stroke(); }   // light arrows on dark water
-    ctx.restore();
-  }
-}
 
 // switch the background between maps (the world's CSS class picks the ruling pattern)
 function applyMap() {

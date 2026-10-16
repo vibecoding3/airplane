@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v43** (2026-10-15)
+Current version: **v44** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -11,11 +11,11 @@ Repository: https://github.com/vibecoding3/airplane
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
 - **Files:** `index.html`, `style.css` and 13 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
-- **Start menu:** a regular game menu (big title, best score and star count, map tiles, Play, Shop and a fold-out "How to play") over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, best depth, time and stars caught, the map tiles, Play again and Shop. The Shop card is still a sticky note.
+- **Start menu:** a regular game menu (big title, best score and star count, map tiles, Play and Shop; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, best depth, time and stars caught, the map tiles, Play again and Shop. The Shop card is still a sticky note.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v43 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v44 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -31,7 +31,7 @@ One scheme for every device. A press can be a tap or click on the left or right 
 | P or Esc | Pause / resume |
 | Space or Enter | Start or resume from the menus |
 
-The arrows in the bottom corners show the current drift, and get darker while a side is held.
+There are no on-screen steering arrows (removed in v44).
 
 ---
 
@@ -82,7 +82,7 @@ The map is chosen with two picture tiles, **Paper** and **Deep sea**, on the sta
 | 600 m + | Now and then, a faded shipwreck resting in the dark |
 
   The specks are placed by a hash of the page position, so nothing is stored per speck. Whales and wrecks are kept at least about 30 m apart, so two never share the screen.
-- **Readability:** on dark water, the top bar, the steering arrows and the depth markers switch to light colours.
+- **Readability:** on dark water, the top bar and the depth markers switch to light colours.
 - **Background decoration:** fish instead of formulas. They are faded, never collide with the plane, swim slowly sideways, and get more dangerous with depth:
 
 | Depth | Fish |
