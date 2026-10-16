@@ -22,6 +22,8 @@ const medalsAnnounced = new Set();   // medals already celebrated this run
 // magnet: pulls stars in from further away at each level; shield: one spare life per level
 const POWER_MAX = 3;
 const MAGNET_RANGES = [0, 120, 180, 240];   // by magnet level
+const SLOWMO_TIME = 4, SLOWMO_SCALE = 0.5;    // slow-motion power-up: 4 real seconds at half speed
+const timeScale = () => (plane.slowmo > 0 && state === 'play' ? SLOWMO_SCALE : 1);
 const NEAR_PULL = 60;                      // every star and power-up this close is pulled in, magnet or not
 const magnetRange = () => MAGNET_RANGES[plane.magnet];
 const POWER_GAP = 45 * PX_PER_M;           // at least ~45 m between power-ups
@@ -63,7 +65,7 @@ const maxSideSpeed = () => 300 + 0.4 * (baseFallSpeed() - 150);
 const score = () => Math.floor(dist / PX_PER_M);   // stars are a collected total, not metres
 
 function reset() {
-  plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, invuln: 0, bubbled: 0 };
+  plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, slowmo: 0, invuln: 0, bubbled: 0 };
   obstacles = []; pickups = []; particles = []; floaters = [];
   dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
   nextRowY = H + 140; lastPowerY = 0; passedBest = false; lastMilestone = 0; flash = 0; medalsAnnounced.clear();

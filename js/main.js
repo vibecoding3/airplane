@@ -91,8 +91,9 @@ function frame(now) {
   watchFrameRate(real);
   countFrame(now);
   // at high speed, split the frame so the plane can't skip through thin obstacles
-  const steps = state === 'play' ? Math.max(1, Math.ceil(speed * dt / 10)) : 1;
-  for (let i = 0; i < steps; i++) update(dt / steps);
+  const sdt = dt * timeScale();                 // slow motion runs the world at half speed
+  const steps = state === 'play' ? Math.max(1, Math.ceil(speed * sdt / 10)) : 1;
+  for (let i = 0; i < steps; i++) update(sdt / steps);
   if (state !== 'title') render();   // the start menu's picture covers the playfield, so skip drawing it
   updateHud();
   requestAnimationFrame(frame);

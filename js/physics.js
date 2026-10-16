@@ -296,6 +296,7 @@ function update(dt) {
   if (plane.bubbled > 0) speed *= 0.5;         // rising bubbles hold the plane up
   dist += speed * dt;
   plane.bubbled = Math.max(0, plane.bubbled - dt);
+  if (plane.slowmo > 0) plane.slowmo = Math.max(0, plane.slowmo - dt / SLOWMO_SCALE);   // real seconds
   for (const o of obstacles) {
     if (o.type !== 'bubbles' || Math.abs(plane.x - o.x) > o.w / 2 || Math.abs(dist + planeScreenY() - o.y) > o.h / 2) continue;
     plane.bubbled = 0.3;
@@ -343,10 +344,10 @@ function update(dt) {
   // stars
   for (let i = pickups.length - 1; i >= 0; i--) {
     const p = pickups[i]; p.spin += dt * 2;
-    // anything that passes really near the plane is pulled in; the magnet pulls stars from further away
+    // anything that passes really near the plane is pulled in; the magnet pulls stars and power-ups from further away
     if (plane.alive) {
       const py = dist + planeScreenY(), dx = plane.x - p.x, dy = py - p.y, dd = Math.hypot(dx, dy);
-      const reach = !p.kind && plane.magnet > 0 ? Math.max(NEAR_PULL, magnetRange()) : NEAR_PULL;
+      const reach = plane.magnet > 0 ? Math.max(NEAR_PULL, magnetRange()) : NEAR_PULL;
       if (dd < reach && dd > 1) {
         const step = Math.min(dd, (300 + speed) * dt);
         p.x += dx / dd * step; p.y += dy / dd * step;
@@ -412,13 +413,16 @@ function collectPower(p) {
   if (p.kind === 'magnet') {
     plane.magnet = Math.min(POWER_MAX, plane.magnet + 1);
     floaters.push({ x: fx, y: p.y, life: 1.4, col: '#c0392b', text: `Magnet level ${plane.magnet}!` });
+  } else if (p.kind === 'slowmo') {
+    plane.slowmo = SLOWMO_TIME;
+    floaters.push({ x: fx, y: p.y, life: 1.4, col: '#8a4fc2', text: 'Slow motion!' });
   } else {
     plane.lives = Math.min(POWER_MAX, plane.lives + 1);
     floaters.push({ x: fx, y: p.y, life: 1.4, col: '#2f6fb8', text: `Shield level ${plane.lives}!` });
   }
-  const col = p.kind === 'magnet' ? '#d9443a' : '#2f8fe0';
+  const col = p.kind === 'magnet' ? '#d9443a' : p.kind === 'slowmo' ? '#8a4fc2' : '#2f8fe0';
   for (let k = 0; k < 12; k++) { const s = spark(p.x, p.y); s.col = col; particles.push(s); }
-  sfx.power();
+  p.kind === 'slowmo' ? sfx.slowmo() : sfx.power();
 }
 
 // a shield level is used up: the hit is forgiven and the plane blinks through obstacles for a moment

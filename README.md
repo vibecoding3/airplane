@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v53** (2026-10-15)
+Current version: **v54** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v53 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v54 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -45,7 +45,7 @@ There are no on-screen steering arrows (removed in v44).
 | Sideways slowdown | Gliding sideways at full speed makes the plane fall up to 40% slower |
 | Difficulty | `1 − e^(−depth / 600)`. It controls when obstacles unlock, gap sizes, row spacing and obstacle speeds, and is nearly maxed by about 2,000 m. |
 | Obstacle rows | Rows spawn ahead of the plane. The same obstacle type never appears twice in a row. |
-| Pickup pull | Since v51, any star or power-up that comes within 60 units (2 m) of the plane is pulled in, so near misses still count. The magnet power-up extends this for stars |
+| Pickup pull | Since v51, any star or power-up that comes within 60 units (2 m) of the plane is pulled in, so near misses still count. The magnet power-up extends this for stars and (since v54) power-ups |
 | Stars | About 28% of rows carry a gold star. Stars are a collected total (shown in the menu and top bar) and add nothing to the score. |
 | Fast-fall safety | At high speed each frame is split into sub-steps, so the plane can't skip through thin obstacles |
 | Best score | Saved per device and per map (since v49; the old single best went to Paper). During a run, a gold dashed line labelled "Your best · N m" marks the record depth, so you can see it coming; passing it pops "New best!" with a short fanfare |
@@ -235,15 +235,17 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 
 ## 7. Power-ups and progression
 
-There is no Shop (removed in v46). Instead, two power-ups appear in the map during a run, picked up by flying through them like stars. Each pickup raises that power one level, up to level 3. Levels last for the rest of the run only; every run starts with none.
+There is no Shop (removed in v46). Instead, power-ups appear in the map during a run, picked up by flying through them like stars. Each pickup raises that power one level, up to level 3. Levels last for the rest of the run only; every run starts with none.
 
 | Power-up | Looks like | Level 1 | Level 2 | Level 3 |
 |---|---|---|---|---|
-| Magnet | White badge with a red rim and a horseshoe magnet | Pulls stars from 120 units away | 180 units | 240 units |
+| Magnet | White badge with a red rim and a horseshoe magnet | Pulls stars and power-ups from 120 units away | 180 units | 240 units |
 | Shield | White badge with a blue rim and a blue shield crest | 1 spare life | 2 spare lives | 3 spare lives |
 
-- **Spawning:** from about 30 m on, a row can carry a power-up instead of a star, with at least about 45 m between power-ups (so roughly one every 50–80 m). A power-up already at level 3 is not offered; a used shield level can be picked up again.
-- **Feedback:** "Magnet level 2!" or "Shield level 3!" pops up in the power's colour, with a burst of sparks and a chime. Using a shield shows "Shield used! N left".
+**Slow motion** (since v54, timed, no levels): a white badge with a purple rim and an hourglass. Picking it up runs the whole game at half speed for 4 seconds (falling, obstacles, steering), with a soft purple tint and a purple bar above the plane showing the time left, plus a falling "whoosh" sound. It is only offered when slow motion is not already running.
+
+- **Spawning:** from about 30 m on, a row can carry a power-up instead of a star, with at least about 45 m between power-ups (so roughly one every 50–80 m). A magnet or shield already at level 3 is not offered (a used shield level can be picked up again); once both are at level 3, slow motion is the only power-up still offered.
+- **Feedback:** "Magnet level 2!", "Shield level 3!" or "Slow motion!" pops up in the power's colour, with a burst of sparks and a chime. Using a shield shows "Shield used! N left".
 - **Stars:** stars caught in a run are added to a saved total when the run ends. The top bar shows the total during a run.
 - **Plane:** one classic white paper plane; the crumpled ball and paper scraps match it. There are no skins (removed in v42) and no trail (removed in v36).
 
@@ -350,7 +352,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | Background decorations | `js/paper-background.js` (formulas) or `js/sea-background.js` (fish, specks, silhouettes) |
 | Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`) and the map tiles in `index.html` |
 | Plane look | `js/core.js` (`PLANE` colours), `js/render.js` (`paintPlane`) |
-| Power-ups | `js/state.js` (`POWER_MAX`, `MAGNET_RANGES`, `POWER_GAP`), `js/obstacles.js` (`pickPower`), `js/physics.js` (`collectPower`, `useExtraLife`), `js/render.js` (`drawPower`, `paintPowerIcon`) |
+| Power-ups | `js/state.js` (`POWER_MAX`, `MAGNET_RANGES`, `POWER_GAP`, `SLOWMO_TIME`, `timeScale`), `js/obstacles.js` (`pickPower`), `js/physics.js` (`collectPower`, `useExtraLife`), `js/render.js` (`drawPower`, `paintPowerIcon`) |
 | Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js`; start-menu picture in `img/menu-bg.svg` |
 | Sounds | `js/audio.js` (`sfx`) |
 | Music | `js/music.js` (`THEMES`: chords, melody and tempo per theme; `setMusic`, `duckMusic`) |
@@ -410,7 +412,7 @@ Suggestions; only the ones marked ✅ are built. They respect the decisions reco
 | 5 | **Daily dive** | One run per day with the same obstacle sequence for everyone (seeded from the date) and its own best score. Gives a reason to come back each day. | M |
 
 ### 12.2 More things to do during a run
-- **More power-ups** next to the magnet and shield (rare pickups, a few seconds each): slow motion, a star rush that turns the next rows into stars, or a tiny plane that fits through narrow gaps.
+- **More power-ups** next to the magnet, shield and slow motion (✅ built in v54) (rare pickups, a few seconds each): a star rush that turns the next rows into stars, or a tiny plane that fits through narrow gaps.
 - **Breathers and rushes:** every few hundred metres, a calm stretch with only stars, followed by a short "rush" of tightly packed obstacles. Changing the pace makes runs feel less flat than a constant difficulty curve.
 - **Milestone moments** ✅ built in v48 (see section 3): a small chime and flash each 100 m (and a bigger one each 500 m), so progress feels rewarding before the run ends.
 - **Rare big star** worth 5, placed in a slightly risky spot.

@@ -33,7 +33,15 @@ function paintLifeOutline(c) {
 // power-up icons, drawn in a 44px box: the shield is a blue crest with a small plane, the magnet a horseshoe
 function paintPowerIcon(c, id) {
   c.translate(22, 22);
-  if (id === 'shield') {
+  if (id === 'slowmo') {                        // an hourglass
+    c.fillStyle = '#efe6ff'; c.strokeStyle = COL.ink; c.lineWidth = 2; c.lineJoin = 'round';
+    c.beginPath(); c.moveTo(-10, -14); c.lineTo(10, -14); c.lineTo(1.5, 0); c.lineTo(10, 14); c.lineTo(-10, 14); c.lineTo(-1.5, 0); c.closePath();
+    c.fill(); c.stroke();
+    c.fillStyle = '#e0b84a';                       // sand: a little left on top, a pile below
+    c.beginPath(); c.moveTo(-5, -7); c.lineTo(5, -7); c.lineTo(0.5, -1.5); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(0, 6); c.lineTo(8, 13); c.lineTo(-8, 13); c.closePath(); c.fill();
+    c.fillStyle = '#8a4fc2'; c.fillRect(-13, -17, 26, 4); c.fillRect(-13, 13, 26, 4);
+  } else if (id === 'shield') {
     c.beginPath();
     c.moveTo(-13, -11); c.lineTo(0, -16); c.lineTo(13, -11); c.lineTo(12, 2);
     c.quadraticCurveTo(9, 12, 0, 17); c.quadraticCurveTo(-9, 12, -12, 2); c.closePath();
@@ -61,7 +69,7 @@ function paintPowerIcon(c, id) {
 function drawPower(p, sy) {
   const s = sharedSprite('power-' + p.kind, 48, 48, 24, 24, () => {
     ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 21, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = p.kind === 'magnet' ? '#d9443a' : '#2f8fe0'; ctx.lineWidth = 3.5; ctx.stroke();
+    ctx.strokeStyle = p.kind === 'magnet' ? '#d9443a' : p.kind === 'slowmo' ? '#8a4fc2' : '#2f8fe0'; ctx.lineWidth = 3.5; ctx.stroke();
     ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 23, 0, Math.PI * 2); ctx.stroke();
     ctx.save(); ctx.translate(-22, -22); paintPowerIcon(ctx, p.kind); ctx.restore();
   });
@@ -198,6 +206,11 @@ function render() {
     ctx.fillText(f.text, f.x, f.y - dist - (1 - f.life) * 40);
   }
   ctx.globalAlpha = 1;
+  if (plane.slowmo > 0 && state === 'play') {   // slow motion: a soft purple tint and a bar showing the time left
+    ctx.fillStyle = 'rgba(150,110,230,.10)'; ctx.fillRect(0, 0, W, H);
+    const w = (W - 120) * plane.slowmo / SLOWMO_TIME;
+    ctx.fillStyle = 'rgba(138,79,194,.85)'; ctx.fillRect(60, planeScreenY() - 52, w, 5);
+  }
   if (flash > 0 && !reduceMotion) {           // milestone flash over the whole playfield
     ctx.fillStyle = `rgba(${flashCol},${(flash * 0.6).toFixed(3)})`;
     ctx.fillRect(0, 0, W, H);

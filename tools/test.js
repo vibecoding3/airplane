@@ -29,7 +29,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per m
   const deep = await page.evaluate(depth => {
     const out = {};
     for (const m of ['notebook', 'sea', 'space']) {
-      mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0 }, counted = new Set();
+      mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0, slowmo: 0 }, counted = new Set();
       let maxMagnet = 0, maxShield = 0;
       while (dist / PX_PER_M < depth && f < 60 * 1200) {
         if (f % 45 === 0) { const s = Math.random() < 0.5 ? -1 : 1; press(s, 'sim'); release('sim'); }
@@ -50,8 +50,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per m
     const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})`);
-    check(d.powers.magnet > 0 && d.powers.shield > 0 && (DEPTH < 600 || (d.maxMagnet === 3 && d.maxShield === 3)),
-      `${m}: power-ups spawned (magnet ${d.powers.magnet}, shield ${d.powers.shield}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
+    check(d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && (DEPTH < 600 || (d.maxMagnet === 3 && d.maxShield === 3)),
+      `${m}: power-ups spawned (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
   }
 
   // normal runs (3 lives) end in a game over

@@ -299,12 +299,13 @@ function seaPool(d) {
   return pool;
 }
 
-// a magnet or shield every so often, never one the plane already has at the top level
+// a magnet, shield or slow motion every so often, never a power the plane already has at the top level
 function pickPower(y) {
   if (y < 30 * PX_PER_M || y - lastPowerY < POWER_GAP || Math.random() > 0.3) return null;
   const options = [];
   if (plane.magnet < POWER_MAX) options.push('magnet');
   if (plane.lives < POWER_MAX) options.push('shield');
+  if (plane.slowmo <= 0) options.push('slowmo');
   if (!options.length) return null;
   lastPowerY = y;
   return options[ri(0, options.length - 1)];
