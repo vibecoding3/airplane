@@ -260,10 +260,14 @@ const SEA_COLS = {
   glue: ['#e0a21a', '#7f8fa1', '#c0392b', '#3a66c4'],                         // submarine hulls
   starfish: ['#f28c28', '#e0503a', '#c75b9b', '#f2c84b', '#8a4fc2']
 };
+// obstacles that push the plane with wind (desk fan, ocean current) stop appearing from this depth
+const WIND_MAX_M = 700;
+const windAllowed = y => y / PX_PER_M < WIND_MAX_M;
+
 // Space obstacles: every one reuses a Paper or Deep sea obstacle's movement and collision with space art
 const SPACE_MAKERS = { girders: 'gate', asteroids: 'blots', ice: 'notes', airlock: 'erasers', probe: 'cutter',
                        satellite: 'pencil', rocket: 'wad', sattrain: 'clips', tumbler: 'starfish', arm: 'compass',
-                       laser: 'zap', spacemine: 'mine', wind: 'fan', lowgrav: 'bubbles', moon: 'protractor' };
+                       laser: 'zap', lowgrav: 'bubbles', moon: 'protractor' };   // no wind or explosions in space
 const SPACE_COLS = {
   gate: ['#c9ced6', '#e0a21a', '#d9443a', '#8fa3b8'],                         // girders
   blot: ['#8a8178', '#6f6a73', '#9a7b62', '#7d8590'],                         // asteroids
@@ -281,19 +285,18 @@ const SPACE_COLS = {
 function spacePool(d) {
   const pool = [['girders', 3], ['asteroids', 2], ['ice', 1.3], ['tumbler', 1.4], ['lowgrav', 1], ['satellite', 1 + 1.5 * d]];
   if (d > 0.06) pool.push(['rocket', 1.2]);
-  if (d > 0.08) pool.push(['sattrain', 1.3], ['spacemine', 1.2]);
+  if (d > 0.08) pool.push(['sattrain', 1.3]);
   if (d > 0.1) pool.push(['moon', 1.3]);
-  if (d > 0.12) pool.push(['wind', 1.1]);
   if (d > 0.15) pool.push(['airlock', 1.3], ['probe', 1.3]);
   if (d > 0.2) pool.push(['laser', 1.2]);
   if (d > 0.3) pool.push(['arm', 1.3]);
   return pool;
 }
-function seaPool(d) {
+function seaPool(d, y) {
   const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1]];
   if (d > 0.08) pool.push(['mine', 1.3]);
   if (d > 0.1) pool.push(['moray', 1.3]);
-  if (d > 0.12) pool.push(['current', 1.1]);
+  if (d > 0.12 && windAllowed(y)) pool.push(['current', 1.1]);
   if (d > 0.15) pool.push(['clam', 1.3], ['sub', 1.2]);
   if (d > 0.2) pool.push(['zap', 1.2], ['kelp', 1.2]);
   return pool;
@@ -312,12 +315,12 @@ function pickPower(y) {
 }
 
 function spawnRow(y, d) {
-  if (mapId === 'sea') return spawnFromPool(y, d, seaPool(d));
+  if (mapId === 'sea') return spawnFromPool(y, d, seaPool(d, y));
   if (mapId === 'space') return spawnFromPool(y, d, spacePool(d));
   const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
   if (d > 0.08) pool.push(['clips', 1.4]);
   if (d > 0.12) pool.push(['scissors', 0.6 + 1.6 * d]);
-  if (d > 0.18) pool.push(['fan', 1.1]);
+  if (d > 0.18 && windAllowed(y)) pool.push(['fan', 1.1]);
   if (d > 0.22) pool.push(['erasers', 1.4]);
   if (d > 0.3) pool.push(['compass', 1.3]);
   if (d > 0.1) pool.push(['glue', 1.2]);

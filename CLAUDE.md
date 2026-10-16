@@ -20,6 +20,8 @@ Tools setup (once): `cd tools && npm install`. Chrome is auto-detected (or set `
 - Deep sea has no rock-wall side columns (removed v31) and no sun rays (removed v39). Background fish never collide; new ones are background only unless asked.
 - Removed obstacles — avoid similar mechanics: pen wall line, stylus ripple rings, sharpener pull, whiteout patch, thumbtack rows, magnifier homing, coffee spill (soggy), rubber stamp (slam).
 - No Shop (removed v46): magnet and shield are power-ups picked up during a run, 3 levels each, reset every run; slow motion is a timed power-up (4 s at half speed). Stars are a collected total (no metres). No skins: one classic white plane (skins removed v42).
+- No wind obstacles (desk fan, ocean current) from 700 m on; Space has no wind or explosion obstacles at all (v55).
+- Top fall speed is capped at the 600 m value (14.0 m/s, v55).
 - No plane trail (removed v36). No "How to play" section and no on-screen steering arrows (removed v44).
 - No Sky dive / Skyscraper / single-journey map — dropped for good. New maps reuse the 20 mechanics in README section 6 with new art.
 

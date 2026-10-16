@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v54** (2026-10-15)
+Current version: **v55** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v54 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v55 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -40,7 +40,7 @@ There are no on-screen steering arrows (removed in v44).
 | Rule | Value |
 |---|---|
 | Depth | 30 world units = 1 metre. The score is the depth reached. |
-| Fall speed | `150 + 11 × √depth` units per second, rising until 800 m and then capped at that speed (since v50): about 5 m/s at the start, 10 m/s at 200 m and 15.4 m/s from 800 m on. Sideways speed is capped with it. Difficulty (gaps, spacing, obstacle speeds) still keeps rising after 800 m |
+| Fall speed | `150 + 11 × √depth` units per second, rising until 600 m and then capped at that speed (since v55; before it was capped at the 800 m speed, 15.4 m/s): about 5 m/s at the start, 10 m/s at 200 m and 14.0 m/s from 600 m on. Sideways speed is capped with it. Difficulty (gaps, spacing, obstacle speeds) still keeps rising after that |
 | Sideways speed | `300 + 0.4 × (fall speed − 150)`, so steering keeps up at depth |
 | Sideways slowdown | Gliding sideways at full speed makes the plane fall up to 40% slower |
 | Difficulty | `1 − e^(−depth / 600)`. It controls when obstacles unlock, gap sizes, row spacing and obstacle speeds, and is nearly maxed by about 2,000 m. |
@@ -53,7 +53,7 @@ There are no on-screen steering arrows (removed in v44).
 | Milestones | Every 100 m: "100 m!" pops up, the screen flashes white for a moment, the depth counter bounces and a two-note chime plays. Every 500 m it is bigger: a gold flash, a larger gold "500 m!", a burst of coloured sparks, a bigger bounce and a four-note arpeggio. Flashes and bounces are skipped when the device asks for reduced motion |
 
 ### Plane states
-- **Shielded** (shield power-up): the plane has a blue outline while it has at least one shield level. A hit uses one level instead of ending the run: the plane blinks and can't be hit for 2 seconds.
+- **Shielded** (shield power-up): the plane has a blue outline while it has at least one shield level, and its look shows the level: pale thin sky blue (1), bright blue (2), deep blue with a soft glow (3). A hit uses one level instead of ending the run: the plane blinks and can't be hit for 2 seconds.
 - **Magnet** (magnet power-up): a faint dashed red ring shows how far stars are pulled in.
 - **Bubbled** (Deep sea map, bubble column): the plane falls 50% slower while inside the column.
 
@@ -140,7 +140,7 @@ The plane is thrown out of orbit and falls away from Earth into deeper and stran
 | Glue tube | Sits on an edge and squirts blobs across the page | ~65 m |
 | Scissors | Spin and snap open and shut while drifting | ~75 m |
 | Cutter | Blade shoots out from an edge (22–38% of the width), holds, then slides back | ~100 m |
-| Desk fan | Wind band that pushes the plane sideways; the fan itself is deadly | ~120 m |
+| Desk fan | Wind band that pushes the plane sideways; the fan itself is deadly. Only appears before 700 m (since v55) | ~120 m |
 | Cat paw | A dashed wedge warns where it will strike, then the paw swipes from an edge | ~135 m |
 | Erasers | Two erasers from the walls that slide shut and open again | ~150 m |
 | Drawing compass | Spins its leg in a circle, pencilling the arc as it goes | ~215 m |
@@ -159,14 +159,14 @@ Eight sea obstacles reuse the movement and collision of a notebook obstacle with
 | Air bubble column | Slows the fall while inside and never hurts | New | 0 m |
 | Naval mine | On a chain. When the plane approaches it blinks and shows a dashed blast circle, then explodes so the blast lands as the plane arrives. The explosion is a cartoon burst (a spiky yellow and orange star) with speed lines and puffs of smoke | New | ~50 m |
 | Moray eel | Lunges out of a hole in the rock wall | Cutter | ~65 m |
-| Ocean current | Moving water pushes the plane sideways (no body to hit) | Desk fan | ~75 m |
+| Ocean current | Moving water pushes the plane sideways (no body to hit). Only appears before 700 m (since v55) | Desk fan | ~75 m |
 | Giant clam | Two shell lips that snap shut and open | Erasers | ~100 m |
 | Submarine | Fires torpedoes across; its bow light blinks just before | Glue tube | ~100 m |
 | Electric eel | Charges with a dashed preview line, then zaps a short lightning bolt out from the wall (14–22% of the width) | New | ~135 m |
 | Kelp | Seaweed frond sweeps out from the wall after a green dashed warning | Cat paw | ~135 m |
 
-### 5.3 Space map (15 types, since v53)
-Every Space obstacle reuses the movement and collision of a Paper or Deep sea obstacle (see `SPACE_MAKERS` in `js/obstacles.js`) with new art in `js/draw-space.js`. Outlines are pale so they read on black.
+### 5.3 Space map (13 types, since v53)
+Every Space obstacle reuses the movement and collision of a Paper or Deep sea obstacle (see `SPACE_MAKERS` in `js/obstacles.js`) with new art in `js/draw-space.js`. Outlines are pale so they read on black. Space has no wind or explosions: the solar wind and the space mine were removed in v55.
 
 | Space obstacle | Behaviour | Based on | Starts at |
 |---|---|---|---|
@@ -178,9 +178,7 @@ Every Space obstacle reuses the movement and collision of a Paper or Deep sea ob
 | Low-gravity field | A dashed purple zone with rising sparkles; slows the fall, never hurts | Bubble column | 0 m |
 | Rocket | A small rocket with a flickering flame launched up toward the plane | Paper wad | ~35 m |
 | Satellite train | A line of tiny satellites crossing | Paper clips | ~50 m |
-| Space mine | Floats (no chain); blinks with a dashed blast circle, then explodes in the cartoon burst | Naval mine | ~50 m |
 | Moon edge | A cratered moon bulging in from one side; slalom pairs deeper down | Protractor | ~65 m |
-| Solar wind | Golden streaks pushing the plane sideways (no body) | Ocean current | ~75 m |
 | Airlock doors | Two heavy doors with hazard stripes sliding shut and open | Erasers | ~100 m |
 | Docking probe | Shoots out of a hull, holds, slides back | Cutter | ~100 m |
 | Laser gate | Charges with a dashed line, then fires a short laser beam from the wall | Electric eel | ~135 m |
@@ -217,8 +215,8 @@ In the code, the mechanic lives in the generator (`make.<name>` in `js/obstacles
 | 14 | **Charged Beam** | On a wall; charges, then a beam crosses part of the screen for a moment | Dashed preview line while charging | Base and beam | — | Electric eel | Laser gate |
 | 15 | **Telegraphed Sweep** | A dashed wedge shows the danger area, then an arm swipes through it in an arc from a wall | Dashed wedge | The arm and its tip, only mid-swipe | Cat paw | Kelp | — |
 | 16 | **Telegraphed Slam** | A target appears at a spot, then something slams down there, lifts, and moves to a new spot | Darkening spot and dashed target | Only the moment it is down | — (was the rubber stamp, removed in v37) | — | — |
-| 17 | **Proximity Blast** | Sits still; when the plane gets close it arms, shows its blast radius, then explodes as the plane arrives | Fast blinking and a dashed blast circle | The body, then the blast | — | Naval mine | Space mine |
-| 18 | **Push Zone** | A horizontal band that pushes the plane sideways while inside it; may have a solid source on the wall | Moving streaks | Only the source, if there is one | Desk fan (fan is solid) | Ocean current (no source) | Solar wind (no source) |
+| 17 | **Proximity Blast** | Sits still; when the plane gets close it arms, shows its blast radius, then explodes as the plane arrives | Fast blinking and a dashed blast circle | The body, then the blast | — | Naval mine | — |
+| 18 | **Push Zone** | A horizontal band that pushes the plane sideways while inside it; may have a solid source on the wall | Moving streaks | Only the source, if there is one | Desk fan (fan is solid) | Ocean current (no source) | — |
 | 19 | **Effect Zone** | A zone that never hurts but changes the plane for a while: a debuff or a buff | The zone itself | Nothing (can be paired with a hazard placed after it) | — (was the coffee spill, removed in v37) | Bubble column (falls slower) | Low-gravity field (falls slower) |
 | 20 | **Spring Line** | A line between two anchors; touching the line kicks the plane sideways instead of crashing it | — | Only the anchors | Rubber band | — | — |
 
@@ -445,7 +443,7 @@ New maps should reuse the 20 mechanics in section 6 with new art (see 11). Setti
 
 ## 13. Space map — brainstorm (built in v53)
 
-The original ideas for the third map, kept for reference. **Built in v53** as described in sections 4.3 and 5.3, with these choices: premise **A. Re-entry**, a **cartoon and playful** tone, the name **Space**, and 15 of the obstacles below (Spinning Blades, Telegraphed Sweep and Spring Line were left out for now).
+The original ideas for the third map, kept for reference. **Built in v53** as described in sections 4.3 and 5.3, with these choices: premise **A. Re-entry**, a **cartoon and playful** tone, the name **Space**, and 15 of the obstacles below (Spinning Blades, Telegraphed Sweep and Spring Line were left out). In v55 the solar wind and space mine were removed too, leaving 13.
 
 ### 13.1 The premise: why is the plane falling in space?
 

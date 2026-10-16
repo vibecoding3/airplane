@@ -22,12 +22,18 @@ function paintPlane(c, bank) {
   c.beginPath(); c.moveTo(0, 20); c.lineTo(0, -12); c.lineWidth = 1; c.stroke();
 }
 
-// blue glow around the plane while it has a shield
-function paintLifeOutline(c) {
+// blue outline around the plane while it has a shield; its look shows the shield level
+const SHIELD_LOOKS = [null,
+  { col: '#9fd8ff', w: 3 },                                   // level 1: pale sky blue, thin
+  { col: '#2f8fe0', w: 4.5 },                                 // level 2: bright blue
+  { col: '#1c4fb8', w: 5, glow: 'rgba(80,160,255,.3)' }      // level 3: deep blue with a soft glow
+];
+function paintLifeOutline(c, lvl = 2) {
+  const s = SHIELD_LOOKS[clamp(lvl, 1, 3)];
   planeOutline(c);
   c.lineJoin = 'round';
-  c.strokeStyle = 'rgba(47,143,224,.35)'; c.lineWidth = 9; c.stroke();
-  c.strokeStyle = '#2f8fe0'; c.lineWidth = 4.5; c.stroke();
+  if (s.glow) { c.strokeStyle = s.glow; c.lineWidth = 10; c.stroke(); }
+  c.strokeStyle = s.col; c.lineWidth = s.w; c.stroke();
 }
 
 // power-up icons, drawn in a 44px box: the shield is a blue crest with a small plane, the magnet a horseshoe
@@ -81,7 +87,7 @@ function drawPlane(x, y, ang) {
 
   ctx.save(); ctx.translate(x, y); ctx.rotate(-ang);
   if (plane.invuln > 0) ctx.globalAlpha = Math.floor(plane.invuln * 12) % 2 ? 0.3 : 1;
-  if (plane.lives > 0) paintLifeOutline(ctx);
+  if (plane.lives > 0) paintLifeOutline(ctx, plane.lives);
   paintPlane(ctx, clamp(plane.vx / 400, -1, 1));
   ctx.restore();
 }

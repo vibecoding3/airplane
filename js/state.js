@@ -58,8 +58,8 @@ const planeScreenY = () => H * 0.28;
 // everything scales with depth: the deeper the plane gets, the faster it falls, with no cap
 const depthM = () => dist / PX_PER_M;
 const difficulty = () => 1 - Math.exp(-depthM() / 600);
-// fall speed rises with depth until 800 m, then stays at that top speed (about 15.4 m/s)
-const SPEED_CAP_M = 800;
+// fall speed rises with depth until 600 m, then stays at that top speed (about 14.0 m/s)
+const SPEED_CAP_M = 600;
 const baseFallSpeed = () => 150 + 11 * Math.sqrt(Math.min(depthM(), SPEED_CAP_M));
 const maxSideSpeed = () => 300 + 0.4 * (baseFallSpeed() - 150);
 const score = () => Math.floor(dist / PX_PER_M);   // stars are a collected total, not metres
