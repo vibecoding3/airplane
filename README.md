@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v46** (2026-10-15)
+Current version: **v47** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v46 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v47 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -47,7 +47,7 @@ There are no on-screen steering arrows (removed in v44).
 | Obstacle rows | Rows spawn ahead of the plane. The same obstacle type never appears twice in a row. |
 | Stars | About 28% of rows carry a gold star. Stars are a collected total (shown in the menu and top bar) and add nothing to the score. |
 | Fast-fall safety | At high speed each frame is split into sub-steps, so the plane can't skip through thin obstacles |
-| Best score | Saved per device |
+| Best score | Saved per device. During a run, a gold dashed line labelled "Your best · N m" marks the record depth, so you can see it coming; passing it pops "New best!" with a short fanfare |
 
 ### Plane states
 - **Shielded** (shield power-up): the plane has a blue outline while it has at least one shield level. A hit uses one level instead of ending the run: the plane blinks and can't be hit for 2 seconds.
@@ -337,13 +337,13 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 ## 12. Ideas to make it more fun
 
-Suggestions only: none of these are built yet. They respect the decisions recorded so far (no trails, no skins, no tutorial screens or steering arrows, no shadows, and none of the removed obstacle mechanics). Effort: **S** = an hour or two, **M** = an evening, **L** = several sessions.
+Suggestions; only the ones marked ✅ are built. They respect the decisions recorded so far (no trails, no skins, no tutorial screens or steering arrows, no shadows, and none of the removed obstacle mechanics). Effort: **S** = an hour or two, **M** = an evening, **L** = several sessions.
 
 ### 12.1 Top picks
 
 | # | Idea | Why it is fun | Effort |
 |---|---|---|---|
-| 1 | **Best-depth line** | A dashed line with "Your best" appears in the world at your record depth. Seeing it coming is the strongest "one more run" pull a high-score game has. | S |
+| 1 | **Best-depth line** ✅ built in v47 (see section 3) | A dashed line with "Your best" appears in the world at your record depth. Seeing it coming is the strongest "one more run" pull a high-score game has. | S |
 | 2 | **Close calls** | Passing very near an obstacle without touching it pops "Close call!" and gives a bonus star. It rewards risky lines instead of only safe ones. | M |
 | 3 | **Star paths** | Instead of single stars, place short lines or arcs of stars that lead through gaps or around hazards, so collecting them is a small route-finding puzzle. | S |
 | 4 | **"Crumpled by…" on game over** | Name what got you ("Crumpled by the scissors at 138 m", "Zapped by an electric eel"). It feels fairer and is often funny. | S |

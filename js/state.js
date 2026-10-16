@@ -17,6 +17,7 @@ let lastPowerY = 0;
 // stars caught in runs are added to a saved total
 let bank = +store.get('nosedive-bank') || 0;
 let titleTime = 0;
+let passedBest = false;          // this run has gone deeper than the saved best
 
 // One control scheme for every device (tap/click a screen side, or press an arrow key):
 // each press steps the drift one notch toward that side (left -> straight -> right);
@@ -50,7 +51,7 @@ function reset() {
   plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, invuln: 0, bubbled: 0 };
   obstacles = []; pickups = []; particles = []; floaters = [];
   dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
-  nextRowY = H + 140; lastPowerY = 0;
+  nextRowY = H + 140; lastPowerY = 0; passedBest = false;
   formulas = []; nextFormulaY = 60; usedFormulas.clear(); fishes.length = 0; lastSceneryY = -1e9;
 }
 reset();

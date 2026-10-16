@@ -57,5 +57,6 @@ const sfx = {
   crash: () => { crunch(); tone(220, 60, 0.4, 'sawtooth', 0.04); },
   save: () => { crunch(); tone(330, 990, 0.35, 'triangle', 0.1); },
   twang: () => { tone(180, 420, 0.08, 'triangle', 0.09); tone(420, 160, 0.3, 'triangle', 0.07, 0.07); },
+  record: () => { tone(660, 660, 0.12, 'triangle', 0.09); tone(880, 880, 0.12, 'triangle', 0.09, 0.11); tone(1320, 1320, 0.25, 'triangle', 0.09, 0.22); },
   power: () => { tone(660, 990, 0.1, 'sine', 0.1); tone(990, 1480, 0.18, 'sine', 0.08, 0.09); }
 };

@@ -40,6 +40,7 @@ function drawPaper() {
   if (MAPS[mapId].formulas) drawFormulas();
   else { drawSeaParticles(); drawFishes(); }
   drawDepthMarkers();
+  drawBestLine();
 }
 
 function drawFormulas() {
@@ -66,6 +67,25 @@ function drawFormulas() {
 }
 
 // dashed marker where each new colour starts (pencil on paper, pale sonar line in deep water)
+// your record depth as a gold dashed line with a label, so you can see it coming during a run
+function drawBestLine() {
+  if (best <= 0 || !(state === 'play' || state === 'paused' || state === 'dying')) return;
+  const y = best * PX_PER_M + planeScreenY() - dist;   // where the plane will be when the depth reaches the record
+  if (y < -30 || y > H + 30) return;
+  const left = mapId === 'sea' ? 12 : 66, text = 'Your best · ' + fmt(best) + ' m';
+  ctx.save();
+  ctx.strokeStyle = COL.ink; ctx.lineWidth = 5; ctx.setLineDash([14, 8]);
+  ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.font = '700 16px Kalam, cursive'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  const w = ctx.measureText(text).width + 20;
+  ctx.beginPath(); roundRectPath(left, y - 26, w, 22, 11);
+  ctx.fillStyle = '#ffd23f'; ctx.fill(); ctx.strokeStyle = COL.ink; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = COL.ink; ctx.fillText(text, left + 10, y - 14);
+  ctx.restore();
+}
+
 function drawDepthMarkers() {
   for (let k = Math.max(1, pageIndexAt(dist - 20) + 1), y; (y = pageTop(k) - dist) < H + 20; k++) {
     const col = isDark(pageColor(k)) ? '#d8eefa' : COL.graphite;

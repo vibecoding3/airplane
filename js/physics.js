@@ -319,6 +319,11 @@ function update(dt) {
   const targetAng = Math.atan2(plane.vx, speed + 60);
   plane.ang += (targetAng - plane.ang) * Math.min(1, 12 * dt);
 
+  if (!passedBest && best > 0 && score() > best) {   // just went past the record
+    passedBest = true;
+    floaters.push({ x: W / 2, y: dist + planeScreenY() - 40, life: 1.6, col: '#c47a00', text: 'New best!' });
+    sfx.record();
+  }
   spawnRows();
   for (const o of obstacles) updateObstacle(o, dt);
   prune(obstacles, o => o.y > dist - 160);
