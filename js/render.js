@@ -85,10 +85,6 @@ function drawPlane(x, y, ang) {
   if (plane.invuln > 0) ctx.globalAlpha = Math.floor(plane.invuln * 12) % 2 ? 0.3 : 1;
   if (plane.lives > 0) paintLifeOutline(ctx);
   paintPlane(ctx, skin, clamp(plane.vx / 400, -1, 1));
-  if (plane.soggy > 0) {                     // coffee stain soaking into the paper
-    ctx.globalAlpha *= 0.5 * Math.min(1, plane.soggy / 0.6);
-    ctx.fillStyle = plane.soggyCol || '#8a5a2e'; planeOutline(); ctx.fill();
-  }
   ctx.restore();
 }
 
@@ -175,8 +171,6 @@ function render() {
       case 'fan': drawFan(o, sy); break;
       case 'glue': o.sea ? drawSub(o, sy) : drawGlue(o, sy); break;
       case 'cutter': o.sea ? drawMoray(o, sy) : drawCutter(o, sy); break;
-      case 'stamp': drawStamp(o, sy); break;
-      case 'coffee': drawCoffee(o, sy); break;
       case 'note': o.sea ? drawJelly(o, sy) : drawNote(o, sy); break;
       case 'setsquare': drawSetSquare(o, sy); break;
       case 'band': drawBand(o, sy); break;

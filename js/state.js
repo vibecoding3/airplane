@@ -61,7 +61,7 @@ const maxSideSpeed = () => 300 + 0.4 * (baseFallSpeed() - 150);
 const score = () => Math.floor(dist / PX_PER_M);   // stars are Shop money, not metres
 
 function reset() {
-  plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: level('life'), invuln: 0, soggy: 0, bubbled: 0 };
+  plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: level('life'), invuln: 0, bubbled: 0 };
   obstacles = []; pickups = []; particles = []; floaters = [];
   dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
   nextRowY = H + 140;

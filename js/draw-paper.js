@@ -370,77 +370,6 @@ function drawCutter(o, sy) {
 }
 
 
-// a smooth, lumpy blob: curves through the midpoints between radius samples
-function blobPath(x, y, r, pts, squash = 1) {
-  const p = pts.map((k, i) => {
-    const a = i / pts.length * Math.PI * 2;
-    return [x + Math.cos(a) * r * k, y + Math.sin(a) * r * k * squash];
-  });
-  const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-  ctx.beginPath();
-  const start = mid(p[p.length - 1], p[0]);
-  ctx.moveTo(start[0], start[1]);
-  p.forEach((q, i) => {
-    const m = mid(q, p[(i + 1) % p.length]);
-    ctx.quadraticCurveTo(q[0], q[1], m[0], m[1]);
-  });
-  ctx.closePath();
-}
-
-function drawStamp(o, sy) {
-  const p = o.pal || PALETTES.stamp[0], k = palKey(p);
-  // marks ("A+", "OK!"...) left by earlier landings, in this stamp's ink
-  const mark = sharedSprite('stampMark' + k, 62, 46, 31, 23, () => {
-    ctx.strokeStyle = `rgba(${p.ink},.65)`; ctx.fillStyle = `rgba(${p.ink},.65)`; ctx.lineWidth = 2.5;
-    ctx.beginPath(); roundRectPath(-27, -19, 54, 38, 6); ctx.stroke();
-    ctx.font = `700 ${p.text.length > 3 ? 15 : 22}px Kalam, cursive`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(p.text, 0, 2);
-  });
-  for (const m of o.marks) blit(mark, m.x, sy, m.rot);
-  // h: how high the stamp is (1 = up by the viewer, 0 = on the page)
-  const h = o.phase === 'warn' ? 1 - Math.min(1, o.t / o.warn) ** 2 : o.phase === 'down' ? 0 : Math.min(1, o.t / 0.45);
-  const near = 1 - h;
-  ctx.fillStyle = `rgba(34,53,107,${0.08 + 0.25 * near})`;
-  ctx.beginPath(); ctx.ellipse(o.x, sy, 30 + 14 * h, 22 + 10 * h, 0, 0, Math.PI * 2); ctx.fill();
-  if (o.phase === 'warn') {           // dashed red target where it is about to land
-    ctx.save();
-    ctx.strokeStyle = `rgba(200,50,40,${0.3 + 0.55 * near})`; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
-    ctx.beginPath(); ctx.ellipse(o.x, sy, 36, 28, 0, 0, Math.PI * 2); ctx.stroke();
-    ctx.restore();
-  }
-  // the block is painted at its largest (lifted) size and scaled down as it comes to the page
-  const BIG = 1.25;
-  const block = sharedSprite('stampBlock' + k, 70 * BIG, 54 * BIG, 35 * BIG, 27 * BIG, () => {
-    ctx.scale(BIG, BIG);
-    ctx.fillStyle = p.wood;                                      // stamp block
-    ctx.beginPath(); roundRectPath(-32, -24, 64, 48, 7); ctx.fill(); inkStroke(1.4);
-    ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1;
-    ctx.beginPath(); roundRectPath(-26, -18, 52, 36, 5); ctx.stroke();
-    ctx.fillStyle = p.knob;                                      // handle knob
-    ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
-    ctx.fillStyle = 'rgba(255,255,255,.3)';
-    ctx.beginPath(); ctx.arc(-5, -5, 5, 0, Math.PI * 2); ctx.fill();
-  });
-  const sc = (1 + 0.25 * h) / BIG;
-  blit(block, o.x - 16 * h, sy - 34 * h, 0, sc, sc);
-}
-
-function paintCoffee(o, sy) {
-  const p = o.pal || PALETTES.coffee[0];
-  ctx.fillStyle = `rgba(${p.fill},.42)`;
-  blobPath(o.x, sy, o.r, o.pts); ctx.fill();
-  ctx.strokeStyle = `rgba(${p.rim},.55)`; ctx.lineWidth = 3; ctx.stroke();
-  ctx.fillStyle = `rgba(${p.fill},.5)`;
-  for (const [a, k, r] of o.drops) {
-    ctx.beginPath(); ctx.arc(o.x + Math.cos(a) * o.r * k, sy + Math.sin(a) * o.r * k, r, 0, Math.PI * 2); ctx.fill();
-  }
-  if (o.ring) {                        // the mug's ring
-    ctx.strokeStyle = `rgba(${p.rim},.45)`; ctx.lineWidth = 3;
-    const cx = o.x + Math.cos(o.ring.a) * o.r * 0.9, cy = sy + Math.sin(o.ring.a) * o.r * 0.9;
-    ctx.beginPath(); ctx.arc(cx, cy, o.ring.r, 0.3, Math.PI * 2 - 0.4); ctx.stroke();
-  }
-}
-
 function paintNote(o, sy) {
   ctx.save();
   ctx.translate(o.x, sy); ctx.rotate(o.rot);
@@ -536,10 +465,6 @@ function drawProtractor(o, sy) {
   const cx = o.side < 0 ? 0 : W, R = o.r + 8;
   const s = ownSprite(o, 'spr', R * 2, R * 2 + 4, R, R - 2, () => { ctx.translate(-cx, 0); paintProtractor(o, 0); });
   blit(s, cx, sy);
-}
-function drawCoffee(o, sy) {
-  const R = o.r * 1.65 + 32;
-  blit(ownSprite(o, 'spr', R * 2, R * 2, R, R, () => paintCoffee({ ...o, x: 0 }, 0)), o.x, sy);
 }
 function drawNote(o, sy) {
   blit(ownSprite(o, 'spr', 56, 58, 26, 26, () => paintNote({ ...o, x: 0, rot: 0 }, 0)), o.x, sy, o.rot);

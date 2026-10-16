@@ -2,13 +2,12 @@
 'use strict';
 
 // ---------- obstacle generation ----------
-// a small round ink blot, used as the extra hazard next to fans and coffee spills
+// a small round ink blot, used as the extra hazard next to desk fans
 const inkBlot = (x, y, r = rand(14, 18)) => ({ type: 'blot', x, y, r, drops: [],
   bumps: Array.from({ length: 6 }, (_, j) => ({ t: j / 6 * 6.28, d: r * 0.7, r: r * 0.4 })) });
 const CLIP_COLORS = ['#8d96a3', '#d9443a', '#2f6fd1', '#2f8f5b', '#e0a21a', '#f29fbd', '#8a4fc2', '#2b2b2b', '#00a3a3'];
 const NOTE_COLORS = ['#fde58a', '#f7a8c4', '#b9e3a8', '#a8d4f2', '#ffc58a', '#d4b8f2', '#a8efe0'];
 const SCISSOR_COLORS = ['#f07f1e', '#2f8f5b', '#8a4fc2', '#2f6fd1', '#d9443a', '#f29fbd', '#00a3a3', '#2b2b2b', '#e0a21a'];
-const SOGGY_TIME = 2.5;          // seconds a coffee soaking lasts
 const BAND_COLORS = ['#c0392b', '#e0a21a', '#2f6fd1', '#2f8f5b', '#b07a45', '#8a4fc2', '#f29fbd', '#00a3a3'];
 const CAT_COLORS = ['#e8913a', '#9a9a9a', '#4a4a4a', '#efe2c8', '#8b5a2b', '#fbfbf7', '#c9b79c'];
 // the classic green of school geometry sets: translucent plastic, darker edge, white markings
@@ -69,18 +68,6 @@ const PALETTES = {
     { handle: '#2f8f5b', slider: '#3b3f47' }, { handle: '#2b2b2b', slider: '#d9443a' }, { handle: '#f29fbd', slider: '#3b3f47' },
     { handle: '#8a4fc2', slider: '#f4c430' }
   ],
-  stamp: [   // wooden block, handle knob, ink colour (r,g,b) and what it prints
-    { wood: '#b07a45', knob: '#8a5a2e', ink: '200,40,40', text: 'A+' },
-    { wood: '#b07a45', knob: '#2b2b2b', ink: '40,80,200', text: 'A+' },
-    { wood: '#c9a06a', knob: '#2f8f5b', ink: '30,140,70', text: '10/10' },
-    { wood: '#a06a3c', knob: '#8a4fc2', ink: '120,50,180', text: 'OK!' },
-    { wood: '#d9443a', knob: '#7a1d16', ink: '200,40,40', text: 'B+' },
-    { wood: '#2f6fd1', knob: '#1d3f80', ink: '40,80,200', text: 'A+' }
-  ],
-  coffee: [   // spill fill and rim (r,g,b)
-    { fill: '122,74,34', rim: '95,55,22' }, { fill: '70,40,20', rim: '45,25,10' }, { fill: '190,130,50', rim: '150,95,30' },
-    { fill: '95,32,22', rim: '62,16,8' }, { fill: '110,150,60', rim: '75,110,35' }, { fill: '240,150,40', rim: '200,110,20' }
-  ]
 };
 PALETTES.protractor = PALETTES.setsquare = [
   GEO, GEO, GEO, GEO, GEO,
@@ -93,7 +80,6 @@ const pickPal = type => {
 };
 const PAW_SWEEP = 0.55;          // the cat paw swings this far (radians) above and below level
 const PAW_TIMES = { rest: 0.6, swipe: 0.38, retract: 0.3 };
-const blobShape = n => Array.from({ length: n }, () => rand(0.8, 1.1));
 const make = {
   gate(y, d) {           // two rulers leaving a gap
     const gapW = lerp(170, 98, d) + rand(-10, 10);
@@ -185,21 +171,6 @@ const make = {
     obstacles.push({ type: 'cutter', y, side: Math.random() < 0.5 ? -1 : 1, ext: 0,
       maxExt: rand(W * 0.22, W * 0.38), period: lerp(2.4, 1.6, d), t: rand(0, 2) });
   },
-  stamp(y, d) {          // a rubber stamp: its shadow warns where it will land, then it slams down
-    obstacles.push({ type: 'stamp', y, x: rand(60, W - 60), phase: 'warn', t: 0, warn: lerp(1.2, 0.75, d), marks: [] });
-    return 40;
-  },
-  coffee(y, d) {         // a coffee spill: flying through it soaks the plane (falls faster, steers worse)
-    const r = rand(40, 58);
-    obstacles.push({ type: 'coffee', y, x: rand(r + 10, W - r - 10), r, pts: blobShape(14),
-      drops: Array.from({ length: 5 }, () => [rand(0, 6.28), rand(1.2, 1.6), rand(2, 5)]),
-      ring: Math.random() < 0.6 ? { a: rand(0, 6.28), r: rand(20, 26) } : null });
-    if (d > 0.35) {      // and an ink blot waiting below the spill for a soggy plane
-      obstacles.push(inkBlot(rand(30, W - 30), y + rand(90, 120)));
-      return 110;
-    }
-    return 30;
-  },
   notes(y, d) {          // sticky notes fluttering down the page, swaying side to side
     const n = d > 0.4 ? 3 : 2;
     for (let i = 0; i < n; i++) {
@@ -243,7 +214,7 @@ const make = {
     return n === 2 ? 90 : 40;
   },
   zap(y, d) {            // an electric eel on one wall: charges (dashed preview), then zaps across
-    obstacles.push({ type: 'zap', y, side: Math.random() < 0.5 ? -1 : 1, len: rand(W * 0.35, W * 0.55),
+    obstacles.push({ type: 'zap', y, side: Math.random() < 0.5 ? -1 : 1, len: rand(W * 0.175, W * 0.275),
       phase: 'rest', t: rand(0, 0.8), rest: lerp(1.3, 0.8, d) });
     return 20;
   },
@@ -310,8 +281,6 @@ function spawnRow(y, d) {
   if (d > 0.1) pool.push(['glue', 1.2]);
   if (d > 0.15) pool.push(['cutter', 1.3]);
   if (d > 0.06) pool.push(['notes', 1.2]);
-  if (d > 0.1) pool.push(['coffee', 1.1]);
-  if (d > 0.22) pool.push(['stamp', 1.3]);
   if (d > 0.05) pool.push(['band', 1.2]);
   if (d > 0.08) pool.push(['setsquare', 1.2]);
   if (d > 0.2) pool.push(['paw', 1.3]);

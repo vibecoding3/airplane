@@ -209,23 +209,72 @@ function drawStarfish(o, sy) {
   }), o.x, sy, o.rot);
 }
 
+// cartoon explosion: a spiky comic-book "BOOM!" burst that pops in with an overshoot, speed lines,
+// then puffy smoke clouds that drift up and fade. T is seconds since the blast (deadly for the first 0.35 s).
+const BOOM_END = 0.95;
+function paintBoomBurst() {
+  const star = (n, tip, valley, rot) => {
+    ctx.beginPath();
+    for (let i = 0; i < n * 2; i++) {
+      const a = rot + i / (n * 2) * Math.PI * 2, r = i % 2 ? valley : i % 4 ? tip * 0.86 : tip;
+      ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    }
+    ctx.closePath();
+  };
+  ctx.lineJoin = 'round';
+  star(12, 70, 48, 0); ctx.fillStyle = '#ffd23f'; ctx.fill(); ctx.strokeStyle = COL.ink; ctx.lineWidth = 3; ctx.stroke();
+  star(10, 50, 33, 0.35); ctx.fillStyle = '#ff8a2a'; ctx.fill();
+  star(8, 30, 20, 0.1); ctx.fillStyle = '#fff3b0'; ctx.fill();
+  ctx.rotate(-0.16);
+  ctx.font = '700 25px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.lineWidth = 5; ctx.strokeText('BOOM!', 0, 2);
+  ctx.fillStyle = '#e8402f'; ctx.fillText('BOOM!', 0, 2);
+}
+function drawBoom(o, sy, T) {
+  const s = o.blast / 62;
+  // smoke puffs behind the burst
+  const p = clamp((T - 0.12) / (BOOM_END - 0.12), 0, 1);
+  if (p > 0) {
+    ctx.save();
+    ctx.globalAlpha = 1 - p * p;
+    ctx.fillStyle = '#eef1f3'; ctx.strokeStyle = COL.ink; ctx.lineWidth = 2;
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2 + o.x * 0.05, d = o.blast * (0.35 + 0.45 * p);
+      const r = o.blast * (0.27 + 0.12 * (i % 2)) * (1 - 0.4 * p) * Math.min(1, p * 6);
+      ctx.beginPath(); ctx.arc(o.x + Math.cos(a) * d, sy + Math.sin(a) * d - 30 * p, r, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  // the burst: pops past full size, settles, then shrinks away
+  const pop = T < 0.1 ? (T / 0.1) * 1.25 : T < 0.2 ? 1.25 - (T - 0.1) / 0.1 * 0.25 : T < 0.4 ? 1 : 1 - (T - 0.4) / 0.2;
+  if (pop > 0) {
+    const burst = sharedSprite('boomBurst', 150, 150, 75, 75, paintBoomBurst);
+    const k = s * pop;
+    blit(burst, o.x, sy, Math.sin(T * 30) * 0.06, k, k);
+  }
+  // speed lines flying outward
+  if (T < 0.3) {
+    ctx.save();
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.globalAlpha = 1 - T / 0.3;
+    const r0 = o.blast * (1.1 + T * 1.5);
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const a = (i + 0.5) / 8 * Math.PI * 2;
+      ctx.moveTo(o.x + Math.cos(a) * r0, sy + Math.sin(a) * r0);
+      ctx.lineTo(o.x + Math.cos(a) * (r0 + 14), sy + Math.sin(a) * (r0 + 14));
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
 // naval mine on a chain: blinks with its blast circle showing, then explodes
 function drawMine(o, sy) {
   ctx.strokeStyle = 'rgba(70,80,92,.7)'; ctx.lineWidth = 1.6;
   ctx.beginPath(); for (let y = 18; y < 130; y += 9) { ctx.moveTo(o.x - 2, sy + y); ctx.lineTo(o.x + 2, sy + y + 6); } ctx.stroke();
-  if (o.phase === 'boom' || (o.phase === 'gone' && o.t < 0.5)) {
-    const k = o.phase === 'boom' ? Math.min(1, o.t / 0.12) : 1;
-    const glow = sharedSprite('blast', 132, 132, 66, 66, () => {
-      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 64);
-      g.addColorStop(0, 'rgba(255,250,220,1)'); g.addColorStop(0.35, 'rgba(255,190,80,.95)');
-      g.addColorStop(0.75, 'rgba(240,100,40,.6)'); g.addColorStop(1, 'rgba(240,100,40,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 64, 0, Math.PI * 2); ctx.fill();
-    });
-    ctx.save();
-    ctx.globalAlpha = o.phase === 'boom' ? 1 : 1 - o.t / 0.5;
-    const sc = o.blast * k / 62;
-    blit(glow, o.x, sy, 0, sc, sc);
-    ctx.restore();
+  if (o.phase === 'boom' || (o.phase === 'gone' && o.t < BOOM_END - 0.35)) {
+    drawBoom(o, sy, o.phase === 'boom' ? o.t : 0.35 + o.t);
     return;
   }
   if (o.phase === 'gone') return;

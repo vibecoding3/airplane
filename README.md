@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v36** (2026-10-15)
+Current version: **v37** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -14,7 +14,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v36 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v37 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -50,7 +50,6 @@ The arrows in the bottom corners show the current drift, and get darker while a 
 
 ### Plane states
 - **Extra life** (Shop upgrade): the plane has a blue outline while a spare life is ready. When a life is used, the plane blinks and can't be hit for 2 seconds.
-- **Soggy** (Paper map, coffee spill): for 2.5 seconds the plane falls 25% faster and steers at 60%. It turns the colour of the drink it flew through.
 - **Bubbled** (Deep sea map, bubble column): the plane falls 50% slower while inside the column.
 
 ---
@@ -102,7 +101,7 @@ The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fi
 
 "Starts at" is the depth where an obstacle first joins the pool of possible obstacles. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
 
-### 5.1 Paper map (18 types)
+### 5.1 Paper map (16 types)
 
 | Obstacle | Behaviour | Starts at |
 |---|---|---|
@@ -116,16 +115,14 @@ The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fi
 | Paper clips | A row of clips sliding across the page | ~50 m |
 | Set square | 45° or 30/60° triangle spinning while it drifts | ~50 m |
 | Glue tube | Sits on an edge and squirts blobs across the page | ~65 m |
-| Coffee spill | Doesn't crash you, but makes the plane soggy. Comes in coffee, espresso, tea, cola, matcha or juice | ~65 m |
 | Scissors | Spin and snap open and shut while drifting | ~75 m |
 | Cutter | Blade shoots out from an edge (22–38% of the width), holds, then slides back | ~100 m |
 | Desk fan | Wind band that pushes the plane sideways; the fan itself is deadly | ~120 m |
 | Cat paw | A dashed wedge warns where it will strike, then the paw swipes from an edge | ~135 m |
 | Erasers | Two erasers from the walls that slide shut and open again | ~150 m |
-| Rubber stamp | A darkening spot and a dashed target warn where it will land, then it slams down and leaves a mark ("A+", "B+", "OK!" or "10/10") | ~150 m |
 | Drawing compass | Spins its leg in a circle, pencilling the arc as it goes | ~215 m |
 
-The extra hazard next to desk fans and below coffee spills deeper down is a small ink blot.
+The extra hazard next to desk fans deeper down is a small ink blot.
 
 ### 5.2 Deep sea map (12 types)
 Eight sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in `js/obstacles.js`). Four are new mechanics.
@@ -137,16 +134,16 @@ Eight sea obstacles reuse the movement and collision of a notebook obstacle with
 | Jellyfish | Pulsing jellyfish drifting down the water | Sticky notes | 0 m |
 | Starfish | Spins while drifting, bouncing off the screen edges | New | 0 m |
 | Air bubble column | Slows the fall while inside and never hurts | New | 0 m |
-| Naval mine | On a chain. When the plane approaches it blinks and shows a dashed blast circle, then explodes so the blast lands as the plane arrives | New | ~50 m |
+| Naval mine | On a chain. When the plane approaches it blinks and shows a dashed blast circle, then explodes so the blast lands as the plane arrives. The explosion is a cartoon "BOOM!" burst with speed lines and puffs of smoke | New | ~50 m |
 | Moray eel | Lunges out of a hole in the rock wall | Cutter | ~65 m |
 | Ocean current | Moving water pushes the plane sideways (no body to hit) | Desk fan | ~75 m |
 | Giant clam | Two shell lips that snap shut and open | Erasers | ~100 m |
 | Submarine | Fires torpedoes across; its bow light blinks just before | Glue tube | ~100 m |
-| Electric eel | Charges with a dashed preview line, then zaps a lightning bolt across | New | ~135 m |
+| Electric eel | Charges with a dashed preview line, then zaps a short lightning bolt out from the wall (14–22% of the width) | New | ~135 m |
 | Kelp | Seaweed frond sweeps out from the wall after a green dashed warning | Cat paw | ~135 m |
 
 ### 5.3 Removed obstacles (history)
-These were built and then removed at the player's request: the pen (drew a wall line from the side), the stylus (expanding ripple rings), the pencil sharpener (pulled the plane), the whiteout patch (hid hazards), thumbtack rows, and the magnifying glass (its sun spot chased the plane). Avoid these kinds of mechanics in future obstacles.
+These were built and then removed at the player's request: the pen (drew a wall line from the side), the stylus (expanding ripple rings), the pencil sharpener (pulled the plane), the whiteout patch (hid hazards), thumbtack rows, the magnifying glass (its sun spot chased the plane), and in v37 the coffee spill (made the plane soggy) and the rubber stamp (slammed down on a marked spot). Avoid these kinds of mechanics in future obstacles.
 
 ---
 
@@ -175,10 +172,10 @@ In the code, the mechanic lives in the generator (`make.<name>` in `js/obstacles
 | 13 | **Wall Turret** | Mounted on a wall, fires projectiles straight across on a timer | Bow or nozzle cue before firing (sea version) | Base and projectiles | Glue tube | Submarine |
 | 14 | **Charged Beam** | On a wall; charges, then a beam crosses part of the screen for a moment | Dashed preview line while charging | Base and beam | — | Electric eel |
 | 15 | **Telegraphed Sweep** | A dashed wedge shows the danger area, then an arm swipes through it in an arc from a wall | Dashed wedge | The arm and its tip, only mid-swipe | Cat paw | Kelp |
-| 16 | **Telegraphed Slam** | A target appears at a spot, then something slams down there, lifts, and moves to a new spot | Darkening spot and dashed target | Only the moment it is down | Rubber stamp | — |
+| 16 | **Telegraphed Slam** | A target appears at a spot, then something slams down there, lifts, and moves to a new spot | Darkening spot and dashed target | Only the moment it is down | — (was the rubber stamp, removed in v37) | — |
 | 17 | **Proximity Blast** | Sits still; when the plane gets close it arms, shows its blast radius, then explodes as the plane arrives | Fast blinking and a dashed blast circle | The body, then the blast | — | Naval mine |
 | 18 | **Push Zone** | A horizontal band that pushes the plane sideways while inside it; may have a solid source on the wall | Moving streaks | Only the source, if there is one | Desk fan (fan is solid) | Ocean current (no source) |
-| 19 | **Effect Zone** | A zone that never hurts but changes the plane for a while: a debuff or a buff | The zone itself | Nothing (can be paired with a hazard placed after it) | Coffee spill (falls faster, steers worse) | Bubble column (falls slower) |
+| 19 | **Effect Zone** | A zone that never hurts but changes the plane for a while: a debuff or a buff | The zone itself | Nothing (can be paired with a hazard placed after it) | — (was the coffee spill, removed in v37) | Bubble column (falls slower) |
 | 20 | **Spring Line** | A line between two anchors; touching the line kicks the plane sideways instead of crashing it | — | Only the anchors | Rubber band | — |
 
 ### 6.2 Tunable parameters
@@ -225,7 +222,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 | Optimization | What it does |
 |---|---|
 | Sprite cache | Rigid obstacle parts, fish, stars and plane-independent art are painted once into offscreen canvases at screen resolution (`sharedSprite` / `ownSprite`) and then copied each frame, rotated, flipped, stretched or cropped as needed. The cache is rebuilt on resize and when fonts finish loading. |
-| No drop shadows | The game has no drop shadows (removed in v29), which saves a draw per obstacle each frame. The rubber stamp keeps its darkening landing spot because that is its warning. |
+| No drop shadows | The game has no drop shadows (removed in v29), which saves a draw per obstacle each frame. |
 | Background as browser layers | The page colour, ruled lines, margin and holes (or the rising bubbles and the sea's sun rays) are CSS layers behind a transparent canvas. The compositor slides them into place each frame, so the canvas only draws formulas, fish, markers, obstacles and the plane. Screen shake moves the whole playfield with one CSS transform. |
 | No per-frame gradients | Scissor blades, glows and blasts use pre-painted sprites instead of creating gradients every frame |
 | Fewer large see-through fills | The desk fan's wind band tint was removed, and the cat paw and kelp warnings are dashed outlines |
@@ -306,7 +303,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `obstacles.js` | `make` (generators), `PALETTES`, `SEA_MAKERS`, `seaPool`, `spawnRow`, `spawnFromPool`, `spawnRows` |
 | `physics.js` | `computeShapes` / `shapes`, `circleHits` (circles, rotated boxes, convex polygons), `planeCircles`, `updateObstacle`, `steer`, `update`, `crash` |
 | `maps.js` | `MAPS`, `mapId`, `SEA`, `RAINBOW`, `isDark`, `syncHudPage`, `drawPaper`, `drawFormulas`, `drawDepthMarkers` |
-| `draw-paper.js` | Paper obstacle `draw*` / `paint*` functions (`drawRuler`, `paintPencil`, `drawScissors`, `drawFan`, `drawStamp`, `drawPaw`, …) |
+| `draw-paper.js` | Paper obstacle `draw*` / `paint*` functions (`drawRuler`, `paintPencil`, `drawScissors`, `drawFan`, `drawPaw`, …) |
 | `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
 | `render.js` | `paintPlane`, `drawPlane`, `syncPaperLayers`, `render`, `applyMap` |
 | `ui.js` | `updateHud`, `showCard`, `start`, `pause`, `resume`, `gameOver`, `renderShop`, `buyUpgrade` |

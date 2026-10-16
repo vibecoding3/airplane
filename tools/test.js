@@ -3,7 +3,7 @@
 //   node tools/test.js 800        (deep runs to 800 m, faster)
 const { openGame, wait } = require('./lib');
 const DEPTH = +process.argv[2] || 2500;
-const EXPECTED = { notebook: 18, sea: 12 };   // obstacle types per map; update when adding obstacles
+const EXPECTED = { notebook: 16, sea: 12 };   // obstacle types per map; update when adding obstacles
 
 (async () => {
   const { browser, page, errors } = await openGame();

@@ -67,7 +67,6 @@ function computeShapes(o) {
       if (o.ext > 1) out.push({ k: 'b', x: x0 + i * (CUTTER_HANDLE + o.ext / 2), y: o.y, hw: o.ext / 2, hh: 6, a: 0 });
       return out;
     }
-    case 'stamp': return o.phase === 'down' ? [{ k: 'b', x: o.x, y: o.y, hw: 32, hh: 24, a: 0 }] : [];
     case 'note': return [{ k: 'b', x: o.x, y: o.y, hw: 21, hh: 21, a: o.rot }];
     case 'setsquare': {
       const c = Math.cos(o.rot), s = Math.sin(o.rot);
@@ -80,7 +79,7 @@ function computeShapes(o) {
       return [{ k: 'b', x: x0 + dx * o.L / 2, y: o.y + dy * o.L / 2, hw: o.L / 2, hh: 11, a: Math.atan2(dy, dx) },
               { k: 'c', x: x0 + dx * o.L, y: o.y + dy * o.L, r: 18 }];
     }
-    // coffee, bubble columns and the rubber band itself never crash the plane
+    // bubble columns and the rubber band itself never crash the plane
   }
   return [];
 }
@@ -198,21 +197,6 @@ function updateObstacle(o, dt) {
       o.ext = o.maxExt * f;
       break;
     }
-    case 'stamp':        // warn (shadow grows) -> down (deadly) -> lift -> warn again somewhere else
-      if (o.y - dist < H + 40) {
-        o.t += dt;
-        if (o.phase === 'warn' && o.t >= o.warn) {
-          o.phase = 'down'; o.t = 0;
-          o.marks.push({ x: o.x, rot: rand(-0.3, 0.3) });
-          if (o.marks.length > 4) o.marks.shift();
-          if (o.y - dist < H) tone(140, 60, 0.12, 'square', 0.05);
-        } else if (o.phase === 'down' && o.t >= 0.3) {
-          o.phase = 'lift'; o.t = 0;
-        } else if (o.phase === 'lift' && o.t >= 0.45) {
-          o.phase = 'warn'; o.t = 0; o.x = rand(60, W - 60);
-        }
-      }
-      break;
     case 'setsquare':
       o.rot += o.spin * dt;
       o.x += o.vx * dt;
@@ -254,7 +238,7 @@ function updateObstacle(o, dt) {
 
 function steer(dt) {
   let target = 0;
-  const maxV = maxSideSpeed() * (plane.soggy > 0 ? 0.6 : 1);   // a coffee-soaked plane steers sluggishly
+  const maxV = maxSideSpeed();
   if (holdSide && performance.now() - holdStart > HOLD_MS) {
     drift = holdSide;
     target = holdSide * maxV;
@@ -309,11 +293,8 @@ function update(dt) {
   // gliding sideways trades fall speed for horizontal speed
   const sideways = Math.min(1, Math.abs(plane.vx) / maxSideSpeed());
   speed = baseFallSpeed() * (1 - SIDE_SLOWDOWN * sideways);
-  if (plane.soggy > 0) speed *= 1.25;          // wet paper drops faster
   if (plane.bubbled > 0) speed *= 0.5;         // rising bubbles hold the plane up
   dist += speed * dt;
-  // flying through a coffee spill soaks the plane
-  plane.soggy = Math.max(0, plane.soggy - dt);
   plane.bubbled = Math.max(0, plane.bubbled - dt);
   for (const o of obstacles) {
     if (o.type !== 'bubbles' || Math.abs(plane.x - o.x) > o.w / 2 || Math.abs(dist + planeScreenY() - o.y) > o.h / 2) continue;
@@ -324,12 +305,6 @@ function update(dt) {
     }
   }
   const planeY = dist + planeScreenY();
-  for (const o of obstacles) {
-    if (o.type !== 'coffee' || Math.hypot(plane.x - o.x, planeY - o.y) > o.r * 0.85) continue;
-    plane.soggyCol = `rgb(${(o.pal || PALETTES.coffee[0]).fill})`;   // stained the colour of the drink
-    if (plane.soggy <= 0) floaters.push({ x: clamp(plane.x, 50, W - 50), y: planeY - 30, text: 'Soggy!', life: 1.2, col: plane.soggyCol });
-    plane.soggy = SOGGY_TIME;
-  }
   // rubber bands kick the plane sideways, toward the nearer end of the band
   for (const o of obstacles) {
     if (o.type !== 'band' || o.cool > 0 || plane.invuln > 0) continue;
@@ -340,10 +315,6 @@ function update(dt) {
     plane.vx = side * maxSideSpeed() * 1.4;
     o.wob = 1; o.hitX = plane.x; o.cool = 0.6;
     sfx.twang();
-  }
-  if (plane.soggy > 0 && Math.random() < dt * 8) {   // coffee drips
-    particles.push({ kind: 'spark', col: plane.soggyCol || '#7a4a22', x: plane.x + rand(-8, 8), y: planeY - 4, vx: rand(-20, 20), vy: -rand(20, 60),
-      g: 0, rot: 0, vr: 0, life: 1, ttl: 0.6, size: rand(2, 3.5) });
   }
   const targetAng = Math.atan2(plane.vx, speed + 60);
   plane.ang += (targetAng - plane.ang) * Math.min(1, 12 * dt);
