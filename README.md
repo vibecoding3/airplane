@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v56** (2026-10-15)
+Current version: **v57** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v56 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v57 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -165,23 +165,29 @@ Eight sea obstacles reuse the movement and collision of a notebook obstacle with
 | Electric eel | Charges with a dashed preview line, then zaps a short lightning bolt out from the wall (14–22% of the width) | New | ~135 m |
 | Kelp | Seaweed frond sweeps out from the wall after a green dashed warning | Cat paw | ~135 m |
 
-### 5.3 Space map (13 types, since v53)
+### 5.3 Space map (19 kinds on 15 mechanics, since v53; 6 added in v57)
 Every Space obstacle reuses the movement and collision of a Paper or Deep sea obstacle (see `SPACE_MAKERS` in `js/obstacles.js`) with new art in `js/draw-space.js`. Outlines are pale so they read on black. Space has no wind or explosions: the solar wind and the space mine were removed in v55.
 
 | Space obstacle | Behaviour | Based on | Starts at |
 |---|---|---|---|
 | Station girders | Steel trusses from both walls with a gap; red lights blink on the end plates | Rulers | 0 m |
-| Asteroids | 1–3 cratered rocks that stay put | Ink blots | 0 m |
+| Asteroids | 1–3 cratered rocks that stay put. Each shows a mineral: iron (red veins), nickel (silver flecks), copper (green patches), gold (gold flecks), ice (white patches) or amethyst (purple crystals) | Ink blots | 0 m |
 | Ice chunks | 2–3 hexagonal ice chunks drifting down and swaying | Sticky notes | 0 m |
-| Tumbling asteroid | Spins while drifting, bouncing off the screen edges | Starfish | 0 m |
-| Satellite | A satellite with long solar panels sliding side to side | Pencil | 0 m |
+| Tumbling asteroid | Spins while drifting, bouncing off the screen edges; also shows a mineral | Starfish | 0 m |
+| Planet | One of the eight planets bulging in from a side, in its real colours (Jupiter with its Great Red Spot, Saturn with a faint ring that is not solid, Earth with land and clouds). Sizes keep the real order, squeezed to fit: Jupiter 120, Saturn 100, Uranus 76, Neptune 74, Earth 60, Venus 58, Mars 48, Mercury 42 units | Protractor | 0 m |
+| GPS satellite | Gold-foil body with an antenna panel and blue solar wings, sliding side to side | Pencil | 0 m |
 | Low-gravity field | A dashed purple zone with rising sparkles; slows the fall, never hurts | Bubble column | 0 m |
 | Rocket | A small rocket with a flickering flame launched up toward the plane | Paper wad | ~35 m |
-| Satellite train | A line of tiny satellites crossing | Paper clips | ~50 m |
+| Starlink train | A line of flat Starlink satellites crossing | Paper clips | ~50 m |
 | Moon edge | A cratered moon bulging in from one side; slalom pairs deeper down | Protractor | ~65 m |
+| International Space Station | A long ISS (truss, white modules, golden solar arrays) sliding side to side; thicker than the GPS satellite | Pencil | ~65 m |
 | Airlock doors | Two heavy doors with hazard stripes sliding shut and open | Erasers | ~100 m |
 | Docking probe | Shoots out of a hull, holds, slides back | Cutter | ~100 m |
+| Black hole | A black core in a bright photon ring with a spinning accretion disc. Deadly to touch, but it does **not** pull the plane (pulling was removed with the sharpener) | Ink blot | ~100 m |
 | Laser gate | Charges with a dashed line, then fires a short laser beam from the wall | Electric eel | ~135 m |
+| Twin-wing fighter | A sci-fi fighter parked at a wall firing red laser bolts across; its gun glows before each shot (original design in a space-opera style) | Glue tube | ~135 m |
+| Energy blade | A glowing blade (red, green, blue or purple) swings out of a hilt on the wall after a dashed warning | Cat paw | ~170 m |
+| Battle station | A big grey sphere with a dish and a trench bulging in from a side (original design in a space-opera style) | Protractor | ~170 m |
 | Robot arm | A station arm with a claw swinging all the way round its base | Drawing compass | ~215 m |
 
 ### 5.4 Removed obstacles (history)
@@ -200,20 +206,25 @@ In the code, the mechanic lives in the generator (`make.<name>` in `js/obstacles
 | # | Mechanic | How it works | Warning | What hurts | Paper | Deep sea | Space |
 |---|---|---|---|---|---|---|---|
 | 1 | **Gap Wall** | Two barriers from both walls leaving one gap; deeper down the gap slides side to side | The gap is visible | Both barriers | Rulers | Coral ledges | Station girders |
-| 2 | **Closing Jaws** | Two blocks from both walls whose gap keeps opening and closing | The rhythm is visible | Both blocks | Erasers | Giant clam | Airlock doors |
-| 3 | **Static Hazards** | 1–3 round hazards that don't move | — | The hazards | Ink blots | Sea urchins | Asteroids |
-| 4 | **Wall Bulge** | A large half-disc stuck to one wall; deeper down a pair on opposite walls forms a slalom | — | The bulge | Protractor | — | Moon edge |
-| 5 | **Bouncing Slider** | A long bar sliding sideways and bouncing off the walls | — | The bar | Pencil | — | Satellite |
+| 2 | **Closing Jaws** | Two blocks from both walls whose gap keeps opening and closing | The rhythm is visible | Both blocks | Erasers | Giant clam | International Space Station | A long ISS (truss, white modules, golden solar arrays) sliding side to side; thicker than the GPS satellite | Pencil | ~65 m |
+| Airlock doors |
+| 3 | **Static Hazards** | 1–3 round hazards that don't move | — | The hazards | Ink blots | Sea urchins | Asteroids (minerals), black hole |
+| 4 | **Wall Bulge** | A large half-disc stuck to one wall; deeper down a pair on opposite walls forms a slalom | — | The bulge | Protractor | — | Moon edge, planets, battle station |
+| 5 | **Bouncing Slider** | A long bar sliding sideways and bouncing off the walls | — | The bar | Pencil | — | GPS satellite, ISS |
 | 6 | **Rising Projectile** | Thrown up the screen toward the plane, bouncing off the walls | — | The projectile | Paper wad | — | Rocket |
 | 7 | **Drifting Swarm** | 2–3 items sinking slower than the plane while swaying side to side | — | Each item | Sticky notes | Jellyfish | Ice chunks |
-| 8 | **Conveyor** | A row of evenly spaced pieces sliding across the screen | The gaps move with the row | Each piece | Paper clips | — | Satellite train |
+| 8 | **Conveyor** | A row of evenly spaced pieces sliding across the screen | The gaps move with the row | Each piece | Paper clips | — | Starlink train |
 | 9 | **Spinning Drifter** | One shape spinning while it drifts sideways and bounces off the walls | — | The shape (triangle or circle) | Set square | Starfish | Tumbling asteroid |
 | 10 | **Spinning Blades** | Two blades spinning around a pivot while opening and closing, drifting slowly | — | Blades and handles | Scissors | — | — |
-| 11 | **Sweeping Arm** | An arm rotating all the way around a fixed pivot | The arc it traces | Arm and pivot | Drawing compass | — | Robot arm |
+| 11 | **Sweeping Arm** | An arm rotating all the way around a fixed pivot | The arc it traces | Arm and pivot | Drawing compass | — | Twin-wing fighter | A sci-fi fighter parked at a wall firing red laser bolts across; its gun glows before each shot (original design in a space-opera style) | Glue tube | ~135 m |
+| Energy blade | A glowing blade (red, green, blue or purple) swings out of a hilt on the wall after a dashed warning | Cat paw | ~170 m |
+| Battle station | A big grey sphere with a dish and a trench bulging in from a side (original design in a space-opera style) | Protractor | ~170 m |
+| Robot arm |
 | 12 | **Wall Piston** | Shoots out from a wall, holds, then retracts on a loop | The body at the wall | Base and extended part | Cutter | Moray eel | Docking probe |
-| 13 | **Wall Turret** | Mounted on a wall, fires projectiles straight across on a timer | Bow or nozzle cue before firing (sea version) | Base and projectiles | Glue tube | Submarine | — |
-| 14 | **Charged Beam** | On a wall; charges, then a beam crosses part of the screen for a moment | Dashed preview line while charging | Base and beam | — | Electric eel | Laser gate |
-| 15 | **Telegraphed Sweep** | A dashed wedge shows the danger area, then an arm swipes through it in an arc from a wall | Dashed wedge | The arm and its tip, only mid-swipe | Cat paw | Kelp | — |
+| 13 | **Wall Turret** | Mounted on a wall, fires projectiles straight across on a timer | Bow or nozzle cue before firing (sea version) | Base and projectiles | Glue tube | Submarine | Twin-wing fighter |
+| 14 | **Charged Beam** | On a wall; charges, then a beam crosses part of the screen for a moment | Dashed preview line while charging | Base and beam | — | Electric eel | Black hole | A black core in a bright photon ring with a spinning accretion disc. Deadly to touch, but it does **not** pull the plane (pulling was removed with the sharpener) | Ink blot | ~100 m |
+| Laser gate |
+| 15 | **Telegraphed Sweep** | A dashed wedge shows the danger area, then an arm swipes through it in an arc from a wall | Dashed wedge | The arm and its tip, only mid-swipe | Cat paw | Kelp | Energy blade |
 | 16 | **Telegraphed Slam** | A target appears at a spot, then something slams down there, lifts, and moves to a new spot | Darkening spot and dashed target | Only the moment it is down | — (was the rubber stamp, removed in v37) | — | — |
 | 17 | **Proximity Blast** | Sits still; when the plane gets close it arms, shows its blast radius, then explodes as the plane arrives | Fast blinking and a dashed blast circle | The body, then the blast | — | Naval mine | — |
 | 18 | **Push Zone** | A horizontal band that pushes the plane sideways while inside it; may have a solid source on the wall | Moving streaks | Only the source, if there is one | Desk fan (fan is solid) | Ocean current (no source) | — |

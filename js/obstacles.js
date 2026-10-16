@@ -260,36 +260,57 @@ const SEA_COLS = {
   glue: ['#e0a21a', '#7f8fa1', '#c0392b', '#3a66c4'],                         // submarine hulls
   starfish: ['#f28c28', '#e0503a', '#c75b9b', '#f2c84b', '#8a4fc2']
 };
+const MINERALS_LIST = ['iron', 'nickel', 'copper', 'gold', 'ice', 'amethyst'];   // asteroid minerals (art in draw-space.js)
 // obstacles that push the plane with wind (desk fan, ocean current) stop appearing from this depth
 const WIND_MAX_M = 700;
 const windAllowed = y => y / PX_PER_M < WIND_MAX_M;
 
 // Space obstacles: every one reuses a Paper or Deep sea obstacle's movement and collision with space art
 const SPACE_MAKERS = { girders: 'gate', asteroids: 'blots', ice: 'notes', airlock: 'erasers', probe: 'cutter',
-                       satellite: 'pencil', rocket: 'wad', sattrain: 'clips', tumbler: 'starfish', arm: 'compass',
-                       laser: 'zap', lowgrav: 'bubbles', moon: 'protractor' };   // no wind or explosions in space
+                       gps: 'pencil', rocket: 'wad', starlink: 'clips', tumbler: 'starfish', arm: 'compass',
+                       laser: 'zap', lowgrav: 'bubbles', moon: 'protractor',
+                       fighter: 'glue', blade: 'paw', station: 'protractor' };   // no wind or explosions in space
+// space-only shapes on existing mechanics: the ISS (a long slider), planets (wall bulges), black holes (static)
+make.iss = (y, d) => {
+  const len = rand(200, 235), a = rand(-0.12, 0.12), ext = len / 2 * Math.cos(a);
+  obstacles.push({ type: 'pencil', look: 'iss', y, len, a, hh: 14, x: rand(ext + 6, W - ext - 6),
+    vx: (Math.random() < 0.5 ? -1 : 1) * rand(35, 60 + 80 * d) });
+  return 20;
+};
+make.planet = (y, d) => {
+  const names = Object.keys(PLANETS), name = names[ri(0, names.length - 1)];
+  obstacles.push({ type: 'protractor', look: 'planet', planet: name, y, side: Math.random() < 0.5 ? -1 : 1, r: PLANETS[name].r });
+  return PLANETS[name].r > 90 ? 70 : 40;
+};
+make.blackhole = (y, d) => {
+  obstacles.push({ type: 'blot', look: 'blackhole', x: rand(60, W - 60), y, r: 26, bumps: [], drops: [] });
+  return 30;
+};
 const SPACE_COLS = {
   gate: ['#c9ced6', '#e0a21a', '#d9443a', '#8fa3b8'],                         // girders
-  blot: ['#8a8178', '#6f6a73', '#9a7b62', '#7d8590'],                         // asteroids
+  blot: MINERALS_LIST,                                                        // asteroid minerals
   note: ['#bfe8ff', '#d6f1ff', '#a8d8f0'],                                    // ice chunks
   erasers: ['#d9dde3', '#c0c7cf', '#e6e0d0'],                                 // airlock doors
   cutter: ['#c9ced6', '#e8913a', '#9fb3c8'],                                  // docking probes
-  pencil: ['#4f8ff0', '#7a8cf0', '#3fb8c8'],                                  // satellite panels
+  pencil: ['#4f8ff0', '#7a8cf0', '#3fb8c8'],                                  // GPS satellite panels
   wad: ['#e2493b', '#2f6fd1', '#f2c84b'],                                     // rockets
   clips: ['#f2c84b', '#c9ced6', '#e2493b'],                                   // tiny satellites
-  starfish: ['#8a8178', '#9a7b62', '#6f6a73'],                                // tumbling asteroids
+  starfish: MINERALS_LIST,                                                    // tumbling asteroids (minerals)
+  glue: ['#c9ced6'],                                                          // fighters
+  paw: ['#ff4a5a', '#3cff9a', '#4ab8ff', '#b77cf0'],                          // energy blades
   compass: ['#f2f2f2', '#f2c84b'],                                            // robot arms
   zap: ['#ff4a5a', '#3cff9a', '#4ab8ff'],                                     // laser beams
   protractor: ['#d8d4c8', '#c9b9a6', '#b8c4d0']                               // moons
 };
 function spacePool(d) {
-  const pool = [['girders', 3], ['asteroids', 2], ['ice', 1.3], ['tumbler', 1.4], ['lowgrav', 1], ['satellite', 1 + 1.5 * d]];
+  const pool = [['girders', 3], ['asteroids', 2], ['ice', 1.2], ['tumbler', 1.2], ['lowgrav', 1], ['gps', 1 + 1.2 * d], ['planet', 1.3]];
   if (d > 0.06) pool.push(['rocket', 1.2]);
-  if (d > 0.08) pool.push(['sattrain', 1.3]);
-  if (d > 0.1) pool.push(['moon', 1.3]);
-  if (d > 0.15) pool.push(['airlock', 1.3], ['probe', 1.3]);
-  if (d > 0.2) pool.push(['laser', 1.2]);
-  if (d > 0.3) pool.push(['arm', 1.3]);
+  if (d > 0.08) pool.push(['starlink', 1.3]);
+  if (d > 0.1) pool.push(['moon', 0.9], ['iss', 1.2]);
+  if (d > 0.15) pool.push(['airlock', 1.2], ['probe', 1.2], ['blackhole', 1.1]);
+  if (d > 0.2) pool.push(['laser', 1.1], ['fighter', 1.2]);
+  if (d > 0.25) pool.push(['blade', 1.2], ['station', 1]);
+  if (d > 0.3) pool.push(['arm', 1.2]);
   return pool;
 }
 function seaPool(d, y) {
@@ -349,11 +370,13 @@ function spawnFromPool(y, d, pool) {
       if (cols) o.seaCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
     } else if (mapId === 'space') {
       o.space = true;
+      o.look = o.look || type;                   // which space obstacle this is (several share a mechanic)
       const cols = SPACE_COLS[o.type];
       if (cols) o.spaceCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
+      if (o.look === 'station') o.r = rand(95, 110);
     }
   }
-  if (!['gate', 'coral', 'girders', 'protractor', 'moon'].includes(type)) {
+  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
     else if (Math.random() < 0.28) pickups.push({ x: rand(40, W - 40), y: py, r: 10, spin: rand(0, 6) });

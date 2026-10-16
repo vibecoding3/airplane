@@ -170,24 +170,24 @@ function render() {
         drawEraser(r, W + 10, sy, r, 1, o.pal);
         break;
       }
-      case 'pencil': o.space ? drawSatellite(o, sy) : drawPencil(o, sy); break;
+      case 'pencil': o.space ? (o.look === 'iss' ? drawISS(o, sy) : drawGPS(o, sy)) : drawPencil(o, sy); break;
       case 'scissors': drawScissors(o, sy); break;
-      case 'blot': o.space ? drawAsteroid(o, sy) : o.sea ? drawUrchin(o, sy) : drawBlot(o, sy); break;
+      case 'blot': o.space ? (o.look === 'blackhole' ? drawBlackHole(o, sy) : drawAsteroid(o, sy)) : o.sea ? drawUrchin(o, sy) : drawBlot(o, sy); break;
       case 'starfish': o.space ? drawTumbler(o, sy) : drawStarfish(o, sy); break;
       case 'zap': o.space ? drawLaser(o, sy) : drawZap(o, sy); break;
       case 'mine': drawMine(o, sy); break;
       case 'bubbles': o.space ? drawLowGrav(o, sy) : drawBubbleColumn(o, sy); break;
-      case 'protractor': o.space ? drawMoonEdge(o, sy) : drawProtractor(o, sy); break;
+      case 'protractor': o.space ? (o.look === 'planet' ? drawPlanetEdge(o, sy) : o.look === 'station' ? drawBattleStation(o, sy) : drawMoonEdge(o, sy)) : drawProtractor(o, sy); break;
       case 'wad': o.space ? drawRocket(o, sy) : drawWad(o, sy); break;
-      case 'clips': for (const x of clipXs(o)) o.space ? drawCubesat(x, sy, o.spaceCol) : drawClip(x, sy, o.col); break;
+      case 'clips': for (const x of clipXs(o)) o.space ? drawStarlink(x, sy) : drawClip(x, sy, o.col); break;
       case 'compass': o.space ? drawRobotArm(o, sy) : drawCompass(o, sy); break;
       case 'fan': drawFan(o, sy); break;
-      case 'glue': o.sea ? drawSub(o, sy) : drawGlue(o, sy); break;
+      case 'glue': o.space ? drawFighter(o, sy) : o.sea ? drawSub(o, sy) : drawGlue(o, sy); break;
       case 'cutter': o.space ? drawProbe(o, sy) : o.sea ? drawMoray(o, sy) : drawCutter(o, sy); break;
       case 'note': o.space ? drawIce(o, sy) : o.sea ? drawJelly(o, sy) : drawNote(o, sy); break;
       case 'setsquare': drawSetSquare(o, sy); break;
       case 'band': drawBand(o, sy); break;
-      case 'paw': o.sea ? drawKelp(o, sy) : drawPaw(o, sy); break;
+      case 'paw': o.space ? drawEnergyBlade(o, sy) : o.sea ? drawKelp(o, sy) : drawPaw(o, sy); break;
     }
   }
   for (const p of pickups) p.kind ? drawPower(p, p.y - dist) : drawStar(p, p.y - dist);

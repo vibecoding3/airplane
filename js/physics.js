@@ -24,7 +24,7 @@ function computeShapes(o) {
         { k: 'b', x: (r + W + 20) / 2, y: o.y, hw: (W + 20 - r) / 2, hh: 14, a: 0 }
       ];
     }
-    case 'pencil': return [{ k: 'b', x: o.x, y: o.y, hw: o.len / 2, hh: 6.5, a: o.a }];
+    case 'pencil': return [{ k: 'b', x: o.x, y: o.y, hw: o.len / 2, hh: o.hh || 6.5, a: o.a }];
     case 'scissors': {
       const out = [];
       for (const s of [-1, 1]) {
