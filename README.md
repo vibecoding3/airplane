@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v37** (2026-10-15)
+Current version: **v38** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -14,7 +14,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v37 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v38 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -134,7 +134,7 @@ Eight sea obstacles reuse the movement and collision of a notebook obstacle with
 | Jellyfish | Pulsing jellyfish drifting down the water | Sticky notes | 0 m |
 | Starfish | Spins while drifting, bouncing off the screen edges | New | 0 m |
 | Air bubble column | Slows the fall while inside and never hurts | New | 0 m |
-| Naval mine | On a chain. When the plane approaches it blinks and shows a dashed blast circle, then explodes so the blast lands as the plane arrives. The explosion is a cartoon "BOOM!" burst with speed lines and puffs of smoke | New | ~50 m |
+| Naval mine | On a chain. When the plane approaches it blinks and shows a dashed blast circle, then explodes so the blast lands as the plane arrives. The explosion is a cartoon burst (a spiky yellow and orange star) with speed lines and puffs of smoke | New | ~50 m |
 | Moray eel | Lunges out of a hole in the rock wall | Cutter | ~65 m |
 | Ocean current | Moving water pushes the plane sideways (no body to hit) | Desk fan | ~75 m |
 | Giant clam | Two shell lips that snap shut and open | Erasers | ~100 m |
@@ -229,6 +229,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 | Less garbage collection | Lists are pruned in place, and the plane's hit circles and static collision shapes are reused. The top bar only touches the page when a number changes. |
 | Adaptive resolution | Render resolution goes up to 2×. Screens denser than 2.5× start at 1.5×. If play stays below about 48 fps for 1.5 s, the resolution steps down by 0.25 (never below 1×) and is remembered. |
 | Frame pacing | Gameplay runs at the display rate (or 60 fps with the option on); menus draw at 30 fps and the pause screen at 4 fps |
+| Audio ready before play | The audio engine is built while the title screen is up and switched on by the first tap or key press. Building it on the first sound used to freeze the start of the first run for 50–85 ms. The crash / explosion noise is generated once and reused instead of rebuilt on every crash, extra life and mine blast. |
 | Text drawn directly | Measurements showed formula text is cheap to draw directly (the browser caches glyphs), so it isn't cached |
 
 ### Measurement notes

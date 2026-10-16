@@ -209,7 +209,7 @@ function drawStarfish(o, sy) {
   }), o.x, sy, o.rot);
 }
 
-// cartoon explosion: a spiky comic-book "BOOM!" burst that pops in with an overshoot, speed lines,
+// cartoon explosion: a spiky comic-book burst that pops in with an overshoot, speed lines,
 // then puffy smoke clouds that drift up and fade. T is seconds since the blast (deadly for the first 0.35 s).
 const BOOM_END = 0.95;
 function paintBoomBurst() {
@@ -225,10 +225,6 @@ function paintBoomBurst() {
   star(12, 70, 48, 0); ctx.fillStyle = '#ffd23f'; ctx.fill(); ctx.strokeStyle = COL.ink; ctx.lineWidth = 3; ctx.stroke();
   star(10, 50, 33, 0.35); ctx.fillStyle = '#ff8a2a'; ctx.fill();
   star(8, 30, 20, 0.1); ctx.fillStyle = '#fff3b0'; ctx.fill();
-  ctx.rotate(-0.16);
-  ctx.font = '700 25px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.lineWidth = 5; ctx.strokeText('BOOM!', 0, 2);
-  ctx.fillStyle = '#e8402f'; ctx.fillText('BOOM!', 0, 2);
 }
 function drawBoom(o, sy, T) {
   const s = o.blast / 62;
