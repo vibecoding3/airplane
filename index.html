@@ -19,7 +19,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v44</div>
+    <div class="version" id="version">v45</div>
 
     <div class="hud">
       <div>
@@ -48,13 +48,12 @@
         <button class="menu-btn" id="shopBtn" type="button">Shop</button>
       </div>
 
-      <div class="card" id="shopCard" hidden>
-        <h2>Shop</h2>
-        <p>Spend the stars you collect on upgrades. You keep them forever.</p>
-        <div class="bank">You have <strong id="bankCount">★ 0</strong></div>
-        <h3>Upgrades</h3>
+      <div class="menu" id="shopCard" hidden>
+        <h2 class="menu-title small">Shop</h2>
+        <p class="menu-tag">Upgrades you keep forever</p>
+        <div class="menu-stats"><span>You have <b id="bankCount">★ 0</b></span></div>
         <div class="shop" id="shopList"></div>
-        <button class="play" id="shopDone" type="button">Done</button>
+        <button class="menu-btn" id="shopDone" type="button">Back</button>
       </div>
 
       <div class="menu" id="pauseCard" hidden>
@@ -67,10 +66,7 @@
         <h2 class="menu-title small">Crumpled!</h2>
         <div class="menu-score" id="overTitle">0 m</div>
         <span class="menu-record" id="recordStamp" hidden>New best!</span>
-        <div class="menu-stats">
-          <span id="overBest">Best 0 m</span>
-          <span id="overDetail">0.0 s</span>
-        </div>
+        <div class="menu-stats"><span id="overBest">Best 0 m</span></div>
         <p class="menu-note" id="overBank"></p>
         <div class="map-pick" role="group" aria-label="Choose a map for the next run">
           <button class="map-tile" type="button" data-map="notebook" aria-pressed="true"><span class="map-thumb paper"></span>Paper</button>

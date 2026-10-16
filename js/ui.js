@@ -6,7 +6,7 @@ const ui = {
   depth: $('depth'), stars: $('starCount'), best: $('best'),
   overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'),
   shop: $('shopCard'), overBank: $('overBank'),
-  overTitle: $('overTitle'), overDetail: $('overDetail'), overBest: $('overBest'), stamp: $('recordStamp'),
+  overTitle: $('overTitle'), overBest: $('overBest'), stamp: $('recordStamp'),
   pauseBtn: $('pauseBtn'), muteBtn: $('muteBtn')
 };
 let hudDepth = -1, hudStars = -1, hudBest = -1;
@@ -83,11 +83,10 @@ function gameOver() {
   const record = s > best;
   if (record) { best = s; store.set('nosedive-best', String(best)); }
   ui.overTitle.textContent = fmt(s) + ' m';
-  ui.overDetail.textContent = time.toFixed(1) + ' s' + (stars ? ' · ★ +' + stars : '');
   ui.overBest.textContent = 'Best ' + fmt(best) + ' m';
   ui.stamp.hidden = !record;
   if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
-  ui.overBank.textContent = 'You have ★ ' + fmt(bank) + ' to spend in the Shop';
+  ui.overBank.textContent = (stars ? '★ +' + stars + ' this run · ' : '') + '★ ' + fmt(bank) + ' to spend in the Shop';
   showCard('over');
 }
 
