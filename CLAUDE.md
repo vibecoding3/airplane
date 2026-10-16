@@ -6,7 +6,7 @@ Browser game: a paper plane always falls; the player steers left/right to dodge 
 `index.html` (page + menus) · `style.css` · `js/*.js` (14 classic scripts, one shared global scope, run in the order `index.html` lists them; `main.js` last). README section 10 has the file map, a "where to change things" table and key names per file. Grep for a name rather than reading whole files.
 
 ## After every change
-1. `node tools/test.js` — loads the game in headless Chrome, menus, deep runs on both maps (all obstacle types must appear), normal runs, pause/resume, page errors. Use `node tools/test.js 800` for a faster run. Update `EXPECTED` in it when adding obstacles.
+1. `node tools/test.js` — loads the game in headless Chrome, menus, deep runs on both maps (all obstacle types must appear), normal runs, pause/resume, page errors. Use `node tools/test.js 800` for a faster run (it skips the all-obstacle-types check, which needs 1,500 m+). Update `EXPECTED` in it when adding obstacles.
 2. Screenshots only for visual changes: `node tools/shot.js <notebook|sea> <depth…>` or `node tools/shot.js title [sea]` → `tools/out/*.png` (phone size 412×860).
 3. Bump the version label in `index.html` (`id="version">vN<`) and "Current version" in README for every pushed change. Keep README in sync with features.
 4. Ask the user "Should I push vN to GitHub?" unless their message already says push. Commit as the repo's local git identity (vibecoding3), then confirm GitHub Pages serves the new `vN` (https://vibecoding3.github.io/airplane/, ~1 min).

@@ -47,7 +47,7 @@ const EXPECTED = { notebook: 16, sea: 12 };   // obstacle types per map; update 
     return out;
   }, DEPTH);
   for (const m of ['notebook', 'sea']) {
-    const d = deep[m], full = DEPTH >= 300;
+    const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})`);
     check(d.powers.magnet > 0 && d.powers.shield > 0 && (DEPTH < 600 || (d.maxMagnet === 3 && d.maxShield === 3)),

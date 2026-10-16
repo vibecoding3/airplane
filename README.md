@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v50** (2026-10-15)
+Current version: **v51** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v50 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v51 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -45,6 +45,7 @@ There are no on-screen steering arrows (removed in v44).
 | Sideways slowdown | Gliding sideways at full speed makes the plane fall up to 40% slower |
 | Difficulty | `1 − e^(−depth / 600)`. It controls when obstacles unlock, gap sizes, row spacing and obstacle speeds, and is nearly maxed by about 2,000 m. |
 | Obstacle rows | Rows spawn ahead of the plane. The same obstacle type never appears twice in a row. |
+| Pickup pull | Since v51, any star or power-up that comes within 60 units (2 m) of the plane is pulled in, so near misses still count. The magnet power-up extends this for stars |
 | Stars | About 28% of rows carry a gold star. Stars are a collected total (shown in the menu and top bar) and add nothing to the score. |
 | Fast-fall safety | At high speed each frame is split into sub-steps, so the plane can't skip through thin obstacles |
 | Best score | Saved per device and per map (since v49; the old single best went to Paper). During a run, a gold dashed line labelled "Your best · N m" marks the record depth, so you can see it coming; passing it pops "New best!" with a short fanfare |

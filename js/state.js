@@ -21,6 +21,7 @@ const medalsAnnounced = new Set();   // medals already celebrated this run
 // magnet: pulls stars in from further away at each level; shield: one spare life per level
 const POWER_MAX = 3;
 const MAGNET_RANGES = [0, 120, 180, 240];   // by magnet level
+const NEAR_PULL = 60;                      // every star and power-up this close is pulled in, magnet or not
 const magnetRange = () => MAGNET_RANGES[plane.magnet];
 const POWER_GAP = 45 * PX_PER_M;           // at least ~45 m between power-ups
 let lastPowerY = 0;

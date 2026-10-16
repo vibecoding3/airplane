@@ -343,9 +343,11 @@ function update(dt) {
   // stars
   for (let i = pickups.length - 1; i >= 0; i--) {
     const p = pickups[i]; p.spin += dt * 2;
-    if (plane.magnet > 0 && plane.alive && !p.kind) {   // the magnet pulls stars only
+    // anything that passes really near the plane is pulled in; the magnet pulls stars from further away
+    if (plane.alive) {
       const py = dist + planeScreenY(), dx = plane.x - p.x, dy = py - p.y, dd = Math.hypot(dx, dy);
-      if (dd < magnetRange() && dd > 1) {
+      const reach = !p.kind && plane.magnet > 0 ? Math.max(NEAR_PULL, magnetRange()) : NEAR_PULL;
+      if (dd < reach && dd > 1) {
         const step = Math.min(dd, (300 + speed) * dt);
         p.x += dx / dd * step; p.y += dy / dd * step;
       }
