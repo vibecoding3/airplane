@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v38** (2026-10-15)
+Current version: **v39** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -14,7 +14,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v38 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v39 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -73,7 +73,7 @@ The map is chosen with two picture tiles, **Paper** and **Deep sea**, on the sta
 
 | Depth | Background |
 |---|---|
-| 0–100 m | Sun rays slanting down from the surface with a bright glow at the top. They sway slowly and fade out by 100 m (one CSS layer, no canvas drawing). |
+| 0–100 m | Clear water: only the fish and bubbles (the sun rays were removed in v39) |
 | 100–400 m | Tiny green plankton specks |
 | 400–1,000 m | White "marine snow" sinking slowly |
 | 1,000 m + | Bioluminescence: twinkling blue and green lights |
@@ -86,14 +86,16 @@ The map is chosen with two picture tiles, **Paper** and **Deep sea**, on the sta
 
 | Depth | Fish |
 |---|---|
-| 0–150 m | Clownfish, blue tang, a small school of silver fish |
-| 150–400 m | Pufferfish, angelfish, jellyfish |
-| 400–800 m | Lionfish, barracuda, moray eel |
-| 800–1,500 m | Stingray, swordfish, reef shark |
-| 1,500–2,500 m | Great white shark, giant squid |
-| 2,500 m + | Anglerfish (with a pulsing glowing lure), viperfish, gulper eel |
+| 0–150 m | Clownfish, tang, a small school of fish, butterflyfish, seahorse |
+| 150–400 m | Pufferfish, angelfish, jellyfish, parrotfish, sea turtle |
+| 400–800 m | Lionfish, barracuda, moray eel, octopus, tuna |
+| 800–1,500 m | Stingray, swordfish, reef shark, hammerhead shark, ocean sunfish |
+| 1,500–2,500 m | Great white shark, giant squid, oarfish |
+| 2,500 m + | Anglerfish (with a pulsing glowing lure), viperfish, gulper eel, lanternfish, hatchetfish |
 
 The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fish have pale outlines so they show against dark water. About 20% of the time a fish from the level above appears, for variety.
+
+**Colour variants:** most species come in 2–4 colour schemes, picked at random when each fish appears (60 looks across 28 species). For example: clownfish in orange, maroon, dark-banded or golden; tangs in blue, yellow or purple; jellyfish in pink, blue, violet or amber; octopuses in red, purple or orange; lanternfish with blue, green or pink lights. Background fish never collide with the plane.
 
 ---
 
@@ -223,7 +225,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 |---|---|
 | Sprite cache | Rigid obstacle parts, fish, stars and plane-independent art are painted once into offscreen canvases at screen resolution (`sharedSprite` / `ownSprite`) and then copied each frame, rotated, flipped, stretched or cropped as needed. The cache is rebuilt on resize and when fonts finish loading. |
 | No drop shadows | The game has no drop shadows (removed in v29), which saves a draw per obstacle each frame. |
-| Background as browser layers | The page colour, ruled lines, margin and holes (or the rising bubbles and the sea's sun rays) are CSS layers behind a transparent canvas. The compositor slides them into place each frame, so the canvas only draws formulas, fish, markers, obstacles and the plane. Screen shake moves the whole playfield with one CSS transform. |
+| Background as browser layers | The page colour, ruled lines, margin and holes (or the rising bubbles) are CSS layers behind a transparent canvas. The compositor slides them into place each frame, so the canvas only draws formulas, fish, markers, obstacles and the plane. Screen shake moves the whole playfield with one CSS transform. |
 | No per-frame gradients | Scissor blades, glows and blasts use pre-painted sprites instead of creating gradients every frame |
 | Fewer large see-through fills | The desk fan's wind band tint was removed, and the cat paw and kelp warnings are dashed outlines |
 | Less garbage collection | Lists are pruned in place, and the plane's hit circles and static collision shapes are reused. The top bar only touches the page when a number changes. |
@@ -245,7 +247,7 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 ```
 airplane/
 ├── index.html              the page: playfield layers, top bar, menu cards; loads everything below
-├── style.css               all styling, including the paper, sea and sun-ray background layers
+├── style.css               all styling, including the paper and sea background layers
 ├── README.md               this document
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)

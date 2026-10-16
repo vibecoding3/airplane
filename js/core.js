@@ -40,7 +40,7 @@ const store = {
 
 // the canvas is transparent: the paper behind it is a set of browser layers (see #world in the CSS)
 const stage = $('stage'), wrap = $('wrap'), canvas = $('game'), world = $('world');
-const pageNow = $('pageNow'), pageNext = $('pageNext'), ruling = $('ruling'), raysEl = $('rays');
+const pageNow = $('pageNow'), pageNext = $('pageNext'), ruling = $('ruling');
 let ctx = canvas.getContext('2d');   // `let`: sprites temporarily swap it (see makeSprite)
 let H = 640, scale = 1, dpr = 1;
 

@@ -51,23 +51,6 @@ body {
   background-size: 100% calc(var(--u) * 250), 100% calc(var(--u) * 250), 100% calc(var(--u) * 375), 100% calc(var(--u) * 375), 100% calc(var(--u) * 375), 100% calc(var(--u) * 250);
   background-repeat: repeat-y;
 }
-/* sun rays slanting down from the surface in the first 100 m of the sea; they sway slowly and fade
-   with depth (opacity set from script). One compositor layer, no canvas drawing. */
-#rays { display: none; height: 100%; opacity: 0; pointer-events: none; }
-#world > #rays { left: -15%; width: 130%; }
-#world.map-sea #rays {
-  display: block;
-  background:
-    linear-gradient(to bottom, rgba(255,255,235,.35), rgba(255,255,235,0) 22%),
-    repeating-linear-gradient(104deg,
-      rgba(255,255,235,0) 0, rgba(255,255,235,0) 34px, rgba(255,255,235,.2) 52px,
-      rgba(255,255,235,.32) 62px, rgba(255,255,235,.2) 72px, rgba(255,255,235,0) 92px, rgba(255,255,235,0) 150px);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.65) 40%, transparent 88%);
-          mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.65) 40%, transparent 88%);
-  animation: rays-sway 9s ease-in-out infinite alternate;
-}
-@keyframes rays-sway { from { transform: translateX(-4%) skewX(-4deg); } to { transform: translateX(4%) skewX(4deg); } }
-@media (prefers-reduced-motion: reduce) { #world.map-sea #rays { animation: none; } }
 /* readable top bar on dark water */
 #wrap.dark-page .hud { color: #e4f3fb; }
 #wrap.dark-page .hud button { color: #e4f3fb; border-color: #e4f3fb; }

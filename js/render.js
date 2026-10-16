@@ -114,7 +114,7 @@ function applyShake() {
 }
 
 // slide the paper layers to match the scroll position; only the transforms change each frame
-let pageNowCol = '', pageNextCol = '', raysOp = -1;
+let pageNowCol = '', pageNextCol = '';
 function syncPaperLayers() {
   const px = v => Math.round(v * scale * dpr) / dpr;           // whole device pixels keep the lines crisp
   ruling.style.transform = `translate3d(0, ${px(-(dist % PAPER_REPEAT))}px, 0)`;
@@ -124,11 +124,6 @@ function syncPaperLayers() {
   if (next !== pageNextCol) pageNext.style.background = pageNextCol = next;
   const boundary = pageTop(k + 1) - dist;                         // where the next colour starts on screen
   pageNext.style.transform = `translate3d(0, ${px(Math.min(boundary, H + 10))}px, 0)`;
-  // sun rays: full strength at the surface, gone by 100 m (stepped so the style only changes now and then)
-  if (mapId === 'sea') {
-    const op = Math.round(clamp(1 - dist / (100 * PX_PER_M), 0, 1) * 40) / 40;
-    if (op !== raysOp) raysEl.style.opacity = raysOp = op;
-  }
 }
 
 function render() {
@@ -240,7 +235,7 @@ function applyMap() {
   // swap the background decorations right away: clear them and refill from just above the screen
   formulas = []; fishes.length = 0; lastSceneryY = -1e9;
   nextFormulaY = Math.ceil(dist / 30) * 30;
-  hudPage = ''; pageNowCol = ''; pageNextCol = ''; raysOp = -1;   // force the colours to refresh
+  hudPage = ''; pageNowCol = ''; pageNextCol = '';   // force the colours to refresh
   for (const b of document.querySelectorAll('[data-map]')) b.setAttribute('aria-pressed', String(b.dataset.map === mapId));
 }
 for (const b of document.querySelectorAll('[data-map]')) {

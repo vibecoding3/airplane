@@ -17,7 +17,7 @@ Tools setup (once): `cd tools && npm install`. Chrome is auto-detected (or set `
 ## Player decisions — don't undo
 - Controls: 3 drift positions only (left / straight / right); hold for a sharp turn. A 5-position version was rejected.
 - No drop shadows anywhere (removed v29).
-- Deep sea has no rock-wall side columns (removed v31).
+- Deep sea has no rock-wall side columns (removed v31) and no sun rays (removed v39). Background fish never collide; new ones are background only unless asked.
 - Removed obstacles — avoid similar mechanics: pen wall line, stylus ripple rings, sharpener pull, whiteout patch, thumbtack rows, magnifier homing, coffee spill (soggy), rubber stamp (slam).
 - Stars are Shop currency only (no metres). Skins are free.
 - No plane trail and no trails in the Shop (removed v36).
