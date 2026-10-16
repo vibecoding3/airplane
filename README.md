@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v39** (2026-10-15)
+Current version: **v40** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -11,10 +11,11 @@ Repository: https://github.com/vibecoding3/airplane
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
 - **Files:** `index.html`, `style.css` and 13 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
+- **Start menu:** a regular game menu (big title, best score and star count, map tiles, Play, Skins, Shop, a fold-out "How to play" and the 60 fps option) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens, and the Skins and Shop cards, are still sticky notes.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v39 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v40 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -247,7 +248,8 @@ Every mechanic is already tuned by depth through `difficulty()`. The knobs each 
 ```
 airplane/
 ├── index.html              the page: playfield layers, top bar, menu cards; loads everything below
-├── style.css               all styling, including the paper and sea background layers
+├── style.css               all styling, including the paper and sea background layers and the start menu
+├── img/menu-bg.svg         start-menu background picture (paper airplanes in a sunset sky)
 ├── README.md               this document
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
@@ -289,7 +291,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`) and the map tiles in `index.html` |
 | Plane and skins | `js/core.js` (`SKINS`), `js/render.js` (`paintPlane`) |
 | Shop prices and upgrades | `js/state.js` (`UPGRADES`, `MAGNET_RANGES`) and `js/ui.js` (shop screen) |
-| Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js` |
+| Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js`; start-menu picture in `img/menu-bg.svg` |
 | Sounds | `js/audio.js` (`sfx`) |
 | Frame rate, resolution, input | `js/main.js`, plus `resize` in `js/core.js` |
 | Version label | `index.html` (`id="version"`) |
@@ -321,7 +323,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 | `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on both maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
 | `node tools/shot.js <notebook|sea> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
 | `node tools/shot.js title [sea]` | Title screen screenshot |
-| `node tools/bundle.js [out.html]` | Inlines `style.css` and the scripts into one page (for a single-file copy) |
+| `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs) and the scripts into one page (for a single-file copy) |
 
 ---
 

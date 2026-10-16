@@ -29,7 +29,10 @@ function showCard(which) {
   ui.over.hidden = which !== 'over';
   ui.skins.hidden = which !== 'skins';
   ui.shop.hidden = which !== 'shop';
-  const btn = which && ui[which].querySelector('.play');
+  // the start menu (and the Skins / Shop cards opened from it) sit on the sky picture instead of the map
+  ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
+  if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); }
+  const btn = which && ui[which].querySelector('.play, .primary');
   if (btn) btn.focus({ preventScroll: true });
 }
 // top-bar icons (the buttons keep spoken labels for screen readers)

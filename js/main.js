@@ -101,7 +101,7 @@ function frame(now) {
   // at high speed, split the frame so the plane can't skip through thin obstacles
   const steps = state === 'play' ? Math.max(1, Math.ceil(speed * dt / 10)) : 1;
   for (let i = 0; i < steps; i++) update(dt / steps);
-  render();
+  if (state !== 'title') render();   // the start menu's picture covers the playfield, so skip drawing it
   updateHud();
   requestAnimationFrame(frame);
 }

@@ -19,7 +19,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v39</div>
+    <div class="version" id="version">v40</div>
 
     <div class="hud">
       <div>
@@ -36,25 +36,29 @@
     </div>
 
     <div class="overlay" id="overlay">
-      <div class="card" id="titleCard">
-        <h1>Paper Nosedive</h1>
-        <p>Your plane only goes one way: down. Steer it past everything in the way and see how deep it falls before it gets crumpled.</p>
+      <div class="menu" id="titleCard">
+        <h1 class="menu-title">Paper<br>Nosedive</h1>
+        <p class="menu-tag">How deep can your paper plane fall?</p>
+        <div class="menu-stats"><span>Best <b id="menuBest">0</b> m</span><span>★ <b id="menuBank">0</b></span></div>
         <div class="map-pick" role="group" aria-label="Choose a map">
           <button class="map-tile" type="button" data-map="notebook" aria-pressed="true"><span class="map-thumb paper"></span>Paper</button>
           <button class="map-tile" type="button" data-map="sea" aria-pressed="false"><span class="map-thumb sea"></span>Deep sea</button>
         </div>
-        <ul>
-          <li>Tap or click a side of the screen, or press <kbd>←</kbd> <kbd>→</kbd> (<kbd>A</kbd> <kbd>D</kbd>), to drift that way</li>
-          <li>Press the other side once to fall straight, twice to drift back. Hold a side for a sharp turn</li>
-          <li>The deeper you fall, the faster you go. Gliding sideways slows you down</li>
-          <li>Collect gold stars to spend in the Shop · <kbd>P</kbd> pauses</li>
-          <li><label class="opt"><input type="checkbox" id="cap60"> Limit to 60 fps (saves battery on 120 Hz screens)</label></li>
-        </ul>
-        <div class="actions">
-          <button class="play" id="startBtn" type="button">Throw it</button>
-          <button class="ghost" id="skinsBtn" type="button">Skins</button>
-          <button class="ghost" id="shopBtn" type="button">Shop</button>
+        <button class="menu-btn primary" id="startBtn" type="button">Play</button>
+        <div class="menu-row">
+          <button class="menu-btn" id="skinsBtn" type="button">Skins</button>
+          <button class="menu-btn" id="shopBtn" type="button">Shop</button>
         </div>
+        <details class="menu-help">
+          <summary>How to play</summary>
+          <ul>
+            <li>Tap or click a side of the screen, or press <kbd>←</kbd> <kbd>→</kbd> (<kbd>A</kbd> <kbd>D</kbd>), to drift that way</li>
+            <li>Press the other side once to fall straight, twice to drift back. Hold a side for a sharp turn</li>
+            <li>The deeper you fall, the faster you go. Gliding sideways slows you down</li>
+            <li>Collect gold stars to spend in the Shop · <kbd>P</kbd> pauses</li>
+          </ul>
+        </details>
+        <label class="opt menu-opt"><input type="checkbox" id="cap60"> Limit to 60 fps (saves battery)</label>
       </div>
 
       <div class="card" id="skinsCard" hidden>

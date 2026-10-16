@@ -7,7 +7,10 @@ const out = process.argv[2] || outFile('paper-nosedive.html');
 const read = f => fs.readFileSync(path.join(ROOT, f), 'utf8');
 
 let html = read('index.html');
-html = html.replace('<link rel="stylesheet" href="style.css">', () => '<style>\n' + read('style.css') + '</style>');
+// images referenced from the stylesheet are embedded as data URLs
+const css = read('style.css').replace(/url\("(img\/[\w.-]+\.svg)"\)/g,
+  (_, f) => `url("data:image/svg+xml;base64,${Buffer.from(read(f)).toString('base64')}")`);
+html = html.replace('<link rel="stylesheet" href="style.css">', () => '<style>\n' + css + '</style>');
 html = html.replace(/<script src="(js\/[\w-]+\.js)"><\/script>/g, (_, f) => '<script>\n' + read(f) + '</script>');
 if (/<script src=|href="style\.css"/.test(html)) throw new Error('something was not inlined');
 // the artifact host adds its own document skeleton
