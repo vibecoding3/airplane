@@ -30,6 +30,22 @@ function popHudDepth(big) {
   void el.offsetWidth;                         // restart the animation
   el.classList.add(big ? 'pop-big' : 'pop');
 }
+// medals on each map tile: bronze / silver / gold, lit when that map's best depth reaches them
+function renderMedals() {
+  for (const tile of document.querySelectorAll('.map-tile')) {
+    const b = bests[tile.dataset.map] || 0;
+    let box = tile.querySelector('.medals');
+    if (!box) { box = document.createElement('span'); box.className = 'medals'; tile.append(box); }
+    box.replaceChildren(...MEDALS.map(md => {
+      const i = document.createElement('i');
+      i.className = 'medal ' + md.id + (b >= md.m ? ' on' : '');
+      i.title = `${md.name}: ${fmt(md.m)} m`;
+      return i;
+    }));
+    const got = MEDALS.filter(md => b >= md.m).map(md => md.name);
+    box.setAttribute('aria-label', got.length ? 'Medals: ' + got.join(', ') : 'No medals yet');
+  }
+}
 function showCard(which) {
   ui.overlay.hidden = !which;
   ui.title.hidden = which !== 'title';
@@ -39,6 +55,7 @@ function showCard(which) {
   ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
   ui.overlay.classList.toggle('dim', !!which && state !== 'title');   // pause / game over: dim the game behind
   if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); }
+  if (which === 'title' || which === 'over') renderMedals();
   const btn = which && ui[which].querySelector('.play, .primary');
   if (btn) btn.focus({ preventScroll: true });
 }
@@ -88,7 +105,7 @@ function gameOver() {
   state = 'over';
   const s = score();
   const record = s > best;
-  if (record) { best = s; store.set('nosedive-best', String(best)); }
+  if (record) { best = bests[mapId] = s; store.set('nosedive-best-' + mapId, String(s)); }
   ui.overTitle.textContent = fmt(s) + ' m';
   ui.overBest.textContent = 'Best ' + fmt(best) + ' m';
   ui.stamp.hidden = !record;
@@ -97,6 +114,9 @@ function gameOver() {
   showCard('over');
 }
 
+for (const b of document.querySelectorAll('[data-map]')) {
+  b.addEventListener('click', () => { $('menuBest').textContent = fmt(best); ui.overBest.textContent = 'Best ' + fmt(best) + ' m'; });
+}
 $('startBtn').addEventListener('click', start);
 $('againBtn').addEventListener('click', start);
 $('resumeBtn').addEventListener('click', resume);

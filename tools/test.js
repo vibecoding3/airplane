@@ -13,6 +13,17 @@ const EXPECTED = { notebook: 16, sea: 12 };   // obstacle types per map; update 
   check(await page.evaluate(() => state) === 'title', 'loads to the title screen');
   console.log('     version label: ' + await page.evaluate(() => document.getElementById('version').textContent));
 
+  // medals on the map tiles follow each map's best depth
+  const medals = await page.evaluate(() => {
+    const keep = { ...bests };
+    bests.notebook = 800; bests.sea = 260; showCard('title');
+    const on = id => document.querySelectorAll(`#titleCard .map-tile[data-map="${id}"] .medal.on`).length;
+    const r = on('notebook') + '/' + on('sea');
+    Object.assign(bests, keep); showCard('title');
+    return r;
+  });
+  check(medals === '2/1', 'map tiles show medals (Paper 800 m → 2, Deep sea 260 m → 1): ' + medals);
+
   // deep runs where the plane can't be hit: every obstacle type should appear, power-ups should spawn
   // and level up to 3, no errors
   const deep = await page.evaluate(depth => {

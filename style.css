@@ -167,3 +167,11 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
 .hud .depth.pop-big { animation: depth-pop-big .8s ease-out; }
 @keyframes depth-pop { 30% { transform: scale(1.3); } }
 @keyframes depth-pop-big { 25% { transform: scale(1.6); color: #e8a317; } 60% { transform: scale(1.2); color: #e8a317; } }
+
+/* medals on the map tiles */
+.medals { display: flex; justify-content: center; gap: 5px; }
+.medal { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--ink); background: #ffffff; opacity: .3; }
+.medal.on { opacity: 1; }
+.medal.bronze.on { background: #cd7f32; }
+.medal.silver.on { background: #c9d1da; }
+.medal.gold.on { background: #ffd23f; }

@@ -208,6 +208,7 @@ function render() {
 // switch the background between maps (the world's CSS class picks the ruling pattern)
 function applyMap() {
   world.classList.toggle('map-sea', mapId === 'sea');
+  best = bests[mapId];
   // swap the background decorations right away: clear them and refill from just above the screen
   formulas = []; fishes.length = 0; lastSceneryY = -1e9;
   nextFormulaY = Math.ceil(dist / 30) * 30;

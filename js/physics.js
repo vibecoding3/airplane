@@ -324,6 +324,13 @@ function update(dt) {
     floaters.push({ x: W / 2, y: dist + planeScreenY() - 40, life: 1.6, col: '#c47a00', text: 'New best!' });
     sfx.record();
   }
+  for (const md of MEDALS) {               // first time this map reaches a medal depth
+    if (best < md.m && score() >= md.m && !medalsAnnounced.has(md.id)) {
+      medalsAnnounced.add(md.id);
+      floaters.push({ x: W / 2, y: dist + planeScreenY() - 70, life: 2, size: 26, col: md.id === 'bronze' ? '#a0612a' : md.id === 'silver' ? '#6b7785' : '#c47a00', text: md.name + ' medal!' });
+      sfx.record();
+    }
+  }
   const mile = Math.floor(score() / 100);
   if (mile > lastMilestone) { lastMilestone = mile; milestone(mile * 100); }
   flash = Math.max(0, flash - dt);

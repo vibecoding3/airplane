@@ -5,7 +5,17 @@
 let state = 'title';          // title | play | paused | dying | over
 let plane, obstacles, pickups, particles, floaters;
 let dist, speed, time, nextRowY, stars, shake, overTimer;
-let best = +store.get('nosedive-best') || 0;
+// best depth per map (the medals depend on it); `best` is the current map's, set by applyMap
+const bests = { notebook: +store.get('nosedive-best-notebook') || 0, sea: +store.get('nosedive-best-sea') || 0 };
+if (store.get('nosedive-best-notebook') == null && +store.get('nosedive-best') > 0) {
+  // before v49 there was one best for all maps: it goes to Paper, the original map
+  bests.notebook = +store.get('nosedive-best');
+  store.set('nosedive-best-notebook', String(bests.notebook));
+}
+let best = 0;
+// medals per map, earned by reaching these depths
+const MEDALS = [{ id: 'bronze', name: 'Bronze', m: 250 }, { id: 'silver', name: 'Silver', m: 750 }, { id: 'gold', name: 'Gold', m: 1500 }];
+const medalsAnnounced = new Set();   // medals already celebrated this run
 
 // ---------- power-ups: picked up during a run, three levels each, gone when the run ends ----------
 // magnet: pulls stars in from further away at each level; shield: one spare life per level
@@ -52,7 +62,7 @@ function reset() {
   plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, invuln: 0, bubbled: 0 };
   obstacles = []; pickups = []; particles = []; floaters = [];
   dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
-  nextRowY = H + 140; lastPowerY = 0; passedBest = false; lastMilestone = 0; flash = 0;
+  nextRowY = H + 140; lastPowerY = 0; passedBest = false; lastMilestone = 0; flash = 0; medalsAnnounced.clear();
   formulas = []; nextFormulaY = 60; usedFormulas.clear(); fishes.length = 0; lastSceneryY = -1e9;
 }
 reset();
