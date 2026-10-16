@@ -87,12 +87,14 @@ function start() {
   clearControls();
   showCard(null);
   sfx.throw();
+  setMusic(mapId);
 }
 function pause() {
   if (state !== 'play') return;
   state = 'paused';
   setPauseIcon(true);
   showCard('pause');
+  duckMusic(true);
 }
 function resume() {
   if (state !== 'paused') return;
@@ -100,9 +102,11 @@ function resume() {
   setPauseIcon(false);
   holdSide = 0; holdSource = null;   // a key released while paused never sent its keyup here
   showCard(null);
+  duckMusic(false);
 }
 function gameOver() {
   state = 'over';
+  setMusic('title');
   const s = score();
   const record = s > best;
   if (record) { best = bests[mapId] = s; store.set('nosedive-best-' + mapId, String(s)); }
@@ -126,5 +130,6 @@ ui.muteBtn.addEventListener('click', () => {
   muted = !muted;
   store.set('nosedive-muted', muted ? '1' : '0');
   setMuteLabel();
+  syncMusicVolume();
   if (!muted) tone(660, 990, 0.1, 'sine', 0.08);
 });

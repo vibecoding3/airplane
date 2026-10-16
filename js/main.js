@@ -98,4 +98,5 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 showCard('title');
+setMusic('title');
 requestAnimationFrame(frame);

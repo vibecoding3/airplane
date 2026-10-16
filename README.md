@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v49** (2026-10-15)
+Current version: **v50** (2026-10-15)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,12 +10,12 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css` and 13 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
+- **Files:** `index.html`, `style.css` and 14 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
 - **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, the map tiles and Play again (the run time was removed in v45). There is no Shop (removed in v46).
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v49 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v50 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -40,7 +40,7 @@ There are no on-screen steering arrows (removed in v44).
 | Rule | Value |
 |---|---|
 | Depth | 30 world units = 1 metre. The score is the depth reached. |
-| Fall speed | `150 + 11 × √depth` units per second. It keeps rising with no cap (about 5 m/s at the start, 17 m/s at 1,000 m, 28 m/s at 4,000 m). |
+| Fall speed | `150 + 11 × √depth` units per second, rising until 800 m and then capped at that speed (since v50): about 5 m/s at the start, 10 m/s at 200 m and 15.4 m/s from 800 m on. Sideways speed is capped with it. Difficulty (gaps, spacing, obstacle speeds) still keeps rising after 800 m |
 | Sideways speed | `300 + 0.4 × (fall speed − 150)`, so steering keeps up at depth |
 | Sideways slowdown | Gliding sideways at full speed makes the plane fall up to 40% slower |
 | Difficulty | `1 − e^(−depth / 600)`. It controls when obstacles unlock, gap sizes, row spacing and obstacle speeds, and is nearly maxed by about 2,000 m. |
@@ -211,11 +211,25 @@ There is no Shop (removed in v46). Instead, two power-ups appear in the map duri
 
 ---
 
-## 8. Settings
+## 8. Music
+
+Background music is composed and played in code (`js/music.js`), in the style of a fantasy MMORPG soundtrack such as Knight Online's: minor keys, harp arpeggios, string pads and flute or horn leads. The melodies are original.
+
+| Theme | Plays | Feel |
+|---|---|---|
+| Title | Start menu and game over | Slow, noble horn melody in E minor over strings, with a soft drum (72 bpm, about 27 s loop) |
+| Paper | During Paper runs | Light pastoral town theme in D minor: flute over flowing harp eighths (88 bpm, about 22 s loop) |
+| Deep sea | During Deep sea runs | Slow and dark in A minor: echoing harp, low lonely flute, deep bass (64 bpm, about 30 s loop) |
+
+- Themes cross-fade when they change. Pausing lowers the music to 30%; hiding the tab silences it.
+- The music sits below the sound effects (peaks about 0.08 against about 0.10 for a star chime).
+- Each theme is 8 bars; notes are scheduled half a second ahead of the audio clock, so the game loop is not involved.
+
+## 8b. Settings
 
 | Setting | Where | Notes |
 |---|---|---|
-| Sound on/off | Top bar (speaker icon, crossed out when muted) | Sound effects are generated in code (Web Audio) |
+| Sound on/off | Top bar (speaker icon, crossed out when muted) | Mutes sound effects and music together. Both are generated in code (Web Audio), with no audio files |
 | Pause / Resume | Top bar (pause icon, becomes a play icon while paused), P, Esc | Also pauses automatically when the tab is hidden |
 | Map | Start and game-over screens | Paper / Deep sea picture tiles |
 
@@ -257,9 +271,10 @@ airplane/
 ├── README.md               this document
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
-└── js/                     13 game scripts, listed in the order they load
+└── js/                     14 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
+    ├── music.js            background music for the menus and each map
     ├── paper-background.js Paper map: pencil formulas by depth
     ├── sea-background.js   Deep sea map: fish, specks, whales, shipwrecks
     ├── state.js            game state, power-up levels, controls, speed and difficulty rules
@@ -297,6 +312,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | Power-ups | `js/state.js` (`POWER_MAX`, `MAGNET_RANGES`, `POWER_GAP`), `js/obstacles.js` (`pickPower`), `js/physics.js` (`collectPower`, `useExtraLife`), `js/render.js` (`drawPower`, `paintPowerIcon`) |
 | Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js`; start-menu picture in `img/menu-bg.svg` |
 | Sounds | `js/audio.js` (`sfx`) |
+| Music | `js/music.js` (`THEMES`: chords, melody and tempo per theme; `setMusic`, `duckMusic`) |
 | Frame rate, resolution, input | `js/main.js`, plus `resize` in `js/core.js` |
 | Version label | `index.html` (`id="version"`) |
 
@@ -305,7 +321,8 @@ There is no build step and nothing to install. To play locally, open `index.html
 | File | Key names |
 |---|---|
 | `core.js` | `W` (playfield width 400), `PX_PER_M`, `COL`, `PLANE`, `rand`, `clamp`, `lerp`, `prune`, `store`, `resize`, `dprCap`, `makeSprite`, `sharedSprite`, `ownSprite`, `blit`, `invalidateSprites` |
-| `audio.js` | `sfx`, `tone`, `muted` |
+| `audio.js` | `sfx`, `tone`, `muted`, `audioEngine` |
+| `music.js` | `THEMES`, `CH` (chords), `setMusic`, `duckMusic`, `syncMusicVolume`, `playBar` |
 | `paper-background.js` | `FORMULA_TIERS`, `pickFormula`, `spawnFormula`, `updateFormulas` |
 | `sea-background.js` | `FISH`, `FISH_TIERS`, `spawnFish`, `drawFishes`, `drawSeaParticles` |
 | `state.js` | `state`, `plane`, `obstacles`, `dist`, `speed`, `POWER_MAX`, `MAGNET_RANGES`, `press` / `release`, `depthM`, `difficulty`, `baseFallSpeed`, `reset` |

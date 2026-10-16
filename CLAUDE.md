@@ -3,7 +3,7 @@
 Browser game: a paper plane always falls; the player steers left/right to dodge obstacles; score = depth in metres. Two maps, **Paper** (internal id `notebook`) and **Deep sea** (`sea`). README.md is the full game spec — read only the section you need.
 
 ## Files
-`index.html` (page + menus) · `style.css` · `js/*.js` (13 classic scripts, one shared global scope, run in the order `index.html` lists them; `main.js` last). README section 10 has the file map, a "where to change things" table and key names per file. Grep for a name rather than reading whole files.
+`index.html` (page + menus) · `style.css` · `js/*.js` (14 classic scripts, one shared global scope, run in the order `index.html` lists them; `main.js` last). README section 10 has the file map, a "where to change things" table and key names per file. Grep for a name rather than reading whole files.
 
 ## After every change
 1. `node tools/test.js` — loads the game in headless Chrome, menus, deep runs on both maps (all obstacle types must appear), normal runs, pause/resume, page errors. Use `node tools/test.js 800` for a faster run. Update `EXPECTED` in it when adding obstacles.
