@@ -417,24 +417,25 @@ function spark(x, y) {
   return { kind: 'spark', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 0, rot: 0, vr: 0, life: 1, ttl: 0.45, size: rand(2, 4) };
 }
 
-// a magnet or shield pickup raises that power one level (up to 3) for the rest of the run
+// a magnet or shield pickup raises that power one level (up to 3) for the rest of the run; its message follows the
+// plane, just under it, so it stays readable
 function collectPower(p) {
   const fx = clamp(p.x, 90, W - 90);
   if (p.kind === 'magnet') {
     plane.magnet = Math.min(POWER_MAX, plane.magnet + 1);
-    floaters.push({ x: fx, y: p.y, life: 1.4, col: '#c0392b', text: `Magnet level ${plane.magnet}!` });
+    floaters.push({ follow: true, x: fx, y: p.y, life: 1.4, col: '#c0392b', text: `Magnet level ${plane.magnet}!` });
   } else if (p.kind === 'superstar') {
     plane.star = STAR_TIME;
-    floaters.push({ x: fx, y: p.y, life: 1.6, col: '#e8a317', size: 26, text: 'Invincible!' });
+    floaters.push({ follow: true, x: fx, y: p.y, life: 1.6, col: '#e8a317', size: 26, text: 'Invincible!' });
   } else if (p.kind === 'boost') {
     plane.boost = BOOST_TIME;
-    floaters.push({ x: fx, y: p.y, life: 1.4, col: '#23964a', text: 'Speed boost!' });
+    floaters.push({ follow: true, x: fx, y: p.y, life: 1.4, col: '#23964a', text: 'Speed boost!' });
   } else if (p.kind === 'slowmo') {
     plane.slowmo = SLOWMO_TIME;
-    floaters.push({ x: fx, y: p.y, life: 1.4, col: '#8a4fc2', text: 'Slow motion!' });
+    floaters.push({ follow: true, x: fx, y: p.y, life: 1.4, col: '#8a4fc2', text: 'Slow motion!' });
   } else {
     plane.lives = Math.min(POWER_MAX, plane.lives + 1);
-    floaters.push({ x: fx, y: p.y, life: 1.4, col: '#2f6fb8', text: `Shield level ${plane.lives}!` });
+    floaters.push({ follow: true, x: fx, y: p.y, life: 1.4, col: '#2f6fb8', text: `Shield level ${plane.lives}!` });
   }
   const col = POWER_RIMS[p.kind];
   for (let k = 0; k < 12; k++) { const s = spark(p.x, p.y); s.col = col; particles.push(s); }

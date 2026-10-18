@@ -252,7 +252,8 @@ function render() {
     ctx.font = `700 ${f.size || 18}px Kalam, cursive`;
     ctx.globalAlpha = clamp(f.life, 0, 1);
     ctx.fillStyle = f.col || '#a8740f';
-    ctx.fillText(f.text, f.x, f.y - dist - (1 - f.life) * 40);
+    if (f.follow) ctx.fillText(f.text, clamp(plane.x, 90, W - 90), planeScreenY() + 52 + (1 - f.life) * 14);   // power-ups: under the plane
+    else ctx.fillText(f.text, f.x, f.y - dist - (1 - f.life) * 40);
   }
   ctx.globalAlpha = 1;
   if (plane.slowmo > 0 && state === 'play') { ctx.fillStyle = 'rgba(150,110,230,.10)'; ctx.fillRect(0, 0, W, H); }   // slow motion: a soft purple tint
