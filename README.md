@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v65** (2026-10-18)
+Current version: **v66** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v65 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v66 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -446,6 +446,7 @@ New maps should reuse the 20 mechanics in section 6 with new art (see 11). Setti
 - **Kitchen:** falling past shelves, with knives (Wall Piston), a whisk (Spinning Blades), steam from pots (Effect Zone) and rolling oranges (Bouncing Slider).
 - **Library:** tall bookshelves as Gap Walls, a swinging reading lamp (Telegraphed Sweep), falling loose pages (Drifting Swarm) and a book cart conveyor.
 - **Space** (worked out in section 13): drifting asteroids (Static Hazards and Spinning Drifter), satellites with solar panels (Sweeping Arm), laser gates (Charged Beam) and solar wind bands (Push Zone).
+- **Dungeon** (brainstorm in section 14): stone ledges, pendulum blades, spear traps, fireballs and bat swarms, from a torch-lit well down to a lava-lit underworld.
 
 ### 12.6 Suggested order
 1. Best-depth line, "Crumpled by…", star paths (quick wins that change how runs feel).
@@ -534,3 +535,63 @@ About 12 of these would be a good set (Deep sea has 12).
 2. Tone: **cartoon and playful** (aliens, UFOs) or more **realistic** (NASA-style)?
 3. Name: Space, Orbit, Starfall, or something else?
 4. Which obstacles to keep or drop from the list above?
+
+---
+
+## 14. Dungeon map — brainstorm (not built yet)
+
+A fourth map, following the rule in 12.5: reuse the 20 mechanics in section 6 with new art.
+
+### 14.1 The premise
+
+The plane is dropped down a deep, ancient dungeon well and falls past torch-lit stone, into caverns, then down to a lava-lit underworld. Cartoon and playful like the other maps: friendly skeletons, not gore.
+
+### 14.2 Background by depth
+
+Like the water darkening in Deep sea:
+
+| Depth | Look |
+|---|---|
+| 0–100 m | Daylight from the well's opening at the top fading into grey stone bricks (like the Earth at the start of Space) |
+| 100–400 m | Torch-lit dungeon: warm flickering light, mossy bricks, chains |
+| 400–1,000 m | Dark caverns: crystals glowing blue and purple, dripping water |
+| 1,000 m + | The underworld: deep red glow from lava far below, embers drifting up |
+
+**Background scenery** (never collides, like the fish): bats fluttering, wall torches, a rat on a ledge, cobwebs, a sleepy ghost, a treasure chest, glowing eyes in the dark. Rare surprise: a dragon's silhouette passing far behind.
+
+### 14.3 Obstacles, reusing the mechanics (section 6)
+
+| Mechanic | Dungeon look |
+|---|---|
+| Gap Wall | Stone ledges from both walls with a gap |
+| Closing Jaws | A spiked portcullis or two crushing stone blocks |
+| Static Hazards | Spiked iron balls, skulls |
+| Wall Bulge | A rounded rock outcrop or a big barrel |
+| Bouncing Slider | A wooden beam or log sliding side to side |
+| Rising Projectile | A fireball thrown up from below, bouncing off the walls |
+| Drifting Swarm | Bats or ghosts drifting down |
+| Conveyor | A row of swinging blades, or a moving chain of spiked links |
+| Spinning Drifter | A spinning throwing axe or shuriken |
+| Spinning Blades | Two crossed swords spinning |
+| Sweeping Arm | A huge pendulum blade on a pivot |
+| Wall Piston | A spear trap shooting out of the wall |
+| Wall Turret | A dragon-head statue spitting fireballs, or an arrow trap |
+| Charged Beam | A magic rune that charges, then fires a beam |
+| Telegraphed Sweep | A giant tentacle or skeleton arm swiping out of the wall |
+| Proximity Blast | A cursed rune on the floor that glows, then blasts |
+| Push Zone | Cold draft from a crack in the wall (only before 700 m, like all wind obstacles) |
+| Spring Line | A spider web stretched between two anchors that bounces the plane away |
+
+Left out on purpose: **Telegraphed Slam** (the rubber stamp was removed, so no falling crusher) and **Effect Zone** (a slowing debuff is close to the removed coffee spill). That gives about 18 obstacle types, more than Space (15).
+
+### 14.4 Extras
+
+- **Music:** a slow, mysterious theme in a minor key with low drums and an echo, like the Deep sea theme.
+- **Map tile:** grey stone bricks with a torch and an orange glow.
+- **Colours:** light text and markers on the dark stone, as in Deep sea.
+
+### 14.5 Open questions
+
+1. Mood: **caves and lava** as above, or a **castle dungeon** (chains, knights' armour, prison cells)?
+2. Keep the **Proximity Blast** (cursed rune)? Explosions were removed from Space (v55).
+3. Build all ~18 obstacles at once, or start with a **smaller set** (about 10) to try first?
