@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v85** (2026-10-18)
+Current version: **v86** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v85 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v86 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -153,7 +153,7 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.4. For 
 | Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders / tombstones |
 | Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern |
 | Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / Frieren's staff / Fern's staff |
-| Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball / potion flask |
+| Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball / potion flask; magic rings |
 | Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps / witch hats / goblins |
 | Conveyor | Paper clips | — | Starlink train | Daggers / arrows / keys |
 | Spinning Drifter | Set square | Starfish | Tumbling asteroid | Saw blade / spiked wheel / eyeball / spiked goblin shield |
@@ -167,7 +167,7 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.4. For 
 | Push Zone | Desk fan | Ocean current | — | Cold draft / steam vent |
 | Effect Zone | — | Bubble column | Low-gravity field | — |
 | Spring Line | Rubber band | — | — | Spider web / slime strand |
-| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **19 obstacles, 64 looks** |
+| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **20 obstacles, 65 looks** |
 
 ### 5.1 Paper map (16 types)
 
@@ -235,7 +235,7 @@ Every Space obstacle reuses the movement and collision of a Paper or Ocean obsta
 | Battle station | A big grey sphere with a dish and a trench bulging in from a side (original design in a space-opera style) | Protractor | ~170 m |
 | Robot arm | A station arm with a claw swinging all the way round its base | Drawing compass | ~215 m |
 
-### 5.4 Dungeon map (19 kinds on 18 mechanics: 10 in v68, 8 more in v70, the flamethrower in v81)
+### 5.4 Dungeon map (20 kinds on 18 mechanics: 10 in v68, 8 more in v70, the flamethrower in v81, the magic rings in v86)
 Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (left out on purpose, see 14.3). Every Dungeon obstacle reuses the movement and collision of a Paper obstacle (see `DUNGEON_MAKERS` in `js/obstacles.js`) with new art in `js/draw-dungeon.js`, and every drawing stays inside its collision shape (a sword's crossguard pokes out a few units, harmlessly). The walls are dark, so obstacles are light stone, bone, wood and fire with a dark outline.
 
 | Dungeon obstacle | Behaviour | Based on | Starts at |
@@ -259,6 +259,7 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Rune beam (v70) | A rune stone on the wall: its runes light up and a dashed line shows the path, then a magic beam fires | Electric eel | ~135 m |
 | Skeleton arm (v70) | A dashed wedge shows its reach, then a bony arm swipes out of a crack in the wall | Cat paw | ~135 m |
 | Flamethrower (v81) | An iron nozzle in the wall with a flickering blue pilot light; a jet of flame shoots out, holds, then dies back. Its own obstacle (own spawn chance), always this look | Cutter | ~120 m |
+| Magic rings (v86) | Cartoon rings after a sheet of fantasy rings, thrown up the shaft spinning and bouncing off the walls. 9 designs: emerald (gold, big green gem), sapphire (silver, blue oval), ruby (gold, red gem with two side gems), crystal (silver, long blue crystal), amethyst (dark, a row of purple gems), amber (silver, orange hexagon), skull (dark, skull with purple eyes), zigzag (gold, engraved), leaf (silver, green leaves). Its own obstacle (own spawn chance) | Paper wad | ~65 m |
 
 **Looks and colours** (since v73): every Dungeon obstacle comes in two to five different objects that share its mechanic and hit box, each in a few colours (64 looks in all; 12 Halloween and goblin looks added in v80, two anime staffs in v82; `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
 

@@ -130,6 +130,18 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(flame.inPool && flame.type === 'cutter' && flame.look === 'flamethrower',
     `Dungeon flamethrower: in the pool ${flame.inPool}, spawns as ${flame.type}/${flame.look}`);
 
+  // the Dungeon's magic rings: their own obstacle in the pool, built on the Rising Projectile (paper wad), one of 9 designs
+  const rings = await page.evaluate(() => {
+    mapId = 'dungeon'; applyMap(); start(); obstacles.length = 0;
+    const inPool = dungeonPool(0.5, 100 * PX_PER_M).some(p => p[0] === 'rings');
+    lastType = ''; spawnFromPool(dist + 600, 0.5, [['rings', 1]]);
+    const o = obstacles[0];
+    gameOver();
+    return { inPool, type: o && o.type, look: o && o.look, design: o && o.dunCol, known: !!(o && RING_DESIGNS[o.dunCol]) };
+  });
+  check(rings.inPool && rings.type === 'wad' && rings.look === 'ring' && rings.known,
+    `Dungeon rings: in the pool ${rings.inPool}, spawns as ${rings.type}/${rings.look} (${rings.design})`);
+
   // Frieren's staff: its big head has its own round hit area at the +x end of the slider
   const staff = await page.evaluate(() => {
     mapId = 'dungeon'; applyMap(); start();

@@ -311,11 +311,63 @@ function drawPlank(o, sy) {
   blit(s, o.x, sy, o.a);
 }
 
+// magic rings (Rising Projectile, own obstacle since v86), cartoon designs after a sheet of fantasy rings:
+// band metal, what sits on top, and the gem colour
+const RING_METALS = { gold: ['#e0b84a', '#a8842a', '#fff0a8'], silver: ['#c4c9d0', '#7d838c', '#ffffff'], dark: ['#7a7e88', '#4a4e57', '#c4c9d0'] };
+const RING_DESIGNS = {
+  emerald: ['gold', 'round', '#3fd16a'], sapphire: ['silver', 'oval', '#4ab8ff'], ruby: ['gold', 'trio', '#e0283a'],
+  crystal: ['silver', 'bar', '#3f7fff'], amethyst: ['dark', 'row', '#a855f7'], amber: ['silver', 'hex', '#f2a03a'],
+  skull: ['dark', 'skull', '#a855f7'], zigzag: ['gold', 'zigzag', null], leaf: ['silver', 'leaf', '#7fd84a']
+};
+function paintRing(design) {
+  const [metal, top, gem] = RING_DESIGNS[design] || RING_DESIGNS.emerald, [m, shade, light] = RING_METALS[metal];
+  const gemDot = (x, y, r) => {                     // a faceted-looking gem: colour, darker lower half, a white glint
+    ctx.fillStyle = gem; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); dunStroke(1.1);
+    ctx.fillStyle = dunShade(0.25); ctx.beginPath(); ctx.arc(x, y, r, 0.2, Math.PI - 0.2); ctx.fill();
+    ctx.fillStyle = dunLight(0.85); ctx.beginPath(); ctx.arc(x - r * 0.35, y - r * 0.35, r * 0.28, 0, Math.PI * 2); ctx.fill();
+  };
+  // the band, seen at a slant: darker back half, bright front edge
+  ctx.strokeStyle = DUN_LINE; ctx.lineWidth = 7.5; ctx.beginPath(); ctx.ellipse(0, 4, 12, 8.5, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = shade; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(0, 4, 12, 8.5, 0, Math.PI, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = m; ctx.beginPath(); ctx.ellipse(0, 4, 12, 8.5, 0, 0, Math.PI); ctx.stroke();
+  ctx.strokeStyle = light; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.ellipse(0, 4, 12, 8.5, 0, 0.5, 1.6); ctx.stroke();
+  if (top === 'zigzag') {                           // an engraved zigzag along the front of the band
+    ctx.strokeStyle = shade; ctx.lineWidth = 1.2; ctx.beginPath();
+    for (let i = 0; i <= 8; i++) { const a = 0.35 + i * 0.3, x = Math.cos(a) * 12, y = 4 + Math.sin(a) * 8.5; ctx.lineTo(x, y + (i % 2 ? -1.6 : 1.6)); }
+    ctx.stroke();
+    return;
+  }
+  ctx.fillStyle = m; ctx.beginPath(); ctx.ellipse(0, -4.5, top === 'bar' ? 9 : 6.5, 3.5, 0, 0, Math.PI * 2); ctx.fill(); dunStroke(1.2);   // the setting
+  if (top === 'round') gemDot(0, -7, 5.4);
+  else if (top === 'oval') {
+    ctx.fillStyle = gem; ctx.beginPath(); ctx.ellipse(0, -7, 6.5, 4.6, 0, 0, Math.PI * 2); ctx.fill(); dunStroke(1.1);
+    ctx.fillStyle = dunLight(0.85); ctx.beginPath(); ctx.ellipse(-2.4, -8.6, 1.8, 1.1, -0.4, 0, Math.PI * 2); ctx.fill();
+  } else if (top === 'trio') { gemDot(-6.5, -5, 2); gemDot(6.5, -5, 2); gemDot(0, -7, 4.2); }
+  else if (top === 'bar') {                         // a long crystal laid across the top
+    ctx.fillStyle = gem; ctx.beginPath(); ctx.moveTo(-12, -6.5); ctx.lineTo(-8, -10); ctx.lineTo(8, -10); ctx.lineTo(12, -6.5); ctx.lineTo(8, -3); ctx.lineTo(-8, -3); ctx.closePath(); ctx.fill(); dunStroke(1.2);
+    ctx.fillStyle = dunLight(0.6); ctx.fillRect(-7, -9, 13, 1.6);
+  } else if (top === 'row') { for (const x of [-7, -2.4, 2.4, 7]) gemDot(x, -6 - (Math.abs(x) < 3 ? 1 : 0), 2.2); }
+  else if (top === 'hex') {
+    ctx.fillStyle = gem; ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; ctx.lineTo(Math.cos(a) * 6, -7 + Math.sin(a) * 5); } ctx.closePath(); ctx.fill(); dunStroke(1.1);
+    ctx.fillStyle = dunLight(0.7); ctx.beginPath(); ctx.arc(-2, -8.5, 1.4, 0, Math.PI * 2); ctx.fill();
+  } else if (top === 'skull') {                     // a little silver skull with glowing eyes
+    ctx.fillStyle = '#c4c9d0'; ctx.beginPath(); ctx.arc(0, -8, 5.6, Math.PI, 0); ctx.lineTo(3.6, -3.6); ctx.lineTo(-3.6, -3.6); ctx.closePath(); ctx.fill(); dunStroke(1.1);
+    ctx.fillStyle = gem; for (const d of [-1, 1]) { ctx.beginPath(); ctx.arc(d * 2.2, -7.6, 1.5, 0, Math.PI * 2); ctx.fill(); }
+  } else if (top === 'leaf') {                      // three green leaves fanned across the top
+    for (const a of [-0.9, 0, 0.9]) {
+      ctx.save(); ctx.translate(0, -5); ctx.rotate(a);
+      ctx.fillStyle = gem; ctx.beginPath(); ctx.ellipse(0, -4.5, 2.6, 5, 0, 0, Math.PI * 2); ctx.fill(); dunStroke(1);
+      ctx.restore();
+    }
+  }
+}
+
 // ---------- Rising Projectile: grinning skulls, jack-o'-lanterns or slime balls, spinning up the shaft ----------
 function drawSkull(o, sy) {
   const col = o.dunCol || '#efe6d0', s = o.r / 16, look = o.look || 'skull';
   blit(sharedSprite(look + col, 36, 36, 18, 18, () => {
-    if (look === 'pumpkin') {
+    if (look === 'ring') paintRing(col);
+    else if (look === 'pumpkin') {
       ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 1.5, 13.5, 12.5, 0, 0, Math.PI * 2); ctx.fill(); dunStroke(1.5);
       ctx.strokeStyle = dunShade(0.25); ctx.lineWidth = 1.2; ctx.beginPath();
       for (const k of [-0.5, 0, 0.5]) { ctx.moveTo(k * 13, -10); ctx.quadraticCurveTo(k * 20, 1.5, k * 13, 13); }

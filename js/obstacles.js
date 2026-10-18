@@ -317,10 +317,12 @@ function spacePool(d) {
 const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots', rock: 'protractor', plank: 'pencil',
                          skull: 'wad', ghosts: 'notes', spear: 'cutter', firebar: 'compass', dragon: 'glue',
                          daggers: 'clips', saw: 'starfish', swords: 'scissors', runebeam: 'zap', skelarm: 'paw',
-                         curse: 'mine', draft: 'fan', web: 'band', flamethrower: 'cutter' };
+                         curse: 'mine', draft: 'fan', web: 'band', flamethrower: 'cutter', rings: 'wad' };
 // obstacles that always have one look, with their own spawn chance (v81): a flamethrower is a Wall Piston whose flame shoots out
 const FRIEREN_HEAD = 11;          // radius of the head of Frieren's staff (drawn in draw-dungeon.js, hit area in physics.js)
-const DUNGEON_SOLO = { flamethrower: { look: 'flamethrower', cols: ['#4a4f58', '#5e4a3a'] } };
+const DUNGEON_SOLO = { flamethrower: { look: 'flamethrower', cols: ['#4a4f58', '#5e4a3a'] },
+  // magic rings thrown up the shaft (Rising Projectile, v86); each colour entry is a ring design (RING_DESIGNS in draw-dungeon.js)
+  rings: { look: 'ring', cols: ['emerald', 'sapphire', 'ruby', 'crystal', 'amethyst', 'amber', 'skull', 'zigzag', 'leaf'] } };
 // each Dungeon mechanic has two to four looks that share its hit box, each with its own colours; a row of the
 // same obstacle shares one look and colour (v73; Halloween and goblin looks added in v80)
 const DUNGEON_LOOKS = {
@@ -353,6 +355,7 @@ function dungeonPool(d, y) {
   if (d > 0.18) pool.push(['curse', 1.2]);
   if (d > 0.2) pool.push(['runebeam', 1.2], ['skelarm', 1.3]);
   if (d > 0.18) pool.push(['flamethrower', 1.2]);
+  if (d > 0.1) pool.push(['rings', 1.2]);
   if (d > 0.1) pool.push(['dragon', 1.2]);
   if (d > 0.15) pool.push(['spear', 1.3]);
   if (d > 0.22) pool.push(['crusher', 1.4]);
