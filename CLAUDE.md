@@ -23,7 +23,7 @@ Tools setup (once): `cd tools && npm install`. Chrome is auto-detected (or set `
 - No wind obstacles (desk fan, ocean current) from 700 m on; Space has no wind or explosion obstacles at all (v55).
 - Top fall speed is capped at the 600 m value (14.0 m/s, v55).
 - No "Crumpled!" heading on the game-over screen (removed v84): players know they crashed; the card starts with the distance.
-- No plane trail (removed v36). No "How to play" section and no on-screen steering arrows (removed v44).
+- No plane trail (removed v36). No "How to play" section and no on-screen steering arrows (removed v44). Exception asked for in v91: short control tips in the top bar, left of the sound button, for the first 100 m of a run only.
 - Daily quests are on hold (decided 2026-10-19): don't build or start the quest system until the player asks; README section 16 keeps the ideas.
 - No Sky dive / Skyscraper / single-journey map — dropped for good. New maps reuse the 20 mechanics in README section 6 with new art.
 

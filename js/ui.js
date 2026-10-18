@@ -7,10 +7,25 @@ const ui = {
   overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'), coll: $('collCard'),
   overBank: $('overBank'),
   overTitle: $('overTitle'), overBest: $('overBest'), stamp: $('recordStamp'),
-  pauseBtn: $('pauseBtn'), muteBtn: $('muteBtn')
+  pauseBtn: $('pauseBtn'), muteBtn: $('muteBtn'), hint: $('hint')
 };
 let hudDepth = -1, hudStars = -1, hudBest = -1;
+// control tips for the first 100 m of a run, left of the sound button: one at a time, changing every 3 seconds,
+// fading out over the last 10 m. Phones get tap tips, keyboards key tips.
+const TOUCH = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+const HINTS = TOUCH ? ['Tap left or right to steer', 'Hold for a sharp turn', 'Tap ⏸ to pause']
+                    : ['← → or A D to steer', 'Hold for a sharp turn', 'Space to pause'];
+const HINT_UNTIL_M = 100;
+let hintText = null, hintFade = false;
+function syncHint() {
+  const m = score(), on = state === 'play' && m < HINT_UNTIL_M;
+  const text = on ? HINTS[Math.floor(time / 3) % HINTS.length] : '';
+  if (text !== hintText) { hintText = text; ui.hint.textContent = text; ui.hint.hidden = !text; }
+  const fade = on && m >= HINT_UNTIL_M - 10;
+  if (fade !== hintFade) { hintFade = fade; ui.hint.classList.toggle('fade', fade); }
+}
 function updateHud() {
+  syncHint();
   const playing = state === 'play' || state === 'paused' || state === 'dying' || state === 'over';
   const d = playing ? score() : 0;
   // total stars owned: the bank plus whatever this run has picked up so far

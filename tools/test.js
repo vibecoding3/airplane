@@ -166,6 +166,17 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(collOpen.shown && collOpen.tiles === 11 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
+  // control tips in the top bar: shown at the start of a run, gone past 100 m and outside a run
+  const hint = await page.evaluate(() => {
+    mapId = 'notebook'; applyMap(); start(); update(1 / 60); updateHud();
+    const atStart = !$('hint').hidden && $('hint').textContent.length > 0;
+    dist = 120 * PX_PER_M; update(1 / 60); updateHud();
+    const past = $('hint').hidden;
+    gameOver(); updateHud();
+    return { atStart, past, after: $('hint').hidden };
+  });
+  check(hint.atStart && hint.past && hint.after, `control tips: shown at the start ${hint.atStart}, hidden past 100 m ${hint.past}, hidden after the run ${hint.after}`);
+
   // the game-over screen has a Collections button too, and Back returns to game over
   await page.evaluate(() => { mapId = 'dungeon'; applyMap(); start(); gameOver(); });
   await page.click('#overCollBtn'); await wait(150);
