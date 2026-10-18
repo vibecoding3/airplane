@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v76** (2026-10-18)
+Current version: **v77** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v76 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v77 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -142,6 +142,32 @@ The plane is dropped down a deep, ancient dungeon well and falls past torch-lit 
 ## 5. Obstacles
 
 "Starts at" is the depth where an obstacle first joins the pool of possible obstacles. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
+
+### 5.0 All obstacles at a glance
+One row per mechanic (section 6), names only; the details are in 5.1–5.4. For Dungeon, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
+
+| Mechanic | Paper | Deep sea | Space | Dungeon |
+|---|---|---|---|---|
+| Gap Wall | Rulers | Coral ledges | Station girders | Stone ledges / wooden beams / iron girders |
+| Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams |
+| Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders |
+| Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end |
+| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff |
+| Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball |
+| Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps |
+| Conveyor | Paper clips | — | Starlink train | Daggers / arrows / keys |
+| Spinning Drifter | Set square | Starfish | Tumbling asteroid | Saw blade / spiked wheel / eyeball |
+| Spinning Blades | Scissors | — | — | Crossed swords / spears / staffs |
+| Sweeping Arm | Drawing compass | — | Robot arm | Fire bar / chain with a spiked ball |
+| Wall Piston | Cutter | Moray eel | Docking probe | Spear / trident / sword blade |
+| Wall Turret | Glue tube | Submarine | Twin-wing fighter | Dragon head / gargoyle / cannon |
+| Charged Beam | — | Electric eel | Laser gate | Rune stone / crystal cluster |
+| Telegraphed Sweep | Cat paw | Kelp | Energy blade | Skeleton arm / tentacle / thorny vine |
+| Proximity Blast | — | Naval mine | — | Cursed rune / spore mushroom |
+| Push Zone | Desk fan | Ocean current | — | Cold draft / steam vent |
+| Effect Zone | — | Bubble column | Low-gravity field | — |
+| Spring Line | Rubber band | — | — | Spider web / slime strand |
+| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **18 obstacles, 49 looks** |
 
 ### 5.1 Paper map (16 types)
 
