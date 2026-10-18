@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v60** (2026-10-15)
+Current version: **v61** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v60 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v61 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -28,6 +28,7 @@ One scheme for every device. A press can be a tap or click on the left or right 
 | Press a side once | The drift steps one notch toward that side: left → straight down → right |
 | Press the other side | Steps back: from a left drift, one press goes straight, a second press drifts right |
 | Hold a side (longer than 0.22 s) | Sharp turn; when released, the plane keeps drifting that way |
+| Hit a screen edge | The drift into that edge is cancelled (the plane falls straight), so one press the other way turns it at once |
 | P or Esc | Pause / resume |
 | Space or Enter | Start or resume from the menus |
 

@@ -255,8 +255,9 @@ function steer(dt) {
     if (o.type === 'fan' && Math.abs(o.y - py) < o.band / 2) plane.vx += -o.side * o.force * dt;
   }
   plane.x += plane.vx * dt;
-  if (plane.x < 16) { plane.x = 16; plane.vx = Math.max(0, plane.vx); }
-  if (plane.x > W - 16) { plane.x = W - 16; plane.vx = Math.min(0, plane.vx); }
+  // hitting an edge cancels the drift into it, so one press the other way turns the plane at once
+  if (plane.x < 16) { plane.x = 16; plane.vx = Math.max(0, plane.vx); if (drift < 0) drift = 0; }
+  if (plane.x > W - 16) { plane.x = W - 16; plane.vx = Math.min(0, plane.vx); if (drift > 0) drift = 0; }
 }
 
 function update(dt) {

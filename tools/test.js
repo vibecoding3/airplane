@@ -69,6 +69,23 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per m
   });
   check(runs.every(r => r.includes('(over)')), 'normal runs end in game over: ' + runs.join(', '));
 
+  // drifting into an edge, then one press the other way turns the plane at once (not straight down)
+  const edge = await page.evaluate(() => {
+    mapId = 'notebook'; applyMap(); start();
+    const out = [];
+    for (const s of [1, -1]) {
+      press(s, 'sim'); release('sim');
+      for (let f = 0; f < 240; f++) { plane.invuln = 1; update(1 / 60); }
+      const atEdge = s > 0 ? plane.x >= W - 16 : plane.x <= 16;
+      press(-s, 'sim'); release('sim');
+      for (let f = 0; f < 12; f++) { plane.invuln = 1; update(1 / 60); }
+      out.push(atEdge && plane.vx * -s > 30);
+    }
+    gameOver();
+    return out;
+  });
+  check(edge.every(Boolean), 'after hitting an edge, one press the other way turns the plane: ' + edge.join('/'));
+
   // a real run through the buttons: play, pause, resume
   await page.click('#againBtn'); await wait(1200);
   check(await page.evaluate(() => state) === 'play', 'Throw again starts a run');
