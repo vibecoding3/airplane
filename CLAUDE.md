@@ -22,6 +22,7 @@ Tools setup (once): `cd tools && npm install`. Chrome is auto-detected (or set `
 - No Shop (removed v46): magnet and shield are power-ups picked up during a run, 3 levels each, reset every run; slow motion (4 s at half speed, from 300 m), the invincibility star (6 s, from 150 m, rarest) and the speed boost (+10% fall speed for 5 s, from 100 m, v69) are timed power-ups. Stars are a collected total (no metres). No skins: one classic white plane (skins removed v42).
 - No wind obstacles (desk fan, ocean current) from 700 m on; Space has no wind or explosion obstacles at all (v55).
 - Top fall speed is capped at the 600 m value (14.0 m/s, v55).
+- No "Crumpled!" heading on the game-over screen (removed v84): players know they crashed; the card starts with the distance.
 - No plane trail (removed v36). No "How to play" section and no on-screen steering arrows (removed v44).
 - No Sky dive / Skyscraper / single-journey map — dropped for good. New maps reuse the 20 mechanics in README section 6 with new art.
 

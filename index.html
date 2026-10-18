@@ -19,7 +19,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v83</div>
+    <div class="version" id="version">v84</div>
 
     <div class="hud">
       <div>
@@ -58,8 +58,7 @@
         <button class="menu-btn" id="exitBtn" type="button">Exit run</button>
       </div>
 
-      <div class="menu" id="overCard" hidden>
-        <h2 class="menu-title small">Crumpled!</h2>
+      <div class="menu" id="overCard" role="group" aria-label="Run over" hidden>
         <div class="menu-score" id="overTitle">0 m</div>
         <span class="menu-record" id="recordStamp" hidden>New best!</span>
         <div class="menu-stats"><span id="overBest">Best 0 m</span></div>
