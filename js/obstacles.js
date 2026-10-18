@@ -318,23 +318,27 @@ const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots'
                          skull: 'wad', ghosts: 'notes', spear: 'cutter', firebar: 'compass', dragon: 'glue',
                          daggers: 'clips', saw: 'starfish', swords: 'scissors', runebeam: 'zap', skelarm: 'paw',
                          curse: 'mine', draft: 'fan', web: 'band' };
-const DUNGEON_COLS = {
-  gate: ['#b9ab8f', '#a9a59c', '#9fa88c', '#b5917a'],                         // stone ledges: sandstone, grey, mossy, red
-  erasers: ['#9a958c', '#8f8476', '#a39a86'],                                 // crusher blocks
-  blot: ['#5b6068', '#7a5a44', '#8a6a3a'],                                    // spiked balls: iron, rust, bronze
-  protractor: ['#8f877a', '#7f8288', '#93806a'],                              // rock outcrops
-  pencil: ['#a06a3a', '#8a5a32', '#b07c48'],                                  // wooden planks
-  wad: ['#efe6d0', '#e6dcc0', '#f4efe2'],                                     // skulls
-  note: ['#eef2ff', '#dff7e6', '#e2ecff'],                                    // ghosts
-  cutter: ['#8f877a', '#9a958c', '#7f8288'],                                  // spear-trap wall blocks
-  compass: ['orange', 'blue', 'green'],                                       // fire bars: normal or magic fire
-  glue: ['#5f8f6a', '#8a8378', '#a0503c'],                                    // dragon statues: bronze, stone, red
-  clips: ['#8a5a32', '#4a4f58', '#7a2a24'],                                   // dagger hilts: wood, iron, red leather
-  starfish: ['#c9ced6', '#b08a6a'],                                           // saw blades: steel, rusty
-  scissors: ['#e0b84a', '#9aa0a8', '#c0392b'],                                // sword hilts: gold, iron, red
-  zap: ['#b77cf0', '#4fe0a0', '#4ab8ff'],                                     // rune beams: purple, green, blue magic
-  paw: ['#efe6d0', '#e0d6bc'],                                                // skeleton arms
-  mine: ['#b77cf0', '#ff5a7a', '#4fe0a0']                                     // cursed runes
+// each Dungeon mechanic has two or three looks that share its hit box, each with its own colours; a row of the
+// same obstacle shares one look and colour (v73)
+const DUNGEON_LOOKS = {
+  gate: { ledge: ['#b9ab8f', '#a9a59c', '#9fa88c', '#b5917a'], beam: ['#a06a3a', '#7a5030'], girder: ['#7d8590', '#8a5a44'] },
+  erasers: { crusher: ['#9a958c', '#8f8476', '#a39a86'], irondoor: ['#4f555e', '#5e4a3a'], ram: ['#8a5a32', '#6b4a2a'] },
+  blot: { spikeball: ['#5b6068', '#7a5a44', '#8a6a3a'], cauldron: ['#5fd16a', '#b77cf0', '#ff7a3a'], boulder: ['#8f877a', '#7f8288', '#93806a'] },
+  protractor: { rock: ['#8f877a', '#7f8288', '#93806a'], shield: ['#a0302a', '#2f5fa8', '#2f7a44', '#c79a2a'], barrel: ['#8a5a32', '#6b4a2a'] },
+  pencil: { plank: ['#a06a3a', '#8a5a32', '#b07c48'], bone: ['#efe6d0', '#e0d6bc'], staff: ['#b77cf0', '#4ab8ff', '#ff5a5a'] },
+  wad: { skull: ['#efe6d0', '#e6dcc0', '#f4efe2'], pumpkin: ['#f28c28', '#e8a33a'], slime: ['#5fd16a', '#b77cf0', '#4ab8ff'] },
+  note: { ghost: ['#eef2ff', '#dff7e6', '#e2ecff'], book: ['#a0302a', '#2f6b3a', '#5a2f8a', '#2f4f8a'], wisp: ['#7fd8ff', '#9dffb8', '#c79cff'] },
+  cutter: { spear: ['#8f877a', '#9a958c', '#7f8288'], trident: ['#8f877a', '#7f8288'], blade: ['#9a958c', '#8f8476'] },
+  compass: { fire: ['orange', 'blue', 'green', 'purple'], chain: ['#9aa0a8', '#8a6a3a'] },
+  glue: { dragon: ['#5f8f6a', '#8a8378', '#a0503c'], gargoyle: ['#8a8378', '#6f6a62'], cannon: ['#3a3f47', '#5a4a3a'] },
+  clips: { daggers: ['#8a5a32', '#4a4f58', '#7a2a24'], arrows: ['#c0392b', '#2f6fd1', '#f2c84b'], keys: ['#e0b84a', '#9aa0a8'] },
+  starfish: { saw: ['#c9ced6', '#b08a6a'], wheel: ['#8a5a32', '#6b4a2a'], eyeball: ['#4ab8ff', '#5fd16a', '#c0392b'] },
+  scissors: { swords: ['#e0b84a', '#9aa0a8', '#c0392b'], spears: ['#8a5a32', '#5a3a22'], staves: ['#b77cf0', '#4ab8ff', '#ff5a5a'] },
+  zap: { rune: ['#b77cf0', '#4fe0a0', '#4ab8ff'], crystal: ['#ff5a7a', '#4ab8ff', '#4fe0a0'] },
+  paw: { skeleton: ['#efe6d0', '#e0d6bc'], tentacle: ['#8a4fc2', '#3f8f5a', '#c0507a'], vine: ['#3f7a3a', '#5a7a2a'] },
+  mine: { curse: ['#b77cf0', '#ff5a7a', '#4fe0a0'], mushroom: ['#4fe0a0', '#ff7ad0', '#ffb347'] },
+  fan: { draft: ['#cdebff'], steam: ['#fff3e0'] },
+  band: { web: ['#f5f5ff'], slime: ['#5fd16a', '#b77cf0'] }
 };
 function dungeonPool(d, y) {
   const pool = [['ledges', 3], ['spikeballs', 2], ['plank', 1 + 1.5 * d], ['rock', 1.4], ['skull', 1 + d]];
@@ -417,8 +421,12 @@ function spawnFromPool(y, d, pool) {
       if (o.look === 'station') o.r = rand(95, 110);
     } else if (mapId === 'dungeon') {
       o.dungeon = true;
-      const cols = DUNGEON_COLS[o.type];
-      if (cols) o.dunCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
+      const looks = DUNGEON_LOOKS[o.type];
+      if (looks && !rowSea[o.type]) {
+        const names = Object.keys(looks), look = names[ri(0, names.length - 1)], cols = looks[look];
+        rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
+      }
+      if (looks) [o.look, o.dunCol] = rowSea[o.type];
       if (o.type === 'compass') o.hh = 7;        // the fire bar's flames are thicker than a compass leg
     }
   }

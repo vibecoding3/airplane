@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v72** (2026-10-18)
+Current version: **v73** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v72 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v73 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -233,6 +233,31 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Rune beam (v70) | A rune stone on the wall: its runes light up and a dashed line shows the path, then a magic beam fires | Electric eel | ~135 m |
 | Skeleton arm (v70) | A dashed wedge shows its reach, then a bony arm swipes out of a crack in the wall | Cat paw | ~135 m |
 
+**Looks and colours** (since v73): every Dungeon obstacle comes in two or three different objects that share its mechanic and hit box, each in a few colours (49 looks in all, `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
+
+| Obstacle | Looks |
+|---|---|
+| Gap Wall | Mossy stone ledges (4 stones), wooden beams with iron brackets, riveted iron girders |
+| Closing Jaws | Spiked stone crushers, spiked riveted iron doors, wooden battering rams with an iron cap |
+| Static Hazards | Spiked iron balls (iron, rust, bronze), bubbling cauldrons (green, purple, orange brew), cracked boulders |
+| Wall Bulge | Rock outcrops, giant round shields (red, blue, green, gold) with an iron rim and boss, huge barrel ends |
+| Bouncing Slider | Wooden planks, long bones, wizard staffs with a glowing gem (purple, blue, red) |
+| Rising Projectile | Grinning skulls, jack-o'-lanterns, slime balls with a face (green, purple, blue) |
+| Drifting Swarm | Ghosts, flying spellbooks (red, green, purple, blue covers), will-o'-wisps (blue, green, violet) |
+| Wall Piston | Spear, trident, sword blade |
+| Sweeping Arm | Fire bar (orange, or magic blue, green or purple fire), iron chain with a spiked ball |
+| Wall Turret | Dragon head spitting fireballs, stone gargoyle spitting green acid, iron cannon firing cannonballs |
+| Conveyor | Daggers, arrows (red, blue, yellow fletching), old keys (gold, silver) |
+| Spinning Drifter | Saw blades (steel, rusty), spiked cart wheels, rolling eyeballs (blue, green, red iris) |
+| Spinning Blades | Crossed swords, crossed spears, crossed wizard staffs |
+| Charged Beam | Rune stone, crystal cluster (pink, blue, green) |
+| Telegraphed Sweep | Skeleton arm, tentacle with suckers (purple, green, pink), thorny vine with a snapping flower |
+| Proximity Blast | Cursed rune stone (ring of magic), glowing spore mushroom (puff of spores) |
+| Push Zone | Cold draft from a frosted crack, hot steam from an iron grate |
+| Spring Line | Spider web between two spiders, slime strand between two slimes |
+
+Also fixed in v73: the spiked crusher blocks reached 9 units past their hit box (with their spikes hidden inside), so the gap looked narrower than it was; the spikes now sit at the closing edge, inside the hit box.
+
 ### 5.5 Removed obstacles (history)
 These were built and then removed at the player's request: the pen (drew a wall line from the side), the stylus (expanding ripple rings), the pencil sharpener (pulled the plane), the whiteout patch (hid hazards), thumbtack rows, the magnifying glass (its sun spot chased the plane), and in v37 the coffee spill (made the plane soggy) and the rubber stamp (slammed down on a marked spot). Avoid these kinds of mechanics in future obstacles.
 
@@ -409,7 +434,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | To change… | Look in |
 |---|---|
 | Speed, difficulty, controls, starting state | `js/state.js` (`baseFallSpeed`, `difficulty`, `HOLD_MS`, `reset`) |
-| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_COLS`, `spawnRow`) |
+| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_LOOKS`, `spawnRow`) |
 | How an obstacle moves or what counts as a hit | `js/physics.js` (`updateObstacle`, `computeShapes`) |
 | How an obstacle looks | `js/draw-paper.js`, `js/draw-sea.js`, `js/draw-space.js` or `js/draw-dungeon.js` (`draw*` / `paint*`) |
 | Background decorations | `js/paper-background.js` (formulas), `js/sea-background.js` (fish, specks, silhouettes), `js/space-background.js` or `js/dungeon-background.js` (scenery, specks, the opening at the start) |
@@ -432,7 +457,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `paper-background.js` | `FORMULA_TIERS`, `pickFormula`, `spawnFormula`, `updateFormulas` |
 | `sea-background.js` | `FISH`, `FISH_TIERS`, `spawnFish`, `drawFishes`, `drawSeaParticles` |
 | `state.js` | `state`, `plane`, `obstacles`, `dist`, `speed`, `POWER_MAX`, `MAGNET_RANGES`, `press` / `release`, `depthM`, `difficulty`, `baseFallSpeed`, `reset`, `xp`, `xpNeed`, `levelInfo` |
-| `obstacles.js` | `make` (generators), `PALETTES`, `SEA_MAKERS`, `seaPool`, `spawnRow`, `spawnFromPool`, `spawnRows` |
+| `obstacles.js` | `make` (generators), `PALETTES`, `DUNGEON_LOOKS`, `SEA_MAKERS`, `seaPool`, `spawnRow`, `spawnFromPool`, `spawnRows` |
 | `physics.js` | `computeShapes` / `shapes`, `circleHits` (circles, rotated boxes, convex polygons), `planeCircles`, `updateObstacle`, `steer`, `update`, `crash` |
 | `maps.js` | `MAPS`, `mapId`, `SEA`, `RAINBOW`, `isDark`, `syncHudPage`, `drawPaper`, `drawFormulas`, `drawDepthMarkers` |
 | `draw-paper.js` | Paper obstacle `draw*` / `paint*` functions (`drawRuler`, `paintPencil`, `drawScissors`, `drawFan`, `drawPaw`, …) |
