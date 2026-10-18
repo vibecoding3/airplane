@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v66** (2026-10-18)
+Current version: **v67** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v66 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v67 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -30,7 +30,7 @@ One scheme for every device. A press can be a tap or click on the left or right 
 | Hold a side (longer than 0.22 s) | Sharp turn; when released, the plane keeps drifting that way |
 | Hit a screen edge | The drift into that edge is cancelled (the plane falls straight), so one press the other way turns it at once |
 | P or Esc | Pause / resume |
-| Space or Enter | Start or resume from the menus |
+| Space or Enter | Start or resume from the menus; during a run, Space pauses (since v67, replacing P) |
 
 There are no on-screen steering arrows (removed in v44).
 
@@ -284,7 +284,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Setting | Where | Notes |
 |---|---|---|
 | Sound on/off | Top bar (speaker icon, crossed out when muted) | Mutes sound effects and music together. Both are generated in code (Web Audio), with no audio files |
-| Pause / Resume | Top bar (pause icon, becomes a play icon while paused), P, Esc | Also pauses automatically when the tab is hidden |
+| Pause / Resume | Top bar (pause icon, becomes a play icon while paused), Space bar, Esc (P no longer pauses since v67) | Also pauses automatically when the tab is hidden |
 | Map | Start and game-over screens | Paper / Deep sea picture tiles |
 
 ### Saved data (browser localStorage)

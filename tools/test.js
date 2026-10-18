@@ -119,10 +119,16 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per m
   // a real run through the buttons: play, pause, resume
   await page.click('#againBtn'); await wait(1200);
   check(await page.evaluate(() => state) === 'play', 'Throw again starts a run');
-  await page.keyboard.press('p'); await wait(150);
+  await page.keyboard.press(' '); await wait(150);           // Space pauses (and its release must not resume)
   const paused = await page.evaluate(() => state);
   await page.click('#resumeBtn'); await wait(150);
-  check(paused === 'paused' && await page.evaluate(() => state) === 'play', 'pause and resume');
+  const resumed = await page.evaluate(() => state);
+  await page.keyboard.press(' '); await wait(150);
+  const paused2 = await page.evaluate(() => state);
+  await page.keyboard.press(' '); await wait(150);           // Space again resumes
+  const resumed2 = await page.evaluate(() => state);
+  check(paused === 'paused' && resumed === 'play' && paused2 === 'paused' && resumed2 === 'play',
+    `pause with Space, resume by button and by Space: ${paused}/${resumed}/${paused2}/${resumed2}`);
 
   check(errors.length === 0, errors.length ? 'errors:\n  ' + errors.join('\n  ') : 'no page errors');
   await browser.close();

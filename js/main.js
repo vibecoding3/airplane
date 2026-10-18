@@ -2,20 +2,27 @@
 'use strict';
 
 // ---------- input ----------
+// Space pauses a run (Esc too). The same key press must not then "click" the focused button on release
+// (pausing focuses Resume), so the keyup of a Space we used is swallowed.
+let spaceUsed = false;
 window.addEventListener('keydown', e => {
   const k = e.key;
   const side = keySide(k);
   if (side) { e.preventDefault(); if (!e.repeat) press(side, 'key' + side); }
-  else if (k === 'p' || k === 'P' || k === 'Escape') { state === 'paused' ? resume() : pause(); }
+  else if (k === 'Escape') { state === 'paused' ? resume() : pause(); }
+  else if (k === ' ' && state === 'play') { e.preventDefault(); if (!e.repeat) { spaceUsed = true; pause(); } }
   else if ((k === ' ' || k === 'Enter') && (state === 'title' || state === 'over' || state === 'paused')) {
+    if (e.repeat && k === ' ') { e.preventDefault(); return; }
     if (e.target instanceof HTMLButtonElement && !e.target.classList.contains('play')) return;
     e.preventDefault();
+    if (k === ' ') spaceUsed = true;
     state === 'paused' ? resume() : start();
-  } else if (k === ' ' && state === 'play') { e.preventDefault(); }
+  }
 });
 window.addEventListener('keyup', e => {
   const side = keySide(e.key);
   if (side) release('key' + side);
+  if (e.key === ' ' && spaceUsed) { e.preventDefault(); spaceUsed = false; }
 });
 function keySide(k) {
   if (k === 'ArrowLeft' || k === 'a' || k === 'A') return -1;
