@@ -94,13 +94,12 @@ function renderCollections() {
     box.append(sec);
   }
 }
-// the Collections button sits on the start, pause and game-over screens; Back returns to whichever opened it
-// (a paused run stays paused while Collections is open)
+// the Collections button sits on the start and game-over screens; Back returns to whichever opened it
 function syncCollectionButton() {
   for (const b of document.querySelectorAll('.coll-open')) b.textContent = `Collections · ${collectionFound.size}/${COLLECTION_TOTAL}`;
 }
 let collFrom = 'title';
-function openCollections() { collFrom = state === 'over' ? 'over' : state === 'paused' ? 'pause' : 'title'; collPick = null; renderCollections(); showCard('coll'); }
+function openCollections() { collFrom = state === 'over' ? 'over' : 'title'; collPick = null; renderCollections(); showCard('coll'); }
 function closeCollections() { showCard(collFrom); }
 
 for (const b of document.querySelectorAll('.coll-open')) b.addEventListener('click', openCollections);
