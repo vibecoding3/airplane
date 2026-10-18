@@ -29,11 +29,13 @@ let darkPage = false;
 
 let hudPage = '';
 function syncHudPage() {         // the HUD's fade matches the page colour behind it
-  const c = pageColor(pageIndexAt(dist + 40));
+  // no fade while the Earth is still in view at the start of Space, so it isn't painted over
+  const earth = mapId === 'space' && earthLimbY() > -150;
+  const c = earth ? 'transparent' : pageColor(pageIndexAt(dist + 40));
   if (c === hudPage) return;
   hudPage = c;
   wrap.style.setProperty('--page', c);
-  darkPage = c.startsWith('#') && isDark(c);
+  darkPage = earth || (c.startsWith('#') && isDark(c));
   wrap.classList.toggle('dark-page', darkPage);
 }
 

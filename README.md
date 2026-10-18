@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v63** (2026-10-18)
+Current version: **v64** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v63 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v64 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -107,7 +107,7 @@ The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fi
 The plane is thrown out of orbit and falls away from Earth into deeper and stranger space. Cartoon and playful in tone.
 - **Background colour:** deep blue sky at the start, turning to black by about 300 m, then faintly tinted nebula darks (purple, teal), near-black below 1,000 m.
 - **Stars:** a field of small stars of a few sizes slides past (one CSS layer, like the sea bubbles).
-- **Earth:** its glowing blue edge curves across the top of the first screen and slides away.
+- **Earth** (since v64): the plane starts just below the Earth, a big curved cap across the top of the first screen with ocean, dark green and brown continents, thin cloud streaks, a glowing atmosphere edge and a pale-blue haze below it. As the plane falls away the Earth slides up and shrinks a little, gone by about 35 m. The top bar has no background fade while the Earth is in view, so it does not cover it.
 - **Background scenery** (faded, never collides):
 
 | Depth | Scenery |
@@ -330,7 +330,7 @@ airplane/
     ├── music.js            background music for the menus and each map
     ├── paper-background.js Paper map: pencil formulas by depth
     ├── sea-background.js   Deep sea map: fish, specks, whales, shipwrecks
-    ├── space-background.js Space map: Earth glow, satellites, planets, comets, galaxies
+    ├── space-background.js Space map: the Earth at the start, satellites, planets, comets, galaxies
     ├── state.js            game state, power-up levels, controls, speed and difficulty rules
     ├── obstacles.js        obstacle generators and row spawning, for all maps
     ├── physics.js          collision, obstacle movement, steering, per-frame update

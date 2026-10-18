@@ -97,16 +97,51 @@ function spawnSpaceThing(lineY) {
   return def.h * s;
 }
 
-// the Earth's blue glow along the top of the first screen, sliding away within the first ~20 m
+// the Earth the plane is leaving: a big curved cap across the top of the first screen (ocean, continents,
+// clouds, a glowing atmosphere and a pale haze below it) that slides up and shrinks away within ~50 m
+const EARTH_R = 560;
+const earthShrink = () => 1 - 0.15 * Math.min(1, dist / (50 * PX_PER_M));
+const earthLimbY = () => planeScreenY() - 55 - dist * 0.22;    // lowest point of the Earth on screen
 function drawSpaceDetails() {
-  if (dist > 60 * PX_PER_M) return;
-  const y = -dist * 0.5;                                           // slides away slower than the scenery
-  const g = sharedSprite('earthGlow', W + 40, 300, 20, 0, () => {
-    const gr = ctx.createLinearGradient(0, 0, 0, 230);
-    gr.addColorStop(0, 'rgba(140,210,255,.6)'); gr.addColorStop(0.6, 'rgba(70,140,230,.25)'); gr.addColorStop(1, 'rgba(40,80,180,.05)');
-    ctx.fillStyle = gr; ctx.beginPath(); ctx.ellipse(W / 2, -200, W * 1.2, 420, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(210,245,255,.85)'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.ellipse(W / 2, -200, W * 1.2, 420, 0, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
+  if (earthLimbY() < -180) return;
+  const s = earthShrink();
+  const g = sharedSprite('earth', W + 120, 440, (W + 120) / 2, 280 - EARTH_R, () => {
+    const R = EARTH_R;
+    // haze of the atmosphere spreading below the planet
+    const haze = ctx.createRadialGradient(0, 0, R, 0, 0, R + 160);
+    haze.addColorStop(0, 'rgba(150,215,255,.55)'); haze.addColorStop(0.35, 'rgba(110,175,250,.22)'); haze.addColorStop(1, 'rgba(80,140,230,0)');
+    ctx.fillStyle = haze; ctx.beginPath(); ctx.arc(0, 0, R + 160, 0, Math.PI * 2); ctx.fill();
+    // ocean, then land and clouds clipped to the globe
+    ctx.save();
+    ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fillStyle = '#2b66b8'; ctx.fill(); ctx.clip();
+    // land: wobbly outlines, squashed flatter near the rim as if seen curving away; dark enough for the HUD text
+    const land = (cx, cy, r, sq, seed, col) => {
+      ctx.fillStyle = col; ctx.beginPath();
+      for (let i = 0; i <= 48; i++) {
+        const a = i / 48 * Math.PI * 2;
+        const k = r * (1 + 0.22 * Math.sin(3 * a + seed) + 0.12 * Math.sin(5 * a + seed * 2) + 0.06 * Math.sin(9 * a + seed * 3));
+        ctx.lineTo(cx + Math.cos(a) * k, R + cy + Math.sin(a) * k * sq);
+      }
+      ctx.fill();
+    };
+    land(-130, -150, 95, 0.6, 1.3, '#3d7a47');          // a continent on the left
+    land(-110, -160, 40, 0.6, 4.1, '#7d7550');          // its dry middle
+    land(175, -125, 80, 0.55, 2.7, '#3b7445');           // a continent on the right
+    land(190, -135, 30, 0.55, 0.6, '#837a52');
+    land(20, -55, 26, 0.4, 5.2, '#3d7a47');              // islands near the rim
+    land(-25, -45, 14, 0.4, 2.2, '#3d7a47');
+    ctx.fillStyle = 'rgba(255,255,255,.7)';                                                                        // thin cloud streaks
+    for (const [x, y, rx, ry, a] of [[10, -140, 75, 8, -0.12], [40, -125, 45, 6, -0.08], [80, -75, 70, 7, 0.1], [-215, -55, 55, 7, 0.18],
+      [-70, -90, 45, 6, -0.15], [150, -45, 40, 5, 0.04], [-150, -40, 35, 5, -0.05]]) {
+      ctx.beginPath(); ctx.ellipse(x, R + y, rx, ry, a, 0, Math.PI * 2); ctx.fill();
+    }
+    // the edge of the globe fades into a bright band of air
+    const rim = ctx.createRadialGradient(0, 0, R - 70, 0, 0, R);
+    rim.addColorStop(0, 'rgba(170,225,255,0)'); rim.addColorStop(1, 'rgba(185,232,255,.6)');
+    ctx.fillStyle = rim; ctx.fillRect(-R, 0, 2 * R, R);
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(140,210,255,.45)'; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(0, 0, R + 4, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(225,248,255,.95)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.stroke();
   });
-  blit(g, 0, y);
+  blit(g, W / 2, earthLimbY() - EARTH_R * s, 0, s, s);
 }
