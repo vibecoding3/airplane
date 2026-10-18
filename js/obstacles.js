@@ -318,24 +318,24 @@ const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots'
                          skull: 'wad', ghosts: 'notes', spear: 'cutter', firebar: 'compass', dragon: 'glue',
                          daggers: 'clips', saw: 'starfish', swords: 'scissors', runebeam: 'zap', skelarm: 'paw',
                          curse: 'mine', draft: 'fan', web: 'band' };
-// each Dungeon mechanic has two or three looks that share its hit box, each with its own colours; a row of the
-// same obstacle shares one look and colour (v73)
+// each Dungeon mechanic has two to four looks that share its hit box, each with its own colours; a row of the
+// same obstacle shares one look and colour (v73; Halloween and goblin looks added in v80)
 const DUNGEON_LOOKS = {
-  gate: { ledge: ['#b9ab8f', '#a9a59c', '#9fa88c', '#b5917a'], beam: ['#a06a3a', '#7a5030'], girder: ['#7d8590', '#8a5a44'] },
-  erasers: { crusher: ['#9a958c', '#8f8476', '#a39a86'], irondoor: ['#4f555e', '#5e4a3a'], ram: ['#8a5a32', '#6b4a2a'] },
-  blot: { spikeball: ['#5b6068', '#7a5a44', '#8a6a3a'], cauldron: ['#5fd16a', '#b77cf0', '#ff7a3a'], boulder: ['#8f877a', '#7f8288', '#93806a'] },
-  protractor: { rock: ['#8f877a', '#7f8288', '#93806a'], shield: ['#a0302a', '#2f5fa8', '#2f7a44', '#c79a2a'], barrel: ['#8a5a32', '#6b4a2a'] },
-  pencil: { plank: ['#a06a3a', '#8a5a32', '#b07c48'], bone: ['#efe6d0', '#e0d6bc'], staff: ['#b77cf0', '#4ab8ff', '#ff5a5a'] },
-  wad: { skull: ['#efe6d0', '#e6dcc0', '#f4efe2'], pumpkin: ['#f28c28', '#e8a33a'], slime: ['#5fd16a', '#b77cf0', '#4ab8ff'] },
-  note: { ghost: ['#eef2ff', '#dff7e6', '#e2ecff'], book: ['#a0302a', '#2f6b3a', '#5a2f8a', '#2f4f8a'], wisp: ['#7fd8ff', '#9dffb8', '#c79cff'] },
-  cutter: { spear: ['#8f877a', '#9a958c', '#7f8288'], trident: ['#8f877a', '#7f8288'], blade: ['#9a958c', '#8f8476'] },
+  gate: { ledge: ['#b9ab8f', '#a9a59c', '#9fa88c', '#b5917a'], beam: ['#a06a3a', '#7a5030'], girder: ['#7d8590', '#8a5a44'], scaffold: ['#8a5a32', '#a06a3a'] },
+  erasers: { crusher: ['#9a958c', '#8f8476', '#a39a86'], irondoor: ['#4f555e', '#5e4a3a'], ram: ['#8a5a32', '#6b4a2a'], barricade: ['#8a5a32', '#6b4a2a'] },
+  blot: { spikeball: ['#5b6068', '#7a5a44', '#8a6a3a'], cauldron: ['#5fd16a', '#b77cf0', '#ff7a3a'], boulder: ['#8f877a', '#7f8288', '#93806a'], tombstone: ['#8f8a84', '#7a7f86'] },
+  protractor: { rock: ['#8f877a', '#7f8288', '#93806a'], shield: ['#a0302a', '#2f5fa8', '#2f7a44', '#c79a2a'], barrel: ['#8a5a32', '#6b4a2a'], pumpkin: ['#f28c28', '#e8a33a'] },
+  pencil: { plank: ['#a06a3a', '#8a5a32', '#b07c48'], bone: ['#efe6d0', '#e0d6bc'], staff: ['#b77cf0', '#4ab8ff', '#ff5a5a'], broom: ['#d9b25a', '#c99a3a'] },
+  wad: { skull: ['#efe6d0', '#e6dcc0', '#f4efe2'], pumpkin: ['#f28c28', '#e8a33a'], slime: ['#5fd16a', '#b77cf0', '#4ab8ff'], potion: ['#b77cf0', '#5fd16a', '#ff5a7a'] },
+  note: { ghost: ['#eef2ff', '#dff7e6', '#e2ecff'], book: ['#a0302a', '#2f6b3a', '#5a2f8a', '#2f4f8a'], wisp: ['#7fd8ff', '#9dffb8', '#c79cff'], witchhat: ['#8a4fc2', '#f28c28', '#3f8f5a'], goblin: ['#6fae4a', '#8ab84a', '#5a9a6a'] },
+  cutter: { spear: ['#8f877a', '#9a958c', '#7f8288'], trident: ['#8f877a', '#7f8288'], blade: ['#9a958c', '#8f8476'], club: ['#8f877a', '#7f8288'] },
   compass: { fire: ['orange', 'blue', 'green', 'purple'], chain: ['#9aa0a8', '#8a6a3a'] },
-  glue: { dragon: ['#5f8f6a', '#8a8378', '#a0503c'], gargoyle: ['#8a8378', '#6f6a62'], cannon: ['#3a3f47', '#5a4a3a'] },
+  glue: { dragon: ['#5f8f6a', '#8a8378', '#a0503c'], gargoyle: ['#8a8378', '#6f6a62'], cannon: ['#3a3f47', '#5a4a3a'], goblin: ['#6fae4a', '#8ab84a'] },
   clips: { daggers: ['#8a5a32', '#4a4f58', '#7a2a24'], arrows: ['#c0392b', '#2f6fd1', '#f2c84b'], keys: ['#e0b84a', '#9aa0a8'] },
-  starfish: { saw: ['#c9ced6', '#b08a6a'], wheel: ['#8a5a32', '#6b4a2a'], eyeball: ['#4ab8ff', '#5fd16a', '#c0392b'] },
+  starfish: { saw: ['#c9ced6', '#b08a6a'], wheel: ['#8a5a32', '#6b4a2a'], eyeball: ['#4ab8ff', '#5fd16a', '#c0392b'], goblinshield: ['#8a5a32', '#7a2a24'] },
   scissors: { swords: ['#e0b84a', '#9aa0a8', '#c0392b'], spears: ['#8a5a32', '#5a3a22'], staves: ['#b77cf0', '#4ab8ff', '#ff5a5a'] },
   zap: { rune: ['#b77cf0', '#4fe0a0', '#4ab8ff'], crystal: ['#ff5a7a', '#4ab8ff', '#4fe0a0'] },
-  paw: { skeleton: ['#efe6d0', '#e0d6bc'], tentacle: ['#8a4fc2', '#3f8f5a', '#c0507a'], vine: ['#3f7a3a', '#5a7a2a'] },
+  paw: { skeleton: ['#efe6d0', '#e0d6bc'], tentacle: ['#8a4fc2', '#3f8f5a', '#c0507a'], vine: ['#3f7a3a', '#5a7a2a'], scythe: ['#5a3a22', '#3a2a1a'] },
   mine: { curse: ['#b77cf0', '#ff5a7a', '#4fe0a0'], mushroom: ['#4fe0a0', '#ff7ad0', '#ffb347'] },
   fan: { draft: ['#cdebff'], steam: ['#fff3e0'] },
   band: { web: ['#f5f5ff'], slime: ['#5fd16a', '#b77cf0'] }

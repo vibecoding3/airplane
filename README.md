@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v79** (2026-10-18)
+Current version: **v80** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v79 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v80 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -148,26 +148,26 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.4. For 
 
 | Mechanic | Paper | Ocean | Space | Dungeon |
 |---|---|---|---|---|
-| Gap Wall | Rulers | Coral ledges | Station girders | Stone ledges / wooden beams / iron girders |
-| Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams |
-| Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders |
-| Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end |
-| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff |
-| Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball |
-| Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps |
+| Gap Wall | Rulers | Coral ledges | Station girders | Stone ledges / wooden beams / iron girders / goblin scaffolding |
+| Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams / goblin barricade |
+| Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders / tombstones |
+| Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern |
+| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom |
+| Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball / potion flask |
+| Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps / witch hats / goblins |
 | Conveyor | Paper clips | — | Starlink train | Daggers / arrows / keys |
-| Spinning Drifter | Set square | Starfish | Tumbling asteroid | Saw blade / spiked wheel / eyeball |
+| Spinning Drifter | Set square | Starfish | Tumbling asteroid | Saw blade / spiked wheel / eyeball / spiked goblin shield |
 | Spinning Blades | Scissors | — | — | Crossed swords / spears / staffs |
 | Sweeping Arm | Drawing compass | — | Robot arm | Fire bar / chain with a spiked ball |
-| Wall Piston | Cutter | Moray eel | Docking probe | Spear / trident / sword blade |
-| Wall Turret | Glue tube | Submarine | Twin-wing fighter | Dragon head / gargoyle / cannon |
+| Wall Piston | Cutter | Moray eel | Docking probe | Spear / trident / sword blade / goblin club |
+| Wall Turret | Glue tube | Submarine | Twin-wing fighter | Dragon head / gargoyle / cannon / goblin with a slingshot |
 | Charged Beam | — | Electric eel | Laser gate | Rune stone / crystal cluster |
-| Telegraphed Sweep | Cat paw | Kelp | Energy blade | Skeleton arm / tentacle / thorny vine |
+| Telegraphed Sweep | Cat paw | Kelp | Energy blade | Skeleton arm / tentacle / thorny vine / reaper's scythe |
 | Proximity Blast | — | Naval mine | — | Cursed rune / spore mushroom |
 | Push Zone | Desk fan | Ocean current | — | Cold draft / steam vent |
 | Effect Zone | — | Bubble column | Low-gravity field | — |
 | Spring Line | Rubber band | — | — | Spider web / slime strand |
-| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **18 obstacles, 49 looks** |
+| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **18 obstacles, 61 looks** |
 
 ### 5.1 Paper map (16 types)
 
@@ -259,25 +259,25 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Rune beam (v70) | A rune stone on the wall: its runes light up and a dashed line shows the path, then a magic beam fires | Electric eel | ~135 m |
 | Skeleton arm (v70) | A dashed wedge shows its reach, then a bony arm swipes out of a crack in the wall | Cat paw | ~135 m |
 
-**Looks and colours** (since v73): every Dungeon obstacle comes in two or three different objects that share its mechanic and hit box, each in a few colours (49 looks in all, `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
+**Looks and colours** (since v73): every Dungeon obstacle comes in two to five different objects that share its mechanic and hit box, each in a few colours (61 looks in all; 12 Halloween and goblin looks added in v80; `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
 
 | Obstacle | Looks |
 |---|---|
-| Gap Wall | Mossy stone ledges (4 stones), wooden beams with iron brackets, riveted iron girders |
-| Closing Jaws | Spiked stone crushers, spiked riveted iron doors, wooden battering rams with an iron cap |
-| Static Hazards | Spiked iron balls (iron, rust, bronze), bubbling cauldrons (green, purple, orange brew), cracked boulders |
-| Wall Bulge | Rock outcrops, giant round shields (red, blue, green, gold) with an iron rim and boss, huge barrel ends |
-| Bouncing Slider | Wooden planks, long bones, wizard staffs with a glowing gem (purple, blue, red) |
-| Rising Projectile | Grinning skulls, jack-o'-lanterns, slime balls with a face (green, purple, blue) |
-| Drifting Swarm | Ghosts, flying spellbooks (red, green, purple, blue covers), will-o'-wisps (blue, green, violet) |
-| Wall Piston | Spear, trident, sword blade |
+| Gap Wall | Mossy stone ledges (4 stones), wooden beams with iron brackets, riveted iron girders, rope-lashed goblin scaffolding |
+| Closing Jaws | Spiked stone crushers, spiked riveted iron doors, wooden battering rams with an iron cap, goblin barricades of sharpened stakes |
+| Static Hazards | Spiked iron balls (iron, rust, bronze), bubbling cauldrons (green, purple, orange brew), cracked boulders, "RIP" tombstones |
+| Wall Bulge | Rock outcrops, giant round shields (red, blue, green, gold) with an iron rim and boss, huge barrel ends, a giant jack-o'-lantern with its glowing face turned to the shaft |
+| Bouncing Slider | Wooden planks, long bones, wizard staffs with a glowing gem (purple, blue, red), witch's brooms |
+| Rising Projectile | Grinning skulls, jack-o'-lanterns, slime balls with a face (green, purple, blue), bubbling potion flasks (purple, green, pink) |
+| Drifting Swarm | Ghosts, flying spellbooks (red, green, purple, blue covers), will-o'-wisps (blue, green, violet), flying witch hats (purple, orange, green band), grinning goblins |
+| Wall Piston | Spear, trident, sword blade, nail-studded goblin club |
 | Sweeping Arm | Fire bar (orange, or magic blue, green or purple fire), iron chain with a spiked ball |
-| Wall Turret | Dragon head spitting fireballs, stone gargoyle spitting green acid, iron cannon firing cannonballs |
+| Wall Turret | Dragon head spitting fireballs, stone gargoyle spitting green acid, iron cannon firing cannonballs, goblin leaning out of a hole with a slingshot firing rocks |
 | Conveyor | Daggers, arrows (red, blue, yellow fletching), old keys (gold, silver) |
-| Spinning Drifter | Saw blades (steel, rusty), spiked cart wheels, rolling eyeballs (blue, green, red iris) |
+| Spinning Drifter | Saw blades (steel, rusty), spiked cart wheels, rolling eyeballs (blue, green, red iris), spiked goblin shields with a painted tooth mark |
 | Spinning Blades | Crossed swords, crossed spears, crossed wizard staffs |
 | Charged Beam | Rune stone, crystal cluster (pink, blue, green) |
-| Telegraphed Sweep | Skeleton arm, tentacle with suckers (purple, green, pink), thorny vine with a snapping flower |
+| Telegraphed Sweep | Skeleton arm, tentacle with suckers (purple, green, pink), thorny vine with a snapping flower, the grim reaper's scythe |
 | Proximity Blast | Cursed rune stone (ring of magic), glowing spore mushroom (puff of spores) |
 | Push Zone | Cold draft from a frosted crack, hot steam from an iron grate |
 | Spring Line | Spider web between two spiders, slime strand between two slimes |

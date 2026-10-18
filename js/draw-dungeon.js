@@ -59,6 +59,14 @@ function drawLedge(x0, x1, sy, innerX, outDir, col = '#b9ab8f', look = 'ledge') 
     ctx.fillStyle = dunShade(0.3); ctx.fillRect(x0, sy - 11, x1 - x0, 5); ctx.fillRect(x0, sy + 6, x1 - x0, 5);
     ctx.fillStyle = dunLight(0.2); ctx.fillRect(x0, sy - 11, x1 - x0, 1.5);
     ctx.fillStyle = RIVET; each(16, x => { ctx.beginPath(); ctx.arc(x, sy, 1.8, 0, Math.PI * 2); ctx.fill(); });
+  } else if (look === 'scaffold') {                 // goblin scaffolding: two rough boards lashed with rope
+    ctx.fillStyle = dunShade(0.18); ctx.fillRect(x0, sy, x1 - x0, 11);
+    ctx.strokeStyle = dunShade(0.45); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x0, sy); ctx.lineTo(x1, sy + 1); ctx.stroke();
+    ctx.strokeStyle = dunShade(0.3); ctx.lineWidth = 1; ctx.beginPath();
+    each(29, x => { ctx.moveTo(x, sy - 11); ctx.lineTo(x + 2, sy); });
+    ctx.stroke();
+    ctx.strokeStyle = '#d9c08a'; ctx.lineWidth = 2;
+    each(52, x => { ctx.beginPath(); ctx.moveTo(x - 4, sy - 11); ctx.lineTo(x + 4, sy + 11); ctx.moveTo(x + 4, sy - 11); ctx.lineTo(x - 4, sy + 11); ctx.stroke(); });
   } else {                                          // stone blocks with moss along the top
     ctx.fillStyle = dunLight(0.22); ctx.fillRect(x0, sy - 11, x1 - x0, 5);
     ctx.fillStyle = dunShade(0.22); ctx.fillRect(x0, sy + 5, x1 - x0, 6);
@@ -83,8 +91,8 @@ function drawCrusher(x0, x1, sy, innerX, outDir, col = '#9a958c', look = 'crushe
   if (look === 'ram') {                            // a flat iron cap on the end of the log
     ctx.fillStyle = '#5a5f66'; ctx.beginPath(); roundRectPath(Math.min(bodyEnd, innerX), sy - 13, SP, 26, 3); ctx.fill(); dunStroke(1.3);
     ctx.fillStyle = RIVET; for (const y of [-7, 0, 7]) { ctx.beginPath(); ctx.arc((bodyEnd + innerX) / 2, sy + y, 1.6, 0, Math.PI * 2); ctx.fill(); }
-  } else {
-    ctx.fillStyle = '#c9ced6'; ctx.beginPath();
+  } else {                                         // iron spikes, or a goblin barricade's sharpened wooden stakes
+    ctx.fillStyle = look === 'barricade' ? '#c9a36a' : '#c9ced6'; ctx.beginPath();
     for (let k = 0; k < 4; k++) { const y = sy - 14 + 3.5 + k * 7; ctx.moveTo(bodyEnd, y - 3.5); ctx.lineTo(innerX, y); ctx.lineTo(bodyEnd, y + 3.5); }
     ctx.fill(); dunStroke(1.2);
   }
@@ -105,6 +113,13 @@ function drawCrusher(x0, x1, sy, innerX, outDir, col = '#9a958c', look = 'crushe
       for (const y of [-6, 1, 7]) { ctx.moveTo(bx0, sy + y); ctx.lineTo(bx1, sy + y + 1); }
       ctx.stroke();
       ctx.fillStyle = IRON; for (const k of [18, 60]) ctx.fillRect(bodyEnd + outDir * k - 3, sy - 14, 6, 28);
+    } else if (look === 'barricade') {             // upright logs bound with rope
+      ctx.strokeStyle = dunShade(0.35); ctx.lineWidth = 1.4; ctx.beginPath();
+      for (let x = bodyEnd + outDir * 11; outDir > 0 ? x < bx1 : x > bx0; x += outDir * 11) { ctx.moveTo(x, sy - 14); ctx.lineTo(x, sy + 14); }
+      ctx.stroke();
+      ctx.strokeStyle = '#d9c08a'; ctx.lineWidth = 2.2; ctx.beginPath();
+      for (const y of [-6, 6]) { ctx.moveTo(bx0, sy + y); ctx.lineTo(bx1, sy + y + 1); }
+      ctx.stroke();
     } else {                                       // an iron band near the face
       ctx.fillStyle = IRON;
       const band = outDir > 0 ? bodyEnd + 6 : bodyEnd - 14;
@@ -129,6 +144,15 @@ function drawSpikeBall(o, sy) {
       for (const [x, y, r] of [[-0.3, -0.5, 0.14], [0.15, -0.62, 0.1], [0.35, -0.45, 0.08]]) { ctx.beginPath(); ctx.arc(R * x, R * y, R * r, 0, Math.PI * 2); ctx.fill(); }
       ctx.strokeStyle = '#4a4950'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, -R * 0.2, R * 0.86, R * 0.27, 0, 0, Math.PI * 2); ctx.stroke();
       ctx.fillStyle = dunLight(0.2); ctx.beginPath(); ctx.ellipse(-R * 0.4, R * 0.2, R * 0.12, R * 0.3, 0.3, 0, Math.PI * 2); ctx.fill();
+    } else if (look === 'tombstone') {             // a rounded gravestone with "RIP", inside the hit circle
+      const w = R * 0.55, top = -R * 0.85, bot = R * 0.75;
+      ctx.beginPath(); ctx.moveTo(-w, bot); ctx.lineTo(-w, top + w); ctx.arc(0, top + w, w, Math.PI, 0); ctx.lineTo(w, bot); ctx.closePath();
+      ctx.fillStyle = col; ctx.fill(); dunStroke(1.5);
+      ctx.fillStyle = dunLight(0.15); ctx.fillRect(-w + 2, top + w, w * 0.4, bot - top - w - 2);
+      ctx.fillStyle = '#2a2420'; ctx.font = '700 ' + Math.round(R * 0.42) + 'px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('RIP', 0, -R * 0.12);
+      ctx.strokeStyle = dunShade(0.4); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(w * 0.3, -R * 0.55); ctx.lineTo(w * 0.05, -R * 0.35); ctx.stroke();
+      ctx.fillStyle = '#4f7a3a'; for (const x of [-0.7, -0.3, 0.2, 0.6]) { ctx.beginPath(); ctx.ellipse(w * x, bot, w * 0.22, R * 0.08, 0, 0, Math.PI * 2); ctx.fill(); }
     } else if (look === 'boulder') {               // a round stone with cracks
       ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
       ctx.save(); ctx.clip();
@@ -164,6 +188,16 @@ function drawRockOutcrop(o, sy) {
       ctx.fillStyle = RIVET; for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; ctx.beginPath(); ctx.arc(Math.cos(a) * (o.r - 5), Math.sin(a) * (o.r - 5), 2, 0, Math.PI * 2); ctx.fill(); }
       ctx.fillStyle = '#9aa0a8'; ctx.beginPath(); ctx.arc(0, 0, o.r * 0.22, 0, Math.PI * 2); ctx.fill(); dunStroke(1.4);
       ctx.fillStyle = dunLight(0.5); ctx.beginPath(); ctx.arc(-o.r * 0.07, -o.r * 0.07, o.r * 0.07, 0, Math.PI * 2); ctx.fill();
+    } else if (look === 'pumpkin') {               // a giant jack-o'-lantern, its glowing face turned toward the shaft
+      const i = -o.side, fx = i * o.r * 0.42;
+      ctx.strokeStyle = dunShade(0.25); ctx.lineWidth = 2; ctx.beginPath();
+      for (const k of [-0.6, -0.2, 0.2, 0.6]) { ctx.moveTo(o.r * k, -o.r); ctx.quadraticCurveTo(o.r * k * 1.6, 0, o.r * k, o.r); }
+      ctx.stroke();
+      ctx.fillStyle = dunLight(0.12); ctx.beginPath(); ctx.arc(-o.r * 0.25, -o.r * 0.3, o.r * 0.7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffd23f'; const u = o.r * 0.13;
+      for (const d of [-1, 1]) { ctx.beginPath(); ctx.moveTo(fx + d * u * 0.6, -u * 1.8); ctx.lineTo(fx + d * u * 2.6, -u * 1.8); ctx.lineTo(fx + d * u * 1.6, -u * 3.6); ctx.closePath(); ctx.fill(); }
+      ctx.beginPath(); ctx.moveTo(fx - u * 2.8, u * 0.6); ctx.lineTo(fx + u * 2.8, u * 0.6); ctx.lineTo(fx + u * 1.8, u * 2.6); ctx.lineTo(fx + u * 0.8, u * 1.6);
+      ctx.lineTo(fx, u * 2.8); ctx.lineTo(fx - u * 0.8, u * 1.6); ctx.lineTo(fx - u * 1.8, u * 2.6); ctx.closePath(); ctx.fill();
     } else if (look === 'barrel') {                // the end of a huge barrel: staves and two iron hoops
       ctx.strokeStyle = dunShade(0.3); ctx.lineWidth = 1.5; ctx.beginPath();
       for (let x = -o.r; x < o.r; x += o.r / 4) { ctx.moveTo(x, -o.r); ctx.lineTo(x, o.r); }
@@ -203,6 +237,13 @@ function drawPlank(o, sy) {
       for (const x of [-L + 5, L - 5]) for (const y of [-2.2, 2.2]) { ctx.moveTo(x + 4.3, y); ctx.arc(x, y, 4.3, 0, Math.PI * 2); }
       dunStroke(1.3);
       ctx.fillStyle = dunLight(0.4); ctx.fillRect(-L + 12, -2.5, o.len - 24, 1.5);
+    } else if (look === 'broom') {                 // a witch's broomstick: a knobbly handle and a bundle of straw
+      ctx.fillStyle = '#6b4a2a'; ctx.beginPath(); roundRectPath(-L, -4, o.len - 30, 8, 4); ctx.fill(); dunStroke(1.2);
+      ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(L - 36, -4.5); ctx.lineTo(L, -6.5); ctx.lineTo(L, 6.5); ctx.lineTo(L - 36, 4.5); ctx.closePath(); ctx.fill(); dunStroke(1.2);
+      ctx.strokeStyle = dunShade(0.3); ctx.lineWidth = 1; ctx.beginPath();
+      for (const y of [-3, 0, 3]) { ctx.moveTo(L - 30, y * 0.8); ctx.lineTo(L - 1, y * 1.6); }
+      ctx.stroke();
+      ctx.fillStyle = '#7a2a24'; ctx.fillRect(L - 38, -5, 6, 10);
     } else if (look === 'staff') {                 // a wizard's staff with a glowing gem in a claw
       ctx.fillStyle = '#7a5030'; ctx.beginPath(); roundRectPath(-L, -4.5, o.len - 12, 9, 4.5); ctx.fill(); dunStroke(1.2);
       ctx.strokeStyle = dunShade(0.3); ctx.lineWidth = 1; ctx.beginPath();
@@ -243,6 +284,16 @@ function drawSkull(o, sy) {
       ctx.fillStyle = '#ffd23f';                    // a glowing carved face
       for (const d of [-1, 1]) { ctx.beginPath(); ctx.moveTo(d * 3, -3); ctx.lineTo(d * 8, -3); ctx.lineTo(d * 5.5, -7); ctx.closePath(); ctx.fill(); }
       ctx.beginPath(); ctx.moveTo(-8, 3); ctx.lineTo(8, 3); ctx.lineTo(5, 8); ctx.lineTo(2, 6); ctx.lineTo(0, 8.5); ctx.lineTo(-2, 6); ctx.lineTo(-5, 8); ctx.closePath(); ctx.fill();
+    } else if (look === 'potion') {                // a round potion flask with a cork, half full and bubbling
+      ctx.fillStyle = 'rgba(220,235,245,.55)'; ctx.beginPath(); ctx.arc(0, 3, 10.5, 0, Math.PI * 2); ctx.fill();
+      ctx.save(); ctx.beginPath(); ctx.arc(0, 3, 10.5, 0, Math.PI * 2); ctx.clip();
+      ctx.fillStyle = col; ctx.fillRect(-11, 2, 22, 12);
+      ctx.fillStyle = dunLight(0.6); for (const [x, y, r] of [[-3, 6, 1.6], [3, 9, 1.2], [1, 4, 1]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+      ctx.restore();
+      ctx.beginPath(); ctx.arc(0, 3, 10.5, 0, Math.PI * 2); dunStroke(1.4);
+      ctx.fillStyle = 'rgba(220,235,245,.55)'; ctx.beginPath(); ctx.rect(-3.5, -12, 7, 6.5); ctx.fill(); dunStroke(1.2);
+      ctx.fillStyle = '#a0703a'; ctx.beginPath(); roundRectPath(-4, -15.5, 8, 5, 1.5); ctx.fill(); dunStroke(1);
+      ctx.fillStyle = dunLight(0.7); ctx.beginPath(); ctx.ellipse(-5, -1, 1.6, 3, 0.3, 0, Math.PI * 2); ctx.fill();
     } else if (look === 'slime') {
       ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-13, 9);
       ctx.quadraticCurveTo(-15, -12, 0, -13); ctx.quadraticCurveTo(15, -12, 13, 9); ctx.quadraticCurveTo(0, 14, -13, 9); ctx.fill(); dunStroke(1.5);
@@ -279,6 +330,21 @@ function drawGhost(o, sy) {
         ctx.stroke();
       }
       ctx.fillStyle = '#e0b84a'; ctx.beginPath(); ctx.arc(0, 14, 2.5, 0, Math.PI * 2); ctx.fill();
+    } else if (look === 'witchhat') {              // a flying witch's hat with a coloured band and a bent tip
+      ctx.fillStyle = '#2b2235'; ctx.beginPath(); ctx.ellipse(0, 12, 21, 6, 0, 0, Math.PI * 2); ctx.fill(); dunStroke(1.4);
+      ctx.beginPath(); ctx.moveTo(-12, 11); ctx.quadraticCurveTo(-6, -6, 2, -14); ctx.lineTo(14, -20); ctx.lineTo(8, -10); ctx.quadraticCurveTo(10, 2, 12, 11); ctx.closePath(); ctx.fill(); dunStroke(1.4);
+      ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-11.5, 7); ctx.lineTo(11.6, 7); ctx.lineTo(11.2, 2); ctx.lineTo(-10, 2); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#ffd23f'; ctx.fillRect(-2.5, 1.5, 5, 6);
+      ctx.fillStyle = '#2b2235'; ctx.fillRect(-1, 3, 2, 3);
+    } else if (look === 'goblin') {                // a grinning little goblin: big pointed ears, yellow eyes
+      ctx.fillStyle = col;
+      for (const d of [-1, 1]) { ctx.beginPath(); ctx.moveTo(d * 10, -6); ctx.lineTo(d * 21, -12); ctx.lineTo(d * 12, 3); ctx.closePath(); ctx.fill(); dunStroke(1.3); }
+      ctx.beginPath(); ctx.ellipse(0, 1, 13.5, 14, 0, 0, Math.PI * 2); ctx.fill(); dunStroke(1.5);
+      ctx.fillStyle = '#ffd23f'; for (const d of [-1, 1]) { ctx.beginPath(); ctx.ellipse(d * 5.5, -3, 3.4, 2.6, d * 0.3, 0, Math.PI * 2); ctx.fill(); }
+      ctx.fillStyle = '#1a1410'; for (const d of [-1, 1]) ctx.fillRect(d * 5.5 - 0.7, -5, 1.4, 4);
+      ctx.fillStyle = dunShade(0.3); ctx.beginPath(); ctx.moveTo(0, -1); ctx.lineTo(-2.5, 4); ctx.lineTo(2.5, 4); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#2a1410'; ctx.beginPath(); ctx.moveTo(-7, 7); ctx.quadraticCurveTo(0, 13, 7, 7); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#ffffff'; for (const x of [-4.5, 3]) { ctx.beginPath(); ctx.moveTo(x, 7.5); ctx.lineTo(x + 1.5, 10.5); ctx.lineTo(x + 3, 7.8); ctx.fill(); }
     } else if (look === 'wisp') {                  // a floating blue-white flame
       const g = ctx.createRadialGradient(0, 2, 2, 0, 2, 20);
       g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, col); g.addColorStop(1, 'rgba(255,255,255,0)');
@@ -308,7 +374,12 @@ function drawSpear(o, sy) {
   toolFrame(o, sy);
   if (e > 1) {
     const tip = h + e;
-    if (look === 'blade') {                        // a long sword blade, tapering to its point
+    if (look === 'club') {                         // a goblin's wooden club studded with nails
+      const hl = Math.min(20, e);
+      ctx.fillStyle = '#6b4a2a'; ctx.beginPath(); ctx.rect(h - 8, -3, Math.max(0, e - hl + 8), 6); ctx.fill(); dunStroke(1.1);
+      ctx.fillStyle = '#8a5a32'; ctx.beginPath(); ctx.ellipse(tip - hl / 2, 0, hl / 2, 6, 0, 0, Math.PI * 2); ctx.fill(); dunStroke(1.2);
+      ctx.fillStyle = RIVET; for (const [x, y] of [[0.3, -2.5], [0.55, 2.5], [0.75, -1.5], [0.45, 0]]) { ctx.beginPath(); ctx.arc(tip - hl + hl * x, y, 1.3, 0, Math.PI * 2); ctx.fill(); }
+    } else if (look === 'blade') {                 // a long sword blade, tapering to its point
       ctx.fillStyle = STEEL; ctx.beginPath(); ctx.moveTo(h - 8, -4); ctx.lineTo(tip - 10, -4); ctx.lineTo(tip, 0); ctx.lineTo(tip - 10, 4); ctx.lineTo(h - 8, 4); ctx.closePath(); ctx.fill(); dunStroke(1.1);
       ctx.strokeStyle = dunShade(0.22); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(h - 6, 0); ctx.lineTo(tip - 8, 0); ctx.stroke();
     } else {
@@ -370,7 +441,11 @@ function drawFireBar(o, sy) {
 function drawDragonHead(o, sy) {
   const dir = inward(o), col = o.dunCol || '#5f8f6a', look = o.look || 'dragon';
   for (const b of o.blobs) {
-    if (look === 'cannon') {                       // iron cannonballs
+    if (look === 'goblin') {                       // rocks from the goblin's slingshot
+      ctx.fillStyle = '#8a8378'; ctx.beginPath();
+      for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2 + b.wob * 0.3, rr = b.r * (0.78 + 0.12 * ((i * 5) % 3)); ctx.lineTo(b.x + Math.cos(a) * rr, sy + Math.sin(a) * rr); }
+      ctx.closePath(); ctx.fill(); dunStroke(1.2);
+    } else if (look === 'cannon') {                // iron cannonballs
       ctx.fillStyle = '#2b2a30'; ctx.beginPath(); ctx.arc(b.x, sy, b.r * 0.9, 0, Math.PI * 2); ctx.fill(); dunStroke(1.2);
       ctx.fillStyle = dunLight(0.35); ctx.beginPath(); ctx.arc(b.x - b.r * 0.3, sy - b.r * 0.3, b.r * 0.25, 0, Math.PI * 2); ctx.fill();
     } else {
@@ -384,6 +459,20 @@ function drawDragonHead(o, sy) {
   const head = sharedSprite(look + dir + col, 170, 50, 85, 25, () => {
     ctx.scale(dir, 1);
     ctx.fillStyle = col;
+    if (look === 'goblin') {                       // a goblin leaning out of a hole in the wall with a slingshot
+      ctx.fillStyle = '#120e0b'; ctx.beginPath(); ctx.ellipse(6, 0, 12, 11, 0, 0, Math.PI * 2); ctx.fill();          // the hole
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.moveTo(14, -6); ctx.lineTo(10, -16); ctx.lineTo(22, -8); ctx.closePath(); ctx.fill(); dunStroke(1.1);   // an ear
+      ctx.beginPath(); ctx.ellipse(24, 0, 12, 10.5, 0, 0, Math.PI * 2); ctx.fill(); dunStroke(1.4);                     // head
+      ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.ellipse(29, -3, 3, 2.3, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#1a1410'; ctx.fillRect(28.5, -4.8, 1.2, 3.6);
+      ctx.fillStyle = '#2a1410'; ctx.beginPath(); ctx.moveTo(25, 4); ctx.quadraticCurveTo(31, 8, 35, 3); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(32, 5); ctx.lineTo(58, 2); ctx.stroke();   // arm
+      ctx.strokeStyle = '#6b4a2a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(58, 2); ctx.lineTo(66, 0);                          // slingshot
+      ctx.moveTo(66, 0); ctx.lineTo(76, -3.5); ctx.moveTo(66, 0); ctx.lineTo(76, 3.5); ctx.stroke();
+      ctx.strokeStyle = '#c9a36a'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(76, -3.5); ctx.lineTo(70, 0); ctx.lineTo(76, 3.5); ctx.stroke();
+      return;
+    }
     if (look === 'cannon') {                       // a barrel on a wall bracket, inside the body and muzzle boxes
       ctx.fillStyle = '#5a3a22'; ctx.beginPath(); roundRectPath(-4, -11, 26, 22, 3); ctx.fill(); dunStroke(1.4);
       ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(14, -9); ctx.lineTo(62, -6); ctx.lineTo(62, 6); ctx.lineTo(14, 9); ctx.closePath(); ctx.fill(); dunStroke(1.5);
@@ -422,7 +511,7 @@ function drawDragonHead(o, sy) {
   blit(head, wallX(o), sy);
   if (o.timer < 0.35 && o.y - dist < H) {
     const flick = Math.floor(o.timer * 20) % 2;
-    ctx.fillStyle = look === 'cannon' ? (flick ? 'rgba(220,220,220,.8)' : 'rgba(160,160,160,.6)') : look === 'gargoyle' ? (flick ? '#7fe05a' : '#e6ffb0') : (flick ? '#ff8a2a' : '#ffe07a');
+    ctx.fillStyle = look === 'cannon' || look === 'goblin' ? (flick ? 'rgba(220,220,220,.8)' : 'rgba(160,160,160,.6)') : look === 'gargoyle' ? (flick ? '#7fe05a' : '#e6ffb0') : (flick ? '#ff8a2a' : '#ffe07a');
     ctx.beginPath(); ctx.arc(wallX(o) + dir * 78, sy, 4, 0, Math.PI * 2); ctx.fill();
   }
 }
@@ -462,6 +551,14 @@ function drawSawBlade(o, sy) {
       ctx.lineWidth = 3; ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 12, Math.sin(a) * 12); } ctx.stroke();
       ctx.beginPath(); ctx.arc(0, 0, 15.5, 0, Math.PI * 2); ctx.arc(0, 0, 10.5, 0, Math.PI * 2, true); dunStroke(1.1);
       ctx.fillStyle = IRON; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill(); dunStroke(1);
+    } else if (look === 'goblinshield') {          // a goblin's round shield with iron spikes and a painted tooth mark
+      ctx.fillStyle = '#c9ced6'; ctx.beginPath();
+      for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, rr = i % 2 ? 16 : 20; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+      ctx.closePath(); ctx.fill(); dunStroke(1);
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 16.5, 0, Math.PI * 2); ctx.fill(); dunStroke(1.4);
+      ctx.strokeStyle = dunShade(0.3); ctx.lineWidth = 1; ctx.beginPath(); for (const x of [-8, 0, 8]) { ctx.moveTo(x, -15); ctx.lineTo(x, 15); } ctx.stroke();
+      ctx.fillStyle = '#e8e0c8'; ctx.beginPath(); ctx.moveTo(-9, -4); ctx.lineTo(-4, 6); ctx.lineTo(0, -2); ctx.lineTo(4, 6); ctx.lineTo(9, -4); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = IRON; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill(); dunStroke(1);
     } else if (look === 'eyeball') {               // a big rolling eyeball with red veins
       ctx.fillStyle = '#f4f1ea'; ctx.beginPath(); ctx.arc(0, 0, 19.5, 0, Math.PI * 2); ctx.fill(); dunStroke(1.5);
       ctx.strokeStyle = 'rgba(200,50,50,.6)'; ctx.lineWidth = 1; ctx.beginPath();
@@ -565,7 +662,7 @@ function drawSkeletonArm(o, sy) {
   if (o.phase === 'warn') {
     const k = Math.min(1, o.t / o.warn);
     ctx.save();
-    ctx.strokeStyle = look === 'skeleton' ? 'rgba(240,228,200,1)' : col; ctx.globalAlpha = 0.3 + 0.55 * k; ctx.lineWidth = 2.2; ctx.setLineDash([6, 6]);
+    ctx.strokeStyle = look === 'skeleton' ? 'rgba(240,228,200,1)' : look === 'scythe' ? '#d6dbe3' : col; ctx.globalAlpha = 0.3 + 0.55 * k; ctx.lineWidth = 2.2; ctx.setLineDash([6, 6]);
     ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, o.L + 20, -PAW_SWEEP, PAW_SWEEP); ctx.closePath(); ctx.stroke();
     ctx.restore();
   }
@@ -582,6 +679,15 @@ function drawSkeletonArm(o, sy) {
       for (let x = 4; x < len - 20; x += 12) { ctx.beginPath(); ctx.arc(x, wy(x) + 4, 2.4, 0, Math.PI * 2); ctx.fill(); }
       ctx.fillStyle = col; ctx.beginPath(); ctx.arc(len - 4, wy(len - 4), 14, 0, Math.PI * 2); ctx.fill(); dunStroke(1.5);
       ctx.strokeStyle = 'rgba(255,220,230,.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(len - 4, wy(len - 4), 6, 0, Math.PI * 1.5); ctx.stroke();
+    } else if (look === 'scythe') {                // the grim reaper's scythe: a long handle and a curved blade inside the tip circle
+      ctx.strokeStyle = DUN_LINE; ctx.lineWidth = 11; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(len - 6, 0); ctx.stroke();
+      ctx.strokeStyle = col; ctx.lineWidth = 8; ctx.stroke();
+      ctx.strokeStyle = '#d9c08a'; ctx.lineWidth = 2; ctx.beginPath(); for (const x of [len * 0.3, len * 0.32]) { ctx.moveTo(x, -4); ctx.lineTo(x, 4); } ctx.stroke();
+      ctx.translate(len, 0);
+      ctx.fillStyle = '#d6dbe3'; ctx.beginPath();                   // a crescent blade hugging the 18-unit tip circle
+      ctx.arc(0, 0, 17, -2.4, 1.5); ctx.arc(4, -2, 10.5, 1.25, -2.3, true); ctx.closePath(); ctx.fill(); dunStroke(1.3);
+      ctx.strokeStyle = dunLight(0.6); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(0, 0, 15, -1.6, 0.9); ctx.stroke();
+      ctx.fillStyle = IRON; ctx.beginPath(); ctx.arc(-4, 0, 4, 0, Math.PI * 2); ctx.fill(); dunStroke(1);
     } else if (look === 'vine') {                  // a thorny vine ending in a snapping flower
       ctx.strokeStyle = DUN_LINE; ctx.lineWidth = 15; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(len - 12, 0); ctx.stroke();
       ctx.strokeStyle = col; ctx.lineWidth = 12; ctx.stroke();
