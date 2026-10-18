@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v82** (2026-10-18)
+Current version: **v83** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v82 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v83 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -722,3 +722,56 @@ A review of the whole game after v75. Nothing here goes against the player decis
 - Dungeon has 18 obstacle types against 12–16 on the other maps; worth a few play-throughs to see if it feels harder, and if so its obstacles could unlock a little later.
 
 **Suggested first three:** 1 (a purpose for stars and levels), 2 ("Crumpled by…") and 4 (readability).
+
+---
+
+## 16. Daily quests — brainstorm (not built yet)
+
+A planned "Daily quests" section in the main menu. The ideas below use things the game already tracks, so most are cheap to add. Three a day works well: one easy, one medium, one hard.
+
+### 16.1 Quest ideas
+
+**Distance**
+- Reach 200 m in one run (easy) / 500 m (medium) / 1,000 m (hard)
+- Fall 1,500 m in total today, across all runs
+- Reach 300 m on a specific map ("Reach 300 m in the Ocean")
+- Beat your best on any map
+
+**Stars**
+- Collect 5 / 10 / 20 stars today
+- Collect 3 stars in a single run
+
+**Power-ups**
+- Pick up 3 power-ups in one run
+- Use the speed boost 2 times today
+- Get the magnet or shield to level 3 in one run
+- Catch an invincibility star
+- Get saved by a shield 2 times today
+
+**Maps**
+- Play a run on every map today
+- Play 3 runs in the Dungeon
+- Earn a medal you don't have yet
+
+**Skill**
+- Reach 150 m without picking up any power-up
+- Reach 250 m without getting the shield
+- Reach 300 m while staying out of the left half of the screen (needs new tracking, but fun)
+
+**Light, for casual days**
+- Play 5 runs today
+- Gain 1,000 XP today
+
+### 16.2 Suggested design
+
+- **Rewards:** quests pay XP, for example 150 / 300 / 600 by difficulty. That gives a level-up feel without going against the "no shop" decision. Stars as a reward only make sense once stars have a use (see section 15).
+- **Reset:** new quests at local midnight, picked at random from the pool, never the same quest twice in one day.
+- **Menu:** a "Daily quests" button on the start screen opens a card with the three quests, each with a progress bar ("3 / 5 stars") and a tick when done. When a quest completes mid-run, a pop-up appears under the plane ("Quest done! +300 XP"), like the power-up messages.
+- **Bonus:** finishing all three gives an extra reward, for example +500 XP.
+
+### 16.3 Open questions
+
+1. Which quests from the list to use (or all of them)?
+2. Rewards: XP, stars, or both?
+3. Three quests a day, or a different number?
+4. Allow swapping one unwanted quest once per day?
