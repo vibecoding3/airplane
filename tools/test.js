@@ -154,8 +154,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { found, saved, total: COLLECTION_TOTAL };
   });
-  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 37,
-    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 6 sets`);
+  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 42,
+    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 7 sets`);
   await page.evaluate(() => { state = 'title'; showCard('title'); });
   await page.click('#collBtn'); await wait(150);
   const collOpen = await page.evaluate(() => ({ shown: !$('collCard').hidden, tiles: document.querySelectorAll('.coll-item').length }));
@@ -163,7 +163,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   const stillTitle = await page.evaluate(() => state);
   await page.keyboard.press('Escape'); await wait(150);
   const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
-  check(collOpen.shown && collOpen.tiles === 37 && stillTitle === 'title' && closed,
+  check(collOpen.shown && collOpen.tiles === 42 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
   // control tips in the top bar: shown at the start of a run, gone past 100 m and outside a run
@@ -264,6 +264,22 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   });
   check(swords.repeats === 0 && swords.seen >= 2 && (swords.seen < 6 || swords.after === 'regular blades'),
     `Legendary swords collection: ${swords.seen}/6 seen in a run to 2,500 m, repeats ${swords.repeats}, a blades row after all 6 is ${swords.after}`);
+
+  // the Legendary fish collection: starfish variants in the Ocean, each once per run, plain starfish once all 5 have appeared
+  const fish = await page.evaluate(() => {
+    mapId = 'sea'; applyMap(); start(); const seen = new Map();
+    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
+      plane.invuln = 1; update(1 / 60);
+      for (const o of obstacles) if (o.fish) { if (!seen.has(o.fish)) seen.set(o.fish, new Set()); seen.get(o.fish).add(o); }
+    }
+    const repeats = [...seen.values()].filter(x => x.size > 1).length;
+    let after = 'n/a';
+    if (seen.size === 5) { const i = obstacles.length; lastType = ''; spawnFromPool(dist + 900, 0.9, [['starfish', 1]]); after = obstacles.slice(i).every(o => !o.fish) ? 'plain starfish' : 'fish'; }
+    gameOver();
+    return { seen: seen.size, repeats, after };
+  });
+  check(fish.repeats === 0 && fish.seen >= 2 && (fish.seen < 5 || fish.after === 'plain starfish'),
+    `Legendary fish collection: ${fish.seen}/5 seen in a run to 2,500 m, repeats ${fish.repeats}, a starfish row after all 5 is ${fish.after}`);
 
   // Ranked Score: the best depths of every map added up, on the start and game-over screens
   const ranked = await page.evaluate(() => {

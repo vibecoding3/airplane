@@ -16,6 +16,8 @@ const COLLECTIONS = [
     items: ORIGAMI.map(n => ({ id: 'origami-' + n, name: n[0].toUpperCase() + n.slice(1), origami: n })) },
   { id: 'shells', name: 'Seashells', map: 'Ocean', bg: '#3f92c0',
     items: SHELLS.map(n => ({ id: 'shell-' + n, name: { sanddollar: 'Sand dollar', pearl: 'Pearl oyster' }[n] || n[0].toUpperCase() + n.slice(1), shell: n })) },
+  { id: 'fish', name: 'Legendary fish', map: 'Ocean', bg: '#3f92c0',
+    items: LEGEND_FISH.map(n => ({ id: 'fish-' + n, name: { golden: 'Golden fish', narwhal: 'Narwhal', coelacanth: 'Coelacanth', squideye: 'Giant squid eye', ghostshark: 'Ghost shark' }[n], fish: n })) },
   { id: 'planets', name: 'Planets', map: 'Space', bg: '#141a3a',
     items: ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].map(n => ({ id: 'planet-' + n, name: n[0].toUpperCase() + n.slice(1), planet: n })) }
 ];
@@ -31,7 +33,8 @@ function noteFound(o, sy) {
            : o.look === 'planet' ? 'planet-' + o.planet
            : o.origami ? 'origami-' + o.origami
            : o.shell ? 'shell-' + o.shell
-           : o.sword ? 'sword-' + o.sword : null;
+           : o.sword ? 'sword-' + o.sword
+           : o.fish ? 'fish-' + o.fish : null;
   if (!id || collectionFound.has(id)) return;
   collectionFound.add(id);
   store.set('nosedive-collection', JSON.stringify([...collectionFound]));
@@ -51,6 +54,9 @@ function paintCollectionItem(canvas, item, locked, wide) {
       if (!wide) g.rotate(-Math.PI / 4);
       g.translate(-22, 0);
       paintLegendarySword(item.sword);
+    } else if (item.fish) {
+      const k = Hc / 54; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintLegendFish(item.fish);
     } else if (item.shell) {
       const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintShell(item.shell);

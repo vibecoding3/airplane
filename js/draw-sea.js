@@ -245,7 +245,70 @@ function drawSub(o, sy) {
   }
 }
 
+// legendary fish (Legendary fish collection, v106): starfish variants (Spinning Drifter), drawn facing right inside a
+// 20-unit circle (the starfish's hit circle)
+function paintLegendFish(name) {
+  const line = (w = 1.5) => inkStroke(w);
+  const eye = (x, y, r = 3.4) => {
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); line(1.1);
+    ctx.fillStyle = COL.ink; ctx.beginPath(); ctx.arc(x + r * 0.3, y, r * 0.5, 0, Math.PI * 2); ctx.fill();
+  };
+  const tail = (fill, x0, h) => {   // a forked tail from x0 back to the circle's edge
+    ctx.fillStyle = fill; ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(-19, -h); ctx.quadraticCurveTo(-14, 0, -19, h); ctx.closePath(); ctx.fill(); line(1.3);
+  };
+  if (name === 'golden') {                         // a round golden fish with a crown fin and sparkles
+    tail('#f2b02a', -9, 13);
+    ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.ellipse(2, 0, 15, 13, 0, 0, Math.PI * 2); ctx.fill(); line();
+    ctx.fillStyle = '#f2b02a'; ctx.beginPath(); ctx.moveTo(-6, -11); ctx.lineTo(-4, -18); ctx.lineTo(0, -13); ctx.lineTo(3, -19); ctx.lineTo(6, -12.5); ctx.closePath(); ctx.fill(); line(1.2);
+    ctx.strokeStyle = 'rgba(190,120,20,.6)'; ctx.lineWidth = 1.3; ctx.beginPath();
+    for (const x of [-4, 2]) { ctx.moveTo(x, -9); ctx.quadraticCurveTo(x + 4, 0, x, 9); }
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.ellipse(4, -6, 6, 2.4, -0.2, 0, Math.PI * 2); ctx.fill();
+    eye(10, -3);
+    ctx.fillStyle = '#ffffff'; for (const [x, y] of [[-12, -15], [15, 11]]) { ctx.beginPath(); ctx.moveTo(x, y - 3); ctx.lineTo(x + 1, y - 1); ctx.lineTo(x + 3, y); ctx.lineTo(x + 1, y + 1); ctx.lineTo(x, y + 3); ctx.lineTo(x - 1, y + 1); ctx.lineTo(x - 3, y); ctx.lineTo(x - 1, y - 1); ctx.closePath(); ctx.fill(); }
+  } else if (name === 'narwhal') {                 // a plump grey-blue whale with a spotted back and a long spiral tusk
+    ctx.fillStyle = '#f3ead2'; ctx.beginPath(); ctx.moveTo(12, -4); ctx.lineTo(25, -9); ctx.lineTo(13, 0); ctx.closePath(); ctx.fill(); line(1.1);
+    ctx.strokeStyle = 'rgba(140,120,80,.7)'; ctx.lineWidth = 0.9; ctx.beginPath(); for (const t of [0.3, 0.55, 0.8]) { const x = 12 + 13 * t, y = -4 - 5 * t; ctx.moveTo(x - 1, y - 1.6 + t); ctx.lineTo(x + 1, y + 2 - t); } ctx.stroke();
+    ctx.fillStyle = '#7f9bb5'; ctx.beginPath(); ctx.moveTo(-12, 2); ctx.lineTo(-20, -6); ctx.lineTo(-18, 2); ctx.lineTo(-20, 9); ctx.closePath(); ctx.fill(); line(1.3);
+    ctx.fillStyle = '#7f9bb5'; ctx.beginPath(); ctx.ellipse(1, 1, 15, 12, 0, 0, Math.PI * 2); ctx.fill(); line();
+    ctx.fillStyle = '#e4ecf2'; ctx.beginPath(); ctx.ellipse(3, 7, 11, 5, 0, 0, Math.PI); ctx.fill();
+    ctx.fillStyle = 'rgba(40,60,90,.35)'; for (const [x, y, r] of [[-6, -6, 1.8], [-1, -8, 1.4], [-9, -1, 1.5], [3, -5, 1.2]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#6a86a0'; ctx.beginPath(); ctx.ellipse(0, 6, 5, 2.4, 0.5, 0, Math.PI * 2); ctx.fill(); line(1);
+    eye(9, -2, 2.6);
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.arc(11, 3, 3, 0.2, 1.4); ctx.stroke();
+  } else if (name === 'coelacanth') {              // a stocky deep-blue living fossil with white flecks and lobed fins
+    ctx.fillStyle = '#2f4f7a'; ctx.beginPath(); ctx.moveTo(-11, 0); ctx.lineTo(-19, -7); ctx.lineTo(-16, 0); ctx.lineTo(-19, 7); ctx.closePath(); ctx.fill(); line(1.3);
+    ctx.fillStyle = '#3a5f8f';
+    for (const [x, y, a] of [[-4, -12, -0.5], [-4, 12, 0.5], [6, 11, 0.9]]) { ctx.beginPath(); ctx.ellipse(x, y, 5, 3, a, 0, Math.PI * 2); ctx.fill(); line(1.1); }
+    ctx.beginPath(); ctx.ellipse(3, 0, 16, 11, 0, 0, Math.PI * 2); ctx.fill(); line();
+    ctx.fillStyle = '#e8f0ff'; for (const [x, y, r] of [[-6, -4, 1.6], [-1, 3, 1.4], [4, -6, 1.3], [-8, 5, 1.2], [8, 4, 1.5], [1, -1, 1]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+    ctx.strokeStyle = 'rgba(10,20,40,.5)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(11, -8); ctx.quadraticCurveTo(8, 0, 11, 8); ctx.stroke();
+    eye(14, -3, 3);
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(15, 4); ctx.lineTo(19, 3); ctx.stroke();
+  } else if (name === 'squideye') {               // a huge round eye in red squid skin, with tentacle tips curling around it
+    ctx.fillStyle = '#c0392b';
+    for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + 0.3; ctx.save(); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(12, -4); ctx.quadraticCurveTo(21, -4, 20, 3); ctx.quadraticCurveTo(18, 6, 16, 3); ctx.lineTo(12, 4); ctx.closePath(); ctx.fill(); line(1.1); ctx.restore(); }
+    ctx.fillStyle = '#d9534a'; ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); line();
+    ctx.fillStyle = '#f7f2e4'; ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI * 2); ctx.fill(); line(1.2);
+    ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.arc(1, 0, 7.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#1a1410'; ctx.beginPath(); ctx.ellipse(1, 0, 2.6, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(-3, -4, 2.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(120,20,20,.5)'; for (const [x, y] of [[-9, -11], [10, 11], [12, -9]]) { ctx.beginPath(); ctx.arc(x, y, 1.4, 0, Math.PI * 2); ctx.fill(); }
+  } else {                                          // ghost shark: a pale, see-through chubby shark with a glowing outline
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = '#dff4f2'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-20, -9); ctx.quadraticCurveTo(-15, 0, -19, 7); ctx.closePath(); ctx.fill(); line(1.3);
+    ctx.beginPath(); ctx.moveTo(-6, -9); ctx.lineTo(-1, -19); ctx.lineTo(5, -10); ctx.closePath(); ctx.fill(); line(1.2);
+    ctx.beginPath(); ctx.moveTo(-14, 4); ctx.quadraticCurveTo(-6, -13, 8, -11); ctx.quadraticCurveTo(19, -8, 19, 0); ctx.quadraticCurveTo(18, 9, 6, 11); ctx.quadraticCurveTo(-8, 12, -14, 4); ctx.closePath(); ctx.fill(); line();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#b8e2de'; ctx.beginPath(); ctx.moveTo(-1, 5); ctx.lineTo(-6, 15); ctx.lineTo(4, 8); ctx.closePath(); ctx.fill(); line(1.1);
+    ctx.strokeStyle = 'rgba(90,150,150,.6)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (const x of [3, 6, 9]) { ctx.moveTo(x, -3); ctx.lineTo(x - 1, 3); } ctx.stroke();
+    ctx.fillStyle = '#5fe0d8'; ctx.beginPath(); ctx.arc(12, -3, 2.8, 0, Math.PI * 2); ctx.fill(); line(1);
+    ctx.fillStyle = COL.ink; ctx.beginPath(); ctx.moveTo(10, 5); ctx.lineTo(18, 3); ctx.lineTo(16, 6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(12, 4.6); ctx.lineTo(13, 6.2); ctx.lineTo(14, 4.2); ctx.closePath(); ctx.fill();
+  }
+}
 function drawStarfish(o, sy) {
+  if (o.fish) { blit(sharedSprite('fish-' + o.fish, 56, 56, 28, 28, () => paintLegendFish(o.fish)), o.x, sy, o.rot); return; }
   const col = o.seaCol || '#f28c28';
   blit(sharedSprite('starfish' + col, 60, 60, 30, 30, () => {
     ctx.beginPath();

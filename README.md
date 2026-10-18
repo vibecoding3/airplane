@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v105** (2026-10-19)
+Current version: **v106** (2026-10-19)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -370,6 +370,7 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
   | Rings of Power | The 9 Dungeon magic rings: emerald, sapphire, ruby, crystal, amethyst, amber, skull, zigzag, leaf |
   | Origami (v102) | Six folded-paper figures on the Paper map: crane, frog, boat, star, fox, butterfly (Drifting Swarm variants of the sticky notes, faceted in three paper tones). In a sticky-note row each note has a 50% chance to be an origami not yet seen this run; once all 6 have appeared the notes are plain sticky notes again |
   | Seashells (v103) | Six shells in the Ocean: conch, scallop, nautilus, cowrie, sand dollar, pearl oyster (Static Hazards variants of the sea urchins, scaled to the urchin's hit circle). Each urchin has a 40% chance to be a shell not yet seen this run; once all 6 have appeared the urchins are plain again |
+  | Legendary fish (v106) | Five fish in the Ocean: golden fish, narwhal, coelacanth, giant squid eye, ghost shark (Spinning Drifter variants of the starfish: they spin and drift like a starfish and are drawn inside its hit circle). Each starfish has a 50% chance to be a fish not yet seen this run; once all 5 have appeared the starfish are plain again. Unlike the background fish, these collide |
   | Legendary swords (v105) | Six original swords in the Dungeon: flame sword, frost blade, crystal sword, desert scimitar, rune blade, bone sword (Spinning Blades variants of the crossed swords; both blades of the pair are the same sword, drawn inside the blade hit shape). Each Spinning Blades obstacle has a 70% chance to be a sword not yet seen this run; once all 6 have appeared it uses its regular looks again |
   | Planets (v94) | The 8 Space planets, Mercury to Neptune (Wall Bulge). Each appears at most once per run; once all 8 have, planet spawns become regular moon edges (since v98; in v94 planets stopped). In the menu they are drawn whole (Saturn with its ring) on a dark-space background |
 
@@ -809,7 +810,7 @@ Ideas for new Collections sets (see Collections in section 7). The best fit is o
 
 - ✅ **Built in v102.** **Paper · Origami (6):** a paper crane, frog, boat, star, fox and butterfly drifting down the page (Drifting Swarm, like the sticky notes). Fits a game about a paper plane.
 - ✅ **Built in v103.** **Ocean · Seashells (6):** a conch, scallop, nautilus, cowrie, sand dollar and a pearl in an open oyster, resting in the water (Static Hazards, like the sea urchins).
-- **Ocean · Legendary fish (5):** a golden fish, a narwhal, a coelacanth, a giant squid eye and a ghost shark (Spinning Drifter, like the starfish).
+- ✅ **Built in v106.** **Ocean · Legendary fish (5):** a golden fish, a narwhal, a coelacanth, a giant squid eye and a ghost shark (Spinning Drifter, like the starfish).
 - **Space · Space probes (5):** Sputnik, Voyager, Hubble, the Apollo capsule and a Mars rover (Bouncing Slider, like the GPS satellite).
 - ✅ **Built in v105.** **Dungeon · Legendary swords (6):** six original swords (flame, ice, crystal, curved, rune, bone), scissoring like the crossed swords (Spinning Blades).
 

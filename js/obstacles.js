@@ -339,6 +339,9 @@ const shellsLeft = () => SHELLS.filter(n => !runCollected.has('shell-' + n));
 // Legendary swords collection (Dungeon): Spinning Blades variants, each at most once per run
 const SWORDS = ['flame', 'frost', 'crystal', 'scimitar', 'rune', 'bone'];
 const swordsLeft = () => SWORDS.filter(n => !runCollected.has('sword-' + n));
+// Legendary fish collection (Ocean map): starfish variants, each at most once per run
+const LEGEND_FISH = ['golden', 'narwhal', 'coelacanth', 'squideye', 'ghostshark'];
+const fishLeft = () => LEGEND_FISH.filter(n => !runCollected.has('fish-' + n));
 // collectibles appear at most once per run: the ring designs and the two anime staffs not yet seen this run
 const ringsLeft = () => DUNGEON_SOLO.rings.cols.filter(d => !runCollected.has('ring-' + d));
 const COLLECTIBLE_LOOKS = { frieren: 'staff-frieren', fern: 'staff-fern' };
@@ -453,6 +456,10 @@ function spawnFromPool(y, d, pool) {
       if (o.type === 'blot') {
         const left = shellsLeft();
         if (left.length && Math.random() < 0.4) { o.shell = left[ri(0, left.length - 1)]; runCollected.add('shell-' + o.shell); }
+      }
+      if (o.type === 'starfish') {               // a legendary fish not yet seen this run (each once per run)
+        const left = fishLeft();
+        if (left.length && Math.random() < 0.5) { o.fish = left[ri(0, left.length - 1)]; runCollected.add('fish-' + o.fish); }
       }
     } else if (mapId === 'space') {
       o.space = true;
