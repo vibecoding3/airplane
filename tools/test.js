@@ -214,6 +214,17 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(planets.unlocked === 1 && planets.repeats === 0 && (planets.seen < 8 || !planets.inPool),
     `Planets collection: a planet on screen unlocks (${planets.unlocked}), ${planets.seen}/8 seen in a run, repeats ${planets.repeats}, still in the pool after all 8 ${planets.seen === 8 ? planets.inPool : 'n/a'}`);
 
+  // the pause menu has a Collections button too: the run stays paused, Back returns to the pause menu
+  await page.evaluate(() => { mapId = 'notebook'; applyMap(); start(); plane.invuln = 99; pause(); });
+  const pausedAt = await page.evaluate(() => dist);
+  await page.click('#pauseCollBtn'); await wait(300);
+  const fromPause = await page.evaluate(() => ({ open: !$('collCard').hidden, state }));
+  await page.click('#collBack'); await wait(150);
+  const backToPause = await page.evaluate(d => !$('pauseCard').hidden && state === 'paused' && dist === d, pausedAt);
+  await page.evaluate(() => { resume(); gameOver(); });
+  check(fromPause.open && fromPause.state === 'paused' && backToPause,
+    `Collections from the pause menu: opens ${fromPause.open} with the run ${fromPause.state}, Back returns to the paused run ${backToPause}`);
+
   // the game-over screen has a Collections button too, and Back returns to game over
   await page.evaluate(() => { mapId = 'dungeon'; applyMap(); start(); gameOver(); });
   await page.click('#overCollBtn'); await wait(150);
