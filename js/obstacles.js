@@ -87,7 +87,7 @@ const make = {
     const moving = d > 0.28 && Math.random() < 0.5;
     const amp = moving ? Math.min(base - gapW / 2 - 12, W - base - gapW / 2 - 12, rand(40, 95)) : 0;
     obstacles.push({ type: 'gate', y, gapW, base, amp, gx: base, freq: rand(0.7, 1.3), ph: rand(0, 6.28) });
-    if (!moving && Math.random() < 0.45) pickups.push({ x: base, y, r: 10, spin: rand(0, 6) });
+    if (!moving && Math.random() < 0.45) addStar(base, y);
   },
   pencil(y, d) {
     const len = rand(120, 165), a = rand(-0.3, 0.3);
@@ -365,6 +365,13 @@ function seaPool(d, y) {
   return pool;
 }
 
+// a gold star, unless the last one is less than 50 m away (rows spawn top to bottom, so the last is the nearest)
+function addStar(x, y) {
+  if (Math.abs(y - lastStarY) < STAR_GAP) return;
+  lastStarY = y;
+  pickups.push({ x, y, r: 10, spin: rand(0, 6) });
+}
+
 // a magnet, shield or slow motion every so often, never a power the plane already has at the top level
 function pickPower(y) {
   if (y < 30 * PX_PER_M || y - lastPowerY < POWER_GAP || Math.random() > 0.3) return null;
@@ -433,7 +440,7 @@ function spawnFromPool(y, d, pool) {
   if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
-    else if (Math.random() < 0.28) pickups.push({ x: rand(40, W - 40), y: py, r: 10, spin: rand(0, 6) });
+    else if (Math.random() < 0.28) addStar(rand(40, W - 40), py);
   }
   return extra;
 }

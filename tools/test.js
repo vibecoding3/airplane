@@ -97,6 +97,27 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(boost.normal === 1 && boost.boosted === 1.1 && boost.after === 1,
     `speed boost: fall speed x${boost.normal} -> x${boost.boosted} with the boost -> x${boost.after} after 5 s`);
 
+  // gold stars never spawn less than 50 m apart (power-ups are not stars)
+  const starGap = await page.evaluate(() => {
+    const out = [];
+    for (const m of ['notebook', 'sea', 'space', 'dungeon']) {
+      mapId = m; applyMap(); start();
+      const ys = new Map();   // each star once, where it first appeared (the magnet moves them)
+      for (let f = 0; f < 60 * 400 && dist / PX_PER_M < 2000; f++) {
+        plane.invuln = 1; update(1 / 60);
+        for (const p of pickups) if (!p.kind && !ys.has(p)) ys.set(p, p.y);
+      }
+      const sorted = [...ys.values()].sort((a, b) => a - b);
+      let min = Infinity;
+      for (let i = 1; i < sorted.length; i++) min = Math.min(min, sorted[i] - sorted[i - 1]);
+      out.push({ m, n: sorted.length, min: Math.round(min / PX_PER_M) });
+    }
+    gameOver();
+    return out;
+  });
+  check(starGap.every(r => r.n > 5 && r.min >= 50),
+    'gold stars at least 50 m apart: ' + starGap.map(r => `${r.m} ${r.n} stars, closest ${r.min} m`).join(', '));
+
   // drifting into an edge, then one press the other way turns the plane at once (not straight down)
   const edge = await page.evaluate(() => {
     mapId = 'notebook'; applyMap(); start();
