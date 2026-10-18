@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v84** (2026-10-18)
+Current version: **v85** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v84 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v85 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -268,7 +268,7 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Closing Jaws | Spiked stone crushers, spiked riveted iron doors, wooden battering rams with an iron cap, goblin barricades of sharpened stakes |
 | Static Hazards | Spiked iron balls (iron, rust, bronze), bubbling cauldrons (green, purple, orange brew), cracked boulders, "RIP" tombstones |
 | Wall Bulge | Rock outcrops, giant round shields (red, blue, green, gold) with an iron rim and boss, huge barrel ends, a giant jack-o'-lantern with its glowing face turned to the shaft |
-| Bouncing Slider | Wooden planks, long bones, wizard staffs with a glowing gem (purple, blue, red), witch's brooms, and since v82 cartoon staffs inspired by *Frieren: Beyond Journey's End*: Frieren's (dark red shaft, brass crescent around a red gem, red ribbon) and Fern's (crooked wood, purple wraps, silver bands, a red crystal on a string). Reference pictures go in `ref/`, which git ignores |
+| Bouncing Slider | Wooden planks, long bones, wizard staffs with a glowing gem (purple, blue, red), witch's brooms, and since v82 cartoon staffs inspired by *Frieren: Beyond Journey's End*: Frieren's (dark red shaft, brass crescent around a red gem, red ribbon; since v85 the head is twice as big, with its own round hit area of radius 11 so the larger head stays fair while the shaft keeps the thin bar) and Fern's (crooked wood with a little zigzag in the middle since v85, purple wraps, silver bands, a red crystal on a string). Reference pictures go in `ref/`, which git ignores |
 | Rising Projectile | Grinning skulls, jack-o'-lanterns, slime balls with a face (green, purple, blue), bubbling potion flasks (purple, green, pink) |
 | Drifting Swarm | Ghosts, flying spellbooks (red, green, purple, blue covers), will-o'-wisps (blue, green, violet), flying witch hats (purple, orange, green band), grinning goblins |
 | Wall Piston | Spear, trident, sword blade, nail-studded goblin club |

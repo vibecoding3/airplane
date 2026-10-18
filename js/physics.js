@@ -24,7 +24,14 @@ function computeShapes(o) {
         { k: 'b', x: (r + W + 20) / 2, y: o.y, hw: (W + 20 - r) / 2, hh: 14, a: 0 }
       ];
     }
-    case 'pencil': return [{ k: 'b', x: o.x, y: o.y, hw: o.len / 2, hh: o.hh || 6.5, a: o.a }];
+    case 'pencil': {
+      const out = [{ k: 'b', x: o.x, y: o.y, hw: o.len / 2, hh: o.hh || 6.5, a: o.a }];
+      if (o.headR) {                 // a big head at the +x end (Frieren's staff) gets its own round hit area
+        const d = o.len / 2 - o.headR;
+        out.push({ k: 'c', x: o.x + Math.cos(o.a) * d, y: o.y + Math.sin(o.a) * d, r: o.headR });
+      }
+      return out;
+    }
     case 'scissors': {
       const out = [];
       for (const s of [-1, 1]) {

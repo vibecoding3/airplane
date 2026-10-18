@@ -130,6 +130,25 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(flame.inPool && flame.type === 'cutter' && flame.look === 'flamethrower',
     `Dungeon flamethrower: in the pool ${flame.inPool}, spawns as ${flame.type}/${flame.look}`);
 
+  // Frieren's staff: its big head has its own round hit area at the +x end of the slider
+  const staff = await page.evaluate(() => {
+    mapId = 'dungeon'; applyMap(); start();
+    let o = null;
+    for (let i = 0; i < 400 && !o; i++) {
+      obstacles.length = 0; lastType = ''; spawnFromPool(dist + 600, 0.5, [['plank', 1]]);
+      if (obstacles[0].look === 'frieren') o = obstacles[0];
+    }
+    if (!o) { gameOver(); return { found: false }; }
+    o.a = 0; o.x = W / 2;
+    const sh = computeShapes(o), hx = o.x + o.len / 2 - o.headR;
+    const hit = sh.some(s => circleHits(hx, o.y + o.headR - 2, 1, s));        // inside the head, outside the thin bar
+    const miss = sh.some(s => circleHits(o.x - o.len / 4, o.y + 10, 1, s));   // beside the shaft
+    gameOver();
+    return { found: true, n: sh.length, headR: o.headR, hit, miss };
+  });
+  check(staff.found && staff.n === 2 && staff.headR === 11 && staff.hit && !staff.miss,
+    `Frieren's staff head hit area: found ${staff.found}, shapes ${staff.n}, radius ${staff.headR}, head hits ${staff.hit}, beside the shaft hits ${staff.miss}`);
+
   // drifting into an edge, then one press the other way turns the plane at once (not straight down)
   const edge = await page.evaluate(() => {
     mapId = 'notebook'; applyMap(); start();

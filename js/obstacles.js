@@ -319,6 +319,7 @@ const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots'
                          daggers: 'clips', saw: 'starfish', swords: 'scissors', runebeam: 'zap', skelarm: 'paw',
                          curse: 'mine', draft: 'fan', web: 'band', flamethrower: 'cutter' };
 // obstacles that always have one look, with their own spawn chance (v81): a flamethrower is a Wall Piston whose flame shoots out
+const FRIEREN_HEAD = 11;          // radius of the head of Frieren's staff (drawn in draw-dungeon.js, hit area in physics.js)
 const DUNGEON_SOLO = { flamethrower: { look: 'flamethrower', cols: ['#4a4f58', '#5e4a3a'] } };
 // each Dungeon mechanic has two to four looks that share its hit box, each with its own colours; a row of the
 // same obstacle shares one look and colour (v73; Halloween and goblin looks added in v80)
@@ -438,6 +439,7 @@ function spawnFromPool(y, d, pool) {
         rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
       }
       if (looks) [o.look, o.dunCol] = rowSea[o.type];
+      if (o.look === 'frieren') o.headR = FRIEREN_HEAD;   // its big crescent head reaches past the 13-unit slider bar
       if (o.type === 'compass') o.hh = 7;        // the fire bar's flames are thicker than a compass leg
     }
   }

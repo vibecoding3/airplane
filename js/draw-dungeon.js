@@ -227,7 +227,7 @@ function drawRockOutcrop(o, sy) {
 // ---------- Bouncing Slider: wooden planks, long bones or wizard staffs, 13 thick ----------
 function drawPlank(o, sy) {
   const L = o.len / 2, col = o.dunCol || '#a06a3a', look = o.look || 'plank';
-  const s = ownSprite(o, 'spr', o.len + 8, 22, L + 4, 11, () => {
+  const s = ownSprite(o, 'spr', o.len + 8, 30, L + 4, 15, () => {    // 30 tall: room for the big head of Frieren's staff
     if (look === 'bone') {                         // a long bone with knobbly ends
       ctx.fillStyle = col;
       ctx.beginPath(); ctx.rect(-L + 7, -4.5, o.len - 14, 9);
@@ -238,25 +238,28 @@ function drawPlank(o, sy) {
       dunStroke(1.3);
       ctx.fillStyle = dunLight(0.4); ctx.fillRect(-L + 12, -2.5, o.len - 24, 1.5);
     } else if (look === 'frieren') {               // a cartoon staff inspired by Frieren's (Frieren: Beyond Journey's End)
-      const BRASS = '#c9a24a';
-      ctx.fillStyle = col; ctx.beginPath(); ctx.rect(-L + 5, -3.6, o.len - 24, 7.2); ctx.fill(); dunStroke(1.4);   // dark red shaft
-      ctx.fillStyle = dunLight(0.25); ctx.fillRect(-L + 6, -2.8, o.len - 26, 1.8);
+      const BRASS = '#c9a24a', HR = FRIEREN_HEAD, hx = L - HR;   // a big head, matching its own round hit area
+      ctx.fillStyle = col; ctx.beginPath(); ctx.rect(-L + 5, -3.6, o.len - 2 * HR - 14, 7.2); ctx.fill(); dunStroke(1.4);   // dark red shaft
+      ctx.fillStyle = dunLight(0.25); ctx.fillRect(-L + 6, -2.8, o.len - 2 * HR - 16, 1.8);
       ctx.fillStyle = BRASS; ctx.beginPath(); roundRectPath(-L, -4.6, 8, 9.2, 2.5); ctx.fill(); dunStroke(1.3);      // butt cap
-      ctx.fillStyle = '#a0302a'; ctx.beginPath(); ctx.rect(L - 22, -4.4, 8, 8.8); ctx.fill(); dunStroke(1.2);      // red cloth wrap
+      ctx.fillStyle = '#a0302a'; ctx.beginPath(); ctx.rect(hx - HR - 12, -4.4, 9, 8.8); ctx.fill(); dunStroke(1.2);   // red cloth wrap
       ctx.strokeStyle = 'rgba(60,10,10,.6)'; ctx.lineWidth = 1; ctx.beginPath();
-      for (const x of [L - 20, L - 17]) { ctx.moveTo(x, -4.4); ctx.lineTo(x + 2.5, 4.4); } ctx.stroke();
-      ctx.fillStyle = BRASS; ctx.beginPath(); roundRectPath(L - 14.5, -4.4, 4, 8.8, 1.2); ctx.fill(); dunStroke(1.2);   // collar
-      ctx.strokeStyle = '#a0302a'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';                                   // ribbon and its red crystal
-      ctx.beginPath(); ctx.moveTo(L - 18, 3); ctx.quadraticCurveTo(L - 24, 6, L - 32, 4.6); ctx.stroke();
-      ctx.fillStyle = '#e03a3a'; ctx.beginPath(); ctx.moveTo(L - 32, 3.2); ctx.lineTo(L - 35.5, 4.6); ctx.lineTo(L - 32, 6); ctx.lineTo(L - 30.5, 4.6); ctx.closePath(); ctx.fill(); dunStroke(0.8);
-      ctx.strokeStyle = DUN_LINE; ctx.lineWidth = 4.6; ctx.beginPath(); ctx.arc(L - 6.5, 0, 4.4, 0.85, Math.PI * 2 - 0.85); ctx.stroke();   // brass crescent
-      ctx.strokeStyle = BRASS; ctx.lineWidth = 2.8; ctx.stroke();
-      ctx.fillStyle = BRASS; ctx.beginPath(); ctx.arc(L - 6.5, 0, 3.4, 0, Math.PI * 2); ctx.fill(); dunStroke(1);  // the ring and the red gem
-      ctx.fillStyle = '#c8202a'; ctx.beginPath(); ctx.arc(L - 6.5, 0, 2.6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = dunLight(0.8); ctx.beginPath(); ctx.arc(L - 7.4, -0.9, 0.9, 0, Math.PI * 2); ctx.fill();
+      for (const x of [hx - HR - 10, hx - HR - 7]) { ctx.moveTo(x, -4.4); ctx.lineTo(x + 2.5, 4.4); } ctx.stroke();
+      ctx.fillStyle = BRASS; ctx.beginPath(); roundRectPath(hx - HR - 3.5, -4.8, 4.5, 9.6, 1.2); ctx.fill(); dunStroke(1.2);   // collar
+      ctx.strokeStyle = '#a0302a'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';                                   // ribbon and its red crystal
+      ctx.beginPath(); ctx.moveTo(hx - HR - 9, 3.5); ctx.quadraticCurveTo(hx - HR - 16, 7, hx - HR - 26, 5.4); ctx.stroke();
+      const cx = hx - HR - 26;
+      ctx.fillStyle = '#e03a3a'; ctx.beginPath(); ctx.moveTo(cx, 3.8); ctx.lineTo(cx - 4, 5.4); ctx.lineTo(cx, 7); ctx.lineTo(cx + 1.8, 5.4); ctx.closePath(); ctx.fill(); dunStroke(0.8);
+      ctx.strokeStyle = DUN_LINE; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(hx, 0, HR - 3, 0.85, Math.PI * 2 - 0.85); ctx.stroke();   // brass crescent
+      ctx.strokeStyle = BRASS; ctx.lineWidth = 4.6; ctx.stroke();
+      ctx.strokeStyle = dunLight(0.45); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(hx, 0, HR - 3.6, 1.6, 3.6); ctx.stroke();
+      ctx.fillStyle = BRASS; ctx.beginPath(); ctx.arc(hx, 0, 6.6, 0, Math.PI * 2); ctx.fill(); dunStroke(1.3);  // the ring and the red gem
+      ctx.fillStyle = '#c8202a'; ctx.beginPath(); ctx.arc(hx, 0, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(120,10,20,.5)'; ctx.beginPath(); ctx.arc(hx + 1.2, 1.2, 3.4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = dunLight(0.85); ctx.beginPath(); ctx.arc(hx - 1.8, -1.8, 1.6, 0, Math.PI * 2); ctx.fill();
     } else if (look === 'fern') {                  // a cartoon staff inspired by Fern's: crooked wood, purple wraps, silver bands
       const SILVER = '#c4bfae', PURPLE = '#8a4fc2';
-      const pts = [[-L, 0.8], [-L * 0.45, -1], [0, 1.2], [L * 0.4, -1], [L - 3, 0.6]];
+      const pts = [[-L, 0.8], [-L * 0.45, -1], [-L * 0.02, 1.2], [L * 0.08, -1.6], [L * 0.16, 1.6], [L * 0.24, -1.4], [L * 0.32, 0.8], [L - 3, 0.6]];   // a little zigzag in the middle
       const crook = () => { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); };
       ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       crook(); ctx.strokeStyle = DUN_LINE; ctx.lineWidth = 9.6; ctx.stroke();
