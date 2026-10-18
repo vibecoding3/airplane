@@ -142,6 +142,30 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(flame.inPool && flame.type === 'cutter' && flame.look === 'flamethrower',
     `Dungeon flamethrower: in the pool ${flame.inPool}, spawns as ${flame.type}/${flame.look}`);
 
+  // Collections: a ring and Frieren's staff seen on screen during a Dungeon run unlock (and are saved); off screen they don't
+  const coll = await page.evaluate(() => {
+    const keep = new Set(collectionFound); collectionFound.clear();
+    mapId = 'dungeon'; applyMap(); start(); obstacles.length = 0; pickups.length = 0; nextRowY = 1e12;
+    const add = (pool, y, look, col) => { lastType = ''; const i = obstacles.length; spawnFromPool(dist + y, 0.5, [[pool, 1]]); obstacles[i].look = look; obstacles[i].dunCol = col; obstacles[i].active = false; obstacles.length = i + 1; };
+    add('rings', 300, 'ring', 'ruby'); add('plank', 500, 'frieren', '#8a2a2a'); add('rings', H + 200, 'ring', 'amber');   // the last one is below the screen
+    render();
+    const found = [...collectionFound].sort().join(','), saved = JSON.parse(store.get('nosedive-collection')).length;
+    gameOver();
+    collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
+    return { found, saved, total: COLLECTION_TOTAL };
+  });
+  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 11,
+    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 2 sets`);
+  await page.evaluate(() => { state = 'title'; showCard('title'); });
+  await page.click('#collBtn'); await wait(150);
+  const collOpen = await page.evaluate(() => ({ shown: !$('collCard').hidden, tiles: document.querySelectorAll('.coll-item').length }));
+  await page.keyboard.press(' '); await wait(150);                 // Space must not start a run from here
+  const stillTitle = await page.evaluate(() => state);
+  await page.keyboard.press('Escape'); await wait(150);
+  const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
+  check(collOpen.shown && collOpen.tiles === 11 && stillTitle === 'title' && closed,
+    `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
+
   // the Dungeon's magic rings: their own obstacle in the pool, built on the Rising Projectile (paper wad), one of 9 designs
   const rings = await page.evaluate(() => {
     mapId = 'dungeon'; applyMap(); start(); obstacles.length = 0;

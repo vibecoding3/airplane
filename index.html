@@ -19,7 +19,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v87</div>
+    <div class="version" id="version">v88</div>
 
     <div class="hud">
       <div>
@@ -48,8 +48,16 @@
           <button class="map-tile" type="button" data-map="dungeon" aria-pressed="false"><span class="map-thumb dungeon"></span>Dungeon</button>
         </div>
         <button class="menu-btn primary" id="startBtn" type="button">Play</button>
+        <button class="menu-btn" id="collBtn" type="button">Collections</button>
       </div>
 
+
+      <div class="menu" id="collCard" hidden>
+        <h2 class="menu-title small">Collections</h2>
+        <p class="menu-tag">Find these in the Dungeon to unlock them.</p>
+        <div class="coll-sets" id="collSets"></div>
+        <button class="menu-btn" id="collBack" type="button">Back</button>
+      </div>
 
       <div class="menu" id="pauseCard" hidden>
         <h2 class="menu-title small">Paused</h2>
@@ -94,6 +102,7 @@
 <script src="js/draw-dungeon.js"></script>
 <script src="js/render.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/collections.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

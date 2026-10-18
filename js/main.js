@@ -9,10 +9,11 @@ window.addEventListener('keydown', e => {
   const k = e.key;
   const side = keySide(k);
   if (side) { e.preventDefault(); if (!e.repeat) press(side, 'key' + side); }
-  else if (k === 'Escape') { state === 'paused' ? resume() : pause(); }
+  else if (k === 'Escape') { if (!ui.coll.hidden) showCard('title'); else state === 'paused' ? resume() : pause(); }
   else if (k === ' ' && state === 'play') { e.preventDefault(); if (!e.repeat) { spaceUsed = true; pause(); } }
   else if ((k === ' ' || k === 'Enter') && (state === 'title' || state === 'over' || state === 'paused')) {
     if (e.repeat && k === ' ') { e.preventDefault(); return; }
+    if (!ui.coll.hidden) return;                 // the Collections screen: its own buttons handle the keys
     if (e.target instanceof HTMLButtonElement && !e.target.classList.contains('play')) return;
     e.preventDefault();
     if (k === ' ') spaceUsed = true;

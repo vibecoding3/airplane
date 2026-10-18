@@ -4,7 +4,7 @@
 // ---------- HUD & screens ----------
 const ui = {
   depth: $('depth'), stars: $('starCount'), best: $('best'),
-  overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'),
+  overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'), coll: $('collCard'),
   overBank: $('overBank'),
   overTitle: $('overTitle'), overBest: $('overBest'), stamp: $('recordStamp'),
   pauseBtn: $('pauseBtn'), muteBtn: $('muteBtn')
@@ -80,10 +80,11 @@ function showCard(which) {
   ui.title.hidden = which !== 'title';
   ui.pause.hidden = which !== 'pause';
   ui.over.hidden = which !== 'over';
+  ui.coll.hidden = which !== 'coll';
   // the start menu sits on the sky picture instead of the map
   ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
   ui.overlay.classList.toggle('dim', !!which && state !== 'title');   // pause / game over: dim the game behind
-  if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); setXp($('titleXp'), levelInfo(xp), 0, true); }
+  if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); setXp($('titleXp'), levelInfo(xp), 0, true); syncCollectionButton(); }
   if (which === 'title' || which === 'over') renderMedals();
   const btn = which && ui[which].querySelector('.play, .primary');
   if (btn) btn.focus({ preventScroll: true });

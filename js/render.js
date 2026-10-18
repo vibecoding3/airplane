@@ -183,7 +183,7 @@ function render() {
   for (const o of obstacles) {
     const sy = o.y - dist;
     if (sy < -120 || sy > H + 120) continue;
-    if (o.dungeon) { drawDungeonObstacle(o, sy); continue; }
+    if (o.dungeon) { noteFound(o, sy); drawDungeonObstacle(o, sy); continue; }
     switch (o.type) {
       case 'gate': {
         const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
