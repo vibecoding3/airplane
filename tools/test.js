@@ -29,7 +29,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 10 };   // obstacl
   const deep = await page.evaluate(depth => {
     const out = {};
     for (const m of ['notebook', 'sea', 'space', 'dungeon']) {
-      mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0, slowmo: 0, superstar: 0 }, counted = new Set();
+      mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0, slowmo: 0, superstar: 0, boost: 0 }, counted = new Set();
       let maxMagnet = 0, maxShield = 0;
       while (dist / PX_PER_M < depth && f < 60 * 1200) {
         if (f % 45 === 0) { const s = Math.random() < 0.5 ? -1 : 1; press(s, 'sim'); release('sim'); }
@@ -50,8 +50,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 10 };   // obstacl
     const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})`);
-    check(d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && d.powers.superstar > 0 && (DEPTH < 1500 || (d.maxMagnet === 3 && d.maxShield === 3)),
-      `${m}: power-ups spawned (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}, star ${d.powers.superstar}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
+    check(d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && d.powers.superstar > 0 && d.powers.boost > 0 && (DEPTH < 1500 || (d.maxMagnet === 3 && d.maxShield === 3)),
+      `${m}: power-ups spawned (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}, star ${d.powers.superstar}, boost ${d.powers.boost}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
   }
 
   // normal runs (3 lives) end in a game over
@@ -80,6 +80,22 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 10 };   // obstacl
   });
   check(xpRes.curve === '1,1,2,2,3,4' && xpRes.gained === 484 && xpRes.saved === 484 && xpRes.stamp && xpRes.shown.includes('+234 XP'),
     `experience: levels ${xpRes.curve}, 250 + 234 m = ${xpRes.gained} XP (saved ${xpRes.saved}), level-up stamp ${xpRes.stamp}, shows "${xpRes.shown}"`);
+
+  // speed boost: the plane falls 10% faster for 5 seconds, then back to normal
+  const boost = await page.evaluate(() => {
+    mapId = 'notebook'; applyMap(); start(); plane.invuln = 99; obstacles.length = 0; nextRowY = 1e12;
+    dist = 700 * PX_PER_M;   // past the speed cap, so the base fall speed doesn't change between frames
+    const fall = () => { clearControls(); plane.vx = 0; update(1 / 60); return speed / baseFallSpeed(); };   // straight down: no sideways slowdown
+    const normal = fall();
+    collectPower({ kind: 'boost', x: W / 2, y: dist + planeScreenY() });
+    const boosted = fall();
+    for (let f = 0; f < 60 * 5.2; f++) { plane.invuln = 99; update(1 / 60); }
+    const after = fall();
+    gameOver();
+    return { normal: +normal.toFixed(3), boosted: +boosted.toFixed(3), after: +after.toFixed(3) };
+  });
+  check(boost.normal === 1 && boost.boosted === 1.1 && boost.after === 1,
+    `speed boost: fall speed x${boost.normal} -> x${boost.boosted} with the boost -> x${boost.after} after 5 s`);
 
   // drifting into an edge, then one press the other way turns the plane at once (not straight down)
   const edge = await page.evaluate(() => {

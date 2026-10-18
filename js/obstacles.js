@@ -355,6 +355,7 @@ function pickPower(y) {
   if (plane.lives < POWER_MAX) options.push('shield');
   if (plane.slowmo <= 0 && y / PX_PER_M >= SLOWMO_FROM_M) options.push('slowmo');
   if (plane.star <= 0 && y / PX_PER_M >= STAR_FROM_M && Math.random() < 0.5) options.push('superstar');   // the rarest
+  if (plane.boost <= 0 && y / PX_PER_M >= BOOST_FROM_M) options.push('boost');
   if (!options.length) return null;
   lastPowerY = y;
   return options[ri(0, options.length - 1)];

@@ -295,6 +295,7 @@ function update(dt) {
   const sideways = Math.min(1, Math.abs(plane.vx) / maxSideSpeed());
   speed = baseFallSpeed() * (1 - SIDE_SLOWDOWN * sideways);
   if (plane.bubbled > 0) speed *= 0.5;         // rising bubbles hold the plane up
+  if (plane.boost > 0) speed *= BOOST_FACTOR;  // speed boost power-up
   dist += speed * dt;
   plane.bubbled = Math.max(0, plane.bubbled - dt);
   if (plane.star > 0) {                                     // invincibility star: real seconds, rainbow sparkles
@@ -305,6 +306,7 @@ function update(dt) {
     }
   }
   if (plane.slowmo > 0) plane.slowmo = Math.max(0, plane.slowmo - dt / SLOWMO_SCALE);   // real seconds
+  if (plane.boost > 0) plane.boost = Math.max(0, plane.boost - dt / timeScale());       // real seconds
   for (const o of obstacles) {
     if (o.type !== 'bubbles' || plane.star > 0 || Math.abs(plane.x - o.x) > o.w / 2 || Math.abs(dist + planeScreenY() - o.y) > o.h / 2) continue;
     plane.bubbled = 0.3;
@@ -424,6 +426,9 @@ function collectPower(p) {
   } else if (p.kind === 'superstar') {
     plane.star = STAR_TIME;
     floaters.push({ x: fx, y: p.y, life: 1.6, col: '#e8a317', size: 26, text: 'Invincible!' });
+  } else if (p.kind === 'boost') {
+    plane.boost = BOOST_TIME;
+    floaters.push({ x: fx, y: p.y, life: 1.4, col: '#23964a', text: 'Speed boost!' });
   } else if (p.kind === 'slowmo') {
     plane.slowmo = SLOWMO_TIME;
     floaters.push({ x: fx, y: p.y, life: 1.4, col: '#8a4fc2', text: 'Slow motion!' });
@@ -431,9 +436,9 @@ function collectPower(p) {
     plane.lives = Math.min(POWER_MAX, plane.lives + 1);
     floaters.push({ x: fx, y: p.y, life: 1.4, col: '#2f6fb8', text: `Shield level ${plane.lives}!` });
   }
-  const col = p.kind === 'magnet' ? '#d9443a' : p.kind === 'slowmo' ? '#8a4fc2' : p.kind === 'superstar' ? '#ffd23f' : '#2f8fe0';
+  const col = POWER_RIMS[p.kind];
   for (let k = 0; k < 12; k++) { const s = spark(p.x, p.y); s.col = col; particles.push(s); }
-  p.kind === 'slowmo' ? sfx.slowmo() : p.kind === 'superstar' ? sfx.superstar() : sfx.power();
+  p.kind === 'slowmo' ? sfx.slowmo() : p.kind === 'superstar' ? sfx.superstar() : p.kind === 'boost' ? sfx.boost() : sfx.power();
 }
 
 // a shield level is used up: the hit is forgiven and the plane blinks through obstacles for a moment

@@ -55,6 +55,23 @@ function paintPowerIcon(c, id) {
     c.beginPath(); c.moveTo(-5, -7); c.lineTo(5, -7); c.lineTo(0.5, -1.5); c.closePath(); c.fill();
     c.beginPath(); c.moveTo(0, 6); c.lineTo(8, 13); c.lineTo(-8, 13); c.closePath(); c.fill();
     c.fillStyle = '#8a4fc2'; c.fillRect(-13, -17, 26, 4); c.fillRect(-13, 13, 26, 4);
+  } else if (id === 'boost') {                         // a cartoon running shoe with speed lines
+    c.lineJoin = 'round'; c.lineCap = 'round';
+    c.fillStyle = '#ffffff'; c.strokeStyle = COL.ink; c.lineWidth = 2;
+    c.beginPath(); roundRectPath(-12, 5, 30, 7, 3.5); c.fill(); c.stroke();                       // sole
+    c.fillStyle = '#e2493b';
+    c.beginPath();
+    c.moveTo(-12, 6); c.lineTo(-12, -6); c.quadraticCurveTo(-12, -12, -6, -12);                    // heel
+    c.lineTo(-1, -11); c.lineTo(3, -4);                                                           // collar, down the tongue
+    c.quadraticCurveTo(12, -2, 17, 3); c.lineTo(17, 6); c.closePath();                            // toe
+    c.fill(); c.stroke();
+    c.fillStyle = '#ffffff'; c.beginPath(); c.ellipse(-6, -2, 3.2, 4.2, 0.2, 0, Math.PI * 2); c.fill();   // white swoosh patch
+    c.strokeStyle = '#ffffff'; c.lineWidth = 1.6; c.beginPath();                                  // laces
+    for (const [x, y] of [[2, -6], [5, -4], [8, -2.8]]) { c.moveTo(x - 2, y - 1.5); c.lineTo(x + 2, y + 1.5); }
+    c.stroke();
+    c.strokeStyle = COL.ink; c.lineWidth = 2; c.beginPath();                                       // speed lines
+    c.moveTo(-21, -6); c.lineTo(-16, -6); c.moveTo(-22, 0); c.lineTo(-16, 0); c.moveTo(-21, 6); c.lineTo(-16, 6);
+    c.stroke();
   } else if (id === 'shield') {
     c.beginPath();
     c.moveTo(-13, -11); c.lineTo(0, -16); c.lineTo(13, -11); c.lineTo(12, 2);
@@ -83,7 +100,7 @@ function paintPowerIcon(c, id) {
 function drawPower(p, sy) {
   const s = sharedSprite('power-' + p.kind, 48, 48, 24, 24, () => {
     ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 21, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = p.kind === 'magnet' ? '#d9443a' : p.kind === 'slowmo' ? '#8a4fc2' : p.kind === 'superstar' ? '#f2b53a' : '#2f8fe0'; ctx.lineWidth = 3.5; ctx.stroke();
+    ctx.strokeStyle = POWER_RIMS[p.kind]; ctx.lineWidth = 3.5; ctx.stroke();
     ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 23, 0, Math.PI * 2); ctx.stroke();
     ctx.save(); ctx.translate(-22, -22); paintPowerIcon(ctx, p.kind); ctx.restore();
   });
@@ -238,15 +255,16 @@ function render() {
     ctx.fillText(f.text, f.x, f.y - dist - (1 - f.life) * 40);
   }
   ctx.globalAlpha = 1;
-  if (plane.slowmo > 0 && state === 'play') {   // slow motion: a soft purple tint and a bar over the plane showing the time left
-    ctx.fillStyle = 'rgba(150,110,230,.10)'; ctx.fillRect(0, 0, W, H);
-    // the bar sits just above the plane and shrinks toward its centre
-    const w = 110 * plane.slowmo / SLOWMO_TIME;
-    ctx.fillStyle = 'rgba(138,79,194,.9)'; ctx.beginPath(); roundRectPath(plane.x - w / 2, planeScreenY() - 34, w, 6, 3); ctx.fill();
-  }
-  if (plane.star > 0 && state === 'play') {      // invincibility time left: a gold bar over the plane (above the slow-motion one)
-    const w = 110 * plane.star / STAR_TIME;
-    ctx.fillStyle = 'rgba(242,181,58,.95)'; ctx.beginPath(); roundRectPath(plane.x - w / 2, planeScreenY() - 44, w, 6, 3); ctx.fill();
+  if (plane.slowmo > 0 && state === 'play') { ctx.fillStyle = 'rgba(150,110,230,.10)'; ctx.fillRect(0, 0, W, H); }   // slow motion: a soft purple tint
+  if (state === 'play') {
+    // time left for each running timed power-up: bars stacked above the plane, each shrinking toward its centre
+    let barY = planeScreenY() - 34;
+    for (const [left, total, kind] of [[plane.slowmo, SLOWMO_TIME, 'slowmo'], [plane.star, STAR_TIME, 'superstar'], [plane.boost, BOOST_TIME, 'boost']]) {
+      if (left <= 0) continue;
+      const w = 110 * left / total;
+      ctx.fillStyle = POWER_RIMS[kind]; ctx.beginPath(); roundRectPath(plane.x - w / 2, barY, w, 6, 3); ctx.fill();
+      barY -= 10;
+    }
   }
   if (flash > 0 && !reduceMotion) {           // milestone flash over the whole playfield
     ctx.fillStyle = `rgba(${flashCol},${(flash * 0.6).toFixed(3)})`;

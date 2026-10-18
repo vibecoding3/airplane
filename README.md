@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v68** (2026-10-18)
+Current version: **v69** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v68 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v69 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -286,10 +286,14 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
 
 **Slow motion** (since v54, timed, no levels): a white badge with a purple rim and an hourglass. Picking it up runs the whole game at half speed for 4 seconds (falling, obstacles, steering), with a soft purple tint and a purple bar just above the plane that shrinks toward its centre as time runs out (since v58), plus a falling "whoosh" sound. It only appears from 300 m on (since v58), and only when slow motion is not already running.
 
-**Invincibility star** (since v59, timed, no levels; an original design inspired by the classic platformer star): a white badge with a gold rim and a shining yellow star. For 6 seconds nothing can hurt or move the plane: it flies straight through obstacles (wind, rubber bands and bubbles don't push or slow it either, since v62) with a rainbow outline cycling through the colours, rainbow sparkles and a gold bar over the plane showing the time left (above the slow-motion bar). The outline flickers in the last 1.5 seconds as a warning. Picking it up shows "Invincible!" with a quick twinkling run of notes. It is the rarest power-up (offered half as often as the others), appears from 150 m on, and only when no star is running.
+**Invincibility star** (since v59, timed, no levels; an original design inspired by the classic platformer star): a white badge with a gold rim and a shining yellow star. For 6 seconds nothing can hurt or move the plane: it flies straight through obstacles (wind, rubber bands and bubbles don't push or slow it either, since v62) with a rainbow outline cycling through the colours, rainbow sparkles and a gold bar over the plane showing the time left. The outline flickers in the last 1.5 seconds as a warning. Picking it up shows "Invincible!" with a quick twinkling run of notes. It is the rarest power-up (offered half as often as the others), appears from 150 m on, and only when no star is running.
 
-- **Spawning:** from about 30 m on, a row can carry a power-up instead of a star, with at least about 45 m between power-ups (so roughly one every 50–80 m). A magnet or shield already at level 3 is not offered (a used shield level can be picked up again); once both are at level 3, slow motion is the only power-up still offered.
-- **Feedback:** "Magnet level 2!", "Shield level 3!", "Slow motion!" or "Invincible!" pops up in the power's colour, with a burst of sparks and a chime. Using a shield shows "Shield used! N left".
+**Speed boost** (since v69, timed, no levels): a white badge with a green rim and a red cartoon running shoe with speed lines. Picking it up makes the plane fall 10% faster for 5 seconds (real seconds, so slow motion does not stretch it); steering is unchanged. During the boost the plane can go 10% above the usual top speed (the 600 m cap). Shows "Speed boost!" in green with a rising whoosh. It appears from 100 m on, and only when no boost is running. There are no speed lines behind the plane (the plane trail was removed in v36).
+
+**Time-left bars:** each running timed power-up shows a bar above the plane that shrinks toward its centre: slow motion (purple) nearest the plane, then the invincibility star (gold), then the speed boost (green), stacked without gaps.
+
+- **Spawning:** from about 30 m on, a row can carry a power-up instead of a star, with at least about 45 m between power-ups (so roughly one every 50–80 m). A magnet or shield already at level 3 is not offered (a used shield level can be picked up again); once both are at level 3, only the timed power-ups (slow motion, the star and the speed boost) are still offered.
+- **Feedback:** "Magnet level 2!", "Shield level 3!", "Slow motion!", "Invincible!" or "Speed boost!" pops up in the power's colour, with a burst of sparks and a chime. Using a shield shows "Shield used! N left".
 - **Stars:** stars caught in a run are added to a saved total when the run ends. The top bar shows the total during a run.
 - **Experience and levels** (since v65): every metre of a run is 1 XP, added to a saved total when the run ends (on any map). The player starts at level 1; level 1 → 2 needs 300 XP and each level after needs 200 XP more than the one before (300, 500, 700, 900 …, so level 5 at 2,400 XP and level 10 at 9,900 XP). The start screen shows a yellow level badge beside a green bar and "440 / 700 XP" toward the next level. The game-over screen shows the same box with "+234 XP", the bar filling up; on a level up it fills to the end, starts over at the new level, and a green "Level up! Level N" badge appears with a rising fanfare. Change the curve in `js/state.js` (`xpNeed`).
 - **Plane:** one classic white paper plane; the crumpled ball and paper scraps match it. There are no skins (removed in v42) and no trail (removed in v36).
