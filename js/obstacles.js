@@ -313,6 +313,30 @@ function spacePool(d) {
   if (d > 0.3) pool.push(['arm', 1.2]);
   return pool;
 }
+// Dungeon obstacles (v68): ten to start, each on an existing mechanic with dungeon art (draw-dungeon.js)
+const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots', rock: 'protractor', plank: 'pencil',
+                         skull: 'wad', ghosts: 'notes', spear: 'cutter', firebar: 'compass', dragon: 'glue' };
+const DUNGEON_COLS = {
+  gate: ['#b9ab8f', '#a9a59c', '#9fa88c', '#b5917a'],                         // stone ledges: sandstone, grey, mossy, red
+  erasers: ['#9a958c', '#8f8476', '#a39a86'],                                 // crusher blocks
+  blot: ['#5b6068', '#7a5a44', '#8a6a3a'],                                    // spiked balls: iron, rust, bronze
+  protractor: ['#8f877a', '#7f8288', '#93806a'],                              // rock outcrops
+  pencil: ['#a06a3a', '#8a5a32', '#b07c48'],                                  // wooden planks
+  wad: ['#efe6d0', '#e6dcc0', '#f4efe2'],                                     // skulls
+  note: ['#eef2ff', '#dff7e6', '#e2ecff'],                                    // ghosts
+  cutter: ['#8f877a', '#9a958c', '#7f8288'],                                  // spear-trap wall blocks
+  compass: ['orange', 'blue', 'green'],                                       // fire bars: normal or magic fire
+  glue: ['#5f8f6a', '#8a8378', '#a0503c']                                     // dragon statues: bronze, stone, red
+};
+function dungeonPool(d) {
+  const pool = [['ledges', 3], ['spikeballs', 2], ['plank', 1 + 1.5 * d], ['rock', 1.4], ['skull', 1 + d]];
+  if (d > 0.06) pool.push(['ghosts', 1.3]);
+  if (d > 0.1) pool.push(['dragon', 1.2]);
+  if (d > 0.15) pool.push(['spear', 1.3]);
+  if (d > 0.22) pool.push(['crusher', 1.4]);
+  if (d > 0.3) pool.push(['firebar', 1.3]);
+  return pool;
+}
 function seaPool(d, y) {
   const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1]];
   if (d > 0.08) pool.push(['mine', 1.3]);
@@ -339,6 +363,7 @@ function pickPower(y) {
 function spawnRow(y, d) {
   if (mapId === 'sea') return spawnFromPool(y, d, seaPool(d, y));
   if (mapId === 'space') return spawnFromPool(y, d, spacePool(d));
+  if (mapId === 'dungeon') return spawnFromPool(y, d, dungeonPool(d));
   const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
   if (d > 0.08) pool.push(['clips', 1.4]);
   if (d > 0.12) pool.push(['scissors', 0.6 + 1.6 * d]);
@@ -360,7 +385,7 @@ function spawnFromPool(y, d, pool) {
   for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
   lastType = type;
   const before = obstacles.length;
-  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || type](y, d) || 0;
+  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || type](y, d) || 0;
   const rowPal = {}, rowSea = {};    // obstacles of the same kind in one row share a colour
   for (let i = before; i < obstacles.length; i++) {
     const o = obstacles[i];
@@ -375,9 +400,14 @@ function spawnFromPool(y, d, pool) {
       const cols = SPACE_COLS[o.type];
       if (cols) o.spaceCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
       if (o.look === 'station') o.r = rand(95, 110);
+    } else if (mapId === 'dungeon') {
+      o.dungeon = true;
+      const cols = DUNGEON_COLS[o.type];
+      if (cols) o.dunCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
+      if (o.type === 'compass') o.hh = 7;        // the fire bar's flames are thicker than a compass leg
     }
   }
-  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station'].includes(type)) {
+  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
     else if (Math.random() < 0.28) pickups.push({ x: rand(40, W - 40), y: py, r: 10, spin: rand(0, 6) });

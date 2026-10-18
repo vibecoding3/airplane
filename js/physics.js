@@ -40,7 +40,7 @@ function computeShapes(o) {
     case 'clips': return clipXs(o).map(x => ({ k: 'b', x, y: o.y, hw: 17, hh: 6, a: 0 }));
     case 'compass': {
       const c = Math.cos(o.ang), s = Math.sin(o.ang);
-      return [{ k: 'b', x: o.x + c * o.L / 2, y: o.y + s * o.L / 2, hw: o.L / 2, hh: 4, a: o.ang },
+      return [{ k: 'b', x: o.x + c * o.L / 2, y: o.y + s * o.L / 2, hw: o.L / 2, hh: o.hh || 4, a: o.ang },
               { k: 'c', x: o.x, y: o.y, r: 8 }];
     }
     case 'fan': return o.sea ? [] : [{ k: 'c', x: o.side < 0 ? 0 : W, y: o.y, r: 24 }];   // an ocean current has no body

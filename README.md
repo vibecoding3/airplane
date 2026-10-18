@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v67** (2026-10-18)
+Current version: **v68** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v67 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v68 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -62,7 +62,7 @@ There are no on-screen steering arrows (removed in v44).
 
 ## 4. Maps
 
-The map is chosen with two picture tiles, **Paper** and **Deep sea**, on the start screen and on the game-over screen (so you can switch between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
+The map is chosen with four picture tiles, **Paper**, **Deep sea**, **Space** and **Dungeon**, on the start screen and on the game-over screen (so you can switch between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
 
 ### 4.1 Paper
 - **Background:** ruled notebook paper with a red margin and punched holes.
@@ -118,6 +118,22 @@ The plane is thrown out of orbit and falls away from Earth into deeper and stran
 | 800–1,500 m | Saturn, Mars, spiral galaxies, comets |
 | 1,500 m + | Galaxies, a black hole with a glowing ring, comets, and deeper down a whale made of stars |
 | Anywhere below 300 m | Rarely, a small UFO zipping past |
+
+### 4.4 Dungeon (since v68)
+The plane is dropped down a deep, ancient dungeon well and falls past torch-lit stone, into caverns, then down to a lava-lit underworld. Cartoon and playful: friendly skeletons, not gore. (The brainstorm is in section 14.)
+- **Walls:** stone bricks (rows of 37.5 units, one CSS layer like the sea bubbles) over a colour that changes every 100 m: grey stone in the well, warm torch-lit browns, cold blue-purple caverns from about 400 m, then deep reds of the underworld below 800 m.
+- **The well opening:** at the start, a disc of blue sky with a cloud sits in the stone ring above the plane, with a rope and bucket hanging below the rim and a soft beam of daylight falling down the shaft. It slides up out of view within the first ~35 m (like the Earth in Space); the top bar has no background fade while it is in view.
+- **Drifting specks:** dust motes in the torchlight (100–400 m), water drips falling (400–1,000 m), then embers rising and flickering.
+- **Background scenery** (faded, never collides):
+
+| Depth | Scenery |
+|---|---|
+| 0–150 m | Wall torches with a flickering glow, bats, cobwebs in the corners, hanging chains |
+| 150–400 m | Torches, bats, a rat, chains, a treasure chest with coins |
+| 400–800 m | Bats, glowing crystals (blue, purple or green), cobwebs, yellow eyes in the dark, glowing mushrooms |
+| 800–1,500 m | Crystals, eyes, mushrooms, a sitting skeleton (faint grey, so it never reads as a skull obstacle) |
+| 1,500 m + | Eyes, skeletons, lava falls, crystals |
+| Anywhere below 300 m | Rarely, a dragon's silhouette gliding far behind |
 
 ---
 
@@ -191,7 +207,23 @@ Every Space obstacle reuses the movement and collision of a Paper or Deep sea ob
 | Battle station | A big grey sphere with a dish and a trench bulging in from a side (original design in a space-opera style) | Protractor | ~170 m |
 | Robot arm | A station arm with a claw swinging all the way round its base | Drawing compass | ~215 m |
 
-### 5.4 Removed obstacles (history)
+### 5.4 Dungeon map (10 kinds on 10 mechanics, since v68)
+A first set of ten; more can be added later from the list in section 14.3. Every Dungeon obstacle reuses the movement and collision of a Paper obstacle (see `DUNGEON_MAKERS` in `js/obstacles.js`) with new art in `js/draw-dungeon.js`, and every drawing stays inside its collision shape. The walls are dark, so obstacles are light stone, bone, wood and fire with a dark outline.
+
+| Dungeon obstacle | Behaviour | Based on | Starts at |
+|---|---|---|---|
+| Stone ledges | Mossy stone slabs from both walls with a gap (sandstone, grey, mossy or reddish) | Rulers | 0 m |
+| Spiked iron balls | 1–3 spiked balls (iron, rust or bronze) that stay put | Ink blots | 0 m |
+| Wooden plank | An iron-banded plank sliding side to side | Pencil | 0 m |
+| Rock outcrop | A cracked, mossy boulder bulging in from one side; slalom pairs deeper down | Protractor | 0 m |
+| Bouncing skull | A grinning skull thrown up toward the plane, spinning and bouncing off the walls | Paper wad | 0 m |
+| Ghosts | 2–3 little ghosts ("ooo" mouths, pink cheeks) drifting down and swaying | Sticky notes | ~35 m |
+| Dragon statue | A dragon head on the wall spitting fireballs across; embers glow in its mouth before each shot | Glue tube | ~65 m |
+| Spear trap | A stone block in the wall shoots out a spear, holds, pulls it back | Cutter | ~100 m |
+| Spiked crusher | Two stone blocks with spiked faces sliding shut and open | Erasers | ~150 m |
+| Fire bar | A chain of fireballs turning all the way round a stone pivot (orange, or magic blue or green fire); its flames are thicker than a compass leg, so its hit box is too | Drawing compass | ~215 m |
+
+### 5.5 Removed obstacles (history)
 These were built and then removed at the player's request: the pen (drew a wall line from the side), the stylus (expanding ripple rings), the pencil sharpener (pulled the plane), the whiteout patch (hid hazards), thumbtack rows, the magnifying glass (its sun spot chased the plane), and in v37 the coffee spill (made the plane soggy) and the rubber stamp (slammed down on a marked spot). Avoid these kinds of mechanics in future obstacles.
 
 ---
@@ -274,6 +306,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Paper | During Paper runs | Light pastoral town theme in D minor: flute over flowing harp eighths (88 bpm, about 22 s loop) |
 | Deep sea | During Deep sea runs | Slow and dark in A minor: echoing harp, low lonely flute, deep bass (64 bpm, about 30 s loop) |
 | Space | During Space runs | Dreamy and floating: shimmering echoing harp over soft major-seventh chords and a slow, high, wavering lead (70 bpm, about 27 s loop) |
+| Dungeon | During Dungeon runs | Slow and mysterious in D minor: a low horn melody over echoing harp, with a soft drum on the downbeats (66 bpm, about 29 s loop) |
 
 - Themes cross-fade when they change. Pausing lowers the music to 30%; hiding the tab silences it.
 - The music sits below the sound effects (peaks about 0.08 against about 0.10 for a star chime).
@@ -285,10 +318,10 @@ Background music is composed and played in code (`js/music.js`), in the style of
 |---|---|---|
 | Sound on/off | Top bar (speaker icon, crossed out when muted) | Mutes sound effects and music together. Both are generated in code (Web Audio), with no audio files |
 | Pause / Resume | Top bar (pause icon, becomes a play icon while paused), Space bar, Esc (P no longer pauses since v67) | Also pauses automatically when the tab is hidden |
-| Map | Start and game-over screens | Paper / Deep sea picture tiles |
+| Map | Start and game-over screens | Paper / Deep sea / Space / Dungeon picture tiles |
 
 ### Saved data (browser localStorage)
-`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
+`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
 
 ---
 
@@ -325,13 +358,14 @@ airplane/
 ├── README.md               this document
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
-└── js/                     16 game scripts, listed in the order they load
+└── js/                     18 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
     ├── paper-background.js Paper map: pencil formulas by depth
     ├── sea-background.js   Deep sea map: fish, specks, whales, shipwrecks
     ├── space-background.js Space map: the Earth at the start, satellites, planets, comets, galaxies
+    ├── dungeon-background.js Dungeon map: the well opening, torches, bats, crystals, lava falls, dust and embers
     ├── state.js            game state, power-up levels, controls, speed and difficulty rules
     ├── obstacles.js        obstacle generators and row spawning, for all maps
     ├── physics.js          collision, obstacle movement, steering, per-frame update
@@ -339,6 +373,7 @@ airplane/
     ├── draw-paper.js       Paper obstacle art
     ├── draw-sea.js         Deep sea obstacle art
     ├── draw-space.js       Space obstacle art
+    ├── draw-dungeon.js     Dungeon obstacle art
     ├── render.js           plane, screen shake, frame drawing, map switching
     ├── ui.js               top bar, menus, start / pause / game over
     └── main.js             keyboard and touch input, main loop (loads last, starts the game)
@@ -359,11 +394,11 @@ There is no build step and nothing to install. To play locally, open `index.html
 | To change… | Look in |
 |---|---|
 | Speed, difficulty, controls, starting state | `js/state.js` (`baseFallSpeed`, `difficulty`, `HOLD_MS`, `reset`) |
-| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `spawnRow`) |
+| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_COLS`, `spawnRow`) |
 | How an obstacle moves or what counts as a hit | `js/physics.js` (`updateObstacle`, `computeShapes`) |
-| How an obstacle looks | `js/draw-paper.js` or `js/draw-sea.js` (`draw*` / `paint*`) |
-| Background decorations | `js/paper-background.js` (formulas) or `js/sea-background.js` (fish, specks, silhouettes) |
-| Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`) and the map tiles in `index.html` |
+| How an obstacle looks | `js/draw-paper.js`, `js/draw-sea.js`, `js/draw-space.js` or `js/draw-dungeon.js` (`draw*` / `paint*`) |
+| Background decorations | `js/paper-background.js` (formulas), `js/sea-background.js` (fish, specks, silhouettes), `js/space-background.js` or `js/dungeon-background.js` (scenery, specks, the opening at the start) |
+| Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`, `SPACE`, `DUNGEON`) and the map tiles in `index.html` |
 | Plane look | `js/core.js` (`PLANE` colours), `js/render.js` (`paintPlane`) |
 | Power-ups | `js/state.js` (`POWER_MAX`, `MAGNET_RANGES`, `POWER_GAP`, `SLOWMO_TIME`, `STAR_TIME`, `timeScale`), `js/obstacles.js` (`pickPower`), `js/physics.js` (`collectPower`, `useExtraLife`), `js/render.js` (`drawPower`, `paintPowerIcon`) |
 | Menus, top bar, buttons | `index.html`, `style.css`, `js/ui.js`; start-menu picture in `img/menu-bg.svg` |
@@ -386,6 +421,8 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `physics.js` | `computeShapes` / `shapes`, `circleHits` (circles, rotated boxes, convex polygons), `planeCircles`, `updateObstacle`, `steer`, `update`, `crash` |
 | `maps.js` | `MAPS`, `mapId`, `SEA`, `RAINBOW`, `isDark`, `syncHudPage`, `drawPaper`, `drawFormulas`, `drawDepthMarkers` |
 | `draw-paper.js` | Paper obstacle `draw*` / `paint*` functions (`drawRuler`, `paintPencil`, `drawScissors`, `drawFan`, `drawPaw`, …) |
+| `draw-dungeon.js` | `drawDungeonObstacle` (picks the art for each mechanic), `drawLedge`, `drawCrusher`, `drawSpikeBall`, `drawRockOutcrop`, `drawPlank`, `drawSkull`, `drawGhost`, `drawSpear`, `drawFireBar`, `drawDragonHead` |
+| `dungeon-background.js` | `DUNGEON_TIERS`, `spawnDungeonThing`, `wellOpeningY`, `drawDungeonDetails`, `drawDungeonParticles` (scenery joins the `FISH` table) |
 | `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
 | `render.js` | `paintPlane`, `drawPlane`, `syncPaperLayers`, `render`, `applyMap` |
 | `ui.js` | `updateHud`, `showCard`, `setXp`, `animateXp`, `start`, `pause`, `resume`, `gameOver` |
@@ -397,7 +434,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 | Command | What it does |
 |---|---|
-| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all three maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
+| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all four maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
 | `node tools/shot.js <notebook|sea> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
 | `node tools/shot.js title [sea]` | Title screen screenshot |
 | `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs) and the scripts into one page (for a single-file copy) |
@@ -446,7 +483,7 @@ New maps should reuse the 20 mechanics in section 6 with new art (see 11). Setti
 - **Kitchen:** falling past shelves, with knives (Wall Piston), a whisk (Spinning Blades), steam from pots (Effect Zone) and rolling oranges (Bouncing Slider).
 - **Library:** tall bookshelves as Gap Walls, a swinging reading lamp (Telegraphed Sweep), falling loose pages (Drifting Swarm) and a book cart conveyor.
 - **Space** (worked out in section 13): drifting asteroids (Static Hazards and Spinning Drifter), satellites with solar panels (Sweeping Arm), laser gates (Charged Beam) and solar wind bands (Push Zone).
-- **Dungeon** (brainstorm in section 14): stone ledges, pendulum blades, spear traps, fireballs and bat swarms, from a torch-lit well down to a lava-lit underworld.
+- **Dungeon** (built in v68 with 10 obstacles, see 4.4 and 5.4; brainstorm in section 14): stone ledges, pendulum blades, spear traps, fireballs and bat swarms, from a torch-lit well down to a lava-lit underworld.
 
 ### 12.6 Suggested order
 1. Best-depth line, "Crumpled by…", star paths (quick wins that change how runs feel).
@@ -538,7 +575,7 @@ About 12 of these would be a good set (Deep sea has 12).
 
 ---
 
-## 14. Dungeon map — brainstorm (not built yet)
+## 14. Dungeon map — brainstorm (first version built in v68, see 4.4 and 5.4)
 
 A fourth map, following the rule in 12.5: reuse the 20 mechanics in section 6 with new art.
 

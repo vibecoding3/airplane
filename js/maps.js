@@ -12,11 +12,14 @@ const pageTop = k => k * PAGE_M * PX_PER_M + planeScreenY();
 // deep sea: the water darkens every 100 m and stays at the darkest shade below 1,000 m
 const SEA = ['#c4ecf4', '#a3dcec', '#80c8e2', '#5daed3', '#3f92c0', '#2c76a6', '#205c88', '#18456b', '#123352', '#0d253d', '#091a2c'];
 // space: deep blue sky turning to black, then faintly tinted nebula darks, near-black below 1,000 m
+// dungeon: grey stone in the well, warm torch-lit browns, cold blue-purple caverns, then the red underworld
+const DUNGEON = ['#57514a', '#4a3f37', '#3d342e', '#332c27', '#262c38', '#20263a', '#1f1b30', '#19172a', '#2a1410', '#311410', '#36120b'];
 const SPACE = ['#2a5298', '#1a3570', '#10204a', '#0b1432', '#140f33', '#0a1b2e', '#1a0e2c', '#0c1533', '#120a28', '#0a1026', '#06070f'];
 const MAPS = {
   notebook: { name: 'Paper', colour: k => (k < 1 ? COL.paper : RAINBOW[(k - 1) % RAINBOW.length]), formulas: true },
   sea: { name: 'Deep sea', colour: k => SEA[clamp(k, 0, SEA.length - 1)], formulas: false },
-  space: { name: 'Space', colour: k => SPACE[clamp(k, 0, SPACE.length - 1)], formulas: false }
+  space: { name: 'Space', colour: k => SPACE[clamp(k, 0, SPACE.length - 1)], formulas: false },
+  dungeon: { name: 'Dungeon', colour: k => DUNGEON[clamp(k, 0, DUNGEON.length - 1)], formulas: false }
 };
 let mapId = MAPS[store.get('nosedive-map')] ? store.get('nosedive-map') : 'notebook';
 const pageColor = k => MAPS[mapId].colour(k);
@@ -29,8 +32,8 @@ let darkPage = false;
 
 let hudPage = '';
 function syncHudPage() {         // the HUD's fade matches the page colour behind it
-  // no fade while the Earth is still in view at the start of Space, so it isn't painted over
-  const earth = mapId === 'space' && earthLimbY() > -150;
+  // no fade while the Earth (Space) or the well's opening (Dungeon) is still in view, so it isn't painted over
+  const earth = (mapId === 'space' && earthLimbY() > -150) || (mapId === 'dungeon' && wellOpeningY() > -150);
   const c = earth ? 'transparent' : pageColor(pageIndexAt(dist + 40));
   if (c === hudPage) return;
   hudPage = c;
@@ -43,7 +46,7 @@ function syncHudPage() {         // the HUD's fade matches the page colour behin
 // (see syncPaperLayers); the canvas only adds the pencilled formulas and the depth markers
 function drawPaper() {
   if (MAPS[mapId].formulas) drawFormulas();
-  else { mapId === 'space' ? drawSpaceDetails() : drawSeaParticles(); drawFishes(); }
+  else { mapId === 'space' ? drawSpaceDetails() : mapId === 'dungeon' ? drawDungeonDetails() : drawSeaParticles(); drawFishes(); }
   drawDepthMarkers();
   drawBestLine();
 }

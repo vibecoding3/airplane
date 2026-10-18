@@ -166,6 +166,7 @@ function render() {
   for (const o of obstacles) {
     const sy = o.y - dist;
     if (sy < -120 || sy > H + 120) continue;
+    if (o.dungeon) { drawDungeonObstacle(o, sy); continue; }
     switch (o.type) {
       case 'gate': {
         const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
@@ -260,6 +261,7 @@ function render() {
 function applyMap() {
   world.classList.toggle('map-sea', mapId === 'sea');
   world.classList.toggle('map-space', mapId === 'space');
+  world.classList.toggle('map-dungeon', mapId === 'dungeon');
   best = bests[mapId];
   // swap the background decorations right away: clear them and refill from just above the screen
   formulas = []; fishes.length = 0; lastSceneryY = -1e9;

@@ -3,7 +3,7 @@
 //   node tools/test.js 800        (deep runs to 800 m, faster)
 const { openGame, wait } = require('./lib');
 const DEPTH = +process.argv[2] || 2500;
-const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per map; update when adding obstacles
+const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 10 };   // obstacle types per map; update when adding obstacles
 
 (async () => {
   const { browser, page, errors } = await openGame();
@@ -28,7 +28,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per m
   // and level up to 3, no errors
   const deep = await page.evaluate(depth => {
     const out = {};
-    for (const m of ['notebook', 'sea', 'space']) {
+    for (const m of ['notebook', 'sea', 'space', 'dungeon']) {
       mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0, slowmo: 0, superstar: 0 }, counted = new Set();
       let maxMagnet = 0, maxShield = 0;
       while (dist / PX_PER_M < depth && f < 60 * 1200) {
@@ -46,7 +46,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per m
     }
     return out;
   }, DEPTH);
-  for (const m of ['notebook', 'sea', 'space']) {
+  for (const m of ['notebook', 'sea', 'space', 'dungeon']) {
     const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})`);
@@ -57,7 +57,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per m
   // normal runs (3 lives) end in a game over
   const runs = await page.evaluate(() => {
     const out = [];
-    for (const m of ['notebook', 'sea', 'space']) {
+    for (const m of ['notebook', 'sea', 'space', 'dungeon']) {
       mapId = m; applyMap(); start(); plane.lives = 3; let f = 0;
       while (state !== 'over' && f < 60 * 300) {
         if (f % 45 === 0) { const s = Math.random() < 0.5 ? -1 : 1; press(s, 'sim'); release('sim'); }
