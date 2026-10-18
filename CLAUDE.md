@@ -1,6 +1,6 @@
 # Paper Nosedive — notes for Claude
 
-Browser game: a paper plane always falls; the player steers left/right to dodge obstacles; score = depth in metres. Four maps: **Paper** (internal id `notebook`), **Deep sea** (`sea`), **Space** (`space`) and **Dungeon** (`dungeon`, 10 obstacles so far). README.md is the full game spec — read only the section you need.
+Browser game: a paper plane always falls; the player steers left/right to dodge obstacles; score = depth in metres. Four maps: **Paper** (internal id `notebook`), **Deep sea** (`sea`), **Space** (`space`) and **Dungeon** (`dungeon`). README.md is the full game spec — read only the section you need.
 
 ## Files
 `index.html` (page + menus) · `style.css` · `js/*.js` (18 classic scripts, one shared global scope, run in the order `index.html` lists them; `main.js` last). README section 10 has the file map, a "where to change things" table and key names per file. Grep for a name rather than reading whole files.

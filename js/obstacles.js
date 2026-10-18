@@ -313,9 +313,11 @@ function spacePool(d) {
   if (d > 0.3) pool.push(['arm', 1.2]);
   return pool;
 }
-// Dungeon obstacles (v68): ten to start, each on an existing mechanic with dungeon art (draw-dungeon.js)
+// Dungeon obstacles: ten in v68, eight more in v70; each on an existing mechanic with dungeon art (draw-dungeon.js)
 const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots', rock: 'protractor', plank: 'pencil',
-                         skull: 'wad', ghosts: 'notes', spear: 'cutter', firebar: 'compass', dragon: 'glue' };
+                         skull: 'wad', ghosts: 'notes', spear: 'cutter', firebar: 'compass', dragon: 'glue',
+                         daggers: 'clips', saw: 'starfish', swords: 'scissors', runebeam: 'zap', skelarm: 'paw',
+                         curse: 'mine', draft: 'fan', web: 'band' };
 const DUNGEON_COLS = {
   gate: ['#b9ab8f', '#a9a59c', '#9fa88c', '#b5917a'],                         // stone ledges: sandstone, grey, mossy, red
   erasers: ['#9a958c', '#8f8476', '#a39a86'],                                 // crusher blocks
@@ -326,11 +328,23 @@ const DUNGEON_COLS = {
   note: ['#eef2ff', '#dff7e6', '#e2ecff'],                                    // ghosts
   cutter: ['#8f877a', '#9a958c', '#7f8288'],                                  // spear-trap wall blocks
   compass: ['orange', 'blue', 'green'],                                       // fire bars: normal or magic fire
-  glue: ['#5f8f6a', '#8a8378', '#a0503c']                                     // dragon statues: bronze, stone, red
+  glue: ['#5f8f6a', '#8a8378', '#a0503c'],                                    // dragon statues: bronze, stone, red
+  clips: ['#8a5a32', '#4a4f58', '#7a2a24'],                                   // dagger hilts: wood, iron, red leather
+  starfish: ['#c9ced6', '#b08a6a'],                                           // saw blades: steel, rusty
+  scissors: ['#e0b84a', '#9aa0a8', '#c0392b'],                                // sword hilts: gold, iron, red
+  zap: ['#b77cf0', '#4fe0a0', '#4ab8ff'],                                     // rune beams: purple, green, blue magic
+  paw: ['#efe6d0', '#e0d6bc'],                                                // skeleton arms
+  mine: ['#b77cf0', '#ff5a7a', '#4fe0a0']                                     // cursed runes
 };
-function dungeonPool(d) {
+function dungeonPool(d, y) {
   const pool = [['ledges', 3], ['spikeballs', 2], ['plank', 1 + 1.5 * d], ['rock', 1.4], ['skull', 1 + d]];
+  if (d > 0.05) pool.push(['web', 1.2]);
   if (d > 0.06) pool.push(['ghosts', 1.3]);
+  if (d > 0.08) pool.push(['saw', 1.2], ['daggers', 1.3]);
+  if (d > 0.12) pool.push(['swords', 0.6 + 1.6 * d]);
+  if (d > 0.12 && windAllowed(y)) pool.push(['draft', 1.1]);
+  if (d > 0.18) pool.push(['curse', 1.2]);
+  if (d > 0.2) pool.push(['runebeam', 1.2], ['skelarm', 1.3]);
   if (d > 0.1) pool.push(['dragon', 1.2]);
   if (d > 0.15) pool.push(['spear', 1.3]);
   if (d > 0.22) pool.push(['crusher', 1.4]);
@@ -364,7 +378,7 @@ function pickPower(y) {
 function spawnRow(y, d) {
   if (mapId === 'sea') return spawnFromPool(y, d, seaPool(d, y));
   if (mapId === 'space') return spawnFromPool(y, d, spacePool(d));
-  if (mapId === 'dungeon') return spawnFromPool(y, d, dungeonPool(d));
+  if (mapId === 'dungeon') return spawnFromPool(y, d, dungeonPool(d, y));
   const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
   if (d > 0.08) pool.push(['clips', 1.4]);
   if (d > 0.12) pool.push(['scissors', 0.6 + 1.6 * d]);

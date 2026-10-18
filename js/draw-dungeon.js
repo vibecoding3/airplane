@@ -28,6 +28,14 @@ function drawDungeonObstacle(o, sy) {
     case 'cutter': drawSpear(o, sy); break;
     case 'compass': drawFireBar(o, sy); break;
     case 'glue': drawDragonHead(o, sy); break;
+    case 'clips': for (const x of clipXs(o)) drawDagger(x, sy, o.v > 0 ? 1 : -1, o.dunCol); break;
+    case 'starfish': drawSawBlade(o, sy); break;
+    case 'scissors': drawSwords(o, sy); break;
+    case 'zap': drawRuneBeam(o, sy); break;
+    case 'paw': drawSkeletonArm(o, sy); break;
+    case 'mine': drawCurse(o, sy); break;
+    case 'fan': drawDraft(o, sy); break;
+    case 'band': drawWeb(o, sy); break;
   }
 }
 
@@ -249,4 +257,192 @@ function drawDragonHead(o, sy) {
     ctx.fillStyle = Math.floor(o.timer * 20) % 2 ? '#ff8a2a' : '#ffe07a';
     ctx.beginPath(); ctx.arc(wallX(o) + dir * 78, sy, 4, 0, Math.PI * 2); ctx.fill();
   }
+}
+
+// ---------- the second set (v70) ----------
+// flying daggers (Conveyor): a row of daggers crossing, each pointing the way the row moves (34 x 12 like a clip)
+function drawDagger(x, sy, dir, hilt = '#8a5a32') {
+  blit(sharedSprite('dagger' + dir + hilt, 40, 16, 20, 8, () => {
+    ctx.scale(dir, 1);
+    ctx.beginPath(); ctx.moveTo(-2, -3.5); ctx.lineTo(11, -3.5); ctx.lineTo(17, 0); ctx.lineTo(11, 3.5); ctx.lineTo(-2, 3.5); ctx.closePath();
+    ctx.fillStyle = '#d6dbe3'; ctx.fill(); dunStroke(1.2);
+    ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-1, 0); ctx.lineTo(13, 0); ctx.stroke();
+    ctx.fillStyle = '#e0b84a'; ctx.beginPath(); ctx.rect(-5, -6, 3, 12); ctx.fill(); dunStroke(1);           // crossguard
+    ctx.fillStyle = hilt; ctx.beginPath(); ctx.rect(-14, -2.5, 9, 5); ctx.fill(); dunStroke(1);              // grip
+    ctx.fillStyle = '#e0b84a'; ctx.beginPath(); ctx.arc(-15.5, 0, 2.8, 0, Math.PI * 2); ctx.fill(); dunStroke(1);
+  }), x, sy);
+}
+
+// a spinning saw blade (Spinning Drifter): fills its 20-unit hit circle, bouncing off the walls
+function drawSawBlade(o, sy) {
+  const col = o.dunCol || '#c9ced6';
+  blit(sharedSprite('saw' + col, 46, 46, 23, 23, () => {
+    const n = 14;
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const a = i / n * Math.PI * 2, b = (i + 0.7) / n * Math.PI * 2;
+      ctx.lineTo(Math.cos(a) * 16.5, Math.sin(a) * 16.5); ctx.lineTo(Math.cos(b) * 20, Math.sin(b) * 20);   // hooked teeth
+    }
+    ctx.closePath(); ctx.fillStyle = col; ctx.fill(); dunStroke(1.4);
+    ctx.strokeStyle = dunShade(0.3); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = dunShade(0.45);
+    for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI * 2; ctx.beginPath(); ctx.arc(Math.cos(a) * 7, Math.sin(a) * 7, 2, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#4a4f58'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill(); dunStroke(1);
+    ctx.fillStyle = dunLight(0.45); ctx.beginPath(); ctx.ellipse(-7, -8, 4, 2, -0.7, 0, Math.PI * 2); ctx.fill();
+  }), o.x, sy, o.rot);
+}
+
+// two crossed swords (Spinning Blades): spinning round a rivet and scissoring open and shut. Each blade
+// matches a scissor blade's hit box and each pommel its handle circle.
+function drawSwords(o, sy) {
+  const hilt = o.dunCol || '#e0b84a';
+  const sword = sharedSprite('sword' + hilt, 106, 26, 34, 13, () => {
+    ctx.beginPath(); ctx.moveTo(-6, -3.5); ctx.lineTo(58, -3.5); ctx.lineTo(66, 0); ctx.lineTo(58, 3.5); ctx.lineTo(-6, 3.5); ctx.closePath();
+    ctx.fillStyle = '#e1e5ea'; ctx.fill(); dunStroke(1.3);
+    ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-4, 0); ctx.lineTo(60, 0); ctx.stroke();
+    ctx.fillStyle = hilt; ctx.beginPath(); ctx.rect(-9, -7, 4, 14); ctx.fill(); dunStroke(1.1);                 // crossguard
+    ctx.fillStyle = '#5a3a22'; ctx.beginPath(); ctx.rect(-18, -2.5, 9, 5); ctx.fill(); dunStroke(1);           // grip
+    ctx.fillStyle = hilt; ctx.beginPath(); ctx.arc(-22, 0, 6, 0, Math.PI * 2); ctx.fill(); dunStroke(1.2);      // pommel
+  });
+  for (const s of [-1, 1]) blit(sword, o.x, sy, o.rot + s * o.open / 2);
+  ctx.fillStyle = '#4a4f58'; ctx.beginPath(); ctx.arc(o.x, sy, 3.2, 0, Math.PI * 2); ctx.fill(); dunStroke(1);
+}
+
+// a rune stone on the wall (Charged Beam): its rune glows and a dashed line shows the path, then a magic beam fires
+function drawRuneBeam(o, sy) {
+  const x0 = ZAP_BODY, L = o.len, col = o.dunCol || '#b77cf0';
+  ctx.save();
+  toolFrame(o, sy);
+  if (o.phase === 'charge') {
+    ctx.save();
+    ctx.strokeStyle = col; ctx.globalAlpha = 0.3 + 0.6 * Math.min(1, o.t / 0.7); ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + L, 0); ctx.stroke();
+    ctx.restore();
+  } else if (o.phase === 'zap') {
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = col; ctx.globalAlpha = 0.35; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + L, 0); ctx.stroke();
+    ctx.globalAlpha = 1; ctx.lineWidth = 5; ctx.stroke();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.6; ctx.stroke();
+  }
+  ctx.beginPath(); roundRectPath(-6, -9, x0 + 2, 18, 3); ctx.fillStyle = '#8f877a'; ctx.fill();
+  ctx.save(); ctx.clip(); ctx.fillStyle = dunLight(0.18); ctx.fillRect(-6, -9, x0 + 2, 4); ctx.restore();
+  ctx.beginPath(); roundRectPath(-6, -9, x0 + 2, 18, 3); dunStroke(1.5);
+  ctx.strokeStyle = o.phase === 'rest' ? 'rgba(40,30,50,.6)' : col; ctx.lineWidth = 1.8; ctx.lineCap = 'round';   // carved runes
+  ctx.beginPath();
+  ctx.moveTo(12, -5); ctx.lineTo(12, 5); ctx.moveTo(12, -5); ctx.lineTo(17, 0);
+  ctx.moveTo(26, -5); ctx.lineTo(31, 5); ctx.moveTo(31, -5); ctx.lineTo(26, 5);
+  ctx.moveTo(42, 5); ctx.lineTo(45, -5); ctx.lineTo(48, 5);
+  ctx.stroke();
+  ctx.fillStyle = o.phase === 'rest' ? '#3a2a40' : col; ctx.beginPath(); ctx.arc(x0 - 7, 0, 5, 0, Math.PI * 2); ctx.fill(); dunStroke(1.1);
+  ctx.restore();
+}
+
+// a skeleton arm (Telegraphed Sweep): a dashed wedge shows its reach, then it swipes out of a crack in the wall
+function drawSkeletonArm(o, sy) {
+  const bone = o.dunCol || '#efe6d0';
+  ctx.save();
+  toolFrame(o, sy);
+  ctx.fillStyle = '#120e0b'; ctx.beginPath(); ctx.moveTo(0, -16); ctx.lineTo(7, -6); ctx.lineTo(3, 0); ctx.lineTo(8, 8); ctx.lineTo(0, 16); ctx.closePath(); ctx.fill();   // the crack
+  if (o.phase === 'warn') {
+    const k = Math.min(1, o.t / o.warn);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(240,228,200,' + (0.3 + 0.55 * k) + ')'; ctx.lineWidth = 2.2; ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, o.L + 20, -PAW_SWEEP, PAW_SWEEP); ctx.closePath(); ctx.stroke();
+    ctx.restore();
+  }
+  if (o.ext > 0) {
+    const len = o.L * o.ext;
+    ctx.rotate(o.ang);
+    ctx.lineCap = 'round';
+    for (const y of [-5.5, 5.5]) {                 // the two forearm bones, filling most of the 22-unit hit box
+      ctx.strokeStyle = DUN_LINE; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(-10, y); ctx.lineTo(len - 12, y * 0.7); ctx.stroke();
+      ctx.strokeStyle = bone; ctx.lineWidth = 7; ctx.stroke();
+    }
+    ctx.fillStyle = bone;                           // knobbly joints at both ends
+    for (const [x, y] of [[-8, -6.5], [-8, 6.5], [len - 14, -4.5], [len - 14, 4.5]]) { ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill(); dunStroke(1.2); }
+    ctx.translate(len, 0);                          // the bony hand, inside the 18-unit tip circle
+    ctx.strokeStyle = DUN_LINE; ctx.lineWidth = 5.5;
+    const fingers = () => { ctx.beginPath(); for (const a of [-0.75, -0.25, 0.25, 0.75]) { ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 16, Math.sin(a) * 16); } ctx.moveTo(-2, 0); ctx.lineTo(4, -14); ctx.stroke(); };
+    fingers(); ctx.strokeStyle = bone; ctx.lineWidth = 3; fingers();
+    ctx.fillStyle = bone; ctx.beginPath(); ctx.arc(-1, 0, 7.5, 0, Math.PI * 2); ctx.fill(); dunStroke(1.3);
+  }
+  ctx.restore();
+}
+
+// a cursed rune (Proximity Blast): a floating stone disc whose rune flickers and shows its blast circle as the
+// plane comes near, then bursts in a ring of magic
+function drawCurse(o, sy) {
+  const col = o.dunCol || '#b77cf0';
+  if (o.phase === 'boom' || o.phase === 'gone') {
+    const t = o.phase === 'boom' ? o.t : 0.35 + o.t;
+    if (t > 0.65) return;
+    const r = o.blast * Math.min(1, t / 0.12), fade = t < 0.35 ? 1 : 1 - (t - 0.35) / 0.3;
+    ctx.save();
+    ctx.globalAlpha = 0.4 * fade; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(o.x, sy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = fade; ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.stroke();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(o.x, sy, r * 0.75, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+    return;
+  }
+  if (o.phase === 'blink') {                       // where the blast will reach
+    ctx.save();
+    ctx.strokeStyle = col; ctx.globalAlpha = 0.35 + 0.5 * Math.min(1, o.t / 0.6); ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.arc(o.x, sy, o.blast, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+  blit(sharedSprite('curseStone', 36, 36, 18, 18, () => {
+    ctx.fillStyle = '#5a5560'; ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); dunStroke(1.6);
+    ctx.fillStyle = dunLight(0.15); ctx.beginPath(); ctx.arc(-4, -4, 8, 0, Math.PI * 2); ctx.fill();
+  }), o.x, sy);
+  const on = o.phase === 'blink' ? Math.floor(o.t * 12) % 2 === 0 : true;
+  ctx.save();
+  ctx.globalAlpha = o.phase === 'blink' ? 1 : 0.55 + 0.35 * Math.sin(o.t * 3);
+  ctx.strokeStyle = on ? col : '#ffffff'; ctx.fillStyle = ctx.strokeStyle; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+  ctx.beginPath();                                                                           // a glowing cursed eye
+  ctx.moveTo(o.x - 10, sy); ctx.quadraticCurveTo(o.x, sy - 9, o.x + 10, sy); ctx.quadraticCurveTo(o.x, sy + 9, o.x - 10, sy);
+  ctx.stroke();
+  ctx.beginPath(); ctx.arc(o.x, sy, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+// a cold draft (Push Zone, before 700 m only): icy streaks blowing out of a frosted crack; nothing solid to hit
+function drawDraft(o, sy) {
+  const cx = o.side < 0 ? 0 : W, dir = -o.side;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(205,235,255,.6)'; ctx.fillStyle = 'rgba(230,245,255,.8)'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+  for (let k = 0; k < 6; k++) {
+    const yy = sy - o.band / 2 + (k + 0.5) * o.band / 6;
+    const run = (o.t * 170 + k * 71) % (W + 60);
+    const x0 = dir > 0 ? run - 30 : W - run + 30;
+    ctx.beginPath(); ctx.moveTo(x0, yy); ctx.quadraticCurveTo(x0 + dir * 18, yy - 5, x0 + dir * 36, yy); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x0 + dir * 46, yy + 3, 1.6, 0, Math.PI * 2); ctx.fill();      // a snowflake riding the gust
+  }
+  ctx.translate(cx, sy); ctx.scale(dir, 1);
+  ctx.fillStyle = '#120e0b'; ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(9, -14); ctx.lineTo(4, -2); ctx.lineTo(11, 12); ctx.lineTo(0, 30); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(220,240,255,.85)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(9, -14); ctx.lineTo(4, -2); ctx.lineTo(11, 12); ctx.lineTo(0, 30); ctx.stroke();
+  ctx.restore();
+}
+
+// a spider web strand (Spring Line): bounces the plane away; the two spiders holding it are what hurts
+function drawWeb(o, sy) {
+  const dy1 = o.y1 - o.y, dy2 = o.y2 - o.y;
+  const len = Math.hypot(o.x2 - o.x1, o.y2 - o.y1), nx = -(o.y2 - o.y1) / len, ny = (o.x2 - o.x1) / len;
+  const k = clamp((o.hitX - o.x1) / (o.x2 - o.x1), 0.1, 0.9);
+  const bend = Math.sin(o.t * 32) * o.wob * 14;
+  const cx = o.x1 + (o.x2 - o.x1) * k + nx * bend, cy = sy + dy1 + (dy2 - dy1) * k + ny * bend;
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'rgba(245,245,255,.9)'; ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.moveTo(o.x1, sy + dy1); ctx.quadraticCurveTo(cx, cy, o.x2, sy + dy2); ctx.stroke();
+  ctx.strokeStyle = 'rgba(245,245,255,.45)'; ctx.lineWidth = 1.2;                        // a looser second thread
+  ctx.beginPath(); ctx.moveTo(o.x1, sy + dy1); ctx.quadraticCurveTo(cx, cy + 6, o.x2, sy + dy2); ctx.stroke();
+  ctx.restore();
+  const spider = sharedSprite('spider', 24, 24, 12, 12, () => {
+    ctx.strokeStyle = '#1a1410'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.beginPath();
+    for (const s of [-1, 1]) for (const a of [-0.9, -0.3, 0.3, 0.9]) { ctx.moveTo(0, 0); ctx.lineTo(s * Math.cos(a) * 9, Math.sin(a) * 9); }
+    ctx.stroke();
+    ctx.fillStyle = '#2b2430'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill(); dunStroke(1.2);
+    ctx.fillStyle = '#ff4a3a'; for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(s * 2.2, -2, 1.2, 0, Math.PI * 2); ctx.fill(); }
+  });
+  blit(spider, o.x1, sy + dy1); blit(spider, o.x2, sy + dy2);
 }

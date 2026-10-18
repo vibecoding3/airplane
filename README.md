@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v69** (2026-10-18)
+Current version: **v70** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v69 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v70 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -207,8 +207,8 @@ Every Space obstacle reuses the movement and collision of a Paper or Deep sea ob
 | Battle station | A big grey sphere with a dish and a trench bulging in from a side (original design in a space-opera style) | Protractor | ~170 m |
 | Robot arm | A station arm with a claw swinging all the way round its base | Drawing compass | ~215 m |
 
-### 5.4 Dungeon map (10 kinds on 10 mechanics, since v68)
-A first set of ten; more can be added later from the list in section 14.3. Every Dungeon obstacle reuses the movement and collision of a Paper obstacle (see `DUNGEON_MAKERS` in `js/obstacles.js`) with new art in `js/draw-dungeon.js`, and every drawing stays inside its collision shape. The walls are dark, so obstacles are light stone, bone, wood and fire with a dark outline.
+### 5.4 Dungeon map (18 kinds on 18 mechanics: 10 in v68, 8 more in v70)
+Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (left out on purpose, see 14.3). Every Dungeon obstacle reuses the movement and collision of a Paper obstacle (see `DUNGEON_MAKERS` in `js/obstacles.js`) with new art in `js/draw-dungeon.js`, and every drawing stays inside its collision shape (a sword's crossguard pokes out a few units, harmlessly). The walls are dark, so obstacles are light stone, bone, wood and fire with a dark outline.
 
 | Dungeon obstacle | Behaviour | Based on | Starts at |
 |---|---|---|---|
@@ -222,6 +222,14 @@ A first set of ten; more can be added later from the list in section 14.3. Every
 | Spear trap | A stone block in the wall shoots out a spear, holds, pulls it back | Cutter | ~100 m |
 | Spiked crusher | Two stone blocks with spiked faces sliding shut and open | Erasers | ~150 m |
 | Fire bar | A chain of fireballs turning all the way round a stone pivot (orange, or magic blue or green fire); its flames are thicker than a compass leg, so its hit box is too | Drawing compass | ~215 m |
+| Spider web (v70) | A silk strand between two little spiders: the strand bounces the plane sideways, the spiders hurt | Rubber band | ~30 m |
+| Spinning saw blade (v70) | A toothed blade (steel or rusty) spinning as it drifts sideways, bouncing off the walls | Starfish | ~50 m |
+| Flying daggers (v70) | A row of daggers crossing the shaft, each pointing the way the row moves | Paper clips | ~50 m |
+| Crossed swords (v70) | Two swords spinning round a rivet and scissoring open and shut | Scissors | ~80 m |
+| Cold draft (v70) | Icy streaks and snowflakes blowing out of a frosted crack; pushes the plane sideways, nothing solid to hit. Only before 700 m, like all wind | Ocean current | ~80 m |
+| Cursed rune (v70) | A floating stone disc with a glowing eye: as the plane comes near it flickers and shows its blast circle, then bursts in a ring of magic (purple, pink or green) | Naval mine | ~120 m |
+| Rune beam (v70) | A rune stone on the wall: its runes light up and a dashed line shows the path, then a magic beam fires | Electric eel | ~135 m |
+| Skeleton arm (v70) | A dashed wedge shows its reach, then a bony arm swipes out of a crack in the wall | Cat paw | ~135 m |
 
 ### 5.5 Removed obstacles (history)
 These were built and then removed at the player's request: the pen (drew a wall line from the side), the stylus (expanding ripple rings), the pencil sharpener (pulled the plane), the whiteout patch (hid hazards), thumbtack rows, the magnifying glass (its sun spot chased the plane), and in v37 the coffee spill (made the plane soggy) and the rubber stamp (slammed down on a marked spot). Avoid these kinds of mechanics in future obstacles.
@@ -487,7 +495,7 @@ New maps should reuse the 20 mechanics in section 6 with new art (see 11). Setti
 - **Kitchen:** falling past shelves, with knives (Wall Piston), a whisk (Spinning Blades), steam from pots (Effect Zone) and rolling oranges (Bouncing Slider).
 - **Library:** tall bookshelves as Gap Walls, a swinging reading lamp (Telegraphed Sweep), falling loose pages (Drifting Swarm) and a book cart conveyor.
 - **Space** (worked out in section 13): drifting asteroids (Static Hazards and Spinning Drifter), satellites with solar panels (Sweeping Arm), laser gates (Charged Beam) and solar wind bands (Push Zone).
-- **Dungeon** (built in v68 with 10 obstacles, see 4.4 and 5.4; brainstorm in section 14): stone ledges, pendulum blades, spear traps, fireballs and bat swarms, from a torch-lit well down to a lava-lit underworld.
+- **Dungeon** (built in v68 and v70 with 18 obstacles, see 4.4 and 5.4; brainstorm in section 14): stone ledges, pendulum blades, spear traps, fireballs and bat swarms, from a torch-lit well down to a lava-lit underworld.
 
 ### 12.6 Suggested order
 1. Best-depth line, "Crumpled by…", star paths (quick wins that change how runs feel).
@@ -579,7 +587,7 @@ About 12 of these would be a good set (Deep sea has 12).
 
 ---
 
-## 14. Dungeon map — brainstorm (first version built in v68, see 4.4 and 5.4)
+## 14. Dungeon map — brainstorm (built: 10 obstacles in v68, the other 8 in v70; see 4.4 and 5.4)
 
 A fourth map, following the rule in 12.5: reuse the 20 mechanics in section 6 with new art.
 
