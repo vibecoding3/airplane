@@ -249,6 +249,19 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(shells.repeats === 0 && shells.seen >= 3 && (shells.seen < 6 || shells.after === 'plain urchins'),
     `Seashells collection: ${shells.seen}/6 seen in a run to 2,500 m, repeats ${shells.repeats}, an urchin row after all 6 is ${shells.after}`);
 
+  // Ranked Score: the best depths of every map added up, on the start and game-over screens
+  const ranked = await page.evaluate(() => {
+    const keep = { ...bests };
+    Object.assign(bests, { notebook: 800, sea: 260, space: 0, dungeon: 412 }); best = bests[mapId];
+    state = 'title'; showCard('title');
+    const title = $('menuRanked').textContent;
+    mapId = 'space'; applyMap(); start(); dist = 333 * PX_PER_M; gameOver();
+    const over = $('overRanked').textContent;
+    for (const m of Object.keys(keep)) { bests[m] = keep[m]; store.set('nosedive-best-' + m, String(keep[m])); }
+    return { title, over };
+  });
+  check(ranked.title === '1,472' && ranked.over === 'Ranked 1,805', `Ranked Score: start screen ${ranked.title}, after a new 333 m Space best "${ranked.over}"`);
+
   // the speedometer: the fall speed in m/s left of the frame rate during a run, gone outside a run
   await page.evaluate(() => { mapId = 'notebook'; applyMap(); start(); plane.invuln = 99; dist = 200 * PX_PER_M; });
   await wait(1200);

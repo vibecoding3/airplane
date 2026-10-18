@@ -14,6 +14,8 @@ if (store.get('nosedive-best-notebook') == null && +store.get('nosedive-best') >
   store.set('nosedive-best-notebook', String(bests.notebook));
 }
 let best = 0;
+// Ranked Score: the best depths of every map added up (a map not played yet counts as 0)
+const rankedScore = () => Object.values(bests).reduce((sum, b) => sum + b, 0);
 // medals per map, earned by reaching these depths
 const MEDALS = [{ id: 'bronze', name: 'Bronze', m: 250 }, { id: 'silver', name: 'Silver', m: 750 }, { id: 'gold', name: 'Gold', m: 1500 }];
 const medalsAnnounced = new Set();   // medals already celebrated this run

@@ -99,7 +99,7 @@ function showCard(which) {
   // the start menu sits on the sky picture instead of the map
   ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
   ui.overlay.classList.toggle('dim', !!which && state !== 'title');   // pause / game over: dim the game behind
-  if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); setXp($('titleXp'), levelInfo(xp), 0, true); syncCollectionButton(); }
+  if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); $('menuRanked').textContent = fmt(rankedScore()); setXp($('titleXp'), levelInfo(xp), 0, true); syncCollectionButton(); }
   if (which === 'title' || which === 'over') { renderMedals(); syncCollectionButton(); }
   const btn = which && ui[which].querySelector('.play, .primary');
   if (btn) btn.focus({ preventScroll: true });
@@ -177,6 +177,7 @@ function gameOver() {
   const { record, xpBefore, levelUp } = keepRunProgress(s);
   ui.overTitle.textContent = fmt(s) + ' m';
   ui.overBest.textContent = 'Best ' + fmt(best) + ' m';
+  $('overRanked').textContent = 'Ranked ' + fmt(rankedScore());
   ui.stamp.hidden = !record;
   ui.overBank.textContent = (stars ? '★ +' + stars + ' this run · ' : '') + '★ ' + fmt(bank) + ' in total';
   $('levelStamp').hidden = !levelUp;
