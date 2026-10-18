@@ -255,16 +255,19 @@ function paintPlanet(p, r) {
   ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); spaceStroke(1.6);
 }
 // a planet bulging in from the edge (Wall Bulge); Saturn's ring is drawn faint because only the planet is solid
+// a whole planet centred on (0, 0), with Saturn's faint ring behind and in front (also used by the Collections screen)
+function paintPlanetFull(name, r) {
+  const p = PLANETS[name];
+  if (p.ring) { ctx.globalAlpha = 0.45; ctx.strokeStyle = p.ring; ctx.lineWidth = r * 0.12; ctx.beginPath(); ctx.ellipse(0, 0, r * 1.8, r * 0.45, -0.3, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1; }
+  paintPlanet(p, r);
+  if (p.ring) {                                    // the front half of the ring over the planet
+    ctx.globalAlpha = 0.45; ctx.strokeStyle = p.ring; ctx.lineWidth = r * 0.12;
+    ctx.beginPath(); ctx.ellipse(0, 0, r * 1.8, r * 0.45, -0.3, 0.05 * Math.PI, 0.95 * Math.PI); ctx.stroke(); ctx.globalAlpha = 1;
+  }
+}
 function drawPlanetEdge(o, sy) {
-  const p = PLANETS[o.planet], cx = o.side < 0 ? 0 : W, R = o.r * 1.9;
-  blit(sharedSprite('planet-' + o.planet, R * 2, R * 2, R, R, () => {
-    if (p.ring) { ctx.globalAlpha = 0.45; ctx.strokeStyle = p.ring; ctx.lineWidth = o.r * 0.12; ctx.beginPath(); ctx.ellipse(0, 0, o.r * 1.8, o.r * 0.45, -0.3, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1; }
-    paintPlanet(p, o.r);
-    if (p.ring) {                                  // the front half of the ring over the planet
-      ctx.globalAlpha = 0.45; ctx.strokeStyle = p.ring; ctx.lineWidth = o.r * 0.12;
-      ctx.beginPath(); ctx.ellipse(0, 0, o.r * 1.8, o.r * 0.45, -0.3, 0.05 * Math.PI, 0.95 * Math.PI); ctx.stroke(); ctx.globalAlpha = 1;
-    }
-  }), cx, sy);
+  const cx = o.side < 0 ? 0 : W, R = o.r * 1.9;
+  blit(sharedSprite('planet-' + o.planet, R * 2, R * 2, R, R, () => paintPlanetFull(o.planet, o.r)), cx, sy);
 }
 
 // a black hole (static hazard): a black core inside a bright photon ring and a spinning accretion disc.

@@ -154,8 +154,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { found, saved, total: COLLECTION_TOTAL };
   });
-  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 11,
-    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 2 sets`);
+  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 19,
+    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 3 sets`);
   await page.evaluate(() => { state = 'title'; showCard('title'); });
   await page.click('#collBtn'); await wait(150);
   const collOpen = await page.evaluate(() => ({ shown: !$('collCard').hidden, tiles: document.querySelectorAll('.coll-item').length }));
@@ -163,7 +163,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   const stillTitle = await page.evaluate(() => state);
   await page.keyboard.press('Escape'); await wait(150);
   const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
-  check(collOpen.shown && collOpen.tiles === 11 && stillTitle === 'title' && closed,
+  check(collOpen.shown && collOpen.tiles === 19 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
   // control tips in the top bar: shown at the start of a run, gone past 100 m and outside a run
@@ -194,6 +194,25 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   });
   check(once.dups === 0 && (once.rings < 9 || !once.ringsInPool),
     `collectibles once per run: repeats ${once.dups}, rings seen ${once.rings}/9, rings still in the pool after all 9 ${once.rings === 9 ? once.ringsInPool : 'n/a'}`);
+
+  // the Planets collection: a planet on screen in a Space run unlocks; each planet once per run, and none after all 8
+  const planets = await page.evaluate(() => {
+    const keep = new Set(collectionFound); collectionFound.clear();
+    mapId = 'space'; applyMap(); start(); obstacles.length = 0; pickups.length = 0; nextRowY = 1e12;
+    make.planet(dist + 400, 0.5); render();
+    const unlocked = [...collectionFound].filter(id => id.startsWith('planet-')).length;
+    start(); const seen = new Map();
+    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
+      plane.invuln = 1; update(1 / 60);
+      for (const o of obstacles) if (o.look === 'planet') { if (!seen.has(o.planet)) seen.set(o.planet, new Set()); seen.get(o.planet).add(o); }
+    }
+    const repeats = [...seen.values()].filter(x => x.size > 1).length, inPool = spacePool(0.9).some(p => p[0] === 'planet');
+    gameOver();
+    collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
+    return { unlocked, seen: seen.size, repeats, inPool };
+  });
+  check(planets.unlocked === 1 && planets.repeats === 0 && (planets.seen < 8 || !planets.inPool),
+    `Planets collection: a planet on screen unlocks (${planets.unlocked}), ${planets.seen}/8 seen in a run, repeats ${planets.repeats}, still in the pool after all 8 ${planets.seen === 8 ? planets.inPool : 'n/a'}`);
 
   // the game-over screen has a Collections button too, and Back returns to game over
   await page.evaluate(() => { mapId = 'dungeon'; applyMap(); start(); gameOver(); });

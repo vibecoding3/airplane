@@ -242,6 +242,7 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
 .coll-set { background: rgba(255,255,255,.88); border: 2px solid var(--ink); border-radius: 16px; padding: 8px 10px 10px; text-align: left; }
 .coll-set h3 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 6px; font-family: var(--display); font-size: 20px; }
 .coll-set h3 b { font-size: 16px; font-variant-numeric: tabular-nums; }
+.coll-set h3 small { flex: 1; margin-left: 8px; font-family: var(--body); font-size: 15px; opacity: .7; }
 .coll-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
 .coll-item { aspect-ratio: 1; padding: 0; border: 2px solid var(--ink); border-radius: 10px; background: #3d3631; cursor: pointer; }
 .coll-item canvas { display: block; width: 100%; height: 100%; }

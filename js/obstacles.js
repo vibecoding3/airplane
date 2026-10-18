@@ -277,8 +277,11 @@ make.iss = (y, d) => {
     vx: (Math.random() < 0.5 ? -1 : 1) * rand(35, 60 + 80 * d) });
   return 20;
 };
+// planets are collectibles: each appears at most once per run, and they leave the Space pool once all 8 have
+const planetsLeft = () => Object.keys(PLANETS).filter(n => !runCollected.has('planet-' + n));
 make.planet = (y, d) => {
-  const names = Object.keys(PLANETS), name = names[ri(0, names.length - 1)];
+  const names = planetsLeft(), name = names[ri(0, names.length - 1)];
+  runCollected.add('planet-' + name);
   obstacles.push({ type: 'protractor', look: 'planet', planet: name, y, side: Math.random() < 0.5 ? -1 : 1, r: PLANETS[name].r });
   return PLANETS[name].r > 90 ? 70 : 40;
 };
@@ -303,7 +306,8 @@ const SPACE_COLS = {
   protractor: ['#d8d4c8', '#c9b9a6', '#b8c4d0']                               // moons
 };
 function spacePool(d) {
-  const pool = [['girders', 3], ['asteroids', 2], ['ice', 1.2], ['tumbler', 1.2], ['lowgrav', 1], ['gps', 1 + 1.2 * d], ['planet', 1.3]];
+  const pool = [['girders', 3], ['asteroids', 2], ['ice', 1.2], ['tumbler', 1.2], ['lowgrav', 1], ['gps', 1 + 1.2 * d]];
+  if (planetsLeft().length) pool.push(['planet', 1.3]);
   if (d > 0.06) pool.push(['rocket', 1.2]);
   if (d > 0.08) pool.push(['starlink', 1.3]);
   if (d > 0.1) pool.push(['moon', 0.9], ['iss', 1.2]);

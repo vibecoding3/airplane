@@ -5,11 +5,13 @@
 // are saved per device; locked ones show as a black silhouette in the menu. Completing a set gives no reward.
 const ringName = d => d[0].toUpperCase() + d.slice(1) + ' ring';
 const COLLECTIONS = [
-  { id: 'frieren', name: 'Frieren', items: [
+  { id: 'frieren', name: 'Frieren', map: 'Dungeon', bg: '#3d3631', items: [
     { id: 'staff-frieren', name: "Frieren's staff", slider: 'frieren' },
     { id: 'staff-fern', name: "Fern's staff", slider: 'fern' }
   ] },
-  { id: 'rings', name: 'Rings of Power', items: DUNGEON_SOLO.rings.cols.map(d => ({ id: 'ring-' + d, name: ringName(d), ring: d })) }
+  { id: 'rings', name: 'Rings of Power', map: 'Dungeon', bg: '#3d3631', items: DUNGEON_SOLO.rings.cols.map(d => ({ id: 'ring-' + d, name: ringName(d), ring: d })) },
+  { id: 'planets', name: 'Planets', map: 'Space', bg: '#141a3a',
+    items: ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].map(n => ({ id: 'planet-' + n, name: n[0].toUpperCase() + n.slice(1), planet: n })) }
 ];
 const COLLECTION_TOTAL = COLLECTIONS.reduce((n, set) => n + set.items.length, 0);
 let collectionFound;
@@ -19,7 +21,8 @@ try { collectionFound = new Set(JSON.parse(store.get('nosedive-collection') || '
 function noteFound(o, sy) {
   if (state !== 'play' || sy < 0 || sy > H) return;
   const id = o.type === 'pencil' && (o.look === 'frieren' || o.look === 'fern') ? 'staff-' + o.look
-           : o.look === 'ring' ? 'ring-' + o.dunCol : null;
+           : o.look === 'ring' ? 'ring-' + o.dunCol
+           : o.look === 'planet' ? 'planet-' + o.planet : null;
   if (!id || collectionFound.has(id)) return;
   collectionFound.add(id);
   store.set('nosedive-collection', JSON.stringify([...collectionFound]));
@@ -34,6 +37,10 @@ function paintCollectionItem(canvas, item, locked, wide) {
     if (item.ring) {
       const k = Hc / 40; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintRing(item.ring);
+    } else if (item.planet) {                       // every planet drawn the same size; Saturn smaller so its ring fits
+      const ring = !!PLANETS[item.planet].ring, k = Math.min(Hc * (ring ? 0.34 : 0.4), Wc * (ring ? 0.25 : 0.4)) / 50;
+      g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintPlanetFull(item.planet, 50);
     } else {
       const k = wide ? Wc / 180 : Wc / 125; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       if (!wide) g.rotate(-Math.PI / 4);             // a long staff fits a square tile on the diagonal
@@ -53,7 +60,8 @@ function renderCollections() {
   box.replaceChildren();
   if (collPick) {
     const d = document.createElement('div'); d.className = 'coll-detail';
-    const c = document.createElement('canvas'); c.width = 560; c.height = collPick.item.ring ? 240 : 140;   // staffs are long and thin
+    d.style.background = collPick.set.bg;
+    const c = document.createElement('canvas'); c.width = 560; c.height = collPick.item.slider ? 140 : 240;   // staffs are long and thin
     paintCollectionItem(c, collPick.item, false, true);
     const name = document.createElement('div'); name.className = 'coll-name'; name.textContent = collPick.item.name;
     const set = document.createElement('div'); set.className = 'coll-setname'; set.textContent = collPick.set.name + ' collection';
@@ -64,12 +72,14 @@ function renderCollections() {
     const n = set.items.filter(it => collectionFound.has(it.id)).length;
     const sec = document.createElement('section'); sec.className = 'coll-set';
     const h = document.createElement('h3');
-    h.innerHTML = `<span></span><b>${n} / ${set.items.length}</b>`; h.firstChild.textContent = set.name;
+    h.innerHTML = `<span></span><small></small><b>${n} / ${set.items.length}</b>`;
+    h.children[0].textContent = set.name; h.children[1].textContent = set.map;
     const grid = document.createElement('div'); grid.className = 'coll-grid';
     for (const item of set.items) {
       const found = collectionFound.has(item.id);
       const b = document.createElement('button'); b.type = 'button';
       b.className = 'coll-item' + (found ? '' : ' locked');
+      if (found) b.style.background = set.bg;
       b.disabled = !found;
       b.setAttribute('aria-label', found ? item.name : 'Not found yet');
       b.title = found ? item.name : 'Not found yet';
