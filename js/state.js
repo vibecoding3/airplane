@@ -32,6 +32,14 @@ const POWER_GAP = 45 * PX_PER_M;           // at least ~45 m between power-ups
 let lastPowerY = 0;
 // stars caught in runs are added to a saved total
 let bank = +store.get('nosedive-bank') || 0;
+// experience: every metre of a run is 1 XP, saved across runs and maps; each level needs 200 XP more than the last
+let xp = +store.get('nosedive-xp') || 0;
+const xpNeed = lvl => 300 + 200 * (lvl - 1);     // XP from level lvl to lvl + 1: 300, 500, 700, ...
+function levelInfo(total) {
+  let level = 1;
+  while (total >= xpNeed(level)) { total -= xpNeed(level); level++; }
+  return { level, into: total, need: xpNeed(level) };
+}
 let titleTime = 0;
 let passedBest = false;          // this run has gone deeper than the saved best
 let lastMilestone = 0, flash = 0, flashCol = '';   // 100 m milestones and their screen flash

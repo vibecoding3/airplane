@@ -69,6 +69,18 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per m
   });
   check(runs.every(r => r.includes('(over)')), 'normal runs end in game over: ' + runs.join(', '));
 
+  // experience: a run's metres are added as XP; levels need 300, 500, 700, ... XP; a level up shows the stamp
+  const xpRes = await page.evaluate(() => {
+    const keep = xp;
+    const curve = [0, 299, 300, 799, 800, 1500].map(t => levelInfo(t).level).join(',');
+    xp = 250; mapId = 'notebook'; applyMap(); start(); dist = 234 * PX_PER_M; gameOver();
+    const gained = xp, stamp = !$('levelStamp').hidden, saved = +store.get('nosedive-xp'), shown = $('overXp').textContent;
+    xp = keep; store.set('nosedive-xp', String(keep));
+    return { curve, gained, stamp, saved, shown };
+  });
+  check(xpRes.curve === '1,1,2,2,3,4' && xpRes.gained === 484 && xpRes.saved === 484 && xpRes.stamp && xpRes.shown.includes('+234 XP'),
+    `experience: levels ${xpRes.curve}, 250 + 234 m = ${xpRes.gained} XP (saved ${xpRes.saved}), level-up stamp ${xpRes.stamp}, shows "${xpRes.shown}"`);
+
   // drifting into an edge, then one press the other way turns the plane at once (not straight down)
   const edge = await page.evaluate(() => {
     mapId = 'notebook'; applyMap(); start();

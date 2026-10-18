@@ -46,6 +46,35 @@ function renderMedals() {
     box.setAttribute('aria-label', got.length ? 'Medals: ' + got.join(', ') : 'No medals yet');
   }
 }
+// experience box: level badge, bar toward the next level, "into / need XP" (plus this run's gain on game over)
+function xpBox(box) {
+  if (!box.firstChild) box.innerHTML = '<span class="xp-lvl"><small>Level</small><b></b></span><span class="xp-track"><i class="xp-fill"></i></span><span class="xp-num"></span>';
+  return { lvl: box.querySelector('.xp-lvl b'), fill: box.querySelector('.xp-fill'), num: box.querySelector('.xp-num') };
+}
+function setXp(box, info, gain, instant) {
+  const el = xpBox(box);
+  el.lvl.textContent = info.level;
+  el.fill.classList.toggle('instant', !!instant);
+  el.fill.style.width = (100 * info.into / info.need) + '%';
+  el.num.innerHTML = (gain ? `<b>+${fmt(gain)} XP</b> · ` : '') + `${fmt(info.into)} / ${fmt(info.need)} XP`;
+  box.setAttribute('aria-label', `Level ${info.level}, ${info.into} of ${info.need} XP to the next level`);
+}
+// game over: the bar fills from where it was; on a level up it fills to the end, then starts the new level
+let xpTimer = 0;
+function animateXp(box, before, gain) {
+  clearTimeout(xpTimer);
+  const a = levelInfo(before), b = levelInfo(before + gain);
+  if (reduceMotion || !gain) { setXp(box, b, gain, true); return; }
+  setXp(box, a, gain, true);
+  void box.offsetWidth;                        // let the starting width apply before animating
+  if (b.level === a.level) { setXp(box, b, gain); return; }
+  setXp(box, { ...a, into: a.need }, gain);
+  xpTimer = setTimeout(() => {
+    setXp(box, { ...b, into: 0 }, gain, true);
+    void box.offsetWidth;
+    setXp(box, b, gain);
+  }, 650);
+}
 function showCard(which) {
   ui.overlay.hidden = !which;
   ui.title.hidden = which !== 'title';
@@ -54,7 +83,7 @@ function showCard(which) {
   // the start menu sits on the sky picture instead of the map
   ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
   ui.overlay.classList.toggle('dim', !!which && state !== 'title');   // pause / game over: dim the game behind
-  if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); }
+  if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); setXp($('titleXp'), levelInfo(xp), 0, true); }
   if (which === 'title' || which === 'over') renderMedals();
   const btn = which && ui[which].querySelector('.play, .primary');
   if (btn) btn.focus({ preventScroll: true });
@@ -115,7 +144,13 @@ function gameOver() {
   ui.stamp.hidden = !record;
   if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
   ui.overBank.textContent = (stars ? '★ +' + stars + ' this run · ' : '') + '★ ' + fmt(bank) + ' in total';
+  // the run's metres become experience
+  const xpBefore = xp, levelUp = levelInfo(xp + s).level > levelInfo(xp).level;
+  xp += s; store.set('nosedive-xp', String(xp));
+  $('levelStamp').hidden = !levelUp;
+  if (levelUp) { $('levelStamp').textContent = 'Level up! Level ' + levelInfo(xp).level; setTimeout(sfx.levelup, 500); }
   showCard('over');
+  animateXp($('overXp'), xpBefore, s);
 }
 
 for (const b of document.querySelectorAll('[data-map]')) {

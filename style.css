@@ -186,6 +186,24 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
 }
 .menu-note { margin: -4px 0 0; font-size: 18px; color: #ffffff; -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill; }
 
+/* experience: a level badge beside a bar filling toward the next level */
+.xp {
+  display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 10px; text-align: left;
+  background: rgba(255,255,255,.85); border: 2px solid var(--ink); border-radius: 16px; padding: 6px 12px 5px 6px;
+}
+.xp-lvl {
+  grid-row: span 2; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
+  background: #ffd23f; border: 3px solid var(--ink); font-family: var(--display); font-weight: 700; line-height: 1;
+}
+.xp-lvl small { font-size: 9px; letter-spacing: .02em; text-transform: uppercase; margin-bottom: -10px; }
+.xp-lvl b { font-size: 21px; }
+.xp-track { height: 14px; border: 2px solid var(--ink); border-radius: 999px; background: #ffffff; overflow: hidden; }
+.xp-fill { display: block; height: 100%; width: 0; background: #6cc04a; transition: width .6s ease-out; }
+.xp-fill.instant { transition: none; }
+.xp-num { font-size: 15px; font-variant-numeric: tabular-nums; }
+.xp-num b { font-family: var(--display); color: #3f8f22; }
+#levelStamp { background: #8fdc6a; margin-top: -4px; }
+
 /* milestone bounce of the depth counter (every 100 m, bigger every 500 m) */
 .hud .depth { transform-origin: left center; }
 .hud .depth.pop { animation: depth-pop .45s ease-out; }
