@@ -22,17 +22,18 @@ function paintPlane(c, bank) {
   c.beginPath(); c.moveTo(0, 20); c.lineTo(0, -12); c.lineWidth = 1; c.stroke();
 }
 
-// blue outline around the plane while it has a shield; its look shows the shield level
+// outline around the plane while it has a shield; its look shows the shield level
 const SHIELD_LOOKS = [null,
-  { col: '#9fd8ff', w: 3 },                                   // level 1: pale sky blue, thin
-  { col: '#2f8fe0', w: 4.5 },                                 // level 2: bright blue
-  { col: '#1c4fb8', w: 5, glow: 'rgba(80,160,255,.3)' }      // level 3: deep blue with a soft glow
+  { col: '#6cc0f7', w: 3 },                                   // level 1: light blue, thin
+  { col: '#1c3fa8', w: 4.5, edge: 'rgba(255,255,255,.85)' }, // level 2: dark blue, white edge so it shows in space
+  { col: '#8b3fe0', w: 5, glow: 'rgba(160,90,255,.3)' }      // level 3: violet with a soft glow
 ];
 function paintLifeOutline(c, lvl = 2) {
   const s = SHIELD_LOOKS[clamp(lvl, 1, 3)];
   planeOutline(c);
   c.lineJoin = 'round';
   if (s.glow) { c.strokeStyle = s.glow; c.lineWidth = 10; c.stroke(); }
+  if (s.edge) { c.strokeStyle = s.edge; c.lineWidth = s.w + 3; c.stroke(); }
   c.strokeStyle = s.col; c.lineWidth = s.w; c.stroke();
 }
 
