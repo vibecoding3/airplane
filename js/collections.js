@@ -84,11 +84,14 @@ function renderCollections() {
     box.append(sec);
   }
 }
+// the Collections button sits on the start screen and on the game-over screen; Back returns to whichever opened it
 function syncCollectionButton() {
-  $('collBtn').textContent = `Collections · ${collectionFound.size}/${COLLECTION_TOTAL}`;
+  for (const b of document.querySelectorAll('.coll-open')) b.textContent = `Collections · ${collectionFound.size}/${COLLECTION_TOTAL}`;
 }
-function openCollections() { collPick = null; renderCollections(); showCard('coll'); }
+let collFrom = 'title';
+function openCollections() { collFrom = state === 'over' ? 'over' : 'title'; collPick = null; renderCollections(); showCard('coll'); }
+function closeCollections() { showCard(collFrom); }
 
-$('collBtn').addEventListener('click', openCollections);
-$('collBack').addEventListener('click', () => showCard('title'));
+for (const b of document.querySelectorAll('.coll-open')) b.addEventListener('click', openCollections);
+$('collBack').addEventListener('click', closeCollections);
 syncCollectionButton();

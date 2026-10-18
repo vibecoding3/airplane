@@ -166,6 +166,14 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(collOpen.shown && collOpen.tiles === 11 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
+  // the game-over screen has a Collections button too, and Back returns to game over
+  await page.evaluate(() => { mapId = 'dungeon'; applyMap(); start(); gameOver(); });
+  await page.click('#overCollBtn'); await wait(150);
+  const fromOver = await page.evaluate(() => !$('collCard').hidden);
+  await page.click('#collBack'); await wait(150);
+  const backToOver = await page.evaluate(() => !$('overCard').hidden && $('titleCard').hidden);
+  check(fromOver && backToOver, `Collections from the game-over screen: opens ${fromOver}, Back returns to game over ${backToOver}`);
+
   // the Dungeon's magic rings: their own obstacle in the pool, built on the Rising Projectile (paper wad), one of 9 designs
   const rings = await page.evaluate(() => {
     mapId = 'dungeon'; applyMap(); start(); obstacles.length = 0;

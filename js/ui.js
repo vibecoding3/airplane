@@ -85,7 +85,7 @@ function showCard(which) {
   ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
   ui.overlay.classList.toggle('dim', !!which && state !== 'title');   // pause / game over: dim the game behind
   if (which === 'title') { $('menuBest').textContent = fmt(best); $('menuBank').textContent = fmt(bank); setXp($('titleXp'), levelInfo(xp), 0, true); syncCollectionButton(); }
-  if (which === 'title' || which === 'over') renderMedals();
+  if (which === 'title' || which === 'over') { renderMedals(); syncCollectionButton(); }
   const btn = which && ui[which].querySelector('.play, .primary');
   if (btn) btn.focus({ preventScroll: true });
 }
