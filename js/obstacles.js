@@ -330,6 +330,9 @@ const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots'
                          daggers: 'clips', saw: 'starfish', swords: 'scissors', runebeam: 'zap', skelarm: 'paw',
                          curse: 'mine', draft: 'fan', web: 'band', flamethrower: 'cutter', rings: 'wad' };
 // obstacles that always have one look, with their own spawn chance (v81): a flamethrower is a Wall Piston whose flame shoots out
+// Origami collection (Paper map): sticky-note variants, each at most once per run
+const ORIGAMI = ['crane', 'frog', 'boat', 'star', 'fox', 'butterfly'];
+const origamiLeft = () => ORIGAMI.filter(n => !runCollected.has('origami-' + n));
 // collectibles appear at most once per run: the ring designs and the two anime staffs not yet seen this run
 const ringsLeft = () => DUNGEON_SOLO.rings.cols.filter(d => !runCollected.has('ring-' + d));
 const COLLECTIBLE_LOOKS = { frieren: 'staff-frieren', fern: 'staff-fern' };
@@ -447,6 +450,9 @@ function spawnFromPool(y, d, pool) {
       const cols = SPACE_COLS[o.type];
       if (cols) o.spaceCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
       if (o.look === 'station') o.r = rand(95, 110);
+    } else if (mapId === 'notebook' && o.type === 'note') {
+      const left = origamiLeft();
+      if (left.length && Math.random() < 0.5) { o.origami = left[ri(0, left.length - 1)]; runCollected.add('origami-' + o.origami); }
     } else if (mapId === 'dungeon') {
       o.dungeon = true;
       const looks = DUNGEON_LOOKS[o.type], solo = DUNGEON_SOLO[type];

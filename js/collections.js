@@ -10,6 +10,8 @@ const COLLECTIONS = [
     { id: 'staff-fern', name: "Fern's staff", slider: 'fern' }
   ] },
   { id: 'rings', name: 'Rings of Power', map: 'Dungeon', bg: '#3d3631', items: DUNGEON_SOLO.rings.cols.map(d => ({ id: 'ring-' + d, name: ringName(d), ring: d })) },
+  { id: 'origami', name: 'Origami', map: 'Paper', bg: '#fbf9f1',
+    items: ORIGAMI.map(n => ({ id: 'origami-' + n, name: n[0].toUpperCase() + n.slice(1), origami: n })) },
   { id: 'planets', name: 'Planets', map: 'Space', bg: '#141a3a',
     items: ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].map(n => ({ id: 'planet-' + n, name: n[0].toUpperCase() + n.slice(1), planet: n })) }
 ];
@@ -22,7 +24,8 @@ function noteFound(o, sy) {
   if (state !== 'play' || sy < 0 || sy > H) return;
   const id = o.type === 'pencil' && (o.look === 'frieren' || o.look === 'fern') ? 'staff-' + o.look
            : o.look === 'ring' ? 'ring-' + o.dunCol
-           : o.look === 'planet' ? 'planet-' + o.planet : null;
+           : o.look === 'planet' ? 'planet-' + o.planet
+           : o.origami ? 'origami-' + o.origami : null;
   if (!id || collectionFound.has(id)) return;
   collectionFound.add(id);
   store.set('nosedive-collection', JSON.stringify([...collectionFound]));
@@ -37,6 +40,9 @@ function paintCollectionItem(canvas, item, locked, wide) {
     if (item.ring) {
       const k = Hc / 40; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintRing(item.ring);
+    } else if (item.origami) {
+      const k = Hc / 52; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintOrigami(item.origami);
     } else if (item.planet) {                       // every planet drawn the same size; Saturn smaller so its ring fits
       const ring = !!PLANETS[item.planet].ring, k = Math.min(Hc * (ring ? 0.34 : 0.4), Wc * (ring ? 0.25 : 0.4)) / 50;
       g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
@@ -60,7 +66,7 @@ function renderCollections() {
   box.replaceChildren();
   if (collPick) {
     const d = document.createElement('div'); d.className = 'coll-detail';
-    d.style.background = collPick.set.bg;
+    d.style.background = collPick.set.bg; d.style.color = collPick.set.id === 'origami' ? '#22356b' : '#ffffff';
     const c = document.createElement('canvas'); c.width = 560; c.height = collPick.item.slider ? 140 : 240;   // staffs are long and thin
     paintCollectionItem(c, collPick.item, false, true);
     const name = document.createElement('div'); name.className = 'coll-name'; name.textContent = collPick.item.name;

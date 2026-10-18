@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v101** (2026-10-18)
+Current version: **v102** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v101 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v102 · 60 fps`) shows the version and the live frame rate; during a run it also shows the plane's current fall speed in m/s, left of the frame rate (since v102, for example `v102 · 11.5 m/s · 60 fps`; slow motion halves it). The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -361,12 +361,13 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
 - **Feedback:** "Magnet level 2!", "Shield level 3!", "Slow motion!", "Invincible!" or "Speed boost!" pops up in the power's colour, with a burst of sparks and a chime. Since v72 the message appears just under the plane and follows it as it fades, so it is easy to read (before, it stayed where the power-up was caught and scrolled up past the plane). Since v75 "Shield used!" appears there too. On dark maps every pop-up text (power-ups, shield saves, the "100 m!" milestones, medals, "New best!" and "+1 ★") gets a light outline so the coloured text stays readable (since v78; power-up messages only in v75). Using a shield shows "Shield used! N left".
 - **Stars:** stars caught in a run are added to a saved total when the run ends. The top bar shows the total during a run. Since v74 two gold stars never spawn less than 50 m apart (`STAR_GAP` in `js/state.js`), which roughly halved how many appear: about 1 every 50–100 m instead of every 25–35 m. Power-ups are not counted as stars.
 - **Experience and levels** (since v65): every metre of a run is 1 XP, added to a saved total when the run ends (on any map). The player starts at level 1; level 1 → 2 needs 300 XP and each level after needs 200 XP more than the one before (300, 500, 700, 900 …, so level 5 at 2,400 XP and level 10 at 9,900 XP). The start screen shows a yellow level badge beside a green bar and "440 / 700 XP" toward the next level. The game-over screen shows the same box with "+234 XP", the bar filling up; on a level up it fills to the end, starts over at the new level, and a green "Level up! Level N" badge appears with a rising fanfare. Change the curve in `js/state.js` (`xpNeed`).
-- **Collections** (since v88): a "Collections · N/19" button under Play on the start screen (since v89 also under Play again on the game-over screen; it was in the pause menu in v97–v98, removed in v99 because of a bug) opens a screen of sets of special obstacles. An item is found the first time it appears on screen during a run (even if you then crash into it); found items are saved per device. Locked items show as black silhouettes, found ones in full colour with the game's own art, and tapping one shows it large with its name. No pop-up when something is found and no reward for completing a set (player's choice). Since v92 collectibles appear at most once per run: each staff and each ring design spawns once (two rings in one row get different designs), and once both staffs have appeared the Bouncing Slider only uses its other looks. Since v98 the rule is the same for every set: collectibles are obstacles with a specific variant which only appear once per run, and when all collectibles of an obstacle have appeared, the obstacle still appears with its regular variants. Once all 9 rings have appeared (usually by 700–1,000 m), ring spawns become regular Rising Projectiles (skull, jack-o'-lantern, slime ball, potion). Since v94 each set panel names its map, and the screen says "Find these in your runs to unlock them." The Collections screen says "Collectibles are obstacles that only appear once per run." (`runCollected` in `js/state.js`, `ringsLeft` in `js/obstacles.js`). Esc or Back returns to the screen it was opened from. Sets (`COLLECTIONS` in `js/collections.js`):
+- **Collections** (since v88): a "Collections · N/25" button under Play on the start screen (since v89 also under Play again on the game-over screen; it was in the pause menu in v97–v98, removed in v99 because of a bug) opens a screen of sets of special obstacles. An item is found the first time it appears on screen during a run (even if you then crash into it); found items are saved per device. Locked items show as black silhouettes, found ones in full colour with the game's own art, and tapping one shows it large with its name. No pop-up when something is found and no reward for completing a set (player's choice). Since v92 collectibles appear at most once per run: each staff and each ring design spawns once (two rings in one row get different designs), and once both staffs have appeared the Bouncing Slider only uses its other looks. Since v98 the rule is the same for every set: collectibles are obstacles with a specific variant which only appear once per run, and when all collectibles of an obstacle have appeared, the obstacle still appears with its regular variants. Once all 9 rings have appeared (usually by 700–1,000 m), ring spawns become regular Rising Projectiles (skull, jack-o'-lantern, slime ball, potion). Since v94 each set panel names its map, and the screen says "Find these in your runs to unlock them." The Collections screen says "Collectibles are obstacles that only appear once per run." (`runCollected` in `js/state.js`, `ringsLeft` in `js/obstacles.js`). Esc or Back returns to the screen it was opened from. Sets (`COLLECTIONS` in `js/collections.js`):
 
   | Set | Items |
   |---|---|
   | Frieren | Frieren's staff, Fern's staff (Dungeon, Bouncing Slider looks) |
   | Rings of Power | The 9 Dungeon magic rings: emerald, sapphire, ruby, crystal, amethyst, amber, skull, zigzag, leaf |
+  | Origami (v102) | Six folded-paper figures on the Paper map: crane, frog, boat, star, fox, butterfly (Drifting Swarm variants of the sticky notes, faceted in three paper tones). In a sticky-note row each note has a 50% chance to be an origami not yet seen this run; once all 6 have appeared the notes are plain sticky notes again |
   | Planets (v94) | The 8 Space planets, Mercury to Neptune (Wall Bulge). Each appears at most once per run; once all 8 have, planet spawns become regular moon edges (since v98; in v94 planets stopped). In the menu they are drawn whole (Saturn with its ring) on a dark-space background |
 
 - **Plane:** one classic white paper plane; the crumpled ball and paper scraps match it. There are no skins (removed in v42) and no trail (removed in v36).
@@ -803,7 +804,7 @@ Ideas for new Collections sets (see Collections in section 7). The best fit is o
 
 ### 17.2 New art, existing mechanics
 
-- **Paper · Origami (6):** a paper crane, frog, boat, star, fox and butterfly drifting down the page (Drifting Swarm, like the sticky notes). Fits a game about a paper plane.
+- ✅ **Built in v102.** **Paper · Origami (6):** a paper crane, frog, boat, star, fox and butterfly drifting down the page (Drifting Swarm, like the sticky notes). Fits a game about a paper plane.
 - **Ocean · Seashells (6):** a conch, scallop, nautilus, cowrie, sand dollar and a pearl in an open oyster, resting in the water (Static Hazards, like the sea urchins).
 - **Ocean · Legendary fish (5):** a golden fish, a narwhal, a coelacanth, a giant squid eye and a ghost shark (Spinning Drifter, like the starfish).
 - **Space · Space probes (5):** Sputnik, Voyager, Hubble, the Apollo capsule and a Mars rover (Bouncing Slider, like the GPS satellite).

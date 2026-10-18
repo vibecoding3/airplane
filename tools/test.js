@@ -154,8 +154,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { found, saved, total: COLLECTION_TOTAL };
   });
-  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 19,
-    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 3 sets`);
+  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 25,
+    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 4 sets`);
   await page.evaluate(() => { state = 'title'; showCard('title'); });
   await page.click('#collBtn'); await wait(150);
   const collOpen = await page.evaluate(() => ({ shown: !$('collCard').hidden, tiles: document.querySelectorAll('.coll-item').length }));
@@ -163,7 +163,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   const stillTitle = await page.evaluate(() => state);
   await page.keyboard.press('Escape'); await wait(150);
   const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
-  check(collOpen.shown && collOpen.tiles === 19 && stillTitle === 'title' && closed,
+  check(collOpen.shown && collOpen.tiles === 25 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
   // control tips in the top bar: shown at the start of a run, gone past 100 m and outside a run
@@ -216,6 +216,31 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   });
   check(planets.unlocked === 1 && planets.repeats === 0 && (planets.seen < 8 || planets.after === 'moon'),
     `Planets collection: a planet on screen unlocks (${planets.unlocked}), ${planets.seen}/8 seen in a run, repeats ${planets.repeats}, a planet spawn after all 8 is a ${planets.after}`);
+
+  // the Origami collection: sticky-note variants on Paper, each once per run, plain sticky notes once all 6 have appeared
+  const orig = await page.evaluate(() => {
+    mapId = 'notebook'; applyMap(); start(); const seen = new Map();
+    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
+      plane.invuln = 1; update(1 / 60);
+      for (const o of obstacles) if (o.origami) { if (!seen.has(o.origami)) seen.set(o.origami, new Set()); seen.get(o.origami).add(o); }
+    }
+    const repeats = [...seen.values()].filter(x => x.size > 1).length;
+    let after = 'n/a';
+    if (seen.size === 6) { const i = obstacles.length; lastType = ''; spawnFromPool(dist + 900, 0.9, [['notes', 1]]); after = obstacles.slice(i).every(o => !o.origami) ? 'plain notes' : 'origami'; }
+    gameOver();
+    return { seen: seen.size, repeats, after };
+  });
+  check(orig.repeats === 0 && orig.seen >= 3 && (orig.seen < 6 || orig.after === 'plain notes'),
+    `Origami collection: ${orig.seen}/6 seen in a run to 2,500 m, repeats ${orig.repeats}, a note row after all 6 is ${orig.after}`);
+
+  // the speedometer: the fall speed in m/s left of the frame rate during a run, gone outside a run
+  await page.evaluate(() => { mapId = 'notebook'; applyMap(); start(); plane.invuln = 99; dist = 200 * PX_PER_M; });
+  await wait(1200);
+  const runLabel = await page.evaluate(() => document.getElementById('version').textContent);
+  await page.evaluate(() => { gameOver(); });
+  await wait(1200);
+  const overLabel = await page.evaluate(() => document.getElementById('version').textContent);
+  check(/ · \d+\.\d m\/s · \d+ fps$/.test(runLabel) && !overLabel.includes('m/s'), `speedometer: "${runLabel}" during a run, "${overLabel}" after it`);
 
   // the game-over screen has a Collections button too, and Back returns to game over
   await page.evaluate(() => { mapId = 'dungeon'; applyMap(); start(); gameOver(); });

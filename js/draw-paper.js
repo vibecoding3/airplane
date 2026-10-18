@@ -466,7 +466,51 @@ function drawProtractor(o, sy) {
   const s = ownSprite(o, 'spr', R * 2, R * 2 + 4, R, R - 2, () => { ctx.translate(-cx, 0); paintProtractor(o, 0); });
   blit(s, cx, sy);
 }
+// origami figures (Origami collection, v102): sticky-note variants on the Paper map, inside its 42-unit square.
+// Each is a few flat paper facets in a light, a mid and a dark tone with an ink outline.
+const ORIGAMI_COLS = {
+  crane: ['#fbe9ef', '#f2c0d0', '#e094ad'], frog: ['#d3eebf', '#9fd387', '#6fb35d'], boat: ['#dbeaf8', '#a9cdf0', '#6fa7de'],
+  star: ['#fff4b8', '#fde27a', '#efc04a'], fox: ['#ffd8b0', '#f7a35a', '#e07a2a'], butterfly: ['#ebdcfa', '#c9a8f0', '#9a6fd8']
+};
+function paintOrigami(name) {
+  const [lt, md, dk] = ORIGAMI_COLS[name] || ORIGAMI_COLS.crane;
+  const facet = (col, pts) => { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); inkStroke(1.5); };
+  // the shorter figures are stretched to fill the square they collide as
+  const FIT = { crane: [4, 1.35], frog: [3, 1.4], boat: [3, 1.25], butterfly: [0, 1.3] }[name];
+  ctx.save(); if (FIT) { ctx.translate(0, FIT[0]); ctx.scale(1, FIT[1]); }
+  if (name === 'crane') {
+    facet(dk, [[-18, 0], [0, 10], [18, 0], [0, 4]]);                    // body
+    facet(lt, [[-3, 3], [-13, -19], [-1, -2]]);                          // wings up
+    facet(md, [[3, 3], [13, -19], [1, -2]]);
+    facet(md, [[-13, 2], [-20, -11], [-17, -13], [-10, 0]]);             // neck and head
+    facet(lt, [[13, 2], [20, -9], [17, -1]]);                            // tail
+  } else if (name === 'frog') {
+    facet(md, [[-14, 12], [14, 12], [10, -4], [-10, -4]]);               // body
+    facet(lt, [[-10, -4], [0, -16], [10, -4]]);                          // head
+    facet(dk, [[-14, 12], [-21, 5], [-11, 2]]); facet(dk, [[14, 12], [21, 5], [11, 2]]);   // back legs
+    ctx.fillStyle = '#ffffff'; for (const x of [-5, 5]) { ctx.beginPath(); ctx.arc(x, -8, 2.6, 0, Math.PI * 2); ctx.fill(); inkStroke(1); }
+    ctx.fillStyle = COL.ink; for (const x of [-5, 5]) { ctx.beginPath(); ctx.arc(x, -8, 1.1, 0, Math.PI * 2); ctx.fill(); }
+  } else if (name === 'boat') {
+    facet(md, [[-20, 2], [20, 2], [13, 14], [-13, 14]]);                 // hull
+    facet(lt, [[-12, 2], [0, -18], [0, 2]]); facet(dk, [[0, 2], [0, -18], [12, 2]]);   // sail, folded down the middle
+  } else if (name === 'star') {
+    const p = i => { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 8 : 20; return [Math.cos(a) * r, Math.sin(a) * r + 1]; };
+    for (let i = 0; i < 10; i++) facet(i % 2 ? md : lt, [[0, 1], p(i), p(i + 1)]);   // ten facets around the centre
+  } else if (name === 'fox') {
+    facet(md, [[-18, -10], [18, -10], [0, 16]]);                         // face
+    facet(dk, [[-18, -10], [-13, -21], [-6, -10]]); facet(dk, [[18, -10], [13, -21], [6, -10]]);   // ears
+    facet(lt, [[-18, -10], [-6, -10], [-4, 4]]); facet(lt, [[18, -10], [6, -10], [4, 4]]);   // white cheeks
+    ctx.fillStyle = COL.ink; for (const x of [-6, 6]) { ctx.beginPath(); ctx.arc(x, -4, 1.6, 0, Math.PI * 2); ctx.fill(); }
+    ctx.beginPath(); ctx.arc(0, 13, 1.8, 0, Math.PI * 2); ctx.fill();
+  } else {                                                               // butterfly
+    facet(lt, [[0, -1], [-20, -15], [-14, 4]]); facet(lt, [[0, -1], [20, -15], [14, 4]]);   // upper wings
+    facet(md, [[0, 0], [-16, 6], [-6, 16]]); facet(md, [[0, 0], [16, 6], [6, 16]]);         // lower wings
+    facet(dk, [[-2, -10], [2, -10], [2, 12], [-2, 12]]);                 // body
+  }
+  ctx.restore();
+}
 function drawNote(o, sy) {
+  if (o.origami) { blit(sharedSprite('origami-' + o.origami, 48, 48, 24, 24, () => paintOrigami(o.origami)), o.x, sy, o.rot); return; }
   blit(ownSprite(o, 'spr', 56, 58, 26, 26, () => paintNote({ ...o, x: 0, rot: 0 }, 0)), o.x, sy, o.rot);
 }
 function drawClip(x, sy, col) {

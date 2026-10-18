@@ -74,7 +74,10 @@ let fpsFrames = 0, fpsSince = performance.now();
 function countFrame(now) {
   fpsFrames++;
   if (now - fpsSince < 500) return;
-  versionEl.textContent = `${VERSION} · ${Math.round(fpsFrames * 1000 / (now - fpsSince))} fps`;
+  // during a run the plane's real fall speed (slow motion halves it) sits left of the frame rate
+  const running = state === 'play' || state === 'paused' || state === 'dying';
+  const mps = running ? `${(speed * (state === 'play' ? timeScale() : 1) / PX_PER_M).toFixed(1)} m/s · ` : '';
+  versionEl.textContent = `${VERSION} · ${mps}${Math.round(fpsFrames * 1000 / (now - fpsSince))} fps`;
   fpsFrames = 0; fpsSince = now;
 }
 
