@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v86** (2026-10-18)
+Current version: **v87** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v86 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v87 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -259,7 +259,7 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Rune beam (v70) | A rune stone on the wall: its runes light up and a dashed line shows the path, then a magic beam fires | Electric eel | ~135 m |
 | Skeleton arm (v70) | A dashed wedge shows its reach, then a bony arm swipes out of a crack in the wall | Cat paw | ~135 m |
 | Flamethrower (v81) | An iron nozzle in the wall with a flickering blue pilot light; a jet of flame shoots out, holds, then dies back. Its own obstacle (own spawn chance), always this look | Cutter | ~120 m |
-| Magic rings (v86) | Cartoon rings after a sheet of fantasy rings, thrown up the shaft spinning and bouncing off the walls. 9 designs: emerald (gold, big green gem), sapphire (silver, blue oval), ruby (gold, red gem with two side gems), crystal (silver, long blue crystal), amethyst (dark, a row of purple gems), amber (silver, orange hexagon), skull (dark, skull with purple eyes), zigzag (gold, engraved), leaf (silver, green leaves). Its own obstacle (own spawn chance) | Paper wad | ~65 m |
+| Magic rings (v86) | Cartoon rings after a sheet of fantasy rings, thrown up the shaft spinning and bouncing off the walls. 9 designs: emerald (gold, big green gem), sapphire (silver, blue oval), ruby (gold, red gem with two side gems), crystal (silver, long blue crystal), amethyst (dark, a row of purple gems), amber (silver, orange hexagon), skull (dark, skull with purple eyes), zigzag (gold, engraved), leaf (silver, green leaves). Its own obstacle; since v87 its spawn weight is 3 (was 1.2), so rings are about 10% of rows, as common as the stone ledges, about 5–6 rings per run to 500 m | Paper wad | ~65 m |
 
 **Looks and colours** (since v73): every Dungeon obstacle comes in two to five different objects that share its mechanic and hit box, each in a few colours (64 looks in all; 12 Halloween and goblin looks added in v80, two anime staffs in v82; `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
 
@@ -719,7 +719,7 @@ A review of the whole game after v75. Nothing here goes against the player decis
 **Smaller things noticed along the way:**
 - In Space, an Earth planet obstacle can appear right after the plane leaves the real Earth; it could be blocked for the first 100 m.
 - The speed boost goes 10% past the top-speed cap (v55); it could be limited if the cap should always hold.
-- Two test checks fail at random now and then (the desk fan, which only appears before 700 m, and the power-up counts in short 800 m runs); making them reliable means a failure always means something real.
+- Two test checks fail at random now and then (the desk fan, which only appears before 700 m, and the power-up counts in short 800 m runs); making them reliable means a failure always means something real. ✅ The wind check is fixed in v87: when a deep run misses its wind obstacle, the test looks again in up to 6 short runs to 760 m. The short-run power-up counts can still miss.
 - Dungeon has 18 obstacle types against 12–16 on the other maps; worth a few play-throughs to see if it feels harder, and if so its obstacles could unlock a little later.
 
 **Suggested first three:** 1 (a purpose for stars and levels), 2 ("Crumpled by…") and 4 (readability).

@@ -44,12 +44,24 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
       }
       out[m] = { depth: Math.round(dist / PX_PER_M), types: [...seen].sort(), powers, maxMagnet, maxShield };
     }
+    // wind obstacles (desk fan, ocean current, cold draft) only spawn before 700 m, so one run misses them about
+    // 1 time in 10–15 by chance: look again in up to 6 short runs to 760 m before calling it missing
+    for (const m of ['notebook', 'sea', 'dungeon']) {
+      const types = out[m].types;
+      for (let tries = 0; tries < 6 && !types.includes('fan'); tries++) {
+        mapId = m; applyMap(); start();
+        for (let f = 0; f < 60 * 300 && dist / PX_PER_M < 760; f++) {
+          plane.invuln = 1; update(1 / 60);
+          if (obstacles.some(o => o.type === 'fan')) { types.push('fan'); types.sort(); out[m].windRetries = tries + 1; break; }
+        }
+      }
+    }
     return out;
   }, DEPTH);
   for (const m of ['notebook', 'sea', 'space', 'dungeon']) {
     const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
-      `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})`);
+      `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})` + (d.windRetries ? ` (wind found on extra run ${d.windRetries})` : ''));
     check(d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && d.powers.superstar > 0 && d.powers.boost > 0 && (DEPTH < 1500 || (d.maxMagnet === 3 && d.maxShield === 3)),
       `${m}: power-ups spawned (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}, star ${d.powers.superstar}, boost ${d.powers.boost}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
   }

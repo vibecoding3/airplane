@@ -355,7 +355,7 @@ function dungeonPool(d, y) {
   if (d > 0.18) pool.push(['curse', 1.2]);
   if (d > 0.2) pool.push(['runebeam', 1.2], ['skelarm', 1.3]);
   if (d > 0.18) pool.push(['flamethrower', 1.2]);
-  if (d > 0.1) pool.push(['rings', 1.2]);
+  if (d > 0.1) pool.push(['rings', 3]);            // weight raised from 1.2 in v87 so rings show up about as often as ledges
   if (d > 0.1) pool.push(['dragon', 1.2]);
   if (d > 0.15) pool.push(['spear', 1.3]);
   if (d > 0.22) pool.push(['crusher', 1.4]);
