@@ -188,12 +188,13 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
       }
     }
     const dups = [...seen].filter(([, s]) => s.size > 1).length, rings = [...seen.keys()].filter(k => k.startsWith('ring-')).length;
-    const ringsInPool = dungeonPool(0.9, dist).some(p => p[0] === 'rings');
+    let after = 'n/a';                          // once all 9 rings are out, a ring spawn is a regular Rising Projectile
+    if (rings === 9) { const i = obstacles.length; lastType = ''; spawnFromPool(dist + 900, 0.9, [['rings', 1]]); after = obstacles[i] && obstacles[i].look; }
     gameOver();
-    return { dups, rings, ringsInPool };
+    return { dups, rings, after };
   });
-  check(once.dups === 0 && (once.rings < 9 || !once.ringsInPool),
-    `collectibles once per run: repeats ${once.dups}, rings seen ${once.rings}/9, rings still in the pool after all 9 ${once.rings === 9 ? once.ringsInPool : 'n/a'}`);
+  check(once.dups === 0 && (once.rings < 9 || ['skull', 'pumpkin', 'slime', 'potion'].includes(once.after)),
+    `collectibles once per run: repeats ${once.dups}, rings seen ${once.rings}/9, a ring spawn after all 9 is a ${once.after}`);
 
   // the Planets collection: a planet on screen in a Space run unlocks; each planet once per run, and none after all 8
   const planets = await page.evaluate(() => {
@@ -206,13 +207,15 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
       plane.invuln = 1; update(1 / 60);
       for (const o of obstacles) if (o.look === 'planet') { if (!seen.has(o.planet)) seen.set(o.planet, new Set()); seen.get(o.planet).add(o); }
     }
-    const repeats = [...seen.values()].filter(x => x.size > 1).length, inPool = spacePool(0.9).some(p => p[0] === 'planet');
+    const repeats = [...seen.values()].filter(x => x.size > 1).length;
+    let after = 'n/a';                          // once all 8 planets are out, a planet spawn is a regular moon edge
+    if (seen.size === 8) { const i = obstacles.length; lastType = ''; spawnFromPool(dist + 900, 0.9, [['planet', 1]]); after = obstacles[i] && obstacles[i].look; }
     gameOver();
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
-    return { unlocked, seen: seen.size, repeats, inPool };
+    return { unlocked, seen: seen.size, repeats, after };
   });
-  check(planets.unlocked === 1 && planets.repeats === 0 && (planets.seen < 8 || !planets.inPool),
-    `Planets collection: a planet on screen unlocks (${planets.unlocked}), ${planets.seen}/8 seen in a run, repeats ${planets.repeats}, still in the pool after all 8 ${planets.seen === 8 ? planets.inPool : 'n/a'}`);
+  check(planets.unlocked === 1 && planets.repeats === 0 && (planets.seen < 8 || planets.after === 'moon'),
+    `Planets collection: a planet on screen unlocks (${planets.unlocked}), ${planets.seen}/8 seen in a run, repeats ${planets.repeats}, a planet spawn after all 8 is a ${planets.after}`);
 
   // the pause menu has a Collections button too: the run stays paused, Back returns to the pause menu
   await page.evaluate(() => { mapId = 'notebook'; applyMap(); start(); plane.invuln = 99; pause(); });

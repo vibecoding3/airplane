@@ -277,10 +277,17 @@ make.iss = (y, d) => {
     vx: (Math.random() < 0.5 ? -1 : 1) * rand(35, 60 + 80 * d) });
   return 20;
 };
-// planets are collectibles: each appears at most once per run, and they leave the Space pool once all 8 have
+// planets are collectibles: each appears at most once per run; once all 8 have, a planet spawn becomes a regular
+// Wall Bulge (a moon edge), so the obstacle keeps appearing with its regular variant
 const planetsLeft = () => Object.keys(PLANETS).filter(n => !runCollected.has('planet-' + n));
 make.planet = (y, d) => {
-  const names = planetsLeft(), name = names[ri(0, names.length - 1)];
+  const names = planetsLeft();
+  if (!names.length) {
+    const before = obstacles.length, extra = make.protractor(y, d);
+    for (let i = before; i < obstacles.length; i++) obstacles[i].look = 'moon';
+    return extra;
+  }
+  const name = names[ri(0, names.length - 1)];
   runCollected.add('planet-' + name);
   obstacles.push({ type: 'protractor', look: 'planet', planet: name, y, side: Math.random() < 0.5 ? -1 : 1, r: PLANETS[name].r });
   return PLANETS[name].r > 90 ? 70 : 40;
@@ -307,7 +314,7 @@ const SPACE_COLS = {
 };
 function spacePool(d) {
   const pool = [['girders', 3], ['asteroids', 2], ['ice', 1.2], ['tumbler', 1.2], ['lowgrav', 1], ['gps', 1 + 1.2 * d]];
-  if (planetsLeft().length) pool.push(['planet', 1.3]);
+  pool.push(['planet', 1.3]);
   if (d > 0.06) pool.push(['rocket', 1.2]);
   if (d > 0.08) pool.push(['starlink', 1.3]);
   if (d > 0.1) pool.push(['moon', 0.9], ['iss', 1.2]);
@@ -362,7 +369,7 @@ function dungeonPool(d, y) {
   if (d > 0.18) pool.push(['curse', 1.2]);
   if (d > 0.2) pool.push(['runebeam', 1.2], ['skelarm', 1.3]);
   if (d > 0.18) pool.push(['flamethrower', 1.2]);
-  if (d > 0.1 && ringsLeft().length) pool.push(['rings', 3]);   // weight 3 since v87; gone once all 9 rings have appeared this run
+  if (d > 0.1) pool.push(['rings', 3]);            // weight 3 since v87; regular Rising Projectile looks once all 9 rings have appeared
   if (d > 0.1) pool.push(['dragon', 1.2]);
   if (d > 0.15) pool.push(['spear', 1.3]);
   if (d > 0.22) pool.push(['crusher', 1.4]);
@@ -445,8 +452,9 @@ function spawnFromPool(y, d, pool) {
       const looks = DUNGEON_LOOKS[o.type], solo = DUNGEON_SOLO[type];
       if (type === 'rings') {
         const left = ringsLeft();
-        if (!left.length) { o.drop = true; continue; }
-        o.look = 'ring'; o.dunCol = left[ri(0, left.length - 1)]; runCollected.add('ring-' + o.dunCol);
+        if (left.length) { o.look = 'ring'; o.dunCol = left[ri(0, left.length - 1)]; runCollected.add('ring-' + o.dunCol); continue; }
+        const names = Object.keys(DUNGEON_LOOKS.wad);     // all 9 seen: a regular Rising Projectile instead
+        o.look = names[ri(0, names.length - 1)]; o.dunCol = DUNGEON_LOOKS.wad[o.look][ri(0, DUNGEON_LOOKS.wad[o.look].length - 1)];
         continue;
       }
       if (solo && !rowSea[o.type]) rowSea[o.type] = [solo.look, solo.cols[ri(0, solo.cols.length - 1)]];
@@ -460,7 +468,6 @@ function spawnFromPool(y, d, pool) {
       if (o.type === 'compass') o.hh = 7;        // the fire bar's flames are thicker than a compass leg
     }
   }
-  prune(obstacles, o => !o.drop);
   if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
