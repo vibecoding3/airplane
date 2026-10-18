@@ -319,6 +319,9 @@ const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots'
                          daggers: 'clips', saw: 'starfish', swords: 'scissors', runebeam: 'zap', skelarm: 'paw',
                          curse: 'mine', draft: 'fan', web: 'band', flamethrower: 'cutter', rings: 'wad' };
 // obstacles that always have one look, with their own spawn chance (v81): a flamethrower is a Wall Piston whose flame shoots out
+// collectibles appear at most once per run: the ring designs and the two anime staffs not yet seen this run
+const ringsLeft = () => DUNGEON_SOLO.rings.cols.filter(d => !runCollected.has('ring-' + d));
+const COLLECTIBLE_LOOKS = { frieren: 'staff-frieren', fern: 'staff-fern' };
 const FRIEREN_HEAD = 11;          // radius of the head of Frieren's staff (drawn in draw-dungeon.js, hit area in physics.js)
 const DUNGEON_SOLO = { flamethrower: { look: 'flamethrower', cols: ['#4a4f58', '#5e4a3a'] },
   // magic rings thrown up the shaft (Rising Projectile, v86); each colour entry is a ring design (RING_DESIGNS in draw-dungeon.js)
@@ -355,7 +358,7 @@ function dungeonPool(d, y) {
   if (d > 0.18) pool.push(['curse', 1.2]);
   if (d > 0.2) pool.push(['runebeam', 1.2], ['skelarm', 1.3]);
   if (d > 0.18) pool.push(['flamethrower', 1.2]);
-  if (d > 0.1) pool.push(['rings', 3]);            // weight raised from 1.2 in v87 so rings show up about as often as ledges
+  if (d > 0.1 && ringsLeft().length) pool.push(['rings', 3]);   // weight 3 since v87; gone once all 9 rings have appeared this run
   if (d > 0.1) pool.push(['dragon', 1.2]);
   if (d > 0.15) pool.push(['spear', 1.3]);
   if (d > 0.22) pool.push(['crusher', 1.4]);
@@ -436,9 +439,16 @@ function spawnFromPool(y, d, pool) {
     } else if (mapId === 'dungeon') {
       o.dungeon = true;
       const looks = DUNGEON_LOOKS[o.type], solo = DUNGEON_SOLO[type];
+      if (type === 'rings') {
+        const left = ringsLeft();
+        if (!left.length) { o.drop = true; continue; }
+        o.look = 'ring'; o.dunCol = left[ri(0, left.length - 1)]; runCollected.add('ring-' + o.dunCol);
+        continue;
+      }
       if (solo && !rowSea[o.type]) rowSea[o.type] = [solo.look, solo.cols[ri(0, solo.cols.length - 1)]];
       if (looks && !rowSea[o.type]) {
-        const names = Object.keys(looks), look = names[ri(0, names.length - 1)], cols = looks[look];
+        const names = Object.keys(looks).filter(l => !runCollected.has(COLLECTIBLE_LOOKS[l])), look = names[ri(0, names.length - 1)], cols = looks[look];
+        if (COLLECTIBLE_LOOKS[look]) runCollected.add(COLLECTIBLE_LOOKS[look]);
         rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
       }
       if (looks) [o.look, o.dunCol] = rowSea[o.type];
@@ -446,6 +456,7 @@ function spawnFromPool(y, d, pool) {
       if (o.type === 'compass') o.hh = 7;        // the fire bar's flames are thicker than a compass leg
     }
   }
+  prune(obstacles, o => !o.drop);
   if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });

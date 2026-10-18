@@ -35,6 +35,8 @@ const POWER_GAP = 45 * PX_PER_M;           // at least ~45 m between power-ups
 let lastPowerY = 0;
 const STAR_GAP = 50 * PX_PER_M;            // gold stars are at least 50 m apart
 let lastStarY = -1e9;
+// collectibles (the Collections items) spawned this run: each appears at most once per run (ids as in collections.js)
+const runCollected = new Set();
 // stars caught in runs are added to a saved total
 let bank = +store.get('nosedive-bank') || 0;
 // experience: every metre of a run is 1 XP, saved across runs and maps; each level needs 200 XP more than the last
@@ -83,7 +85,7 @@ function reset() {
   plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, slowmo: 0, star: 0, boost: 0, invuln: 0, bubbled: 0 };
   obstacles = []; pickups = []; particles = []; floaters = [];
   dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
-  nextRowY = H + 140; lastPowerY = 0; lastStarY = -1e9; passedBest = false; lastMilestone = 0; flash = 0; medalsAnnounced.clear();
+  nextRowY = H + 140; lastPowerY = 0; lastStarY = -1e9; runCollected.clear(); passedBest = false; lastMilestone = 0; flash = 0; medalsAnnounced.clear();
   formulas = []; nextFormulaY = 60; usedFormulas.clear(); fishes.length = 0; lastSceneryY = -1e9;
 }
 reset();

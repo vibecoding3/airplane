@@ -177,6 +177,24 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   });
   check(hint.atStart && hint.past && hint.after, `control tips: shown at the start ${hint.atStart}, hidden past 100 m ${hint.past}, hidden after the run ${hint.after}`);
 
+  // collectibles appear at most once per run; once all 9 rings have appeared, rings leave the pool
+  const once = await page.evaluate(() => {
+    mapId = 'dungeon'; applyMap(); start(); const seen = new Map();
+    for (let f = 0; f < 60 * 700 && dist / PX_PER_M < 1800; f++) {
+      plane.invuln = 1; update(1 / 60);
+      for (const o of obstacles) {
+        const id = o.look === 'ring' ? 'ring-' + o.dunCol : (o.look === 'frieren' || o.look === 'fern') ? 'staff-' + o.look : null;
+        if (id) { if (!seen.has(id)) seen.set(id, new Set()); seen.get(id).add(o); }
+      }
+    }
+    const dups = [...seen].filter(([, s]) => s.size > 1).length, rings = [...seen.keys()].filter(k => k.startsWith('ring-')).length;
+    const ringsInPool = dungeonPool(0.9, dist).some(p => p[0] === 'rings');
+    gameOver();
+    return { dups, rings, ringsInPool };
+  });
+  check(once.dups === 0 && (once.rings < 9 || !once.ringsInPool),
+    `collectibles once per run: repeats ${once.dups}, rings seen ${once.rings}/9, rings still in the pool after all 9 ${once.rings === 9 ? once.ringsInPool : 'n/a'}`);
+
   // the game-over screen has a Collections button too, and Back returns to game over
   await page.evaluate(() => { mapId = 'dungeon'; applyMap(); start(); gameOver(); });
   await page.click('#overCollBtn'); await wait(150);
