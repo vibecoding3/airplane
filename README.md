@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v92** (2026-10-18)
+Current version: **v93** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v92 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v93 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -788,3 +788,30 @@ A planned "Daily quests" section in the main menu. The ideas below use things th
 2. Rewards: XP, stars, or both?
 3. Three quests a day, or a different number?
 4. Allow swapping one unwanted quest once per day?
+
+---
+
+## 17. More collection sets — ideas (not built yet)
+
+Ideas for new Collections sets (see Collections in section 7). The best fit is one set per map, so every map has a reason to be played, not only the Dungeon. Like the current sets, these items would be collectibles: each appears at most once per run, and is found the first time it shows on screen.
+
+### 17.1 Cheap: the art already exists
+
+- **Space · Planets (8):** Mercury to Neptune are already Wall Bulge obstacles; making them collectible is mostly bookkeeping, and the Collections screen would show them in their real colours. A rare **Pluto** could be a ninth, hard-to-find item.
+- **Dungeon · Potions (6):** the potion flask (Rising Projectile) already exists in three colours; it could become six named potions: Healing (red), Mana (blue), Poison (green), Invisibility (clear), Fire (orange), Luck (gold).
+
+### 17.2 New art, existing mechanics
+
+- **Paper · Origami (6):** a paper crane, frog, boat, star, fox and butterfly drifting down the page (Drifting Swarm, like the sticky notes). Fits a game about a paper plane.
+- **Ocean · Seashells (6):** a conch, scallop, nautilus, cowrie, sand dollar and a pearl in an open oyster, resting in the water (Static Hazards, like the sea urchins).
+- **Ocean · Legendary fish (5):** a golden fish, a narwhal, a coelacanth, a giant squid eye and a ghost shark (Spinning Drifter, like the starfish).
+- **Space · Space probes (5):** Sputnik, Voyager, Hubble, the Apollo capsule and a Mars rover (Bouncing Slider, like the GPS satellite).
+- **Dungeon · Legendary swords (6):** six original swords (flame, ice, crystal, curved, rune, bone), scissoring like the crossed swords (Spinning Blades).
+
+### 17.3 More anime or fantasy sets
+
+- Built the same way as the Frieren staffs and the rings, for example another character's staff or weapon. Reference pictures go in `ref/` (which git ignores) and are drawn in the game's cartoon style.
+
+### 17.4 Suggested next three
+
+**Planets** (almost free), **Origami** (fits the game best) and **Seashells** (gives the Ocean a set): every map would then have at least one collection.
