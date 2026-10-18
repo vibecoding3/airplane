@@ -449,7 +449,7 @@ function useExtraLife() {
   shake = 7;
   const px = plane.x, py = dist + planeScreenY();
   for (let i = 0; i < 16; i++) { const p = spark(px, py); p.col = '#2f8fe0'; p.size += 1; particles.push(p); }
-  floaters.push({ x: clamp(px, 90, W - 90), y: py - 30, life: 1.4, col: '#2f6fb8',
+  floaters.push({ follow: true, x: clamp(px, 90, W - 90), y: py - 30, life: 1.4, col: '#2f6fb8',   // under the plane, like power-ups
     text: plane.lives > 0 ? `Shield used! ${plane.lives} left` : 'Shield used!' });
   sfx.save();
 }
