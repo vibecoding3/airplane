@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v89** (2026-10-18)
+Current version: **v90** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v89 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v90 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -736,7 +736,7 @@ A review of the whole game after v75. Nothing here goes against the player decis
 
 ---
 
-## 16. Daily quests — brainstorm (not built yet)
+## 16. Daily quests — brainstorm (on hold: not to be built for now, player's decision of 2026-10-19)
 
 A planned "Daily quests" section in the main menu. The ideas below use things the game already tracks, so most are cheap to add. Three a day works well: one easy, one medium, one hard.
 
