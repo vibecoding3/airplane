@@ -94,7 +94,7 @@ function drawDepthMarkers() {
     const col = isDark(pageColor(k)) ? '#d8eefa' : COL.graphite;
     ctx.save();
     ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.3; ctx.setLineDash([8, 6]);
-    ctx.beginPath(); ctx.moveTo(mapId === 'notebook' ? 60 : 24, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = col; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = 'right';
     ctx.fillText(fmt(k * PAGE_M) + ' m', W - 10, y - 6);
