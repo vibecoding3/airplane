@@ -146,6 +146,15 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(paused === 'paused' && resumed === 'play' && paused2 === 'paused' && resumed2 === 'play',
     `pause with Space, resume by button and by Space: ${paused}/${resumed}/${paused2}/${resumed2}`);
 
+  // the pause menu's Exit run button: back to the start menu, keeping the run's metres as XP
+  await page.evaluate(() => { dist = 120 * PX_PER_M; });
+  const xpBeforeExit = await page.evaluate(() => xp);
+  await page.keyboard.press(' '); await wait(150);
+  await page.click('#exitBtn'); await wait(200);
+  const exited = await page.evaluate(() => ({ state, title: !$('titleCard').hidden, xp, dist }));
+  check(exited.state === 'title' && exited.title && exited.xp - xpBeforeExit === 120 && exited.dist < 120 * 30,   // 30 units per metre
+    `Exit run: back to the ${exited.state} screen (card shown ${exited.title}), +${exited.xp - xpBeforeExit} XP kept`);
+
   check(errors.length === 0, errors.length ? 'errors:\n  ' + errors.join('\n  ') : 'no page errors');
   await browser.close();
   console.log(problems.length ? `\n${problems.length} problem(s)` : '\nall good');

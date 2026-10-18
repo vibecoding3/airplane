@@ -30,25 +30,35 @@ const isDark = hex => {
 };
 let darkPage = false;
 
+// where each map's starting scene is on screen (its lowest point); it slides away within the first ~35 m
+const START_SCENES = { notebook: () => paperStartY(), sea: () => seaStartY(), space: () => earthLimbY(), dungeon: () => wellOpeningY() };
 let hudPage = '';
 function syncHudPage() {         // the HUD's fade matches the page colour behind it
-  // no fade while the Earth (Space) or the well's opening (Dungeon) is still in view, so it isn't painted over
-  const earth = (mapId === 'space' && earthLimbY() > -150) || (mapId === 'dungeon' && wellOpeningY() > -150);
-  const c = earth ? 'transparent' : pageColor(pageIndexAt(dist + 40));
+  // no fade while the map's starting scene (notebook top, sea surface, Earth, well opening) is in view, so it
+  // isn't painted over; the text stays dark over the light paper and sky, light over Earth and the well
+  const scene = START_SCENES[mapId]() > -150;
+  const c = scene ? 'transparent' : pageColor(pageIndexAt(dist + 40));
   if (c === hudPage) return;
   hudPage = c;
   wrap.style.setProperty('--page', c);
-  darkPage = earth || (c.startsWith('#') && isDark(c));
+  darkPage = scene ? (mapId === 'space' || mapId === 'dungeon') : c.startsWith('#') && isDark(c);
   wrap.classList.toggle('dark-page', darkPage);
 }
 
 // the page colour, ruled lines, margin and punched holes are browser layers behind the canvas
 // (see syncPaperLayers); the canvas only adds the pencilled formulas and the depth markers
 function drawPaper() {
-  if (MAPS[mapId].formulas) drawFormulas();
-  else { mapId === 'space' ? drawSpaceDetails() : mapId === 'dungeon' ? drawDungeonDetails() : drawSeaParticles(); drawFishes(); }
+  if (MAPS[mapId].formulas) { belowLine(paperStartY() + 52, drawFormulas); drawPaperStart(); }   // no formulas over the header
+  else if (mapId === 'sea') { drawSeaStart(); drawSeaParticles(); belowLine(seaStartY() + 8, drawFishes); }   // no fish in the sky
+  else { mapId === 'space' ? drawSpaceDetails() : drawDungeonDetails(); drawFishes(); }
   drawDepthMarkers();
   drawBestLine();
+}
+
+// draw only below a line on screen (keeps formulas off the notebook header and fish out of the sky at the start)
+function belowLine(y, draw) {
+  if (y <= 0) { draw(); return; }
+  ctx.save(); ctx.beginPath(); ctx.rect(0, y, W, H - y + 200); ctx.clip(); draw(); ctx.restore();
 }
 
 function drawFormulas() {

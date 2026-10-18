@@ -413,3 +413,39 @@ function drawFishes() {
   }
   ctx.restore();
 }
+
+// the start of a Deep sea run: the sea's surface with sky and clouds above, a paper boat bobbing on the waves and
+// sunlit shallows below. It slides up out of view within the first ~35 m, like the Earth in Space.
+const seaStartY = () => planeScreenY() - 90 - dist * 0.22;          // the water line on screen
+function drawSeaStart() {
+  const y = seaStartY();
+  if (y < -150) return;
+  blit(sharedSprite('seaTop', W, 520, 0, 380, () => {
+    const sky = ctx.createLinearGradient(0, -380, 0, 0);
+    sky.addColorStop(0, '#6fc0ec'); sky.addColorStop(1, '#d9f2fb');
+    ctx.fillStyle = sky; ctx.fillRect(0, -380, W, 384);
+    ctx.fillStyle = 'rgba(255,255,255,.9)';                                                    // clouds
+    for (const [x, yy, r] of [[90, -70, 14], [108, -78, 18], [128, -70, 13], [300, -50, 11], [315, -57, 15], [333, -50, 11]]) { ctx.beginPath(); ctx.arc(x, yy, r, 0, Math.PI * 2); ctx.fill(); }
+    const shallow = ctx.createLinearGradient(0, 0, 0, 140);                                    // sunlit water just below
+    shallow.addColorStop(0, 'rgba(255,255,255,.4)'); shallow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = shallow; ctx.fillRect(0, 0, W, 140);
+    const wave = x => Math.sin(x * 0.05) * 3 + Math.sin(x * 0.13) * 1.5;
+    ctx.fillStyle = '#c4ecf4'; ctx.beginPath(); ctx.moveTo(0, 6);                             // the water body up to the waves
+    for (let x = 0; x <= W; x += 6) ctx.lineTo(x, wave(x)); ctx.lineTo(W, 30); ctx.lineTo(0, 30); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = shallow; ctx.fillRect(0, 0, W, 30);
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.beginPath();  // foam along the top
+    for (let x = 0; x <= W; x += 6) (x ? ctx.lineTo(x, wave(x)) : ctx.moveTo(x, wave(x)));
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5; ctx.beginPath();          // ripples of light
+    for (const [x, yy, w] of [[60, 34, 40], [180, 52, 54], [300, 30, 36], [120, 84, 30], [250, 96, 44]]) { ctx.moveTo(x, yy); ctx.quadraticCurveTo(x + w / 2, yy - 4, x + w, yy); }
+    ctx.stroke();
+  }), 0, y);
+  // a paper boat bobbing on the surface, off to one side of the plane
+  const t = titleTime + time, bob = Math.sin(t * 2) * 2;
+  blit(sharedSprite('paperBoat', 74, 44, 37, 30, () => {
+    ctx.fillStyle = '#ffffff'; ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.5; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(-32, -4); ctx.lineTo(32, -4); ctx.lineTo(22, 8); ctx.lineTo(-22, 8); ctx.closePath(); ctx.fill(); ctx.stroke();   // hull
+    ctx.fillStyle = '#e9e7dd'; ctx.beginPath(); ctx.moveTo(-14, -4); ctx.lineTo(2, -28); ctx.lineTo(16, -4); ctx.closePath(); ctx.fill(); ctx.stroke();   // sail
+    ctx.beginPath(); ctx.moveTo(2, -28); ctx.lineTo(2, -4); ctx.stroke();
+  }), 300, y + 2 + bob, Math.sin(t * 1.6) * 0.05);
+}

@@ -133,20 +133,36 @@ function resume() {
   showCard(null);
   duckMusic(false);
 }
+// a finished run keeps what it earned: a new best depth, its stars, and its metres as experience
+function keepRunProgress(s) {
+  const record = s > best;
+  if (record) { best = bests[mapId] = s; store.set('nosedive-best-' + mapId, String(s)); }
+  if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
+  const xpBefore = xp, levelUp = levelInfo(xp + s).level > levelInfo(xp).level;
+  xp += s; store.set('nosedive-xp', String(xp));
+  return { record, xpBefore, levelUp };
+}
+// leaving a run from the pause menu: it keeps its progress like a crash, then goes straight to the start menu
+function exitRun() {
+  if (state !== 'paused') return;
+  keepRunProgress(score());
+  reset();
+  clearControls();
+  state = 'title';
+  setPauseIcon(false);
+  duckMusic(false);
+  setMusic('title');
+  showCard('title');
+}
 function gameOver() {
   state = 'over';
   setMusic('title');
   const s = score();
-  const record = s > best;
-  if (record) { best = bests[mapId] = s; store.set('nosedive-best-' + mapId, String(s)); }
+  const { record, xpBefore, levelUp } = keepRunProgress(s);
   ui.overTitle.textContent = fmt(s) + ' m';
   ui.overBest.textContent = 'Best ' + fmt(best) + ' m';
   ui.stamp.hidden = !record;
-  if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
   ui.overBank.textContent = (stars ? '★ +' + stars + ' this run · ' : '') + '★ ' + fmt(bank) + ' in total';
-  // the run's metres become experience
-  const xpBefore = xp, levelUp = levelInfo(xp + s).level > levelInfo(xp).level;
-  xp += s; store.set('nosedive-xp', String(xp));
   $('levelStamp').hidden = !levelUp;
   if (levelUp) { $('levelStamp').textContent = 'Level up! Level ' + levelInfo(xp).level; setTimeout(sfx.levelup, 500); }
   showCard('over');
@@ -159,6 +175,7 @@ for (const b of document.querySelectorAll('[data-map]')) {
 $('startBtn').addEventListener('click', start);
 $('againBtn').addEventListener('click', start);
 $('resumeBtn').addEventListener('click', resume);
+$('exitBtn').addEventListener('click', exitRun);
 
 ui.pauseBtn.addEventListener('click', () => (state === 'paused' ? resume() : pause()));
 ui.muteBtn.addEventListener('click', () => {

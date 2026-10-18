@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v70** (2026-10-18)
+Current version: **v71** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v70 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v71 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -66,6 +66,7 @@ The map is chosen with four picture tiles, **Paper**, **Deep sea**, **Space** an
 
 ### 4.1 Paper
 - **Background:** ruled notebook paper with a red margin and punched holes.
+- **The start** (since v71): the plane sets off from the top of the notebook page: a wooden desk with a pencil and an eraser above the page edge, the spiral binding across the top, and a handwritten header ("Name: Paper plane", "Date: today"). It slides up out of view within the first ~35 m, like the Earth in Space; formulas are only drawn below the header while it shows, and the top bar has no background fade.
 - **Page colour:** plain paper for the first 100 m, then pastel red, orange, yellow, green, blue, indigo and violet, changing every 100 m and repeating. A pencilled dashed line labelled "100 m", "200 m"… marks each change.
 - **Background decoration:** pencilled maths and science formulas, faded so they read as background.
   - 264 formulas in 6 difficulty levels (levels start at 0, 150, 400, 800, 1,500 and 2,500 m). The topics are arithmetic, fractions and algebra, geometry and trigonometry, calculus, series and linear algebra, statistics and probability, number theory, physics, engineering and astronomy.
@@ -75,6 +76,7 @@ The map is chosen with four picture tiles, **Paper**, **Deep sea**, **Space** an
 
 ### 4.2 Deep sea
 - **Water colour:** light turquoise at the surface, darkening every 100 m down to near-black navy by about 1,000 m, then staying there.
+- **The start** (since v71): the plane dives in from the surface: sky with clouds above, waves with a line of foam, a paper boat bobbing on the water off to one side, and sunlit shallows with ripples of light below. It slides up out of view within the first ~35 m; fish are only drawn below the water line while it shows, and the top bar has no background fade.
 - **Background:** bubbles rising past the plane (no side walls; they were removed in v31). What else you see changes with depth:
 
 | Depth | Background |
@@ -330,6 +332,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 |---|---|---|
 | Sound on/off | Top bar (speaker icon, crossed out when muted) | Mutes sound effects and music together. Both are generated in code (Web Audio), with no audio files |
 | Pause / Resume | Top bar (pause icon, becomes a play icon while paused), Space bar, Esc (P no longer pauses since v67) | Also pauses automatically when the tab is hidden |
+| Exit run | Pause menu, under Resume (since v71) | Ends the run and goes straight to the start menu. The run keeps what it earned, like a crash: a new best depth, its stars, and its metres as XP |
 | Map | Start and game-over screens | Paper / Deep sea / Space / Dungeon picture tiles |
 
 ### Saved data (browser localStorage)
@@ -437,7 +440,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `dungeon-background.js` | `DUNGEON_TIERS`, `spawnDungeonThing`, `wellOpeningY`, `drawDungeonDetails`, `drawDungeonParticles` (scenery joins the `FISH` table) |
 | `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
 | `render.js` | `paintPlane`, `drawPlane`, `syncPaperLayers`, `render`, `applyMap` |
-| `ui.js` | `updateHud`, `showCard`, `setXp`, `animateXp`, `start`, `pause`, `resume`, `gameOver` |
+| `ui.js` | `updateHud`, `showCard`, `setXp`, `animateXp`, `start`, `pause`, `resume`, `exitRun`, `keepRunProgress`, `gameOver` |
 | `main.js` | `watchFrameRate`, `frameInterval`, `frame` |
 
 ### 10.5 Dev tools (`tools/`)

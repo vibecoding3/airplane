@@ -176,3 +176,46 @@ function updateFormulas(dt = 0) {
   for (const f of fishes) { f.x += f.vx * dt; f.t += dt; }
   prune(fishes, f => f.y + f.ext / 2 > dist - 20 && f.x > -f.w && f.x < W + f.w);
 }
+
+// the start of a Paper run: the top of the notebook page, with its spiral binding and a handwritten header,
+// lying on a wooden desk with a pencil and an eraser. It slides up out of view within the first ~35 m, like the
+// Earth in Space. Desk things sit above the page edge, so they never look like obstacles on the page.
+const paperStartY = () => planeScreenY() - 80 - dist * 0.22;       // the page's top edge on screen
+function drawPaperStart() {
+  const y = paperStartY();
+  if (y < -60) return;
+  blit(sharedSprite('paperTop', W, 420, 0, 360, () => {
+    const desk = ctx.createLinearGradient(0, -360, 0, 0);
+    desk.addColorStop(0, '#c99a6b'); desk.addColorStop(1, '#ddb38a');
+    ctx.fillStyle = desk; ctx.fillRect(0, -360, W, 360);
+    ctx.strokeStyle = 'rgba(120,70,30,.18)'; ctx.lineWidth = 1.5; ctx.beginPath();           // wood grain
+    for (const gy of [-300, -240, -170, -110, -55]) { ctx.moveTo(0, gy); ctx.bezierCurveTo(W * 0.3, gy - 8, W * 0.6, gy + 8, W, gy - 3); }
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fillRect(0, -3, W, 3);                              // the page's edge
+    // a pencil and an eraser lying on the desk
+    ctx.save(); ctx.translate(150, -26); ctx.rotate(-0.08);
+    ctx.fillStyle = '#f4c430'; ctx.fillRect(-55, -5, 92, 10);
+    ctx.fillStyle = '#d9a520'; ctx.fillRect(-55, 1.5, 92, 3.5);
+    ctx.fillStyle = '#ecc99a'; ctx.beginPath(); ctx.moveTo(37, -5); ctx.lineTo(54, 0); ctx.lineTo(37, 5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#3a3a3a'; ctx.beginPath(); ctx.moveTo(48, -1.8); ctx.lineTo(54, 0); ctx.lineTo(48, 1.8); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#c3c9d3'; ctx.fillRect(-63, -5, 8, 10); ctx.fillStyle = '#f29fae'; ctx.fillRect(-72, -5, 9, 10);
+    ctx.beginPath(); ctx.rect(-72, -5, 109, 10); ctx.moveTo(37, -5); ctx.lineTo(54, 0); ctx.lineTo(37, 5); inkStroke(1.2);
+    ctx.restore();
+    ctx.save(); ctx.translate(300, -30); ctx.rotate(0.12);
+    ctx.fillStyle = '#f2a7b5'; ctx.beginPath(); roundRectPath(-20, -9, 40, 18, 4); ctx.fill(); inkStroke(1.2);
+    ctx.fillStyle = '#3a66c4'; ctx.fillRect(-4, -9, 24, 18); ctx.beginPath(); ctx.rect(-4, -9, 24, 18); inkStroke(1);
+    ctx.restore();
+    // the spiral binding: punched holes just below the edge, with a wire coil looping through each
+    for (let x = 18; x < W; x += 24) {
+      ctx.fillStyle = '#c99a6b'; ctx.beginPath(); ctx.arc(x, 9, 3.6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#6b7078'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x - 1, 9); ctx.bezierCurveTo(x - 4, -6, x + 8, -14, x + 6, 2); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.stroke();
+    }
+    // the page header, handwritten
+    ctx.font = '700 16px Kalam, cursive'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = 'rgba(85,88,94,.75)'; ctx.fillText('Name:', 70, 42); ctx.fillText('Date:', 262, 42);
+    ctx.strokeStyle = 'rgba(85,88,94,.55)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(118, 44); ctx.lineTo(248, 44); ctx.moveTo(305, 44); ctx.lineTo(385, 44); ctx.stroke();
+    ctx.fillStyle = COL.ink; ctx.font = '400 18px Kalam, cursive'; ctx.fillText('Paper plane', 124, 40); ctx.fillText('today', 312, 40);
+  }), 0, y);
+}
