@@ -327,7 +327,7 @@ const DUNGEON_LOOKS = {
   erasers: { crusher: ['#9a958c', '#8f8476', '#a39a86'], irondoor: ['#4f555e', '#5e4a3a'], ram: ['#8a5a32', '#6b4a2a'], barricade: ['#8a5a32', '#6b4a2a'] },
   blot: { spikeball: ['#5b6068', '#7a5a44', '#8a6a3a'], cauldron: ['#5fd16a', '#b77cf0', '#ff7a3a'], boulder: ['#8f877a', '#7f8288', '#93806a'], tombstone: ['#8f8a84', '#7a7f86'] },
   protractor: { rock: ['#8f877a', '#7f8288', '#93806a'], shield: ['#a0302a', '#2f5fa8', '#2f7a44', '#c79a2a'], barrel: ['#8a5a32', '#6b4a2a'], pumpkin: ['#f28c28', '#e8a33a'] },
-  pencil: { plank: ['#a06a3a', '#8a5a32', '#b07c48'], bone: ['#efe6d0', '#e0d6bc'], staff: ['#b77cf0', '#4ab8ff', '#ff5a5a'], broom: ['#d9b25a', '#c99a3a'] },
+  pencil: { plank: ['#a06a3a', '#8a5a32', '#b07c48'], bone: ['#efe6d0', '#e0d6bc'], staff: ['#b77cf0', '#4ab8ff', '#ff5a5a'], broom: ['#d9b25a', '#c99a3a'], frieren: ['#8a2a2a'], fern: ['#8a5a32'] },
   wad: { skull: ['#efe6d0', '#e6dcc0', '#f4efe2'], pumpkin: ['#f28c28', '#e8a33a'], slime: ['#5fd16a', '#b77cf0', '#4ab8ff'], potion: ['#b77cf0', '#5fd16a', '#ff5a7a'] },
   note: { ghost: ['#eef2ff', '#dff7e6', '#e2ecff'], book: ['#a0302a', '#2f6b3a', '#5a2f8a', '#2f4f8a'], wisp: ['#7fd8ff', '#9dffb8', '#c79cff'], witchhat: ['#8a4fc2', '#f28c28', '#3f8f5a'], goblin: ['#6fae4a', '#8ab84a', '#5a9a6a'] },
   cutter: { spear: ['#8f877a', '#9a958c', '#7f8288'], trident: ['#8f877a', '#7f8288'], blade: ['#9a958c', '#8f8476'], club: ['#8f877a', '#7f8288'] },

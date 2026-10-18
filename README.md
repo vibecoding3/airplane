@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v81** (2026-10-18)
+Current version: **v82** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v81 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v82 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -152,7 +152,7 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.4. For 
 | Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams / goblin barricade |
 | Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders / tombstones |
 | Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern |
-| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom |
+| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / Frieren's staff / Fern's staff |
 | Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball / potion flask |
 | Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps / witch hats / goblins |
 | Conveyor | Paper clips | — | Starlink train | Daggers / arrows / keys |
@@ -167,7 +167,7 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.4. For 
 | Push Zone | Desk fan | Ocean current | — | Cold draft / steam vent |
 | Effect Zone | — | Bubble column | Low-gravity field | — |
 | Spring Line | Rubber band | — | — | Spider web / slime strand |
-| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **19 obstacles, 62 looks** |
+| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **19 obstacles, 64 looks** |
 
 ### 5.1 Paper map (16 types)
 
@@ -260,7 +260,7 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Skeleton arm (v70) | A dashed wedge shows its reach, then a bony arm swipes out of a crack in the wall | Cat paw | ~135 m |
 | Flamethrower (v81) | An iron nozzle in the wall with a flickering blue pilot light; a jet of flame shoots out, holds, then dies back. Its own obstacle (own spawn chance), always this look | Cutter | ~120 m |
 
-**Looks and colours** (since v73): every Dungeon obstacle comes in two to five different objects that share its mechanic and hit box, each in a few colours (61 looks in all; 12 Halloween and goblin looks added in v80; `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
+**Looks and colours** (since v73): every Dungeon obstacle comes in two to five different objects that share its mechanic and hit box, each in a few colours (64 looks in all; 12 Halloween and goblin looks added in v80, two anime staffs in v82; `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
 
 | Obstacle | Looks |
 |---|---|
@@ -268,7 +268,7 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Closing Jaws | Spiked stone crushers, spiked riveted iron doors, wooden battering rams with an iron cap, goblin barricades of sharpened stakes |
 | Static Hazards | Spiked iron balls (iron, rust, bronze), bubbling cauldrons (green, purple, orange brew), cracked boulders, "RIP" tombstones |
 | Wall Bulge | Rock outcrops, giant round shields (red, blue, green, gold) with an iron rim and boss, huge barrel ends, a giant jack-o'-lantern with its glowing face turned to the shaft |
-| Bouncing Slider | Wooden planks, long bones, wizard staffs with a glowing gem (purple, blue, red), witch's brooms |
+| Bouncing Slider | Wooden planks, long bones, wizard staffs with a glowing gem (purple, blue, red), witch's brooms, and since v82 cartoon staffs inspired by *Frieren: Beyond Journey's End*: Frieren's (dark red shaft, brass crescent around a red gem, red ribbon) and Fern's (crooked wood, purple wraps, silver bands, a red crystal on a string). Reference pictures go in `ref/`, which git ignores |
 | Rising Projectile | Grinning skulls, jack-o'-lanterns, slime balls with a face (green, purple, blue), bubbling potion flasks (purple, green, pink) |
 | Drifting Swarm | Ghosts, flying spellbooks (red, green, purple, blue covers), will-o'-wisps (blue, green, violet), flying witch hats (purple, orange, green band), grinning goblins |
 | Wall Piston | Spear, trident, sword blade, nail-studded goblin club |
