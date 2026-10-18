@@ -13,8 +13,8 @@ let hudDepth = -1, hudStars = -1, hudBest = -1;
 // control tips for the first 100 m of a run, left of the sound button: one at a time, changing every 3 seconds,
 // fading out over the last 10 m. Phones get tap tips, keyboards key tips.
 const TOUCH = window.matchMedia && matchMedia('(pointer: coarse)').matches;
-const HINTS = TOUCH ? ['Tap left or right to steer', 'Hold for a sharp turn', 'Tap ⏸ to pause']
-                    : ['← → or A D to steer', 'Hold for a sharp turn', 'Space to pause'];
+const HINTS = TOUCH ? ['Tap left or right to steer', 'Tap ⏸ to pause']
+                    : ['← → or A D to steer', 'Space to pause'];
 const HINT_UNTIL_M = 100;
 let hintText = null, hintFade = false;
 function syncHint() {

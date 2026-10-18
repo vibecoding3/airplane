@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v94** (2026-10-18)
+Current version: **v95** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v94 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v95 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -36,7 +36,7 @@ There are no on-screen steering arrows (removed in v44).
 
 ---
 
-**Control tips** (since v91): for the first 100 m of a run, a small tip shows in the top bar to the left of the sound button, changing every 3 seconds and fading out over the last 10 m. Keyboards: "← → or A D to steer", "Hold for a sharp turn", "Space to pause". Phones and tablets (coarse pointer): "Tap left or right to steer", "Hold for a sharp turn", "Tap ⏸ to pause" (`HINTS` in `js/ui.js`). The separate "How to play" section stays removed (v44).
+**Control tips** (since v91): for the first 100 m of a run, a small tip shows in the top bar to the left of the sound button, changing every 3 seconds and fading out over the last 10 m. Keyboards: "← → or A D to steer", "Space to pause". Phones and tablets (coarse pointer): "Tap left or right to steer", "Tap ⏸ to pause" (the "Hold for a sharp turn" tip was removed in v95) (`HINTS` in `js/ui.js`). The separate "How to play" section stays removed (v44).
 
 ## 3. Core rules
 
