@@ -86,6 +86,24 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15 };   // obstacle types per m
   });
   check(edge.every(Boolean), 'after hitting an edge, one press the other way turns the plane: ' + edge.join('/'));
 
+  // during the invincibility star, wind, rubber bands and bubbles leave the plane alone
+  const starFx = await page.evaluate(() => {
+    mapId = 'notebook'; applyMap(); start();
+    const py = () => dist + planeScreenY();
+    const run = () => { plane.x = W / 2; plane.vx = 0; update(1 / 60); return plane.vx; };
+    plane.star = 5;
+    obstacles.length = 0; obstacles.push({ type: 'fan', y: py(), band: 200, side: -1, force: 400 });
+    const fan = run();
+    obstacles.length = 0; obstacles.push({ type: 'band', x1: W / 2 - 50, y1: py(), x2: W / 2 + 60, y2: py(), cool: 0 });
+    const band = run();
+    obstacles.length = 0; obstacles.push({ type: 'bubbles', x: W / 2, y: py(), w: 200, h: 200 });
+    run(); const bubbled = plane.bubbled;
+    obstacles.length = 0; gameOver();
+    return { fan, band, bubbled };
+  });
+  check(starFx.fan === 0 && starFx.band === 0 && starFx.bubbled === 0,
+    `star ignores wind, rubber bands and bubbles: vx ${starFx.fan}/${starFx.band}, bubbled ${starFx.bubbled}`);
+
   // a real run through the buttons: play, pause, resume
   await page.click('#againBtn'); await wait(1200);
   check(await page.evaluate(() => state) === 'play', 'Throw again starts a run');

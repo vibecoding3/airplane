@@ -249,10 +249,10 @@ function steer(dt) {
   } else {
     plane.vx += (0 - plane.vx) * Math.min(1, 8 * dt);
   }
-  // desk fans push the plane while it is inside their wind band
+  // desk fans push the plane while it is inside their wind band (not during the invincibility star)
   const py = dist + planeScreenY();
   for (const o of obstacles) {
-    if (o.type === 'fan' && Math.abs(o.y - py) < o.band / 2) plane.vx += -o.side * o.force * dt;
+    if (o.type === 'fan' && plane.star <= 0 && Math.abs(o.y - py) < o.band / 2) plane.vx += -o.side * o.force * dt;
   }
   plane.x += plane.vx * dt;
   // hitting an edge cancels the drift into it, so one press the other way turns the plane at once
@@ -306,7 +306,7 @@ function update(dt) {
   }
   if (plane.slowmo > 0) plane.slowmo = Math.max(0, plane.slowmo - dt / SLOWMO_SCALE);   // real seconds
   for (const o of obstacles) {
-    if (o.type !== 'bubbles' || Math.abs(plane.x - o.x) > o.w / 2 || Math.abs(dist + planeScreenY() - o.y) > o.h / 2) continue;
+    if (o.type !== 'bubbles' || plane.star > 0 || Math.abs(plane.x - o.x) > o.w / 2 || Math.abs(dist + planeScreenY() - o.y) > o.h / 2) continue;
     plane.bubbled = 0.3;
     if (Math.random() < dt * 12) {             // bubbles fizzing around the plane
       particles.push({ kind: 'spark', col: 'rgba(235,250,255,.9)', x: plane.x + rand(-10, 10), y: dist + planeScreenY() + rand(-6, 10),
@@ -314,9 +314,9 @@ function update(dt) {
     }
   }
   const planeY = dist + planeScreenY();
-  // rubber bands kick the plane sideways, toward the nearer end of the band
+  // rubber bands kick the plane sideways, toward the nearer end of the band (the star passes through)
   for (const o of obstacles) {
-    if (o.type !== 'band' || o.cool > 0 || plane.invuln > 0) continue;
+    if (o.type !== 'band' || o.cool > 0 || plane.invuln > 0 || plane.star > 0) continue;
     const bx = o.x2 - o.x1, by = o.y2 - o.y1;
     const k = clamp(((plane.x - o.x1) * bx + (planeY - o.y1) * by) / (bx * bx + by * by), 0, 1);
     if (Math.hypot(plane.x - (o.x1 + bx * k), planeY - (o.y1 + by * k)) > 9) continue;
