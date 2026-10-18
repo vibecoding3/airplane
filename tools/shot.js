@@ -1,6 +1,6 @@
 // Phone-size screenshots (412×860) saved to tools/out/.
 //   node tools/shot.js title              title screen (Paper map)
-//   node tools/shot.js title sea          title screen (Deep sea map)
+//   node tools/shot.js title sea          title screen (Ocean map)
 //   node tools/shot.js sea 0 250 1300     gameplay on a map at these depths (metres)
 //   node tools/shot.js space 0 500        (map ids: notebook = Paper, sea, space)
 const { openGame, wait, outFile } = require('./lib');
@@ -19,6 +19,8 @@ const [what = 'title', ...rest] = process.argv.slice(2);
       await page.evaluate((map, depth) => {
         mapId = map; applyMap(); start(); plane.lives = 1e9;
         while (dist / PX_PER_M < depth) update(1 / 60);
+        // the endless shield keeps the plane alive; drop its "Shield used!" messages so they don't pile up under the plane
+        prune(floaters, f => !f.text.startsWith('Shield used'));
       }, what, m);
       await wait(400);
       const file = outFile(`${what}-${m}.png`);

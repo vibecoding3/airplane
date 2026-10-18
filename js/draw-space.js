@@ -1,7 +1,7 @@
 // Paper Nosedive — Art for the Space map obstacles.
 'use strict';
 
-// Space obstacles reuse a Paper / Deep sea obstacle's movement and collision (see SPACE_MAKERS) and only
+// Space obstacles reuse a Paper / Ocean obstacle's movement and collision (see SPACE_MAKERS) and only
 // change the look. Space is dark, so outlines are pale instead of ink.
 const SPACE_LINE = '#e6eeff';
 function spaceStroke(w = 1.4) { ctx.strokeStyle = SPACE_LINE; ctx.lineWidth = w; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke(); }

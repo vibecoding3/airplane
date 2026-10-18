@@ -1,6 +1,6 @@
 # Paper Nosedive — notes for Claude
 
-Browser game: a paper plane always falls; the player steers left/right to dodge obstacles; score = depth in metres. Four maps: **Paper** (internal id `notebook`), **Deep sea** (`sea`), **Space** (`space`) and **Dungeon** (`dungeon`). README.md is the full game spec — read only the section you need.
+Browser game: a paper plane always falls; the player steers left/right to dodge obstacles; score = depth in metres. Four maps: **Paper** (internal id `notebook`), **Ocean** (`sea`, called Deep sea until v78), **Space** (`space`) and **Dungeon** (`dungeon`). README.md is the full game spec — read only the section you need.
 
 ## Files
 `index.html` (page + menus) · `style.css` · `js/*.js` (18 classic scripts, one shared global scope, run in the order `index.html` lists them; `main.js` last). README section 10 has the file map, a "where to change things" table and key names per file. Grep for a name rather than reading whole files.
@@ -17,7 +17,7 @@ Tools setup (once): `cd tools && npm install`. Chrome is auto-detected (or set `
 ## Player decisions — don't undo
 - Controls: 3 drift positions only (left / straight / right); hold for a sharp turn. A 5-position version was rejected.
 - No drop shadows anywhere (removed v29).
-- Deep sea has no rock-wall side columns (removed v31) and no sun rays (removed v39). Background fish never collide; new ones are background only unless asked.
+- Ocean has no rock-wall side columns (removed v31) and no sun rays (removed v39). Background fish never collide; new ones are background only unless asked.
 - Removed obstacles — avoid similar mechanics: pen wall line, stylus ripple rings, sharpener pull, whiteout patch, thumbtack rows, magnifier homing, coffee spill (soggy), rubber stamp (slam).
 - No Shop (removed v46): magnet and shield are power-ups picked up during a run, 3 levels each, reset every run; slow motion (4 s at half speed, from 300 m), the invincibility star (6 s, from 150 m, rarest) and the speed boost (+10% fall speed for 5 s, from 100 m, v69) are timed power-ups. Stars are a collected total (no metres). No skins: one classic white plane (skins removed v42).
 - No wind obstacles (desk fan, ocean current) from 700 m on; Space has no wind or explosion obstacles at all (v55).

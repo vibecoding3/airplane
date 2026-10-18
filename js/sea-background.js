@@ -1,7 +1,7 @@
-// Paper Nosedive — Deep sea map background: fish, specks, whales and shipwrecks by depth.
+// Paper Nosedive — Ocean map background: fish, specks, whales and shipwrecks by depth.
 'use strict';
 
-// ---------- deep sea: background fish, more dangerous the deeper you go (they never collide) ----------
+// ---------- ocean: background fish, more dangerous the deeper you go (they never collide) ----------
 const fishes = [];
 const PALE = '#9fc3d9';          // outline for deep-water fish so they show against dark water
 function fishOutline(col, w = 1.2) { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke(); }
@@ -414,7 +414,7 @@ function drawFishes() {
   ctx.restore();
 }
 
-// the start of a Deep sea run: the sea's surface with sky and clouds above, a paper boat bobbing on the waves and
+// the start of a Ocean run: the sea's surface with sky and clouds above, a paper boat bobbing on the waves and
 // sunlit shallows below. It slides up out of view within the first ~35 m, like the Earth in Space.
 const seaStartY = () => planeScreenY() - 90 - dist * 0.22;          // the water line on screen
 function drawSeaStart() {

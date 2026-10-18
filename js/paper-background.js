@@ -166,7 +166,7 @@ function formulaAngle() {
 }
 
 // formulas start on the ruled lines (every 30 units of world y); tall rotated ones push the next one down
-// the notebook gets formulas, the deep sea gets fish; both use the same spacing down the page
+// the notebook gets formulas, the ocean gets fish; both use the same spacing down the page
 function updateFormulas(dt = 0) {
   while (nextFormulaY < dist + H + 140) {
     const ext = (mapId === 'sea' ? spawnFish(nextFormulaY) : mapId === 'space' ? spawnSpaceThing(nextFormulaY) : mapId === 'dungeon' ? spawnDungeonThing(nextFormulaY) : spawnFormula(nextFormulaY)) || 0;

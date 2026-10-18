@@ -9,7 +9,7 @@ const RAINBOW = ['#fde2de', '#fee8d2', '#fcf3c6', '#e1f3d8', '#d9eaf9', '#e0def6
 const pageIndexAt = wy => Math.floor((wy - planeScreenY()) / (PAGE_M * PX_PER_M));
 const pageTop = k => k * PAGE_M * PX_PER_M + planeScreenY();
 // ---------- maps: only the background changes; obstacles and rules stay the same ----------
-// deep sea: the water darkens every 100 m and stays at the darkest shade below 1,000 m
+// ocean: the water darkens every 100 m and stays at the darkest shade below 1,000 m
 const SEA = ['#c4ecf4', '#a3dcec', '#80c8e2', '#5daed3', '#3f92c0', '#2c76a6', '#205c88', '#18456b', '#123352', '#0d253d', '#091a2c'];
 // space: deep blue sky turning to black, then faintly tinted nebula darks, near-black below 1,000 m
 // dungeon: grey stone in the well, warm torch-lit browns, cold blue-purple caverns, then the red underworld
@@ -17,7 +17,7 @@ const DUNGEON = ['#57514a', '#4a3f37', '#3d342e', '#332c27', '#262c38', '#20263a
 const SPACE = ['#2a5298', '#1a3570', '#10204a', '#0b1432', '#140f33', '#0a1b2e', '#1a0e2c', '#0c1533', '#120a28', '#0a1026', '#06070f'];
 const MAPS = {
   notebook: { name: 'Paper', colour: k => (k < 1 ? COL.paper : RAINBOW[(k - 1) % RAINBOW.length]), formulas: true },
-  sea: { name: 'Deep sea', colour: k => SEA[clamp(k, 0, SEA.length - 1)], formulas: false },
+  sea: { name: 'Ocean', colour: k => SEA[clamp(k, 0, SEA.length - 1)], formulas: false },
   space: { name: 'Space', colour: k => SPACE[clamp(k, 0, SPACE.length - 1)], formulas: false },
   dungeon: { name: 'Dungeon', colour: k => DUNGEON[clamp(k, 0, DUNGEON.length - 1)], formulas: false }
 };

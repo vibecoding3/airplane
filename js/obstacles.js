@@ -204,7 +204,7 @@ const make = {
       col: CAT_COLORS[ri(0, CAT_COLORS.length - 1)] });
     return 120;
   },
-  // ---- deep sea only ----
+  // ---- ocean only ----
   starfish(y, d) {       // a starfish spinning as it drifts sideways, bouncing off the rock walls
     const n = d > 0.4 ? 2 : 1;
     for (let i = 0; i < n; i++) {
@@ -246,7 +246,7 @@ function clipXs(o) {
 
 // depth (as difficulty d) at which each obstacle starts appearing, and how often
 let lastType = '';
-// Deep sea obstacles. Most reuse a notebook obstacle's movement and collision with an underwater look
+// Ocean obstacles. Most reuse a notebook obstacle's movement and collision with an underwater look
 // (the generator named on the right); mines, electric eels, bubble columns and starfish are their own.
 const SEA_MAKERS = { coral: 'gate', urchins: 'blots', jellies: 'notes', clam: 'erasers', moray: 'cutter',
                      kelp: 'paw', sub: 'glue', current: 'fan' };
@@ -265,7 +265,7 @@ const MINERALS_LIST = ['iron', 'nickel', 'copper', 'gold', 'ice', 'amethyst'];  
 const WIND_MAX_M = 700;
 const windAllowed = y => y / PX_PER_M < WIND_MAX_M;
 
-// Space obstacles: every one reuses a Paper or Deep sea obstacle's movement and collision with space art
+// Space obstacles: every one reuses a Paper or Ocean obstacle's movement and collision with space art
 const SPACE_MAKERS = { girders: 'gate', asteroids: 'blots', ice: 'notes', airlock: 'erasers', probe: 'cutter',
                        gps: 'pencil', rocket: 'wad', starlink: 'clips', tumbler: 'starfish', arm: 'compass',
                        laser: 'zap', lowgrav: 'bubbles', moon: 'protractor',

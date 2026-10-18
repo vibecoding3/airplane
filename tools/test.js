@@ -22,7 +22,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
     Object.assign(bests, keep); showCard('title');
     return r;
   });
-  check(medals === '2/1', 'map tiles show medals (Paper 800 m → 2, Deep sea 260 m → 1): ' + medals);
+  check(medals === '2/1', 'map tiles show medals (Paper 800 m → 2, Ocean 260 m → 1): ' + medals);
 
   // deep runs where the plane can't be hit: every obstacle type should appear, power-ups should spawn
   // and level up to 3, no errors

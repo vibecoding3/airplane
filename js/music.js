@@ -50,7 +50,7 @@ const THEMES = {
       [[74, 1.5], [72, 0.5], [69, 2]], [[72, 1], [69, 1], [65, 2]], [[67, 1], [65, 1], [64, 1], [67, 1]], [[69, 2], [61, 2]]
     ]
   },
-  // Deep sea: slow and dark, long echoing harp notes and a lonely low flute
+  // Ocean: slow and dark, long echoing harp notes and a lonely low flute
   sea: {
     bpm: 64, lead: 'deep', harp: [0, 2, 3, 4], harpStep: 1, echo: 0.45,
     chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'Dm2', 'E'],

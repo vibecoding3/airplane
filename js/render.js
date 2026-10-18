@@ -252,13 +252,13 @@ function render() {
     ctx.font = `700 ${f.size || 18}px Kalam, cursive`;
     ctx.globalAlpha = clamp(f.life, 0, 1);
     ctx.fillStyle = f.col || '#a8740f';
-    if (f.follow) {                              // power-ups and shield saves: under the plane
-      const x = clamp(plane.x, 90, W - 90), y = planeScreenY() + 52 + (1 - f.life) * 14;
-      if (darkPage) {                            // a light outline keeps the coloured text readable on dark maps
-        ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.strokeText(f.text, x, y);
-      }
-      ctx.fillText(f.text, x, y);
-    } else ctx.fillText(f.text, f.x, f.y - dist - (1 - f.life) * 40);
+    // power-ups and shield saves follow the plane, just under it; milestones, medals and stars stay where they happened
+    const x = f.follow ? clamp(plane.x, 90, W - 90) : f.x;
+    const y = f.follow ? planeScreenY() + 52 + (1 - f.life) * 14 : f.y - dist - (1 - f.life) * 40;
+    if (darkPage) {                              // a light outline keeps the coloured text readable on dark maps
+      ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = f.size > 30 ? 5 : 4; ctx.lineJoin = 'round'; ctx.strokeText(f.text, x, y);
+    }
+    ctx.fillText(f.text, x, y);
   }
   ctx.globalAlpha = 1;
   if (plane.slowmo > 0 && state === 'play') { ctx.fillStyle = 'rgba(150,110,230,.10)'; ctx.fillRect(0, 0, W, H); }   // slow motion: a soft purple tint

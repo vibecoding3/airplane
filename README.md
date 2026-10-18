@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v77** (2026-10-18)
+Current version: **v78** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v77 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v78 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -56,13 +56,13 @@ There are no on-screen steering arrows (removed in v44).
 ### Plane states
 - **Shielded** (shield power-up): the plane has a coloured outline while it has at least one shield level, and its look shows the level: thin light blue (1), dark blue with a thin white edge (2), violet with a soft glow (3; colours since v63). A hit uses one level instead of ending the run: the plane blinks and can't be hit for 2 seconds.
 - **Magnet** (magnet power-up): a dotted ring shows how far stars and power-ups are pulled in. Since v56 the ring is a shade of the map colour behind the plane (darker on light pages and shallow water, lighter on deep water and space), so it matches every map.
-- **Bubbled** (Deep sea map, bubble column): the plane falls 50% slower while inside the column.
+- **Bubbled** (Ocean map, bubble column): the plane falls 50% slower while inside the column.
 
 ---
 
 ## 4. Maps
 
-The map is chosen with four picture tiles, **Paper**, **Deep sea**, **Space** and **Dungeon**, on the start screen and on the game-over screen (so you can switch between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
+The map is chosen with four picture tiles, **Paper**, **Ocean**, **Space** and **Dungeon**, on the start screen and on the game-over screen (so you can switch between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
 
 ### 4.1 Paper
 - **Background:** ruled notebook paper with a red margin and punched holes.
@@ -74,7 +74,7 @@ The map is chosen with four picture tiles, **Paper**, **Deep sea**, **Space** an
   - Each formula appears at most once per run. When a level runs out, it borrows from harder levels first, then easier ones.
   - Formulas are tilted at random, never more than 45°, and some are underlined.
 
-### 4.2 Deep sea
+### 4.2 Ocean (called "Deep sea" until v78; the internal id is still `sea`)
 - **Water colour:** light turquoise at the surface, darkening every 100 m down to near-black navy by about 1,000 m, then staying there.
 - **The start** (since v71): the plane dives in from the surface: sky with clouds above, waves with a line of foam, a paper boat bobbing on the water off to one side, and sunlit shallows with ripples of light below. It slides up out of view within the first ~35 m; fish are only drawn below the water line while it shows, and the top bar has no background fade.
 - **Background:** bubbles rising past the plane (no side walls; they were removed in v31). What else you see changes with depth:
@@ -146,7 +146,7 @@ The plane is dropped down a deep, ancient dungeon well and falls past torch-lit 
 ### 5.0 All obstacles at a glance
 One row per mechanic (section 6), names only; the details are in 5.1–5.4. For Dungeon, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
 
-| Mechanic | Paper | Deep sea | Space | Dungeon |
+| Mechanic | Paper | Ocean | Space | Dungeon |
 |---|---|---|---|---|
 | Gap Wall | Rulers | Coral ledges | Station girders | Stone ledges / wooden beams / iron girders |
 | Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams |
@@ -192,7 +192,7 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.4. For 
 
 The extra hazard next to desk fans deeper down is a small ink blot.
 
-### 5.2 Deep sea map (12 types)
+### 5.2 Ocean map (12 types)
 Eight sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in `js/obstacles.js`). Four are new mechanics.
 
 | Sea obstacle | Behaviour | Based on | Starts at |
@@ -211,7 +211,7 @@ Eight sea obstacles reuse the movement and collision of a notebook obstacle with
 | Kelp | Seaweed frond sweeps out from the wall after a green dashed warning | Cat paw | ~135 m |
 
 ### 5.3 Space map (19 kinds on 15 mechanics, since v53; 6 added in v57)
-Every Space obstacle reuses the movement and collision of a Paper or Deep sea obstacle (see `SPACE_MAKERS` in `js/obstacles.js`) with new art in `js/draw-space.js`. Outlines are pale so they read on black. Space has no wind or explosions: the solar wind and the space mine were removed in v55.
+Every Space obstacle reuses the movement and collision of a Paper or Ocean obstacle (see `SPACE_MAKERS` in `js/obstacles.js`) with new art in `js/draw-space.js`. Outlines are pale so they read on black. Space has no wind or explosions: the solar wind and the space mine were removed in v55.
 
 | Space obstacle | Behaviour | Based on | Starts at |
 |---|---|---|---|
@@ -293,11 +293,11 @@ These were built and then removed at the player's request: the pen (drew a wall 
 
 Every obstacle in the game is one of the **20 mechanics** below, dressed in a map's art. A mechanic defines how something moves, what hurts, how it warns the player, and what can be tuned. A map's obstacle is just *mechanic + look*. The goal is to build any new map by reusing these mechanics with new drawings, instead of writing new movement and collision code each time.
 
-In the code, the mechanic lives in the generator (`make.<name>` in `js/obstacles.js`), the movement (`updateObstacle`) and the collision (`computeShapes`), both in `js/physics.js`. The look lives in the `draw*` / `paint*` functions in `js/draw-paper.js` and `js/draw-sea.js`. The Deep sea map already works this way: `SEA_MAKERS` maps each sea obstacle to the notebook generator whose mechanic it reuses.
+In the code, the mechanic lives in the generator (`make.<name>` in `js/obstacles.js`), the movement (`updateObstacle`) and the collision (`computeShapes`), both in `js/physics.js`. The look lives in the `draw*` / `paint*` functions in `js/draw-paper.js` and `js/draw-sea.js`. The Ocean map already works this way: `SEA_MAKERS` maps each sea obstacle to the notebook generator whose mechanic it reuses.
 
 ### 6.1 Mechanic catalogue
 
-| # | Mechanic | How it works | Warning | What hurts | Paper | Deep sea | Space |
+| # | Mechanic | How it works | Warning | What hurts | Paper | Ocean | Space |
 |---|---|---|---|---|---|---|---|
 | 1 | **Gap Wall** | Two barriers from both walls leaving one gap; deeper down the gap slides side to side | The gap is visible | Both barriers | Rulers | Coral ledges | Station girders |
 | 2 | **Closing Jaws** | Two blocks from both walls whose gap keeps opening and closing | The rhythm is visible | Both blocks | Erasers | Giant clam | International Space Station | A long ISS (truss, white modules, golden solar arrays) sliding side to side; thicker than the GPS satellite | Pencil | ~65 m |
@@ -354,7 +354,7 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
 **Time-left bars:** each running timed power-up shows a bar above the plane that shrinks toward its centre: slow motion (purple) nearest the plane, then the invincibility star (gold), then the speed boost (green), stacked without gaps.
 
 - **Spawning:** from about 30 m on, a row can carry a power-up instead of a star, with at least about 45 m between power-ups (so roughly one every 50–80 m). A magnet or shield already at level 3 is not offered (a used shield level can be picked up again); once both are at level 3, only the timed power-ups (slow motion, the star and the speed boost) are still offered.
-- **Feedback:** "Magnet level 2!", "Shield level 3!", "Slow motion!", "Invincible!" or "Speed boost!" pops up in the power's colour, with a burst of sparks and a chime. Since v72 the message appears just under the plane and follows it as it fades, so it is easy to read (before, it stayed where the power-up was caught and scrolled up past the plane). Since v75 "Shield used!" appears there too, and on dark maps these messages get a light outline so the coloured text stays readable. Using a shield shows "Shield used! N left".
+- **Feedback:** "Magnet level 2!", "Shield level 3!", "Slow motion!", "Invincible!" or "Speed boost!" pops up in the power's colour, with a burst of sparks and a chime. Since v72 the message appears just under the plane and follows it as it fades, so it is easy to read (before, it stayed where the power-up was caught and scrolled up past the plane). Since v75 "Shield used!" appears there too. On dark maps every pop-up text (power-ups, shield saves, the "100 m!" milestones, medals, "New best!" and "+1 ★") gets a light outline so the coloured text stays readable (since v78; power-up messages only in v75). Using a shield shows "Shield used! N left".
 - **Stars:** stars caught in a run are added to a saved total when the run ends. The top bar shows the total during a run. Since v74 two gold stars never spawn less than 50 m apart (`STAR_GAP` in `js/state.js`), which roughly halved how many appear: about 1 every 50–100 m instead of every 25–35 m. Power-ups are not counted as stars.
 - **Experience and levels** (since v65): every metre of a run is 1 XP, added to a saved total when the run ends (on any map). The player starts at level 1; level 1 → 2 needs 300 XP and each level after needs 200 XP more than the one before (300, 500, 700, 900 …, so level 5 at 2,400 XP and level 10 at 9,900 XP). The start screen shows a yellow level badge beside a green bar and "440 / 700 XP" toward the next level. The game-over screen shows the same box with "+234 XP", the bar filling up; on a level up it fills to the end, starts over at the new level, and a green "Level up! Level N" badge appears with a rising fanfare. Change the curve in `js/state.js` (`xpNeed`).
 - **Plane:** one classic white paper plane; the crumpled ball and paper scraps match it. There are no skins (removed in v42) and no trail (removed in v36).
@@ -369,7 +369,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 |---|---|---|
 | Title | Start menu and game over | Slow, noble horn melody in E minor over strings, with a soft drum (72 bpm, about 27 s loop) |
 | Paper | During Paper runs | Light pastoral town theme in D minor: flute over flowing harp eighths (88 bpm, about 22 s loop) |
-| Deep sea | During Deep sea runs | Slow and dark in A minor: echoing harp, low lonely flute, deep bass (64 bpm, about 30 s loop) |
+| Ocean | During Ocean runs | Slow and dark in A minor: echoing harp, low lonely flute, deep bass (64 bpm, about 30 s loop) |
 | Space | During Space runs | Dreamy and floating: shimmering echoing harp over soft major-seventh chords and a slow, high, wavering lead (70 bpm, about 27 s loop) |
 | Dungeon | During Dungeon runs | Slow and mysterious in D minor: a low horn melody over echoing harp, with a soft drum on the downbeats (66 bpm, about 29 s loop) |
 
@@ -384,7 +384,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Sound on/off | Top bar (speaker icon, crossed out when muted) | Mutes sound effects and music together. Both are generated in code (Web Audio), with no audio files |
 | Pause / Resume | Top bar (pause icon, becomes a play icon while paused), Space bar, Esc (P no longer pauses since v67) | Also pauses automatically when the tab is hidden |
 | Exit run | Pause menu, under Resume (since v71) | Ends the run and goes straight to the start menu. The run keeps what it earned, like a crash: a new best depth, its stars, and its metres as XP |
-| Map | Start and game-over screens | Paper / Deep sea / Space / Dungeon picture tiles |
+| Map | Start and game-over screens | Paper / Ocean / Space / Dungeon picture tiles |
 
 ### Saved data (browser localStorage)
 `nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
@@ -429,7 +429,7 @@ airplane/
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
     ├── paper-background.js Paper map: pencil formulas by depth
-    ├── sea-background.js   Deep sea map: fish, specks, whales, shipwrecks
+    ├── sea-background.js   Ocean map: fish, specks, whales, shipwrecks
     ├── space-background.js Space map: the Earth at the start, satellites, planets, comets, galaxies
     ├── dungeon-background.js Dungeon map: the well opening, torches, bats, crystals, lava falls, dust and embers
     ├── state.js            game state, power-up levels, controls, speed and difficulty rules
@@ -437,7 +437,7 @@ airplane/
     ├── physics.js          collision, obstacle movement, steering, per-frame update
     ├── maps.js             map definitions, page and water colours, paper background drawing
     ├── draw-paper.js       Paper obstacle art
-    ├── draw-sea.js         Deep sea obstacle art
+    ├── draw-sea.js         Ocean obstacle art
     ├── draw-space.js       Space obstacle art
     ├── draw-dungeon.js     Dungeon obstacle art
     ├── render.js           plane, screen shake, frame drawing, map switching
@@ -509,7 +509,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 ## 11. Direction
 
-**Current focus: three maps, Paper, Deep sea and Space,** each chosen from the menu. Any new map should be built from the mechanics in section 6, with new art.
+**Current focus: three maps, Paper, Ocean and Space,** each chosen from the menu. Any new map should be built from the mechanics in section 6, with new art.
 
 ---
 
@@ -534,7 +534,7 @@ Suggestions; only the ones marked ✅ are built. They respect the decisions reco
 - **Rare big star** worth 5, placed in a slightly risky spot.
 
 ### 12.3 Goals between runs
-- **Missions:** three small goals at a time, replaced when done ("Pass 3 mines in one run", "Collect 10 stars", "Reach 300 m in Deep sea"). They pay stars and point players at things they would not try on their own.
+- **Missions:** three small goals at a time, replaced when done ("Pass 3 mines in one run", "Collect 10 stars", "Reach 300 m in Ocean"). They pay stars and point players at things they would not try on their own.
 - **Medals per map** ✅ built in v49 (see section 3): bronze / silver / gold at 250 / 750 / 1,500 m, shown on the map tiles.
 - **A use for stars** now that the Shop is gone: for example unlocking the second map, or medals at star totals.
 
@@ -576,7 +576,7 @@ Name ideas: **Space**, **Orbit**, **Starfall**.
 
 ### 13.2 Background by depth
 
-Like the water darkening in Deep sea, the background changes every so often:
+Like the water darkening in Ocean, the background changes every so often:
 
 | Depth | Look |
 |---|---|
@@ -617,7 +617,7 @@ Like the water darkening in Deep sea, the background changes every so often:
 | Effect Zone (helpful only) | A low-gravity bubble that slows the fall (like the sea's bubble column) |
 | Spring Line | A loose tether cable that bounces the plane sideways |
 
-About 12 of these would be a good set (Deep sea has 12).
+About 12 of these would be a good set (Ocean has 12).
 
 **Avoid** (too close to removed obstacles):
 - Black holes or gravity wells that pull the plane in (like the removed sharpener).
@@ -651,7 +651,7 @@ The plane is dropped down a deep, ancient dungeon well and falls past torch-lit 
 
 ### 14.2 Background by depth
 
-Like the water darkening in Deep sea:
+Like the water darkening in Ocean:
 
 | Depth | Look |
 |---|---|
@@ -689,9 +689,9 @@ Left out on purpose: **Telegraphed Slam** (the rubber stamp was removed, so no f
 
 ### 14.4 Extras
 
-- **Music:** a slow, mysterious theme in a minor key with low drums and an echo, like the Deep sea theme.
+- **Music:** a slow, mysterious theme in a minor key with low drums and an echo, like the Ocean theme.
 - **Map tile:** grey stone bricks with a torch and an orange glow.
-- **Colours:** light text and markers on the dark stone, as in Deep sea.
+- **Colours:** light text and markers on the dark stone, as in Ocean.
 
 ### 14.5 Open questions
 
@@ -706,11 +706,11 @@ Left out on purpose: **Telegraphed Slam** (the rubber stamp was removed, so no f
 A review of the whole game after v75. Nothing here goes against the player decisions in CLAUDE.md (no shop, no skins, no trail, no tutorial, three drift positions). Ordered by value.
 
 1. **Give stars and levels a purpose (the biggest gap).** Stars pile up with nothing to spend them on, and levels unlock nothing. Since v74 stars are rarer, so they feel more valuable, but they still do nothing. Two ideas that fit the rules:
-   - **Levels unlock maps:** for example Deep sea at level 2, Space at level 4, Dungeon at level 6. Every run then has a goal, and new content is paced.
+   - **Levels unlock maps:** for example Ocean at level 2, Space at level 4, Dungeon at level 6. Every run then has a goal, and new content is paced.
    - **Stars buy a one-time "second chance" per run,** offered on the crash screen for a cost. It is a single in-run choice, not a shop.
 2. **"Crumpled by…" on the game-over screen,** for example "Crumpled by a fire bar at 412 m". Knowing what got you makes a crash feel fair and teaches the obstacles, which matters more now that there are 60+ looks. Also a top pick in 12.1, and cheap.
 3. **Close-call rewards:** passing very close to a hazard without touching it shows "Close!" with a small sparkle, and now and then a bonus star. Rewards skilled steering, the core of the game (see 12.2).
-4. **Readability on dark maps:** the "100 m!" milestone text and the medal pop-ups are dark blue and hard to read on Dungeon, Space and deep sea. The light outline added to the messages under the plane in v75 would fix it. Quick.
+4. ✅ **Done in v78.** **Readability on dark maps:** the "100 m!" milestone text and the medal pop-ups are dark blue and hard to read on Dungeon, Space and ocean. The light outline added to the messages under the plane in v75 would fix it. Quick.
 5. **Separate music and sound toggles:** one button mutes both today; many players want the effects without the music, or the other way round. Small.
 6. **Phone vibration on a crash and on a shield save:** a short buzz makes hits feel real (works on Android; iPhones ignore it harmlessly). Very small.
 

@@ -1,7 +1,7 @@
-// Paper Nosedive — Art for the Deep sea map obstacles.
+// Paper Nosedive — Art for the Ocean map obstacles.
 'use strict';
 
-// ---------- deep sea obstacle art ----------
+// ---------- ocean obstacle art ----------
 // coral ledge: a bumpy strip measured from its rounded inner tip, cropped to length like the rulers
 function coralStrip(col, outDir) {
   return sharedSprite('coral' + outDir + col, RULER_LEN + 4, 34, outDir > 0 ? 2 : RULER_LEN + 2, 17, () => {
