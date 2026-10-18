@@ -333,6 +333,9 @@ const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots'
 // Origami collection (Paper map): sticky-note variants, each at most once per run
 const ORIGAMI = ['crane', 'frog', 'boat', 'star', 'fox', 'butterfly'];
 const origamiLeft = () => ORIGAMI.filter(n => !runCollected.has('origami-' + n));
+// Seashells collection (Ocean map): sea-urchin variants, each at most once per run
+const SHELLS = ['conch', 'scallop', 'nautilus', 'cowrie', 'sanddollar', 'pearl'];
+const shellsLeft = () => SHELLS.filter(n => !runCollected.has('shell-' + n));
 // collectibles appear at most once per run: the ring designs and the two anime staffs not yet seen this run
 const ringsLeft = () => DUNGEON_SOLO.rings.cols.filter(d => !runCollected.has('ring-' + d));
 const COLLECTIBLE_LOOKS = { frieren: 'staff-frieren', fern: 'staff-fern' };
@@ -444,6 +447,10 @@ function spawnFromPool(y, d, pool) {
       o.sea = true;
       const cols = SEA_COLS[o.type];
       if (cols) o.seaCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
+      if (o.type === 'blot') {
+        const left = shellsLeft();
+        if (left.length && Math.random() < 0.4) { o.shell = left[ri(0, left.length - 1)]; runCollected.add('shell-' + o.shell); }
+      }
     } else if (mapId === 'space') {
       o.space = true;
       o.look = o.look || type;                   // which space obstacle this is (several share a mechanic)

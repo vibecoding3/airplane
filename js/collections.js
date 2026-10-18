@@ -12,6 +12,8 @@ const COLLECTIONS = [
   { id: 'rings', name: 'Rings of Power', map: 'Dungeon', bg: '#3d3631', items: DUNGEON_SOLO.rings.cols.map(d => ({ id: 'ring-' + d, name: ringName(d), ring: d })) },
   { id: 'origami', name: 'Origami', map: 'Paper', bg: '#fbf9f1',
     items: ORIGAMI.map(n => ({ id: 'origami-' + n, name: n[0].toUpperCase() + n.slice(1), origami: n })) },
+  { id: 'shells', name: 'Seashells', map: 'Ocean', bg: '#3f92c0',
+    items: SHELLS.map(n => ({ id: 'shell-' + n, name: { sanddollar: 'Sand dollar', pearl: 'Pearl oyster' }[n] || n[0].toUpperCase() + n.slice(1), shell: n })) },
   { id: 'planets', name: 'Planets', map: 'Space', bg: '#141a3a',
     items: ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].map(n => ({ id: 'planet-' + n, name: n[0].toUpperCase() + n.slice(1), planet: n })) }
 ];
@@ -25,7 +27,8 @@ function noteFound(o, sy) {
   const id = o.type === 'pencil' && (o.look === 'frieren' || o.look === 'fern') ? 'staff-' + o.look
            : o.look === 'ring' ? 'ring-' + o.dunCol
            : o.look === 'planet' ? 'planet-' + o.planet
-           : o.origami ? 'origami-' + o.origami : null;
+           : o.origami ? 'origami-' + o.origami
+           : o.shell ? 'shell-' + o.shell : null;
   if (!id || collectionFound.has(id)) return;
   collectionFound.add(id);
   store.set('nosedive-collection', JSON.stringify([...collectionFound]));
@@ -40,6 +43,9 @@ function paintCollectionItem(canvas, item, locked, wide) {
     if (item.ring) {
       const k = Hc / 40; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintRing(item.ring);
+    } else if (item.shell) {
+      const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintShell(item.shell);
     } else if (item.origami) {
       const k = Hc / 52; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintOrigami(item.origami);

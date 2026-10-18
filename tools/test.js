@@ -154,8 +154,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { found, saved, total: COLLECTION_TOTAL };
   });
-  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 25,
-    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 4 sets`);
+  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 31,
+    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 5 sets`);
   await page.evaluate(() => { state = 'title'; showCard('title'); });
   await page.click('#collBtn'); await wait(150);
   const collOpen = await page.evaluate(() => ({ shown: !$('collCard').hidden, tiles: document.querySelectorAll('.coll-item').length }));
@@ -163,7 +163,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   const stillTitle = await page.evaluate(() => state);
   await page.keyboard.press('Escape'); await wait(150);
   const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
-  check(collOpen.shown && collOpen.tiles === 25 && stillTitle === 'title' && closed,
+  check(collOpen.shown && collOpen.tiles === 31 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
   // control tips in the top bar: shown at the start of a run, gone past 100 m and outside a run
@@ -232,6 +232,22 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   });
   check(orig.repeats === 0 && orig.seen >= 3 && (orig.seen < 6 || orig.after === 'plain notes'),
     `Origami collection: ${orig.seen}/6 seen in a run to 2,500 m, repeats ${orig.repeats}, a note row after all 6 is ${orig.after}`);
+
+  // the Seashells collection: sea-urchin variants in the Ocean, each once per run, plain urchins once all 6 have appeared
+  const shells = await page.evaluate(() => {
+    mapId = 'sea'; applyMap(); start(); const seen = new Map();
+    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
+      plane.invuln = 1; update(1 / 60);
+      for (const o of obstacles) if (o.shell) { if (!seen.has(o.shell)) seen.set(o.shell, new Set()); seen.get(o.shell).add(o); }
+    }
+    const repeats = [...seen.values()].filter(x => x.size > 1).length;
+    let after = 'n/a';
+    if (seen.size === 6) { const i = obstacles.length; lastType = ''; spawnFromPool(dist + 900, 0.9, [['urchins', 1]]); after = obstacles.slice(i).every(o => !o.shell) ? 'plain urchins' : 'shells'; }
+    gameOver();
+    return { seen: seen.size, repeats, after };
+  });
+  check(shells.repeats === 0 && shells.seen >= 3 && (shells.seen < 6 || shells.after === 'plain urchins'),
+    `Seashells collection: ${shells.seen}/6 seen in a run to 2,500 m, repeats ${shells.repeats}, an urchin row after all 6 is ${shells.after}`);
 
   // the speedometer: the fall speed in m/s left of the frame rate during a run, gone outside a run
   await page.evaluate(() => { mapId = 'notebook'; applyMap(); start(); plane.invuln = 99; dist = 200 * PX_PER_M; });

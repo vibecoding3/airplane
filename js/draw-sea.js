@@ -42,7 +42,62 @@ function drawClam(x0, x1, sy, innerX, outDir, col = '#e9d3c4') {
 }
 
 // sea urchin (in place of an ink blot): spiky ball, same footprint
+// seashells (Seashells collection, v103): sea-urchin variants on the Ocean map, drawn to fill a 20-unit circle and
+// scaled to the urchin's hit circle (radius r × 0.88)
+function paintShell(name) {
+  const line = (w = 1.6) => inkStroke(w);
+  if (name === 'conch') {                          // a spiral spire up-left, a wide body and a pink opening
+    ctx.fillStyle = '#f6e3c8'; ctx.beginPath();
+    ctx.moveTo(-17, -14); ctx.lineTo(-8, -18); ctx.quadraticCurveTo(14, -16, 19, 2); ctx.quadraticCurveTo(18, 18, 2, 19);
+    ctx.quadraticCurveTo(-10, 18, -12, 6); ctx.quadraticCurveTo(-18, -2, -17, -14); ctx.closePath(); ctx.fill(); line();
+    ctx.strokeStyle = 'rgba(150,100,60,.55)'; ctx.lineWidth = 1.4; ctx.beginPath();
+    for (const k of [0, 1, 2]) { ctx.moveTo(-16 + k * 5, -15 + k * 3); ctx.quadraticCurveTo(-8 + k * 6, -4 + k * 4, -12 + k * 5, 4 + k * 3); }
+    ctx.stroke();
+    ctx.fillStyle = '#f2a7a0'; ctx.beginPath(); ctx.ellipse(8, 8, 8, 10, -0.5, 0, Math.PI * 2); ctx.fill(); line(1.3);
+    ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.ellipse(6, 6, 2.4, 4, -0.5, 0, Math.PI * 2); ctx.fill();
+  } else if (name === 'scallop') {                 // a ribbed fan from a hinge with two little ears
+    ctx.fillStyle = '#f7c59f'; ctx.beginPath(); ctx.moveTo(-6, 17); ctx.lineTo(-19, -2); ctx.arc(0, 2, 19, Math.PI * 1.05, Math.PI * 1.95); ctx.lineTo(6, 17); ctx.closePath(); ctx.fill(); line();
+    ctx.strokeStyle = '#e0865a'; ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = -3; i <= 3; i++) { const a = -Math.PI / 2 + i * 0.36; ctx.moveTo(0, 16); ctx.lineTo(Math.cos(a) * 17, 2 + Math.sin(a) * 17); }
+    ctx.stroke();
+    ctx.fillStyle = '#f7c59f'; ctx.beginPath(); ctx.rect(-10, 14, 20, 6); ctx.fill(); line(1.3);
+  } else if (name === 'nautilus') {                // a round chambered shell with tiger stripes and an opening on the right
+    ctx.fillStyle = '#f6ead6'; ctx.beginPath(); ctx.arc(-1, 0, 19, 0, Math.PI * 2); ctx.fill(); line();
+    ctx.save(); ctx.beginPath(); ctx.arc(-1, 0, 19, 0, Math.PI * 2); ctx.clip();
+    ctx.fillStyle = '#b8683a'; for (let i = 0; i < 6; i++) { ctx.save(); ctx.rotate(-2.2 + i * 0.45); ctx.fillRect(-2, -20, 4.5, 12); ctx.restore(); }
+    ctx.restore();
+    ctx.fillStyle = '#3a2a2a'; ctx.beginPath(); ctx.ellipse(13, 3, 6, 12, 0, 0, Math.PI * 2); ctx.fill(); line(1.3);
+    ctx.strokeStyle = 'rgba(120,70,40,.6)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(-3, 0, 6, 0, Math.PI * 1.6); ctx.arc(-1, 0, 11, Math.PI * 1.6, Math.PI * 0.9, true); ctx.stroke();
+  } else if (name === 'cowrie') {                  // a glossy spotted dome seen from above
+    ctx.fillStyle = '#a8673a'; ctx.beginPath(); ctx.ellipse(0, 0, 19, 15, 0, 0, Math.PI * 2); ctx.fill(); line();
+    ctx.fillStyle = '#f2dcc0'; for (const [x, y, r] of [[-9, -6, 2.6], [-2, -9, 2], [6, -6, 2.4], [11, 1, 2], [-12, 3, 2.2], [-4, 2, 2.6], [4, 6, 2.2], [-6, 9, 1.8]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.ellipse(-6, -8, 7, 3, -0.3, 0, Math.PI * 2); ctx.fill();
+  } else if (name === 'sanddollar') {              // a flat pale disc with a five-petal flower
+    ctx.fillStyle = '#ecdfc2'; ctx.beginPath(); ctx.arc(0, 0, 19, 0, Math.PI * 2); ctx.fill(); line();
+    ctx.fillStyle = '#d4c09a';
+    for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * Math.PI * 2 / 5; ctx.beginPath(); ctx.ellipse(Math.cos(a) * 8, Math.sin(a) * 8, 2.6, 6, a + Math.PI / 2, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#bfa77c'; ctx.beginPath(); ctx.arc(0, 0, 2, 0, Math.PI * 2); ctx.fill();
+  } else {                                          // an open oyster with a white pearl
+    ctx.save(); ctx.translate(-17, 0); ctx.rotate(-0.45); ctx.translate(17, 0);                // the lid, tipped open from its hinge
+    ctx.fillStyle = '#8f8aa6'; ctx.beginPath(); ctx.moveTo(-18, -2);
+    for (let i = 0; i <= 8; i++) { const a = Math.PI + i / 8 * Math.PI; ctx.lineTo(Math.cos(a) * 18, -2 + Math.sin(a) * (10 + (i % 2) * 1.6)); }
+    ctx.closePath(); ctx.fill(); line(1.4);
+    ctx.restore();
+    ctx.fillStyle = '#b3aec8'; ctx.beginPath(); ctx.moveTo(-19, 2);                            // the lower shell, with a ruffled edge
+    for (let i = 0; i <= 10; i++) { const a = i / 10 * Math.PI; ctx.lineTo(Math.cos(Math.PI - a) * 19, 2 + Math.sin(a) * (14 + (i % 2) * 1.8)); }
+    ctx.closePath(); ctx.fill(); line();
+    ctx.fillStyle = '#e6e0f0'; ctx.beginPath(); ctx.ellipse(0, 3, 14, 9, 0, 0, Math.PI); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 2, 6.5, 0, Math.PI * 2); ctx.fill(); line(1.2);
+    ctx.fillStyle = 'rgba(200,190,230,.6)'; ctx.beginPath(); ctx.arc(1.6, 3.6, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(-2, 0, 1.8, 0, Math.PI * 2); ctx.fill();
+  }
+}
 function drawUrchin(o, sy) {
+  if (o.shell) {
+    const k = o.r * 0.88 / 20;
+    blit(sharedSprite('shell-' + o.shell, 44, 44, 22, 22, () => paintShell(o.shell)), o.x, sy, 0, k, k);
+    return;
+  }
   const R = o.r * 1.15 + 4, col = o.seaCol || '#3b2a52';
   blit(ownSprite(o, 'sprU', R * 2, R * 2, R, R, () => {
     ctx.lineCap = 'round';
