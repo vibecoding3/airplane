@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v78** (2026-10-18)
+Current version: **v79** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v78 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v79 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -123,7 +123,7 @@ The plane is thrown out of orbit and falls away from Earth into deeper and stran
 
 ### 4.4 Dungeon (since v68)
 The plane is dropped down a deep, ancient dungeon well and falls past torch-lit stone, into caverns, then down to a lava-lit underworld. Cartoon and playful: friendly skeletons, not gore. (The brainstorm is in section 14.)
-- **Walls:** stone bricks (rows of 37.5 units, one CSS layer like the sea bubbles) over a colour that changes every 100 m: grey stone in the well, warm torch-lit browns, cold blue-purple caverns from about 400 m, then deep reds of the underworld below 800 m.
+- **Walls:** stone bricks (rows of 37.5 units, one CSS layer like the sea bubbles; since v79 every mortar line is the same thickness, before that every fourth row was half as thick because it sat on the tile edge) over a colour that changes every 100 m: grey stone in the well, warm torch-lit browns, cold blue-purple caverns from about 400 m, then deep reds of the underworld below 800 m.
 - **The well opening:** at the start, a disc of blue sky with a cloud sits in the stone ring above the plane, with a rope and bucket hanging below the rim and a soft beam of daylight falling down the shaft. It slides up out of view within the first ~35 m (like the Earth in Space); the top bar has no background fade while it is in view.
 - **Drifting specks:** dust motes in the torchlight (100–400 m), water drips falling (400–1,000 m), then embers rising and flickering.
 - **Background scenery** (faded, never collides):
