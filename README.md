@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v75** (2026-10-18)
+Current version: **v76** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v75 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v76 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -672,3 +672,26 @@ Left out on purpose: **Telegraphed Slam** (the rubber stamp was removed, so no f
 1. Mood: **caves and lava** as above, or a **castle dungeon** (chains, knights' armour, prison cells)?
 2. Keep the **Proximity Blast** (cursed rune)? Explosions were removed from Space (v55).
 3. Build all ~18 obstacles at once, or start with a **smaller set** (about 10) to try first?
+
+---
+
+## 15. Recommended next changes (review at v75, not built yet)
+
+A review of the whole game after v75. Nothing here goes against the player decisions in CLAUDE.md (no shop, no skins, no trail, no tutorial, three drift positions). Ordered by value.
+
+1. **Give stars and levels a purpose (the biggest gap).** Stars pile up with nothing to spend them on, and levels unlock nothing. Since v74 stars are rarer, so they feel more valuable, but they still do nothing. Two ideas that fit the rules:
+   - **Levels unlock maps:** for example Deep sea at level 2, Space at level 4, Dungeon at level 6. Every run then has a goal, and new content is paced.
+   - **Stars buy a one-time "second chance" per run,** offered on the crash screen for a cost. It is a single in-run choice, not a shop.
+2. **"Crumpled by…" on the game-over screen,** for example "Crumpled by a fire bar at 412 m". Knowing what got you makes a crash feel fair and teaches the obstacles, which matters more now that there are 60+ looks. Also a top pick in 12.1, and cheap.
+3. **Close-call rewards:** passing very close to a hazard without touching it shows "Close!" with a small sparkle, and now and then a bonus star. Rewards skilled steering, the core of the game (see 12.2).
+4. **Readability on dark maps:** the "100 m!" milestone text and the medal pop-ups are dark blue and hard to read on Dungeon, Space and deep sea. The light outline added to the messages under the plane in v75 would fix it. Quick.
+5. **Separate music and sound toggles:** one button mutes both today; many players want the effects without the music, or the other way round. Small.
+6. **Phone vibration on a crash and on a shield save:** a short buzz makes hits feel real (works on Android; iPhones ignore it harmlessly). Very small.
+
+**Smaller things noticed along the way:**
+- In Space, an Earth planet obstacle can appear right after the plane leaves the real Earth; it could be blocked for the first 100 m.
+- The speed boost goes 10% past the top-speed cap (v55); it could be limited if the cap should always hold.
+- Two test checks fail at random now and then (the desk fan, which only appears before 700 m, and the power-up counts in short 800 m runs); making them reliable means a failure always means something real.
+- Dungeon has 18 obstacle types against 12–16 on the other maps; worth a few play-throughs to see if it feels harder, and if so its obstacles could unlock a little later.
+
+**Suggested first three:** 1 (a purpose for stars and levels), 2 ("Crumpled by…") and 4 (readability).
