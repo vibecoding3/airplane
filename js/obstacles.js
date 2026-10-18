@@ -336,6 +336,9 @@ const origamiLeft = () => ORIGAMI.filter(n => !runCollected.has('origami-' + n))
 // Seashells collection (Ocean map): sea-urchin variants, each at most once per run
 const SHELLS = ['conch', 'scallop', 'nautilus', 'cowrie', 'sanddollar', 'pearl'];
 const shellsLeft = () => SHELLS.filter(n => !runCollected.has('shell-' + n));
+// Legendary swords collection (Dungeon): Spinning Blades variants, each at most once per run
+const SWORDS = ['flame', 'frost', 'crystal', 'scimitar', 'rune', 'bone'];
+const swordsLeft = () => SWORDS.filter(n => !runCollected.has('sword-' + n));
 // collectibles appear at most once per run: the ring designs and the two anime staffs not yet seen this run
 const ringsLeft = () => DUNGEON_SOLO.rings.cols.filter(d => !runCollected.has('ring-' + d));
 const COLLECTIBLE_LOOKS = { frieren: 'staff-frieren', fern: 'staff-fern' };
@@ -479,6 +482,10 @@ function spawnFromPool(y, d, pool) {
       if (looks) [o.look, o.dunCol] = rowSea[o.type];
       if (o.look === 'frieren') o.headR = FRIEREN_HEAD;   // its big crescent head reaches past the 13-unit slider bar
       if (o.type === 'compass') o.hh = 7;        // the fire bar's flames are thicker than a compass leg
+      if (o.type === 'scissors') {               // a pair of legendary swords not yet seen this run (each once per run)
+        const left = swordsLeft();
+        if (left.length && Math.random() < 0.7) { o.sword = left[ri(0, left.length - 1)]; runCollected.add('sword-' + o.sword); }
+      }
     }
   }
   if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock'].includes(type)) {

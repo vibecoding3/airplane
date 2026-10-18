@@ -10,6 +10,8 @@ const COLLECTIONS = [
     { id: 'staff-fern', name: "Fern's staff", slider: 'fern' }
   ] },
   { id: 'rings', name: 'Rings of Power', map: 'Dungeon', bg: '#3d3631', items: DUNGEON_SOLO.rings.cols.map(d => ({ id: 'ring-' + d, name: ringName(d), ring: d })) },
+  { id: 'swords', name: 'Legendary swords', map: 'Dungeon', bg: '#3d3631',
+    items: SWORDS.map(n => ({ id: 'sword-' + n, name: { flame: 'Flame sword', frost: 'Frost blade', crystal: 'Crystal sword', scimitar: 'Desert scimitar', rune: 'Rune blade', bone: 'Bone sword' }[n], sword: n })) },
   { id: 'origami', name: 'Origami', map: 'Paper', bg: '#fbf9f1',
     items: ORIGAMI.map(n => ({ id: 'origami-' + n, name: n[0].toUpperCase() + n.slice(1), origami: n })) },
   { id: 'shells', name: 'Seashells', map: 'Ocean', bg: '#3f92c0',
@@ -28,7 +30,8 @@ function noteFound(o, sy) {
            : o.look === 'ring' ? 'ring-' + o.dunCol
            : o.look === 'planet' ? 'planet-' + o.planet
            : o.origami ? 'origami-' + o.origami
-           : o.shell ? 'shell-' + o.shell : null;
+           : o.shell ? 'shell-' + o.shell
+           : o.sword ? 'sword-' + o.sword : null;
   if (!id || collectionFound.has(id)) return;
   collectionFound.add(id);
   store.set('nosedive-collection', JSON.stringify([...collectionFound]));
@@ -43,6 +46,11 @@ function paintCollectionItem(canvas, item, locked, wide) {
     if (item.ring) {
       const k = Hc / 40; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintRing(item.ring);
+    } else if (item.sword) {                        // one sword, on the diagonal in a tile, flat in the large view
+      const k = wide ? Wc / 110 : Wc / 80; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      if (!wide) g.rotate(-Math.PI / 4);
+      g.translate(-22, 0);
+      paintLegendarySword(item.sword);
     } else if (item.shell) {
       const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintShell(item.shell);
@@ -73,7 +81,7 @@ function renderCollections() {
   if (collPick) {
     const d = document.createElement('div'); d.className = 'coll-detail';
     d.style.background = collPick.set.bg; d.style.color = collPick.set.id === 'origami' ? '#22356b' : '#ffffff';
-    const c = document.createElement('canvas'); c.width = 560; c.height = collPick.item.slider ? 140 : 240;   // staffs are long and thin
+    const c = document.createElement('canvas'); c.width = 560; c.height = collPick.item.slider || collPick.item.sword ? 140 : 240;   // staffs are long and thin
     paintCollectionItem(c, collPick.item, false, true);
     const name = document.createElement('div'); name.className = 'coll-name'; name.textContent = collPick.item.name;
     const set = document.createElement('div'); set.className = 'coll-setname'; set.textContent = collPick.set.name + ' collection';
@@ -108,7 +116,7 @@ function renderCollections() {
 }
 // the Collections button sits on the start and game-over screens; Back returns to whichever opened it
 function syncCollectionButton() {
-  for (const b of document.querySelectorAll('.coll-open')) b.textContent = `Collections · ${collectionFound.size}/${COLLECTION_TOTAL}`;
+  for (const b of document.querySelectorAll('.coll-open')) b.textContent = 'Collections';   // no count on the button (v105)
 }
 let collFrom = 'title';
 function openCollections() { collFrom = state === 'over' ? 'over' : 'title'; collPick = null; renderCollections(); showCard('coll'); }

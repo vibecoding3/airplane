@@ -718,7 +718,64 @@ function drawSawBlade(o, sy) {
 
 // ---------- Spinning Blades: two crossed swords, spears or wizard staffs, spinning and scissoring ----------
 // each blade matches a scissor blade's hit box and each pommel (butt, gem) its handle circle
+// legendary swords (Legendary swords collection, v105): Spinning Blades variants, both blades the same sword
+function paintLegendarySword(name) {
+  const blade = (fill, pts) => { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); dunStroke(1.3); };
+  const hilt = (guard, grip, gem) => {
+    ctx.fillStyle = guard; ctx.beginPath(); ctx.rect(-9, -7, 4, 14); ctx.fill(); dunStroke(1.1);
+    ctx.fillStyle = grip; ctx.beginPath(); ctx.rect(-18, -2.5, 9, 5); ctx.fill(); dunStroke(1);
+    ctx.fillStyle = gem; ctx.beginPath(); ctx.arc(-22, 0, 6, 0, Math.PI * 2); ctx.fill(); dunStroke(1.2);
+    ctx.fillStyle = dunLight(0.7); ctx.beginPath(); ctx.arc(-23.6, -1.6, 1.6, 0, Math.PI * 2); ctx.fill();
+  };
+  const straight = [[-6, -3.8], [58, -3.8], [66, 0], [58, 3.8], [-6, 3.8]];
+  if (name === 'flame') {                          // a red blade with a wavy flame edge and a glow
+    ctx.fillStyle = 'rgba(255,120,30,.3)'; ctx.fillRect(-4, -5, 66, 10);
+    const pts = [[-6, -3]]; for (let x = 0; x <= 56; x += 8) pts.push([x, x % 16 ? -4 : -2.4]);
+    pts.push([66, 0]); for (let x = 56; x >= 0; x -= 8) pts.push([x, x % 16 ? 2.4 : 4]); pts.push([-6, 3]);
+    blade('#e2493b', pts);
+    ctx.fillStyle = '#ffb347'; ctx.fillRect(-2, -1, 52, 2);
+    hilt('#e0b84a', '#5a2a1a', '#ff5a3a');
+  } else if (name === 'frost') {                   // a pale ice-blue blade with crystal glints
+    blade('#cfeefe', straight);
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(-4, -2.6, 58, 1.6);
+    ctx.fillStyle = '#7fc8ff'; for (const x of [10, 28, 46]) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 3, -3); ctx.lineTo(x + 6, 0); ctx.lineTo(x + 3, 3); ctx.closePath(); ctx.fill(); }
+    hilt('#c4c9d0', '#2f4f8a', '#4ab8ff');
+  } else if (name === 'crystal') {                 // a faceted purple crystal blade
+    blade('#c79cff', straight);
+    ctx.strokeStyle = 'rgba(80,30,140,.55)'; ctx.lineWidth = 1; ctx.beginPath();
+    for (let x = 4; x < 58; x += 10) { ctx.moveTo(x, -3.8); ctx.lineTo(x + 5, 0); ctx.lineTo(x, 3.8); }
+    ctx.stroke();
+    ctx.fillStyle = dunLight(0.6); ctx.fillRect(-2, -2.6, 50, 1.4);
+    hilt('#c4c9d0', '#4a3a6a', '#a855f7');
+  } else if (name === 'scimitar') {                // a curved desert blade, widest near the tip
+    ctx.beginPath(); ctx.moveTo(-6, -2.6); ctx.quadraticCurveTo(30, -4.4, 66, -3.4); ctx.quadraticCurveTo(58, 3.6, 40, 3.8);
+    ctx.quadraticCurveTo(14, 3.8, -6, 2.6); ctx.closePath(); ctx.fillStyle = '#e1e5ea'; ctx.fill(); dunStroke(1.3);
+    ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-4, -0.6); ctx.quadraticCurveTo(30, -2, 58, -1.6); ctx.stroke();
+    hilt('#e0b84a', '#7a2a24', '#3fb8a8');
+  } else if (name === 'rune') {                    // a dark blade with glowing green runes
+    blade('#4a4f58', straight);
+    ctx.strokeStyle = '#4fe0a0'; ctx.lineWidth = 1.4; ctx.lineCap = 'round'; ctx.beginPath();
+    ctx.moveTo(6, -2); ctx.lineTo(6, 2); ctx.moveTo(6, -2); ctx.lineTo(9, 0);
+    ctx.moveTo(18, -2); ctx.lineTo(21, 2); ctx.moveTo(21, -2); ctx.lineTo(18, 2);
+    ctx.moveTo(31, 2); ctx.lineTo(33, -2); ctx.lineTo(35, 2);
+    ctx.moveTo(45, -2); ctx.lineTo(45, 2); ctx.moveTo(43, 0); ctx.lineTo(47, 0);
+    ctx.stroke();
+    hilt('#2b2a30', '#1a1410', '#4fe0a0');
+  } else {                                          // bone: a serrated bone-white blade with a little skull pommel
+    const pts = [[-6, -3.6]]; for (let x = 2; x <= 54; x += 6) pts.push([x, -3.8], [x + 3, -1.8]);
+    pts.push([66, 0]); for (let x = 54; x >= 2; x -= 6) pts.push([x + 3, 1.8], [x, 3.8]); pts.push([-6, 3.6]);
+    blade('#efe6d0', pts);
+    hilt('#d8ccb0', '#5a3a22', '#efe6d0');
+    ctx.fillStyle = '#2a211b'; for (const d of [-1, 1]) { ctx.beginPath(); ctx.arc(-22 + d * 2.2, -0.8, 1.3, 0, Math.PI * 2); ctx.fill(); }
+  }
+}
 function drawSwords(o, sy) {
+  if (o.sword) {
+    const s = sharedSprite('legend-' + o.sword, 106, 26, 34, 13, () => paintLegendarySword(o.sword));
+    for (const k of [-1, 1]) blit(s, o.x, sy, o.rot + k * o.open / 2);
+    ctx.fillStyle = IRON; ctx.beginPath(); ctx.arc(o.x, sy, 3.2, 0, Math.PI * 2); ctx.fill(); dunStroke(1);
+    return;
+  }
   const col = o.dunCol || '#e0b84a', look = o.look || 'swords';
   const piece = sharedSprite(look + col, 106, 26, 34, 13, () => {
     if (look === 'spears') {
