@@ -368,7 +368,45 @@ function drawGhost(o, sy) {
 }
 
 // ---------- Wall Piston: a stone block shoots out a spear, a trident or a sword blade, holds, pulls it back ----------
+// a flamethrower (Wall Piston, its own obstacle since v81): an iron nozzle in the wall with a blue pilot light; the flame
+// jet shoots out, holds, then dies back. Its flickering edges stay inside the 12-unit hit box of the extended part.
+function drawFlamethrower(o, sy) {
+  const h = CUTTER_HANDLE, e = o.ext, col = o.dunCol || '#4a4f58', t = performance.now() / 60;
+  ctx.save();
+  toolFrame(o, sy);
+  if (e > 1) {
+    const x0 = h - 2, x1 = h + e;
+    const edge = (k, hw) => {                      // a flame shape: wavy top and bottom, a rounded tip
+      ctx.beginPath(); ctx.moveTo(x0, -hw * 0.6);
+      for (let x = x0; x <= x1 - hw; x += 5) ctx.lineTo(x, -hw + Math.sin(t + x * 0.15 + k) * hw * 0.15);
+      ctx.arc(x1 - hw, 0, hw, -Math.PI / 2, Math.PI / 2);
+      for (let x = x1 - hw; x >= x0; x -= 5) ctx.lineTo(x, hw + Math.sin(t * 1.3 + x * 0.17 + k) * hw * 0.15);
+      ctx.lineTo(x0, hw * 0.6); ctx.closePath();
+    };
+    ctx.globalAlpha = 0.45; ctx.fillStyle = '#ff5a1f'; edge(0, 6); ctx.fill();
+    ctx.globalAlpha = 1; ctx.fillStyle = '#ff8a2a'; edge(1, 5); ctx.fill();
+    ctx.fillStyle = '#ffd25a'; edge(2, 3.2); ctx.fill();
+    ctx.fillStyle = '#fff6d0'; edge(3, 1.4); ctx.fill();
+  }
+  ctx.beginPath(); roundRectPath(-6, -12, h - 6, 24, 4); ctx.fillStyle = col; ctx.fill();          // the iron body
+  ctx.save(); ctx.clip();
+  ctx.fillStyle = dunLight(0.18); ctx.fillRect(-6, -12, h, 5);
+  ctx.fillStyle = '#a0302a'; ctx.fillRect(18, -12, 14, 24);                                          // a red fuel band
+  ctx.restore();
+  ctx.fillStyle = RIVET; for (const x of [6, 42, 58]) for (const y of [-7, 7]) { ctx.beginPath(); ctx.arc(x, y, 1.6, 0, Math.PI * 2); ctx.fill(); }
+  ctx.beginPath(); roundRectPath(-6, -12, h - 6, 24, 4); dunStroke(1.6);
+  ctx.fillStyle = '#b8963a'; ctx.beginPath(); ctx.moveTo(h - 12, -8); ctx.lineTo(h, -5); ctx.lineTo(h, 5); ctx.lineTo(h - 12, 8); ctx.closePath(); ctx.fill(); dunStroke(1.3);   // brass nozzle
+  ctx.fillStyle = '#120e0b'; ctx.fillRect(h - 2, -3, 2, 6);
+  if (e <= 1) {                                    // the pilot light, so you can tell what it is before it fires
+    const f = 1 + 0.2 * Math.sin(t * 2);
+    ctx.fillStyle = 'rgba(80,150,255,.85)'; ctx.beginPath(); ctx.ellipse(h + 4, 0, 4 * f, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#dff0ff'; ctx.beginPath(); ctx.ellipse(h + 3, 0, 1.8, 1.2, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
 function drawSpear(o, sy) {
+  if (o.look === 'flamethrower') { drawFlamethrower(o, sy); return; }
   const h = CUTTER_HANDLE, e = o.ext, col = o.dunCol || '#8f877a', look = o.look || 'spear';
   ctx.save();
   toolFrame(o, sy);

@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v80** (2026-10-18)
+Current version: **v81** (2026-10-18)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -15,7 +15,7 @@ Paper Nosedive is a 2D browser game. A paper airplane is always falling; the pla
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
-- **Version label:** the bottom-centre label (for example `v80 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
+- **Version label:** the bottom-centre label (for example `v81 · 60 fps`) shows the version and the live frame rate. The version number goes up with every pushed change, so you can confirm a deployment has arrived.
 
 ---
 
@@ -159,7 +159,7 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.4. For 
 | Spinning Drifter | Set square | Starfish | Tumbling asteroid | Saw blade / spiked wheel / eyeball / spiked goblin shield |
 | Spinning Blades | Scissors | — | — | Crossed swords / spears / staffs |
 | Sweeping Arm | Drawing compass | — | Robot arm | Fire bar / chain with a spiked ball |
-| Wall Piston | Cutter | Moray eel | Docking probe | Spear / trident / sword blade / goblin club |
+| Wall Piston | Cutter | Moray eel | Docking probe | Spear / trident / sword blade / goblin club; flamethrower |
 | Wall Turret | Glue tube | Submarine | Twin-wing fighter | Dragon head / gargoyle / cannon / goblin with a slingshot |
 | Charged Beam | — | Electric eel | Laser gate | Rune stone / crystal cluster |
 | Telegraphed Sweep | Cat paw | Kelp | Energy blade | Skeleton arm / tentacle / thorny vine / reaper's scythe |
@@ -167,7 +167,7 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.4. For 
 | Push Zone | Desk fan | Ocean current | — | Cold draft / steam vent |
 | Effect Zone | — | Bubble column | Low-gravity field | — |
 | Spring Line | Rubber band | — | — | Spider web / slime strand |
-| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **18 obstacles, 61 looks** |
+| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **19 obstacles, 62 looks** |
 
 ### 5.1 Paper map (16 types)
 
@@ -235,7 +235,7 @@ Every Space obstacle reuses the movement and collision of a Paper or Ocean obsta
 | Battle station | A big grey sphere with a dish and a trench bulging in from a side (original design in a space-opera style) | Protractor | ~170 m |
 | Robot arm | A station arm with a claw swinging all the way round its base | Drawing compass | ~215 m |
 
-### 5.4 Dungeon map (18 kinds on 18 mechanics: 10 in v68, 8 more in v70)
+### 5.4 Dungeon map (19 kinds on 18 mechanics: 10 in v68, 8 more in v70, the flamethrower in v81)
 Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (left out on purpose, see 14.3). Every Dungeon obstacle reuses the movement and collision of a Paper obstacle (see `DUNGEON_MAKERS` in `js/obstacles.js`) with new art in `js/draw-dungeon.js`, and every drawing stays inside its collision shape (a sword's crossguard pokes out a few units, harmlessly). The walls are dark, so obstacles are light stone, bone, wood and fire with a dark outline.
 
 | Dungeon obstacle | Behaviour | Based on | Starts at |
@@ -258,6 +258,7 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Cursed rune (v70) | A floating stone disc with a glowing eye: as the plane comes near it flickers and shows its blast circle, then bursts in a ring of magic (purple, pink or green) | Naval mine | ~120 m |
 | Rune beam (v70) | A rune stone on the wall: its runes light up and a dashed line shows the path, then a magic beam fires | Electric eel | ~135 m |
 | Skeleton arm (v70) | A dashed wedge shows its reach, then a bony arm swipes out of a crack in the wall | Cat paw | ~135 m |
+| Flamethrower (v81) | An iron nozzle in the wall with a flickering blue pilot light; a jet of flame shoots out, holds, then dies back. Its own obstacle (own spawn chance), always this look | Cutter | ~120 m |
 
 **Looks and colours** (since v73): every Dungeon obstacle comes in two to five different objects that share its mechanic and hit box, each in a few colours (61 looks in all; 12 Halloween and goblin looks added in v80; `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
 

@@ -317,7 +317,9 @@ function spacePool(d) {
 const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots', rock: 'protractor', plank: 'pencil',
                          skull: 'wad', ghosts: 'notes', spear: 'cutter', firebar: 'compass', dragon: 'glue',
                          daggers: 'clips', saw: 'starfish', swords: 'scissors', runebeam: 'zap', skelarm: 'paw',
-                         curse: 'mine', draft: 'fan', web: 'band' };
+                         curse: 'mine', draft: 'fan', web: 'band', flamethrower: 'cutter' };
+// obstacles that always have one look, with their own spawn chance (v81): a flamethrower is a Wall Piston whose flame shoots out
+const DUNGEON_SOLO = { flamethrower: { look: 'flamethrower', cols: ['#4a4f58', '#5e4a3a'] } };
 // each Dungeon mechanic has two to four looks that share its hit box, each with its own colours; a row of the
 // same obstacle shares one look and colour (v73; Halloween and goblin looks added in v80)
 const DUNGEON_LOOKS = {
@@ -349,6 +351,7 @@ function dungeonPool(d, y) {
   if (d > 0.12 && windAllowed(y)) pool.push(['draft', 1.1]);
   if (d > 0.18) pool.push(['curse', 1.2]);
   if (d > 0.2) pool.push(['runebeam', 1.2], ['skelarm', 1.3]);
+  if (d > 0.18) pool.push(['flamethrower', 1.2]);
   if (d > 0.1) pool.push(['dragon', 1.2]);
   if (d > 0.15) pool.push(['spear', 1.3]);
   if (d > 0.22) pool.push(['crusher', 1.4]);
@@ -428,7 +431,8 @@ function spawnFromPool(y, d, pool) {
       if (o.look === 'station') o.r = rand(95, 110);
     } else if (mapId === 'dungeon') {
       o.dungeon = true;
-      const looks = DUNGEON_LOOKS[o.type];
+      const looks = DUNGEON_LOOKS[o.type], solo = DUNGEON_SOLO[type];
+      if (solo && !rowSea[o.type]) rowSea[o.type] = [solo.look, solo.cols[ri(0, solo.cols.length - 1)]];
       if (looks && !rowSea[o.type]) {
         const names = Object.keys(looks), look = names[ri(0, names.length - 1)], cols = looks[look];
         rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];

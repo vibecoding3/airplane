@@ -118,6 +118,18 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(starGap.every(r => r.n > 5 && r.min >= 50),
     'gold stars at least 50 m apart: ' + starGap.map(r => `${r.m} ${r.n} stars, closest ${r.min} m`).join(', '));
 
+  // the Dungeon flamethrower: its own obstacle in the pool, built on the Wall Piston (cutter) with its own look
+  const flame = await page.evaluate(() => {
+    mapId = 'dungeon'; applyMap(); start(); obstacles.length = 0;
+    const inPool = dungeonPool(0.5, 100 * PX_PER_M).some(p => p[0] === 'flamethrower');
+    lastType = ''; spawnFromPool(dist + 600, 0.5, [['flamethrower', 1]]);
+    const o = obstacles[0];
+    gameOver();
+    return { inPool, type: o && o.type, look: o && o.look };
+  });
+  check(flame.inPool && flame.type === 'cutter' && flame.look === 'flamethrower',
+    `Dungeon flamethrower: in the pool ${flame.inPool}, spawns as ${flame.type}/${flame.look}`);
+
   // drifting into an edge, then one press the other way turns the plane at once (not straight down)
   const edge = await page.evaluate(() => {
     mapId = 'notebook'; applyMap(); start();
