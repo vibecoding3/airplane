@@ -170,6 +170,13 @@ function exitRun() {
   setMusic('title');
   showCard('title');
 }
+// the game-over screen's Main Menu button: back to the start menu (where Collections is)
+function toMainMenu() {
+  if (state !== 'over') return;
+  reset();
+  state = 'title';
+  showCard('title');
+}
 function gameOver() {
   state = 'over';
   setMusic('title');
@@ -193,6 +200,7 @@ $('startBtn').addEventListener('click', start);
 $('againBtn').addEventListener('click', start);
 $('resumeBtn').addEventListener('click', resume);
 $('exitBtn').addEventListener('click', exitRun);
+$('overMenuBtn').addEventListener('click', toMainMenu);
 
 ui.pauseBtn.addEventListener('click', () => (state === 'paused' ? resume() : pause()));
 ui.muteBtn.addEventListener('click', () => {

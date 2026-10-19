@@ -125,7 +125,7 @@ function syncCollectionButton() {
   for (const b of document.querySelectorAll('.coll-open')) b.textContent = 'Collections';   // no count on the button (v105)
 }
 let collFrom = 'title';
-function openCollections() { collFrom = state === 'over' ? 'over' : 'title'; collPick = null; renderCollections(); showCard('coll'); }
+function openCollections() { collFrom = 'title'; collPick = null; renderCollections(); showCard('coll'); }
 function closeCollections() { showCard(collFrom); }
 
 for (const b of document.querySelectorAll('.coll-open')) b.addEventListener('click', openCollections);

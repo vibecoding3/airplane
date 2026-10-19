@@ -303,15 +303,17 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   const overLabel = await page.evaluate(() => document.getElementById('version').textContent);
   check(/ · \d+\.\d m\/s · \d+ fps$/.test(runLabel) && !overLabel.includes('m/s'), `speedometer: "${runLabel}" during a run, "${overLabel}" after it`);
 
-  // the game-over screen has a Collections button too, and Back returns to game over
+  // the game-over screen: a Main Menu button back to the start menu; Collections only on the start menu
   await page.evaluate(() => { mapId = 'dungeon'; applyMap(); start(); gameOver(); });
-  await page.click('#overCollBtn'); await wait(150);
-  const fromOver = await page.evaluate(() => !$('collCard').hidden);
+  const collButtons = await page.evaluate(() => [...document.querySelectorAll('.coll-open')].map(b => b.closest('.menu').id).join(','));
+  await page.click('#overMenuBtn'); await wait(150);
+  const toMenu = await page.evaluate(() => state === 'title' && !$('titleCard').hidden && $('overCard').hidden && obstacles.length === 0);
+  await page.click('#collBtn'); await wait(150);
+  const fromMenu = await page.evaluate(() => !$('collCard').hidden);
   await page.click('#collBack'); await wait(150);
-  const backToOver = await page.evaluate(() => !$('overCard').hidden && $('titleCard').hidden);
-  const noPauseColl = await page.evaluate(() => !$('pauseCard').querySelector('.coll-open'));
-  check(noPauseColl, 'no Collections button in the pause menu');
-  check(fromOver && backToOver, `Collections from the game-over screen: opens ${fromOver}, Back returns to game over ${backToOver}`);
+  const backToMenu = await page.evaluate(() => !$('titleCard').hidden);
+  check(collButtons === 'titleCard', `Collections button only on the start menu (${collButtons})`);
+  check(toMenu && fromMenu && backToMenu, `game over → Main Menu ${toMenu}, Collections opens ${fromMenu}, Back returns to the menu ${backToMenu}`);
 
   // the Dungeon's magic rings: their own obstacle in the pool, built on the Rising Projectile (paper wad), one of 9 designs
   const rings = await page.evaluate(() => {
