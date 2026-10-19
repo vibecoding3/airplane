@@ -31,6 +31,16 @@ function keySide(k) {
   return 0;
 }
 
+// the phone's Back button (called by the Android app): one step back through the screens.
+// Returns false on the start menu, where there is nothing to go back to and the app closes.
+function goBack() {
+  if (!ui.coll.hidden) { closeCollections(); return true; }
+  if (state === 'play') { pause(); return true; }
+  if (state === 'paused') { resume(); return true; }
+  if (state === 'over') { toMainMenu(); return true; }
+  return false;
+}
+
 // mouse, pen and touch all work the same: press the left or right half of the playfield
 const sideOf = clientX => {
   const r = canvas.getBoundingClientRect();

@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v109** (2026-10-19)
+Current version: **v110** (2026-10-19)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,7 +10,7 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css` and 16 plain script files in `js/` (about 3,400 lines in all). No build step and no dependencies, apart from two Google Fonts (Kalam and Patrick Hand). See section 10 for the file structure.
+- **Files:** `index.html`, `style.css` and 19 plain script files in `js/` (about 5,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
 - **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, the map tiles, Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
@@ -31,6 +31,7 @@ One scheme for every device. A press can be a tap or click on the left or right 
 | Hit a screen edge | The drift into that edge is cancelled (the plane falls straight), so one press the other way turns it at once |
 | P or Esc | Pause / resume |
 | Space or Enter | Start or resume from the menus; during a run, Space pauses (since v67, replacing P) |
+| Phone Back button (Android app) | One step back (since v110, `goBack` in `js/main.js`): a run pauses, the pause menu resumes, game over goes to the start menu, Collections closes. On the start menu it returns false and the app closes. The website does not use it yet; the Android app will call it |
 
 There are no on-screen steering arrows (removed in v44).
 
@@ -440,6 +441,7 @@ airplane/
 ├── index.html              the page: playfield layers, top bar, menu cards; loads everything below
 ├── style.css               all styling, including the paper and sea background layers and the start menu
 ├── img/menu-bg.svg         start-menu background picture (paper airplanes in a sunset sky)
+├── fonts/                  Kalam and Patrick Hand (woff2, Latin + Latin Extended), fonts.css and their OFL licence files
 ├── README.md               this document
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
@@ -525,7 +527,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 | `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all four maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
 | `node tools/shot.js <notebook|sea> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
 | `node tools/shot.js title [sea]` | Title screen screenshot |
-| `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs) and the scripts into one page (for a single-file copy) |
+| `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs), the bundled fonts (as data URLs) and the scripts into one page (for a single-file copy) |
 
 ---
 

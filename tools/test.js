@@ -339,6 +339,20 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(collButtons === 'titleCard', `Collections button only on the start menu (${collButtons})`);
   check(toMenu && fromMenu && backToMenu, `game over → Main Menu ${toMenu}, Collections opens ${fromMenu}, Back returns to the menu ${backToMenu}`);
 
+  // the phone's Back button (goBack): run → pause → resume, game over → start menu, Collections → closed,
+  // and false on the start menu (the Android app then closes)
+  const back = await page.evaluate(() => {
+    const steps = [];
+    const step = () => { const handled = goBack(); steps.push((handled ? '' : 'exit:') + (ui.coll.hidden ? state : 'coll')); };
+    mapId = 'notebook'; applyMap(); start(); plane.invuln = 99;
+    step(); step();                  // pause, then resume
+    gameOver(); step();              // game over → start menu
+    openCollections(); step();       // Collections → start menu
+    step();                          // start menu: nothing to go back to
+    return steps.join(' ');
+  });
+  check(back === 'paused play title title exit:title', `Back button steps: ${back}`);
+
   // the Dungeon's magic rings: their own obstacle in the pool, built on the Rising Projectile (paper wad), one of 9 designs
   const rings = await page.evaluate(() => {
     mapId = 'dungeon'; applyMap(); start(); obstacles.length = 0;
