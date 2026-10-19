@@ -1,0 +1,13 @@
+{
+  "name": "paper-nosedive-app",
+  "private": true,
+  "description": "Android app for Paper Nosedive: the web game in the repo root, wrapped with Capacitor",
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.3"
+  }
+}

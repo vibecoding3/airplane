@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v111** (2026-10-19)
+Current version: **v112** (2026-10-19)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -445,6 +445,7 @@ airplane/
 ├── README.md               this document
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
+├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
 └── js/                     19 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
@@ -825,3 +826,46 @@ Ideas for new Collections sets (see Collections in section 7). The best fit is o
 ### 17.4 Suggested next three
 
 **Planets** (almost free), **Origami** (fits the game best) and **Seashells** (gives the Ocean a set): every map would then have at least one collection.
+
+---
+
+## 18. Android app (since v112)
+
+The same game, wrapped as an Android app with **Capacitor 8**. The website at the repo root stays the source: every build copies it into the app, so a change to the game reaches both.
+
+- **App ID:** `io.github.vibecoding3.papernosedive` (permanent once published on Google Play). **Name:** Paper Nosedive.
+- **Portrait only** (`screenOrientation` in `app/android/app/src/main/AndroidManifest.xml`).
+- **Back button:** `app/native.js` (app only, never on the website) sends the phone's Back button to `goBack()` in `js/main.js`; on the start menu the app closes.
+- **Saves** are the app's own `localStorage`, separate from the website's.
+
+### 18.1 Files
+
+```
+app/
+├── package.json            Capacitor packages (@capacitor/core, android, app; cli)
+├── capacitor.config.json   app ID, name, web folder
+├── copy-web.js             copies index.html, style.css, js/, img/, fonts/ into app/www and adds native.js
+├── native.js               app-only script: the Back button
+├── build.js                one command for the whole build (see 18.3)
+├── www/                    the copied game (git ignores it; rebuilt every time)
+└── android/                the native Android project (Gradle). Committed; its build output is ignored
+```
+
+### 18.2 One-time setup (per computer)
+
+No Android Studio needed. Installed in `%LOCALAPPDATA%\Android` (no admin rights):
+
+- **JDK 21** (Eclipse Temurin) in `jdk-21`. Capacitor 8 is built for JDK 21; a separate newer JDK on the PATH is fine.
+- **Android SDK** in `Sdk`: command-line tools, then `platform-tools`, `platforms;android-36`, `build-tools;36.0.0` (Gradle adds build-tools 35 itself on the first build). Use the classic `sdkmanager` (command-line tools 13114758, in `Sdk/cmdline-tools/classic`): from 16111833 on, `sdkmanager` is a wrapper that first downloads Google's new "Android CLI".
+- `cd app && npm install`.
+
+`build.js` finds both by default; elsewhere set `JAVA_HOME_21` and `ANDROID_HOME`.
+
+### 18.3 Build and install
+
+| Command | What it does |
+|---|---|
+| `node app/build.js` | Copies the game, `cap sync android`, builds the debug APK: `app/android/app/build/outputs/apk/debug/app-debug.apk` (about 4.4 MB) |
+| `node app/build.js --install` | Also installs it on the phone connected over USB (Developer options → USB debugging on) |
+
+The first build downloads Gradle and its libraries (a few minutes); later builds take seconds.

@@ -14,6 +14,9 @@ Browser game: a paper plane always falls; the player steers left/right to dodge 
 
 Tools setup (once): `cd tools && npm install`. Chrome is auto-detected (or set `CHROME`).
 
+## Android app (`app/`, since v112)
+Capacitor 8 wrapper around the game in the repo root; README section 18 has the setup. `node app/build.js` copies the game into `app/www` and builds the debug APK; `--install` puts it on the USB-connected phone. Rebuild it after game changes when the user is testing on the phone. App-only code goes in `app/native.js`, never in `js/`. `app/www` is generated: never edit it. The app ID `io.github.vibecoding3.papernosedive` is permanent.
+
 ## Player decisions — don't undo
 - Controls: 3 drift positions only (left / straight / right); hold for a sharp turn. A 5-position version was rejected.
 - No drop shadows anywhere (removed v29).
