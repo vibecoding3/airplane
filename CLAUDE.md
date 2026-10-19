@@ -10,7 +10,7 @@ Browser game: a paper plane always falls; the player steers left/right to dodge 
 2. Screenshots only for visual changes: `node tools/shot.js <notebook|sea|space|dungeon|city|forest> <depth…>` or `node tools/shot.js title [map]` → `tools/out/*.png` (phone size 412×860).
 3. Bump the version label in `index.html` (`id="version">vN<`) and "Current version" in README for every pushed change. Keep README in sync with features.
 4. Push every change to GitHub without asking (user's standing instruction, 2026-10-18). Commit as the repo's local git identity (vibecoding3), then confirm GitHub Pages serves the new `vN` (https://vibecoding3.github.io/airplane/, ~1 min).
-5. Private claude.ai artifact copy (https://claude.ai/artifact/KJy3ncyQMyFFiAsPLhSYuf): `node tools/bundle.js` → publish `tools/out/paper-nosedive.html` to that URL.
+5. Don't update the private claude.ai artifact copy (https://claude.ai/artifact/KJy3ncyQMyFFiAsPLhSYuf) anymore (user's decision, 2026-10-20; last updated at v119). `tools/bundle.js` still works if it's ever asked for.
 
 Tools setup (once): `cd tools && npm install`. Chrome is auto-detected (or set `CHROME`).
 
