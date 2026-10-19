@@ -64,9 +64,13 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
     const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})` + (d.windRetries ? ` (wind found on extra run ${d.windRetries})` : ''));
-    check(d.repeats === 0 && d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && d.powers.superstar > 0 && d.powers.boost > 0 && (DEPTH < 1500 || (d.powers.squid > 0 && d.maxMagnet === 3 && d.maxShield === 3)),
+    check(d.repeats === 0 && d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && d.powers.boost > 0 && (DEPTH < 1500 || (d.powers.squid > 0 && d.maxMagnet >= 2 && d.maxShield >= 2)),
       `${m}: power-ups spawned, never the same kind twice in a row (repeats ${d.repeats}) (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}, star ${d.powers.superstar}, boost ${d.powers.boost}, squid ${d.powers.squid}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
   }
+
+  // the invincibility star is the rarest power-up, so a single run can miss it: look across all the deep runs
+  const starsOffered = Object.values(deep).reduce((n, d) => n + d.powers.superstar, 0);
+  check(starsOffered > 0, `invincibility star offered in the deep runs: ${starsOffered} in all`);
 
   // normal runs (3 lives) end in a game over
   const runs = await page.evaluate(() => {
@@ -94,6 +98,16 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
   });
   check(xpRes.curve === '1,1,2,2,3,4' && xpRes.gained === 484 && xpRes.saved === 484 && xpRes.stamp && xpRes.shown.includes('+234 XP'),
     `experience: levels ${xpRes.curve}, 250 + 234 m = ${xpRes.gained} XP (saved ${xpRes.saved}), level-up stamp ${xpRes.stamp}, shows "${xpRes.shown}"`);
+
+  // magnet and shield level up one step per pickup and stop at level 3 (whether one run reaches 3 depends on chance)
+  const levels = await page.evaluate(() => {
+    mapId = 'notebook'; applyMap(); start();
+    const seen = [];
+    for (let k = 0; k < 4; k++) { collectPower({ kind: 'magnet', x: W / 2, y: 0 }); collectPower({ kind: 'shield', x: W / 2, y: 0 }); seen.push(plane.magnet + '/' + plane.lives); }
+    gameOver();
+    return seen.join(' ');
+  });
+  check(levels === '1/1 2/2 3/3 3/3', 'magnet / shield levels per pickup, capped at 3: ' + levels);
 
   // speed boost: the plane falls 10% faster for 5 seconds, then back to normal
   const boost = await page.evaluate(() => {
@@ -193,16 +207,18 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
   check(collOpen.shown && collOpen.tiles === 58 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
-  // control tips in the top bar: shown at the start of a run, gone past 100 m and outside a run
+  // control tips in the top bar: shown for the first 200 m of a run, gone after and outside a run; no pause button
   const hint = await page.evaluate(() => {
-    mapId = 'notebook'; applyMap(); start(); update(1 / 60); updateHud();
+    mapId = 'notebook'; applyMap(); start(); plane.invuln = 99; update(1 / 60); updateHud();   // invulnerable: a jump down must not crash into a row
     const atStart = !$('hint').hidden && $('hint').textContent.length > 0;
-    dist = 120 * PX_PER_M; update(1 / 60); updateHud();
+    dist = 150 * PX_PER_M; update(1 / 60); updateHud();
+    const still = !$('hint').hidden;
+    dist = 220 * PX_PER_M; update(1 / 60); updateHud();
     const past = $('hint').hidden;
     gameOver(); updateHud();
-    return { atStart, past, after: $('hint').hidden };
+    return { atStart, still, past, after: $('hint').hidden, button: !!document.getElementById('pauseBtn') };
   });
-  check(hint.atStart && hint.past && hint.after, `control tips: shown at the start ${hint.atStart}, hidden past 100 m ${hint.past}, hidden after the run ${hint.after}`);
+  check(hint.atStart && hint.still && hint.past && hint.after && !hint.button, `control tips: shown at the start ${hint.atStart}, still at 150 m ${hint.still}, hidden past 200 m ${hint.past}, hidden after the run ${hint.after}; no pause button in the top bar ${!hint.button}`);
 
   // collectibles appear at most once per run; once all 9 rings have appeared, rings leave the pool
   const once = await page.evaluate(() => {

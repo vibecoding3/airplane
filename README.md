@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v117** (2026-10-20)
+Current version: **v118** (2026-10-20)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -37,7 +37,7 @@ There are no on-screen steering arrows (removed in v44).
 
 ---
 
-**Control tips** (since v91): for the first 100 m of a run, a tip shows in the top bar (bold 17 px since v108, was 13 px) to the left of the sound button, changing every 3 seconds and fading out over the last 10 m. Keyboards: "← → or A D to steer", "Space to pause". Phones and tablets (coarse pointer): "Tap left or right to steer" only (the "Hold for a sharp turn" tip was removed in v95, "Tap ⏸ to pause" in v96) (`HINTS` in `js/ui.js`). The separate "How to play" section stays removed (v44).
+**Control tips** (since v91): for the first 200 m of a run (100 m until v117), a tip shows in the top bar (bold 17 px since v108, was 13 px) to the left of the sound button, changing every 3 seconds and fading out over the last 10 m. Keyboards: "← → or A D to steer", "Space to pause". Phones and tablets (coarse pointer): "Tap left or right to steer" only (the "Hold for a sharp turn" tip was removed in v95, "Tap ⏸ to pause" in v96) (`HINTS` in `js/ui.js`). The separate "How to play" section stays removed (v44).
 
 ## 3. Core rules
 
@@ -492,7 +492,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Setting | Where | Notes |
 |---|---|---|
 | Sound on/off | Top bar (speaker icon, crossed out when muted) | Mutes sound effects and music together. Both are generated in code (Web Audio), with no audio files |
-| Pause / Resume | Top bar (pause icon, becomes a play icon while paused), Space bar, Esc (P no longer pauses since v67) | Also pauses automatically when the tab is hidden |
+| Pause / Resume | Space bar, Esc (P no longer pauses since v67); the phone Back button in the Android app. The top bar's pause button was removed in v118 | Also pauses automatically when the tab is hidden or the window loses focus |
 | Exit run | Pause menu, under Resume (since v71) | Ends the run and goes straight to the start menu. The run keeps what it earned, like a crash: a new best depth, its stars, and its metres as XP |
 | Map | Start and game-over screens | Paper / Ocean / Space / Dungeon / Neon City / Forest picture tiles |
 
