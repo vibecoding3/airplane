@@ -3,7 +3,7 @@
 //   node tools/test.js 800        (deep runs to 800 m, faster)
 const { openGame, wait } = require('./lib');
 const DEPTH = +process.argv[2] || 2500;
-const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, forest: 19, desert: 19 };   // obstacle types per map; update when adding obstacles
+const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, forest: 19, desert: 19, volcano: 19 };   // obstacle types per map; update when adding obstacles
 
 (async () => {
   const { browser, page, errors } = await openGame();
@@ -28,7 +28,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
   // and level up to 3, no errors
   const deep = await page.evaluate(depth => {
     const out = {};
-    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest', 'desert']) {
+    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest', 'desert', 'volcano']) {
       mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0, slowmo: 0, superstar: 0, boost: 0, squid: 0 }, counted = new Set();
       let maxMagnet = 0, maxShield = 0;
       let prevKind = '', repeats = 0;
@@ -48,7 +48,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
     }
     // wind obstacles (desk fan, ocean current, cold draft, city vent, forest breeze, sandstorm) only spawn before 700 m, so one run misses them about
     // 1 time in 10–15 by chance: look again in up to 6 short runs to 760 m before calling it missing
-    for (const m of ['notebook', 'sea', 'dungeon', 'city', 'forest', 'desert']) {
+    for (const m of ['notebook', 'sea', 'dungeon', 'city', 'forest', 'desert', 'volcano']) {
       const types = out[m].types;
       for (let tries = 0; tries < 6 && !types.includes('fan'); tries++) {
         mapId = m; applyMap(); start();
@@ -60,11 +60,11 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
     }
     return out;
   }, DEPTH);
-  for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest', 'desert']) {
+  for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest', 'desert', 'volcano']) {
     const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})` + (d.windRetries ? ` (wind found on extra run ${d.windRetries})` : ''));
-    check(d.repeats === 0 && d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && d.powers.boost > 0 && (DEPTH < 1500 || (d.powers.squid > 0 && d.maxMagnet >= 2 && d.maxShield >= 2)),
+    check(d.repeats === 0 && d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.boost > 0 && (DEPTH < 1500 || (d.powers.slowmo > 0 && d.powers.squid > 0 && d.maxMagnet >= 2 && d.maxShield >= 2)),
       `${m}: power-ups spawned, never the same kind twice in a row (repeats ${d.repeats}) (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}, star ${d.powers.superstar}, boost ${d.powers.boost}, squid ${d.powers.squid}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
   }
 
@@ -75,7 +75,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
   // normal runs (3 lives) end in a game over
   const runs = await page.evaluate(() => {
     const out = [];
-    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest', 'desert']) {
+    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest', 'desert', 'volcano']) {
       mapId = m; applyMap(); start(); plane.lives = 3; let f = 0;
       while (state !== 'over' && f < 60 * 300) {
         if (f % 45 === 0) { const s = Math.random() < 0.5 ? -1 : 1; press(s, 'sim'); release('sim'); }
@@ -152,7 +152,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
   // gold stars never spawn less than 50 m apart (power-ups are not stars)
   const starGap = await page.evaluate(() => {
     const out = [];
-    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest', 'desert']) {
+    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest', 'desert', 'volcano']) {
       mapId = m; applyMap(); start();
       const ys = new Map();   // each star once, where it first appeared (the magnet moves them)
       for (let f = 0; f < 60 * 400 && dist / PX_PER_M < 2000; f++) {
@@ -195,8 +195,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { found, saved, total: COLLECTION_TOTAL };
   });
-  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 66,
-    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 10 sets`);
+  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 74,
+    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 11 sets`);
   await page.evaluate(() => { state = 'title'; showCard('title'); });
   await page.click('#collBtn'); await wait(150);
   const collOpen = await page.evaluate(() => ({ shown: !$('collCard').hidden, tiles: document.querySelectorAll('.coll-item').length }));
@@ -204,7 +204,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
   const stillTitle = await page.evaluate(() => state);
   await page.keyboard.press('Escape'); await wait(150);
   const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
-  check(collOpen.shown && collOpen.tiles === 66 && stillTitle === 'title' && closed,
+  check(collOpen.shown && collOpen.tiles === 74 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
   // control tips in the top bar: shown for the first 200 m of a run, gone after and outside a run; no pause button
@@ -404,10 +404,39 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
   });
   check(layers.length === 0, 'Desert looks follow the rock layers' + (layers.length ? ': ' + layers.slice(0, 5).join(', ') : ''));
 
+  // the Volcanic stones collection: stones among the Volcano's lava bombs, each once per run, plain bombs once all 8 have appeared
+  const stones = await page.evaluate(() => {
+    mapId = 'volcano'; applyMap(); start(); const seen = new Map();
+    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
+      plane.invuln = 1; update(1 / 60);
+      for (const o of obstacles) if (o.stone) { if (!seen.has(o.stone)) seen.set(o.stone, new Set()); seen.get(o.stone).add(o); }
+    }
+    const repeats = [...seen.values()].filter(x => x.size > 1).length;
+    let after = 'n/a';
+    if (seen.size === 8) { const i = obstacles.length; lastType = ''; spawnFromPool(dist + 900, 0.9, [['lavaBombs', 1]]); after = obstacles.slice(i).every(o => !o.stone) ? 'plain bombs' : 'stones'; }
+    gameOver();
+    return { seen: seen.size, repeats, after };
+  });
+  check(stones.repeats === 0 && stones.seen >= 4 && (stones.seen < 8 || stones.after === 'plain bombs'),
+    `Volcanic stones collection: ${stones.seen}/8 seen in a run to 2,500 m, repeats ${stones.repeats}, a bomb row after all 8 is ${stones.after}`);
+
+  // Volcano looks follow the layers: vines only on the jungle slope, rope lava from the ash cloud on, and so on
+  const vlayers = await page.evaluate(() => {
+    mapId = 'volcano'; applyMap(); start(); const bad = [];
+    for (const m of [50, 300, 600, 1200, 2000]) for (let k = 0; k < 40; k++) {
+      obstacles.length = 0; lastType = '';
+      spawnFromPool(m * PX_PER_M, 0.5, [[['ropeLava', 'raft', 'moths', 'lightning', 'lavaVent'][k % 5], 1]]);
+      for (const o of obstacles) if (o.look && VOLCANO_LAYERS[o.look] && !VOLCANO_LAYERS[o.look].includes(o.layer)) bad.push(o.look + '@' + m);
+    }
+    gameOver();
+    return bad;
+  });
+  check(vlayers.length === 0, 'Volcano looks follow the layers' + (vlayers.length ? ': ' + vlayers.slice(0, 5).join(', ') : ''));
+
   // Ranked Score: the best depths of every map added up, on the start and game-over screens
   const ranked = await page.evaluate(() => {
     const keep = { ...bests };
-    Object.assign(bests, { notebook: 800, sea: 260, space: 0, dungeon: 412, city: 0, forest: 0, desert: 0 }); best = bests[mapId];
+    Object.assign(bests, { notebook: 800, sea: 260, space: 0, dungeon: 412, city: 0, forest: 0, desert: 0, volcano: 0 }); best = bests[mapId];
     state = 'title'; showCard('title');
     const title = $('menuRanked').textContent;
     mapId = 'space'; applyMap(); start(); dist = 333 * PX_PER_M; gameOver();

@@ -539,6 +539,56 @@ function desertPool(d, y) {
   if (d > 0.3) pool.push(['wellLever', 1.3]);
   return pool;
 }
+// Volcano obstacles (v121): every one reuses a Paper or Ocean obstacle's movement and collision with volcano art (draw-volcano.js)
+const VOLCANO_MAKERS = { basaltLedges: 'gate', plates: 'erasers', bombs: 'blots', dome: 'protractor', raft: 'pencil', lavaBombs: 'wad',
+                         moths: 'notes', rollers: 'clips', spindle: 'starfish', shards: 'scissors', steamArm: 'compass',
+                         lavaTongue: 'cutter', lavaVent: 'glue', lightning: 'zap', lavaWave: 'paw', mudPot: 'mine', ashGust: 'fan',
+                         steamColumn: 'bubbles', ropeLava: 'band' };
+// the volcano gets hotter as you fall: jungle slope, ash cloud (150 m), crater (400 m), lava tubes (800 m), then the magma
+// chamber (1,500 m)
+const volcanoLayer = y => { const m = y / PX_PER_M; return m < 150 ? 0 : m < 400 ? 1 : m < 800 ? 2 : m < 1500 ? 3 : 4; };
+// Volcanic stones collection: Rising Projectile variants (among the lava bombs), each at most once per run
+const VOLC_STONES = ['obsidian', 'pumice', 'basalt', 'sulfur', 'olivine', 'geode', 'peleshair', 'spindlebomb'];
+const stonesLeft = () => VOLC_STONES.filter(n => !runCollected.has('stone-' + n));
+// each Volcano mechanic has one to three looks sharing its hit box; some only appear in certain layers (VOLCANO_LAYERS)
+const VOLCANO_LOOKS = {
+  gate: { basalt: ['#3a3a42', '#46464e'], crust: ['#2a2420'] },
+  erasers: { plates: ['#4a4440', '#3a3632'], obsidian: ['#1e1a24'] },
+  blot: { bomb: ['#3a302a'], sulfur: ['#f0d030'], pumice: ['#d8d0c0'] },
+  protractor: { dome: ['#3a2a24'], columns: ['#3a3a42'], mound: ['#8a7a6a'] },
+  pencil: { charlog: ['#2a2420'], lavaraft: ['#3a302a'] },
+  wad: { lavabomb: ['#3a2a24'], glowrock: ['#ff7a2a'] },
+  note: { moth: ['#8a6a5a'], beetle: ['#2a2a30'], ashpuff: ['#9a968e'] },
+  clips: { rollers: ['#3a302a'], beetles: ['#2a2a30'] },
+  starfish: { spindle: ['#3a2a24'], obsstar: ['#1e1a24'] },
+  scissors: { obsidian: ['#1e1a24', '#2a2034'] },
+  compass: { steam: ['#ffffff'], lavaspout: ['#ff7a2a'] },
+  cutter: { lavatongue: ['#ff6a1e'], column: ['#3a3a42'] },
+  glue: { vent: ['#3a302a'], lavafrog: ['#c84a2a'] },
+  zap: { lightning: ['#d8e8ff'], steambeam: ['#ffffff'] },
+  paw: { lavawave: ['#ff6a1e'], pillar: ['#3a3a42'] },
+  mine: { mudpot: ['#8a6a5a'], gaspocket: ['#c8c040'] },
+  fan: { ashgust: ['#8a8680'] },
+  bubbles: { steam: ['#ffffff'] },
+  band: { ropelava: ['#3a2a24'], vine: ['#4f8a3a'] }
+};
+// looks tied to the layers they belong to (0 jungle, 1 ash cloud, 2 crater, 3 lava tubes, 4 magma); the rest appear everywhere
+const VOLCANO_LAYERS = { vine: [0, 1], ropelava: [1, 2, 3, 4], charlog: [0, 1, 2], ashpuff: [1, 2], lightning: [1, 2, 3], lavafrog: [2, 3, 4], moth: [0, 1, 2] };
+function volcanoPool(d, y) {
+  const pool = [['basaltLedges', 3], ['bombs', 2], ['raft', 1 + 1.5 * d], ['dome', 1.4], ['lavaBombs', 1.2 + d], ['steamColumn', 1]];
+  if (d > 0.05) pool.push(['ropeLava', 1.2]);
+  if (d > 0.06) pool.push(['moths', 1.3]);
+  if (d > 0.08) pool.push(['spindle', 1.2], ['rollers', 1.3]);
+  if (d > 0.1) pool.push(['lavaVent', 1.2]);
+  if (d > 0.12) pool.push(['shards', 0.6 + 1.6 * d]);
+  if (d > 0.12 && windAllowed(y)) pool.push(['ashGust', 1.1]);
+  if (d > 0.15) pool.push(['lavaTongue', 1.3]);
+  if (d > 0.18) pool.push(['mudPot', 1.2]);
+  if (d > 0.2) pool.push(['lightning', 1.2], ['lavaWave', 1.3]);
+  if (d > 0.22) pool.push(['plates', 1.4]);
+  if (d > 0.3) pool.push(['steamArm', 1.3]);
+  return pool;
+}
 function seaPool(d, y) {
   const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1]];
   if (d > 0.08) pool.push(['mine', 1.3]);
@@ -580,6 +630,7 @@ function spawnRow(y, d) {
   if (mapId === 'city') return spawnFromPool(y, d, cityPool(d, y));
   if (mapId === 'forest') return spawnFromPool(y, d, forestPool(d, y));
   if (mapId === 'desert') return spawnFromPool(y, d, desertPool(d, y));
+  if (mapId === 'volcano') return spawnFromPool(y, d, volcanoPool(d, y));
   const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
   if (d > 0.08) pool.push(['clips', 1.4]);
   if (d > 0.12) pool.push(['scissors', 0.6 + 1.6 * d]);
@@ -601,7 +652,7 @@ function spawnFromPool(y, d, pool) {
   for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
   lastType = type;
   const before = obstacles.length;
-  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || FOREST_MAKERS[type] || DESERT_MAKERS[type] || type](y, d) || 0;
+  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || FOREST_MAKERS[type] || DESERT_MAKERS[type] || VOLCANO_MAKERS[type] || type](y, d) || 0;
   const rowPal = {}, rowSea = {};    // obstacles of the same kind in one row share a colour
   for (let i = before; i < obstacles.length; i++) {
     const o = obstacles[i];
@@ -690,9 +741,24 @@ function spawnFromPool(y, d, pool) {
         const left = fossilsLeft();
         if (left.length && Math.random() < 0.4) { o.fossil = left[ri(0, left.length - 1)]; runCollected.add('fossil-' + o.fossil); }
       }
+    } else if (mapId === 'volcano') {
+      o.volcano = true;
+      o.layer = volcanoLayer(o.y);
+      const looks = VOLCANO_LOOKS[o.type];
+      if (looks && !rowSea[o.type]) {
+        const all = Object.keys(looks), fit = all.filter(l => !VOLCANO_LAYERS[l] || VOLCANO_LAYERS[l].includes(o.layer));
+        const names = fit.length ? fit : all, look = names[ri(0, names.length - 1)], cols = looks[look];
+        rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
+      }
+      if (looks) [o.look, o.volCol] = rowSea[o.type];
+      if (o.type === 'compass') o.hh = 5;        // a steam jet is a little thicker than a compass leg
+      if (o.type === 'wad') {                    // a volcanic stone not yet seen this run (each once per run)
+        const left = stonesLeft();
+        if (left.length && Math.random() < 0.5) { o.stone = left[ri(0, left.length - 1)]; runCollected.add('stone-' + o.stone); }
+      }
     }
   }
-  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon', 'branches', 'trunk', 'sandLedges', 'outcrop'].includes(type)) {
+  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon', 'branches', 'trunk', 'sandLedges', 'outcrop', 'basaltLedges', 'dome'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
     else if (Math.random() < 0.28) addStar(rand(40, W - 40), py);

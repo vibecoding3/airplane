@@ -25,6 +25,8 @@ const COLLECTIONS = [
     items: FOREST_BIRDS.map(n => ({ id: 'bird-' + n, name: BIRD_LOOKS[n].name, bird: n })) },
   { id: 'fossils', name: 'Fossils', map: 'Desert', bg: '#e0a060',
     items: FOSSILS.map(n => ({ id: 'fossil-' + n, name: FOSSIL_NAMES[n], fossil: n })) },
+  { id: 'stones', name: 'Volcanic stones', map: 'Volcano', bg: '#5a4a44',
+    items: VOLC_STONES.map(n => ({ id: 'stone-' + n, name: STONE_NAMES[n], stone: n })) },
   { id: 'planets', name: 'Planets', map: 'Space', bg: '#141a3a',
     items: ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].map(n => ({ id: 'planet-' + n, name: n[0].toUpperCase() + n.slice(1), planet: n })) }
 ];
@@ -44,7 +46,8 @@ function noteFound(o, sy) {
            : o.fish ? 'fish-' + o.fish
            : o.neonSign ? 'neon-' + o.neonSign
            : o.bird ? 'bird-' + o.bird
-           : o.fossil ? 'fossil-' + o.fossil : null;
+           : o.fossil ? 'fossil-' + o.fossil
+           : o.stone ? 'stone-' + o.stone : null;
   if (!id || collectionFound.has(id)) return;
   collectionFound.add(id);
   store.set('nosedive-collection', JSON.stringify([...collectionFound]));
@@ -76,6 +79,9 @@ function paintCollectionItem(canvas, item, locked, wide) {
     } else if (item.fossil) {
       const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintFossil(item.fossil);
+    } else if (item.stone) {
+      const k = Hc / 40; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintVolcStone(item.stone);
     } else if (item.bird) {
       const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintForestBird(item.bird);

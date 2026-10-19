@@ -9,7 +9,7 @@ let dist, speed, time, nextRowY, stars, shake, overTimer;
 const bests = { notebook: +store.get('nosedive-best-notebook') || 0, sea: +store.get('nosedive-best-sea') || 0,
                 space: +store.get('nosedive-best-space') || 0, dungeon: +store.get('nosedive-best-dungeon') || 0,
                 city: +store.get('nosedive-best-city') || 0, forest: +store.get('nosedive-best-forest') || 0,
-                desert: +store.get('nosedive-best-desert') || 0 };
+                desert: +store.get('nosedive-best-desert') || 0, volcano: +store.get('nosedive-best-volcano') || 0 };
 if (store.get('nosedive-best-notebook') == null && +store.get('nosedive-best') > 0) {
   // before v49 there was one best for all maps: it goes to Paper, the original map
   bests.notebook = +store.get('nosedive-best');

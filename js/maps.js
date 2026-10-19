@@ -28,6 +28,10 @@ const FOREST = ['#d4ecb4', '#c4e4a2', '#9fcf78', '#8cc266', '#ecc07a', '#e6ad66'
 // beds (800 m), then the golden amber (1,500 m)
 const DESERT = ['#f4dc9c', '#f0d08a', '#eab070', '#e09a5c', '#9cc8b0', '#8cbea4', '#7cb498', '#6caa8c', '#b0a490', '#a69a86',
                 '#9c907c', '#928672', '#887c68', '#7e725e', '#746854', '#c8862a', '#b8761e', '#a86814', '#985a0c'];
+// volcano: hotter and brighter as you fall: jungle greens, ash greys (150 m), dark crater basalt (400 m), near-black lava
+// tubes (800 m), then the glowing orange magma chamber (1,500 m)
+const VOLCANO = ['#a8d890', '#98cc80', '#b4b0aa', '#a29e98', '#5a5650', '#504c46', '#46423c', '#3e3a34', '#2e2220', '#2c1e1a',
+                 '#2a1a16', '#281612', '#26140f', '#24120c', '#22100a', '#c8501e', '#d05a1e', '#d8641e', '#e06e1e'];
 const SPACE = ['#2a5298', '#1a3570', '#10204a', '#0b1432', '#140f33', '#0a1b2e', '#1a0e2c', '#0c1533', '#120a28', '#0a1026', '#06070f'];
 const MAPS = {
   notebook: { name: 'Paper', colour: k => (k < 1 ? COL.paper : RAINBOW[(k - 1) % RAINBOW.length]), formulas: true },
@@ -36,7 +40,8 @@ const MAPS = {
   dungeon: { name: 'Dungeon', colour: k => DUNGEON[clamp(k, 0, DUNGEON.length - 1)], formulas: false },
   city: { name: 'Neon City', colour: k => CITY[clamp(k, 0, CITY.length - 1)], formulas: false },
   forest: { name: 'Forest', colour: k => FOREST[clamp(k, 0, FOREST.length - 1)], formulas: false },
-  desert: { name: 'Desert', colour: k => DESERT[clamp(k, 0, DESERT.length - 1)], formulas: false }
+  desert: { name: 'Desert', colour: k => DESERT[clamp(k, 0, DESERT.length - 1)], formulas: false },
+  volcano: { name: 'Volcano', colour: k => VOLCANO[clamp(k, 0, VOLCANO.length - 1)], formulas: false }
 };
 let mapId = MAPS[store.get('nosedive-map')] ? store.get('nosedive-map') : 'notebook';
 const pageColor = k => MAPS[mapId].colour(k);
@@ -48,11 +53,11 @@ const isDark = hex => {
 let darkPage = false;
 
 // where each map's starting scene is on screen (its lowest point); it slides away within the first ~35 m
-const START_SCENES = { notebook: () => paperStartY(), sea: () => seaStartY(), space: () => earthLimbY(), dungeon: () => wellOpeningY(), city: () => cityStartY(), forest: () => forestStartY(), desert: () => desertStartY() };
+const START_SCENES = { notebook: () => paperStartY(), sea: () => seaStartY(), space: () => earthLimbY(), dungeon: () => wellOpeningY(), city: () => cityStartY(), forest: () => forestStartY(), desert: () => desertStartY(), volcano: () => volcanoStartY() };
 const DARK_SCENES = new Set(['space', 'dungeon', 'city']);   // starting scenes the HUD needs light text over
 let hudPage = '';
 function syncHudPage() {         // the HUD's fade matches the page colour behind it
-  // no fade while the map's starting scene (notebook top, sea surface, Earth, well opening, rooftop, treetops, mesa) is in view, so it
+  // no fade while the map's starting scene (notebook top, sea surface, Earth, well opening, rooftop, treetops, mesa, crater) is in view, so it
   // isn't painted over; the text stays dark over the light paper and sky, light over Earth and the well
   const scene = START_SCENES[mapId]() > -150;
   const c = scene ? 'transparent' : pageColor(pageIndexAt(dist + 40));
@@ -68,6 +73,7 @@ function syncHudPage() {         // the HUD's fade matches the page colour behin
 function drawPaper() {
   if (MAPS[mapId].formulas) { belowLine(paperStartY() + 52, drawFormulas); drawPaperStart(); }   // no formulas over the header
   else if (mapId === 'sea') { drawSeaStart(); drawSeaParticles(); belowLine(seaStartY() + 8, drawFishes); }   // no fish in the sky
+  else if (mapId === 'volcano') { drawVolcanoStart(); drawVolcanoParticles(); belowLine(volcanoStartY() + 4, drawFishes); }   // no scenery over the crater rim
   else if (mapId === 'desert') { drawDesertStart(); drawDesertParticles(); belowLine(desertStartY() + 4, drawFishes); }   // no scenery over the mesa
   else if (mapId === 'forest') { drawForestStart(); drawForestParticles(); belowLine(forestStartY() + 4, drawFishes); }   // no scenery over the treetops
   else if (mapId === 'city') { drawCityStart(); drawCityParticles(); belowLine(cityStartY() + 4, drawFishes); }   // no scenery over the rooftop

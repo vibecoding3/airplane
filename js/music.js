@@ -78,6 +78,15 @@ const THEMES = {
       [[69, 1], [70, 1], [72, 1.5], [70, 0.5]], [[70, 1], [67, 1], [63, 2]], [[67, 1], [66, 1], [63, 1], [66, 1]], [[62, 3], [null, 1]]
     ]
   },
+  // Volcano: a heavy, smouldering theme in E Phrygian: a brassy lead over a low arpeggio and pounding big drums
+  volcano: {
+    bpm: 104, lead: 'brass', harp: [0, 1, 2, 1, 0, 2, 3, 2], harpStep: 0.5, echo: 0.15, taiko: true,
+    chords: ['Em', 'F', 'Em', 'Dm', 'C', 'F', 'Dm', 'Em'],
+    melody: [
+      [[64, 0.5], [64, 0.5], [65, 1], [64, 2]], [[69, 1], [67, 0.5], [65, 0.5], [64, 2]], [[71, 1.5], [72, 0.5], [71, 1], [67, 1]], [[69, 3], [null, 1]],
+      [[72, 1], [71, 0.5], [69, 0.5], [67, 1], [69, 1]], [[65, 1], [69, 1], [72, 2]], [[74, 1], [72, 1], [69, 1], [65, 1]], [[64, 3], [null, 1]]
+    ]
+  },
   // Ocean: slow and dark, long echoing harp notes and a lonely low flute
   sea: {
     bpm: 64, lead: 'deep', harp: [0, 2, 3, 4], harpStep: 1, echo: 0.45,
@@ -164,6 +173,10 @@ function playBar(th, i, t0, bus) {
     drum(bus, t0, 0.7); drum(bus, t0 + 2.5 * beat, 0.55);
     for (const b of [1, 1.5, 3, 3.5]) hiss(bus, t0 + b * beat, 0.05, 2600, 0.03);
   }
+  if (th.taiko) {                                 // big drums: boom on 1, a double hit on the and-of-2, a boom on 4
+    for (const [b, v] of [[0, 1], [1.5, 0.6], [2, 0.75], [3, 0.9]]) drum(bus, t0 + b * beat, v);
+    hiss(bus, t0 + 3.5 * beat, 0.08, 3200, 0.03);
+  }
   if (th.birds) for (let b = 0; b < 4; b++) if (Math.random() < 0.3) chirp(bus, t0 + (b + Math.random() * 0.5) * beat);   // birdsong
   if (th.beat) for (let b = 0; b < 4; b++) {     // a dance beat: kick, off-beat hat, clap on 2 and 4
     drum(bus, t0 + b * beat, b % 2 ? 0.55 : 0.8);
@@ -194,20 +207,21 @@ function pluck(bus, f, t, dur, vol, echo) {
   if (echo) { const e = a.createGain(); e.gain.value = echo; g.connect(e).connect(music.echo); }
   osc.start(t); osc.stop(t + dur + 0.05);
 }
-// lead voices: flute (sine with vibrato), deep flute (lower, slower), horn (filtered saw), synth (filtered square), ocarina (soft triangle), reed (brighter filtered saw)
+// lead voices: flute (sine with vibrato), deep flute (lower, slower), horn (filtered saw), synth (filtered square), ocarina (soft triangle), reed (brighter filtered saw),
+// brass (darker, louder filtered saw)
 function lead(bus, kind, f, t, dur) {
   const a = actx, osc = a.createOscillator(), g = a.createGain(), vib = a.createOscillator(), vg = a.createGain();
-  const horn = kind === 'horn', synth = kind === 'synth', ocarina = kind === 'ocarina', reed = kind === 'reed';
+  const horn = kind === 'horn' || kind === 'brass', brass = kind === 'brass', synth = kind === 'synth', ocarina = kind === 'ocarina', reed = kind === 'reed';
   osc.type = horn || reed ? 'sawtooth' : synth ? 'square' : ocarina ? 'triangle' : 'sine'; osc.frequency.value = f;
   vib.frequency.value = kind === 'deep' ? 4 : kind === 'space' ? 3 : 5.5; vg.gain.value = f * (kind === 'space' ? 0.009 : 0.006);
   vib.connect(vg).connect(osc.frequency);
-  const vol = horn ? 0.035 : reed ? 0.03 : synth ? 0.026 : ocarina ? 0.07 : kind === 'deep' ? 0.07 : kind === 'space' ? 0.05 : 0.06, att = horn ? 0.12 : synth ? 0.02 : kind === 'space' ? 0.25 : 0.08;
+  const vol = brass ? 0.045 : horn ? 0.035 : reed ? 0.03 : synth ? 0.026 : ocarina ? 0.07 : kind === 'deep' ? 0.07 : kind === 'space' ? 0.05 : 0.06, att = horn ? 0.12 : synth ? 0.02 : kind === 'space' ? 0.25 : 0.08;
   g.gain.setValueAtTime(0, t);
   g.gain.linearRampToValueAtTime(vol, t + att);
   g.gain.setValueAtTime(vol * 0.85, Math.max(t + att, t + dur - 0.15));
   g.gain.linearRampToValueAtTime(0, t + dur + 0.05);
   let out = osc;
-  if (horn || synth || reed) { const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = horn ? 1300 : reed ? 1800 : 2200; osc.connect(lp); out = lp; }
+  if (horn || synth || reed) { const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = brass ? 1000 : horn ? 1300 : reed ? 1800 : 2200; osc.connect(lp); out = lp; }
   out.connect(g).connect(bus);
   if (kind === 'deep' || kind === 'space' || synth || ocarina) { const e = a.createGain(); e.gain.value = kind === 'space' ? 0.45 : synth || ocarina ? 0.25 : 0.3; g.connect(e).connect(music.echo); }
   osc.start(t); vib.start(t); osc.stop(t + dur + 0.1); vib.stop(t + dur + 0.1);
