@@ -389,6 +389,59 @@ function dungeonPool(d, y) {
   if (d > 0.3) pool.push(['firebar', 1.3]);
   return pool;
 }
+// Neon City obstacles (v113): every one reuses a Paper or Ocean obstacle's movement and collision with city art (draw-city.js)
+const CITY_MAKERS = { signs: 'gate', shutters: 'erasers', cones: 'blots', bulge: 'protractor', tram: 'pencil', cans: 'wad',
+                      drones: 'notes', taxis: 'clips', fanspin: 'starfish', rotors: 'scissors', crane: 'compass', ladder: 'cutter',
+                      camera: 'glue', laser: 'zap', barrier: 'paw', transformer: 'mine', vent: 'fan', holo: 'bubbles', cable: 'band' };
+// Neon signs collection: big round neon signs (Wall Bulge), each at most once per run; once all 8 have appeared,
+// a sign spawn becomes a regular Wall Bulge (dish, AC unit or clock)
+const NEON_SIGNS = ['ramen', 'cat', 'cassette', 'bolt', 'heart', 'note', 'coffee', 'palm'];
+const neonLeft = () => NEON_SIGNS.filter(n => !runCollected.has('neon-' + n));
+make.neon = (y, d) => {
+  const left = neonLeft();
+  if (!left.length) return make.protractor(y, d);
+  const name = left[ri(0, left.length - 1)], r = rand(80, 100);
+  runCollected.add('neon-' + name);
+  obstacles.push({ type: 'protractor', neonSign: name, y, side: Math.random() < 0.5 ? -1 : 1, r });
+  return r > 90 ? 70 : 40;
+};
+// each Neon City mechanic has two or three looks sharing its hit box, each in a few neon colours; a row shares one
+const CITY_LOOKS = {
+  gate: { sign: ['#ff4fd8', '#3ff0ff', '#b6ff3f', '#ffb03f'], balcony: ['#ffd36a', '#7fe8ff'] },
+  erasers: { shutter: ['#8a93a8', '#a08a7a'], door: ['#ff4f6a', '#3fb0ff', '#ffb03f'] },
+  blot: { cone: ['#ff7a1f', '#ff4fd8'], manhole: ['#3ff0ff', '#ff4fd8', '#b6ff3f'], vending: ['#ff3f5a', '#3f8fff', '#3fd17a'] },
+  protractor: { dish: ['#c9cfdb', '#e6e0d0'], acunit: ['#9aa3b5', '#b8b0a0'], clock: ['#f4f1ea'] },
+  pencil: { tram: ['#ff4fd8', '#3ff0ff', '#ffb03f'], tube: ['#ff4fd8', '#3ff0ff', '#b6ff3f', '#ff3f5a'] },
+  wad: { can: ['#ff3f5a', '#3f8fff', '#b6ff3f', '#ff4fd8'], token: ['#ffd23f', '#c9cfdb'], ball: ['#ff4fd8', '#3ff0ff', '#b6ff3f'] },
+  note: { drone: ['#3ff0ff', '#ff4fd8', '#b6ff3f'], lantern: ['#ff3f3f', '#ffb03f', '#ff4fd8'], umbrella: ['#ff4fd8', '#3ff0ff', '#ffd23f', '#9a7cff'] },
+  clips: { taxi: ['#ffd23f', '#ff4fd8', '#3ff0ff'], pod: ['#e6ecf5', '#b6ff3f', '#ffb03f'] },
+  starfish: { fan: ['#9aa3b5', '#7fe8ff'], hubcap: ['#3ff0ff', '#ff4fd8', '#b6ff3f'], record: ['#ff3f5a', '#ffd23f', '#3ff0ff'] },
+  scissors: { rotor: ['#3ff0ff', '#ff4fd8', '#ffb03f'], neon: ['#ff4fd8', '#3ff0ff', '#b6ff3f'] },
+  compass: { crane: ['#ffc21f', '#ff7a1f'], lamp: ['#c9cfdb', '#7f8aa0'] },
+  cutter: { ladder: ['#8a93a8', '#a06a4a'], arrow: ['#ff4fd8', '#3ff0ff', '#b6ff3f'], antenna: ['#c9cfdb'] },
+  glue: { camera: ['#ff3f5a', '#3ff0ff'], dumpling: ['#c8a46a'], spray: ['#ff4fd8', '#3ff0ff', '#b6ff3f', '#ffb03f'] },
+  zap: { laser: ['#ff3f5a', '#3fff8a'], arc: ['#3ff0ff', '#ff4fd8', '#b6ff3f'] },
+  paw: { barrier: ['#ff3f3f', '#ffc21f'], robot: ['#c9cfdb', '#ffb03f'] },
+  mine: { transformer: ['#3ff0ff', '#b6ff3f'], hydrant: ['#ff3f3f', '#ffc21f', '#3f8fff'] },
+  fan: { steam: ['#fff3e0'], ac: ['#cdebff'] },
+  bubbles: { holo: ['#3ff0ff', '#ff4fd8'] },
+  band: { cable: ['#2b2b3a'], lights: ['#ffd36a'] }
+};
+function cityPool(d, y) {
+  const pool = [['signs', 3], ['cones', 2], ['tram', 1 + 1.5 * d], ['bulge', 1.1], ['neon', 1.3], ['cans', 1 + d], ['holo', 1]];
+  if (d > 0.05) pool.push(['cable', 1.2]);
+  if (d > 0.06) pool.push(['drones', 1.3]);
+  if (d > 0.08) pool.push(['fanspin', 1.2], ['taxis', 1.3]);
+  if (d > 0.1) pool.push(['camera', 1.2]);
+  if (d > 0.12) pool.push(['rotors', 0.6 + 1.6 * d]);
+  if (d > 0.12 && windAllowed(y)) pool.push(['vent', 1.1]);
+  if (d > 0.15) pool.push(['ladder', 1.3]);
+  if (d > 0.18) pool.push(['transformer', 1.2]);
+  if (d > 0.2) pool.push(['laser', 1.2], ['barrier', 1.3]);
+  if (d > 0.22) pool.push(['shutters', 1.4]);
+  if (d > 0.3) pool.push(['crane', 1.3]);
+  return pool;
+}
 function seaPool(d, y) {
   const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1]];
   if (d > 0.08) pool.push(['mine', 1.3]);
@@ -425,6 +478,7 @@ function spawnRow(y, d) {
   if (mapId === 'sea') return spawnFromPool(y, d, seaPool(d, y));
   if (mapId === 'space') return spawnFromPool(y, d, spacePool(d));
   if (mapId === 'dungeon') return spawnFromPool(y, d, dungeonPool(d, y));
+  if (mapId === 'city') return spawnFromPool(y, d, cityPool(d, y));
   const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
   if (d > 0.08) pool.push(['clips', 1.4]);
   if (d > 0.12) pool.push(['scissors', 0.6 + 1.6 * d]);
@@ -446,7 +500,7 @@ function spawnFromPool(y, d, pool) {
   for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
   lastType = type;
   const before = obstacles.length;
-  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || type](y, d) || 0;
+  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || type](y, d) || 0;
   const rowPal = {}, rowSea = {};    // obstacles of the same kind in one row share a colour
   for (let i = before; i < obstacles.length; i++) {
     const o = obstacles[i];
@@ -495,9 +549,19 @@ function spawnFromPool(y, d, pool) {
         const left = swordsLeft();
         if (left.length && Math.random() < 0.7) { o.sword = left[ri(0, left.length - 1)]; runCollected.add('sword-' + o.sword); }
       }
+    } else if (mapId === 'city') {
+      o.city = true;
+      if (o.neonSign) continue;                  // a collectible neon sign has its own art
+      const looks = CITY_LOOKS[o.type];
+      if (looks && !rowSea[o.type]) {
+        const names = Object.keys(looks), look = names[ri(0, names.length - 1)], cols = looks[look];
+        rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
+      }
+      if (looks) [o.look, o.cityCol] = rowSea[o.type];
+      if (o.type === 'compass') o.hh = 5;        // the crane boom is a little thicker than a compass leg
     }
   }
-  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock'].includes(type)) {
+  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
     else if (Math.random() < 0.28) addStar(rand(40, W - 40), py);

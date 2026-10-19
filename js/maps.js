@@ -14,12 +14,19 @@ const SEA = ['#c4ecf4', '#a3dcec', '#80c8e2', '#5daed3', '#3f92c0', '#2c76a6', '
 // space: deep blue sky turning to black, then faintly tinted nebula darks, near-black below 1,000 m
 // dungeon: grey stone in the well, warm torch-lit browns, cold blue-purple caverns, then the red underworld
 const DUNGEON = ['#57514a', '#4a3f37', '#3d342e', '#332c27', '#262c38', '#20263a', '#1f1b30', '#19172a', '#2a1410', '#311410', '#36120b'];
+// neon city: night-blue rooftops, purple streets, the teal subway (400 m), the magenta arcade (800 m), then the
+// near-black data core (1,500 m)
+const CITY = ['#1c2350', '#1e1f4c', '#261b4e', '#2b1850', '#11303a', '#0f2b34', '#0d262e', '#0b2129', '#2a0f33', '#260d30',
+              '#220b2c', '#1f0a29', '#1c0926', '#190823', '#160720', '#071a1c', '#06161a', '#051318', '#041016'];
+// the depth markers glow in a different neon colour every 100 m on the Neon City map
+const NEON_MARKS = ['#ff4fd8', '#3ff0ff', '#b6ff3f', '#ffb03f', '#9a7cff'];
 const SPACE = ['#2a5298', '#1a3570', '#10204a', '#0b1432', '#140f33', '#0a1b2e', '#1a0e2c', '#0c1533', '#120a28', '#0a1026', '#06070f'];
 const MAPS = {
   notebook: { name: 'Paper', colour: k => (k < 1 ? COL.paper : RAINBOW[(k - 1) % RAINBOW.length]), formulas: true },
   sea: { name: 'Ocean', colour: k => SEA[clamp(k, 0, SEA.length - 1)], formulas: false },
   space: { name: 'Space', colour: k => SPACE[clamp(k, 0, SPACE.length - 1)], formulas: false },
-  dungeon: { name: 'Dungeon', colour: k => DUNGEON[clamp(k, 0, DUNGEON.length - 1)], formulas: false }
+  dungeon: { name: 'Dungeon', colour: k => DUNGEON[clamp(k, 0, DUNGEON.length - 1)], formulas: false },
+  city: { name: 'Neon City', colour: k => CITY[clamp(k, 0, CITY.length - 1)], formulas: false }
 };
 let mapId = MAPS[store.get('nosedive-map')] ? store.get('nosedive-map') : 'notebook';
 const pageColor = k => MAPS[mapId].colour(k);
@@ -31,17 +38,17 @@ const isDark = hex => {
 let darkPage = false;
 
 // where each map's starting scene is on screen (its lowest point); it slides away within the first ~35 m
-const START_SCENES = { notebook: () => paperStartY(), sea: () => seaStartY(), space: () => earthLimbY(), dungeon: () => wellOpeningY() };
+const START_SCENES = { notebook: () => paperStartY(), sea: () => seaStartY(), space: () => earthLimbY(), dungeon: () => wellOpeningY(), city: () => cityStartY() };
 let hudPage = '';
 function syncHudPage() {         // the HUD's fade matches the page colour behind it
-  // no fade while the map's starting scene (notebook top, sea surface, Earth, well opening) is in view, so it
+  // no fade while the map's starting scene (notebook top, sea surface, Earth, well opening, rooftop) is in view, so it
   // isn't painted over; the text stays dark over the light paper and sky, light over Earth and the well
   const scene = START_SCENES[mapId]() > -150;
   const c = scene ? 'transparent' : pageColor(pageIndexAt(dist + 40));
   if (c === hudPage) return;
   hudPage = c;
   wrap.style.setProperty('--page', c);
-  darkPage = scene ? (mapId === 'space' || mapId === 'dungeon') : c.startsWith('#') && isDark(c);
+  darkPage = scene ? mapId !== 'notebook' && mapId !== 'sea' : c.startsWith('#') && isDark(c);
   wrap.classList.toggle('dark-page', darkPage);
 }
 
@@ -50,6 +57,7 @@ function syncHudPage() {         // the HUD's fade matches the page colour behin
 function drawPaper() {
   if (MAPS[mapId].formulas) { belowLine(paperStartY() + 52, drawFormulas); drawPaperStart(); }   // no formulas over the header
   else if (mapId === 'sea') { drawSeaStart(); drawSeaParticles(); belowLine(seaStartY() + 8, drawFishes); }   // no fish in the sky
+  else if (mapId === 'city') { drawCityStart(); drawCityParticles(); belowLine(cityStartY() + 4, drawFishes); }   // no scenery over the rooftop
   else { mapId === 'space' ? drawSpaceDetails() : drawDungeonDetails(); drawFishes(); }
   drawDepthMarkers();
   drawBestLine();
@@ -106,7 +114,7 @@ function drawBestLine() {
 
 function drawDepthMarkers() {
   for (let k = Math.max(1, pageIndexAt(dist - 20) + 1), y; (y = pageTop(k) - dist) < H + 20; k++) {
-    const col = isDark(pageColor(k)) ? '#d8eefa' : COL.graphite;
+    const col = mapId === 'city' ? NEON_MARKS[(k - 1) % NEON_MARKS.length] : isDark(pageColor(k)) ? '#d8eefa' : COL.graphite;
     ctx.save();
     ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.3; ctx.setLineDash([8, 6]);
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();

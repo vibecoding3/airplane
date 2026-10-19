@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v112** (2026-10-19)
+Current version: **v113** (2026-10-20)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,7 +10,7 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css` and 19 plain script files in `js/` (about 5,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
+- **Files:** `index.html`, `style.css` and 21 plain script files in `js/` (about 6,900 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
 - **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, the map tiles, Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
@@ -53,7 +53,7 @@ There are no on-screen steering arrows (removed in v44).
 | Stars | About 28% of rows carry a gold star. Stars are a collected total (shown in the menu and top bar) and add nothing to the score. |
 | Fast-fall safety | At high speed each frame is split into sub-steps, so the plane can't skip through thin obstacles |
 | Best score | Saved per device and per map (since v49; the old single best went to Paper). During a run, a gold dashed line labelled "Your best · N m" marks the record depth, so you can see it coming; passing it pops "New best!" with a short fanfare |
-| Ranked Score | Since v104: the best depth of every map added up (a map not played yet counts as 0), for example Paper 800 + Ocean 260 + Space 0 + Dungeon 412 = 1,472. Shown as "Ranked" on the start screen (next to Best and the stars) and on the game-over screen (next to Best, so a new record shows straight away) (`rankedScore` in `js/state.js`) |
+| Ranked Score | Since v104: the best depth of every map added up (a map not played yet counts as 0), for example Paper 800 + Ocean 260 + Space 0 + Dungeon 412 + Neon City 0 = 1,472. Shown as "Ranked" on the start screen (next to Best and the stars) and on the game-over screen (next to Best, so a new record shows straight away) (`rankedScore` in `js/state.js`) |
 | Medals | Each map has bronze / silver / gold medals for reaching 250 / 750 / 1,500 m. They show as three coins on the map tiles (start and game-over screens), lit once earned. The first time a run reaches a medal depth on that map, "Bronze medal!" (or Silver / Gold) pops up with a fanfare |
 | Milestones | Every 100 m: "100 m!" pops up, the screen flashes white for a moment, the depth counter bounces and a two-note chime plays. Every 500 m it is bigger: a gold flash, a larger gold "500 m!", a burst of coloured sparks, a bigger bounce and a four-note arpeggio. Flashes and bounces are skipped when the device asks for reduced motion |
 
@@ -66,7 +66,7 @@ There are no on-screen steering arrows (removed in v44).
 
 ## 4. Maps
 
-Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a notebook page; Ocean: the surface with waves and a paper boat; Space: a big ringed planet and its moon; Dungeon: a stone archway between two torches); options were drawn as sheets in `ref/map-icons/` to choose from. The map is chosen with four picture tiles, **Paper**, **Ocean**, **Space** and **Dungeon**, on the start screen and on the game-over screen (so you can switch between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
+Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a notebook page; Ocean: the surface with waves and a paper boat; Space: a big ringed planet and its moon; Dungeon: a stone archway between two torches); options were drawn as sheets in `ref/map-icons/` to choose from. Neon City's tile (v113) is a night skyline with neon signs. The map is chosen with five picture tiles, **Paper**, **Ocean**, **Space**, **Dungeon** and **Neon City**, on the start screen and on the game-over screen (so you can switch between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
 
 ### 4.1 Paper
 - **Background:** ruled notebook paper with a red margin and punched holes.
@@ -141,6 +141,24 @@ The plane is dropped down a deep, ancient dungeon well and falls past torch-lit 
 | 1,500 m + | Eyes, skeletons, lava falls, crystals |
 | Anywhere below 300 m | Rarely, a dragon's silhouette gliding far behind |
 
+### 4.5 Neon City (since v113; internal id `city`)
+A rainy city at night, cartoon and playful like the other maps. The plane drops off a rooftop and falls through the layers of the city: the rooftops, the streets, the subway, an underground arcade and finally the data core. It is not a Skyscraper map (that idea was dropped for good): the plane falls through the city, not down one building. Obstacles are dark metal with bright neon tubes, lit windows and warning lights.
+- **Background colour:** night blue at the rooftops, purple streets from 200 m, the teal subway from 400 m, the magenta-black arcade from 800 m, then the near-black green of the data core from 1,500 m (`CITY` in `js/maps.js`).
+- **Background layer:** faint distant buildings with a few lit windows (one CSS layer, like the sea bubbles).
+- **The start:** a night sky with the moon and stars, two rows of skyline with lit windows and neon signs, and the rooftop the plane drops from: a water tank on legs, an antenna with a blinking red light, a pink "OPEN" neon sign that flickers now and then, and a cyan neon strip along the edge. It slides up out of view within the first ~35 m, like the Earth in Space; the top bar has no background fade while it shows.
+- **Depth markers:** the dashed "100 m", "200 m"… lines glow in a different neon colour every 100 m (pink, cyan, lime, orange, violet).
+- **Drifting specks:** rain streaks over the rooftops and streets (0–400 m), sparks falling from the subway wires (400–800 m), neon pixels twinkling in the arcade (800–1,500 m), then data packets racing up in the data core.
+- **Background scenery** (faded, never collides):
+
+| Depth | Scenery |
+|---|---|
+| 0–150 m | Delivery drones, pigeons, a black cat on a ledge, sagging cables with little lights, billboards (smile, wave or star) |
+| 150–400 m | Billboards, a string of paper lanterns, cables, flying delivery robots with a parcel, holographic koi, drones |
+| 400–800 m | A subway train racing past far behind, caged tunnel lamps, pipes with a valve wheel, holographic koi |
+| 800–1,500 m | Arcade cabinets, floating pixel hearts, coins and stars, holographic koi |
+| 1,500 m + | Circuit chips, glowing wireframe data cubes, server racks, holographic koi |
+| Rarely | A blimp with an ad screen near the rooftops (0–400 m); a neon dragon kite below 800 m |
+
 ---
 
 ## 5. Obstacles
@@ -148,30 +166,30 @@ The plane is dropped down a deep, ancient dungeon well and falls past torch-lit 
 "Starts at" is the depth where an obstacle first joins the pool of possible obstacles. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
 
 ### 5.0 All obstacles at a glance
-One row per mechanic (section 6), names only; the details are in 5.1–5.4. For Dungeon, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
+One row per mechanic (section 6), names only; the details are in 5.1–5.5. For Dungeon and Neon City, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
 
-| Mechanic | Paper | Ocean | Space | Dungeon |
-|---|---|---|---|---|
-| Gap Wall | Rulers | Coral ledges | Station girders | Stone ledges / wooden beams / iron girders / goblin scaffolding |
-| Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams / goblin barricade |
-| Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders / tombstones |
-| Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern |
-| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / crescent staff / twisted staff |
-| Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball / potion flask; magic rings |
-| Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps / witch hats / goblins |
-| Conveyor | Paper clips | — | Starlink train | Daggers / arrows / keys |
-| Spinning Drifter | Set square | Starfish | Tumbling asteroid | Saw blade / spiked wheel / eyeball / spiked goblin shield |
-| Spinning Blades | Scissors | — | — | Crossed swords / spears / staffs |
-| Sweeping Arm | Drawing compass | — | Robot arm | Fire bar / chain with a spiked ball |
-| Wall Piston | Cutter | Moray eel | Docking probe | Spear / trident / sword blade / goblin club; flamethrower |
-| Wall Turret | Glue tube | Submarine | Twin-wing fighter | Dragon head / gargoyle / cannon / goblin with a slingshot |
-| Charged Beam | — | Electric eel | Laser gate | Rune stone / crystal cluster |
-| Telegraphed Sweep | Cat paw | Kelp | Energy blade | Skeleton arm / tentacle / thorny vine / reaper's scythe |
-| Proximity Blast | — | Naval mine | — | Cursed rune / spore mushroom |
-| Push Zone | Desk fan | Ocean current | — | Cold draft / steam vent |
-| Effect Zone | — | Bubble column | Low-gravity field | — |
-| Spring Line | Rubber band | — | — | Spider web / slime strand |
-| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **20 obstacles, 65 looks** |
+| Mechanic | Paper | Ocean | Space | Dungeon | Neon City |
+|---|---|---|---|---|---|
+| Gap Wall | Rulers | Coral ledges | Station girders | Stone ledges / wooden beams / iron girders / goblin scaffolding | Neon shop signs / steel balconies |
+| Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams / goblin barricade | Rolling shutters / subway doors |
+| Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders / tombstones | Traffic cones / manhole covers / vending machines |
+| Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern | Satellite dish / AC unit / station clock; neon signs |
+| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / crescent staff / twisted staff | Hover tram / neon tube |
+| Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball / potion flask; magic rings | Soda can / arcade token / bouncy ball |
+| Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps / witch hats / goblins | Delivery drones / paper lanterns / umbrellas |
+| Conveyor | Paper clips | — | Starlink train | Daggers / arrows / keys | Hover taxis / pods |
+| Spinning Drifter | Set square | Starfish | Tumbling asteroid | Saw blade / spiked wheel / eyeball / spiked goblin shield | Vent fan / neon hubcap / vinyl record |
+| Spinning Blades | Scissors | — | — | Crossed swords / spears / staffs | Drone rotors / neon tubes |
+| Sweeping Arm | Drawing compass | — | Robot arm | Fire bar / chain with a spiked ball | Crane boom / street lamp arm |
+| Wall Piston | Cutter | Moray eel | Docking probe | Spear / trident / sword blade / goblin club; flamethrower | Fire escape ladder / neon arrow / antenna |
+| Wall Turret | Glue tube | Submarine | Twin-wing fighter | Dragon head / gargoyle / cannon / goblin with a slingshot | Security camera / dumpling steamer / spray can |
+| Charged Beam | — | Electric eel | Laser gate | Rune stone / crystal cluster | Laser emitter / sparking neon sign |
+| Telegraphed Sweep | Cat paw | Kelp | Energy blade | Skeleton arm / tentacle / thorny vine / reaper's scythe | Traffic barrier with a STOP sign / street-sweeper robot arm |
+| Proximity Blast | — | Naval mine | — | Cursed rune / spore mushroom | Transformer box / fire hydrant |
+| Push Zone | Desk fan | Ocean current | — | Cold draft / steam vent | Street steam vent / AC exhaust |
+| Effect Zone | — | Bubble column | Low-gravity field | — | Hologram field |
+| Spring Line | Rubber band | — | — | Spider web / slime strand | Power cable / string of lights |
+| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **20 obstacles, 65 looks** | **20 obstacles, 44 looks + 8 neon signs** |
 
 ### 5.1 Paper map (16 types)
 
@@ -290,7 +308,33 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 
 Also fixed in v73: the spiked crusher blocks reached 9 units past their hit box (with their spikes hidden inside), so the gap looked narrower than it was; the spikes now sit at the closing edge, inside the hit box.
 
-### 5.5 Removed obstacles (history)
+### 5.5 Neon City map (20 kinds on 19 mechanics, since v113)
+Every mechanic in section 6 except the Telegraphed Slam. Every Neon City obstacle reuses the movement and collision of a Paper or Ocean obstacle (see `CITY_MAKERS` in `js/obstacles.js`) with new art in `js/draw-city.js`. Like the Dungeon, each mechanic has two or three looks sharing its hit box, each in a few neon colours (`CITY_LOOKS`); a row of the same obstacle shares one look and colour. Solid parts stay inside the hit shape; only the soft neon glow spills a little past it.
+
+| Neon City obstacle | Looks | Based on | Starts at |
+|---|---|---|---|
+| Signs (Gap Wall) | Dark boards with a neon border and neon "lettering" (pink, cyan, lime, orange); steel balconies with a railing and a strip of lit windows | Rulers | 0 m |
+| Cones (Static Hazards) | Traffic cones on a square base; iron manhole covers with glowing slots; vending machines with a lit window of cans | Ink blots | 0 m |
+| Tram (Bouncing Slider) | A hover tram with lit windows and headlights; a neon tube between two end caps that hums and sometimes flickers | Pencil | 0 m |
+| Bulge (Wall Bulge) | A satellite dish with its feed arm pointing into the street; a round AC unit (fan behind a grill); a station clock showing the real time when it appeared; slalom pairs deeper down | Protractor | 0 m |
+| Neon signs (Wall Bulge, collectible) | Big round neon signs with an icon, each once per run (see Collections in section 7); after all 8, a regular Wall Bulge | Protractor | 0 m |
+| Cans (Rising Projectile) | Soda cans, arcade tokens with a star, glowing bouncy balls, thrown up the street | Paper wad | 0 m |
+| Hologram field (Effect Zone) | A dashed cyan or pink zone with rolling scanlines and chevrons floating up; slows the fall, never hurts | Bubble column | 0 m |
+| Cable (Spring Line) | A black power cable between two insulators, or a string of coloured lights between two lamp brackets: the line bounces the plane, the anchors hurt | Rubber band | ~30 m |
+| Drones (Drifting Swarm) | 2–3 delivery drones, glowing paper lanterns or open umbrellas floating down | Sticky notes | ~35 m |
+| Fan (Spinning Drifter) | A vent fan, a tyre with a neon hubcap, a vinyl record | Starfish | ~50 m |
+| Taxis (Conveyor) | A line of hover taxis or round pods crossing, headlights facing the way they go | Paper clips | ~50 m |
+| Camera (Wall Turret) | A security camera firing laser bolts; a stack of bamboo steamers firing dumplings; a giant spray can firing paint blobs. The nozzle lights up (or puffs) before each shot | Glue tube | ~65 m |
+| Rotors (Spinning Blades) | Two drone rotor blades, or two neon tubes, spinning and scissoring | Scissors | ~80 m |
+| Vent (Push Zone) | Steam from a street grate, or the blast of an AC unit on the wall; pushes the plane sideways, nothing solid to hit. Only before 700 m, like all wind | Ocean current | ~80 m |
+| Ladder (Wall Piston) | A fire escape ladder, a neon arrow on a pole, or a telescopic antenna with a red light shooting out of a wall box | Cutter | ~100 m |
+| Transformer (Proximity Blast) | An overloaded transformer box (status light flashes, electric burst) or a fire hydrant (water burst); both rattle and show their blast circle first | Naval mine | ~120 m |
+| Laser (Charged Beam) | A laser emitter with hazard stripes (red or green beam), or a broken neon sign whose frayed end fires a crackling arc; a dashed line warns first | Electric eel | ~135 m |
+| Barrier (Telegraphed Sweep) | A striped traffic barrier with a STOP sign at its tip, or a street-sweeper robot arm with a spinning brush, after a dashed wedge warning | Cat paw | ~135 m |
+| Shutters (Closing Jaws) | Rolling shop shutters with a yellow and black edge, or subway doors with a window and a coloured line | Erasers | ~150 m |
+| Crane (Sweeping Arm) | A yellow lattice crane boom with a red tip light, or a street lamp arm, turning all the way round a hub | Drawing compass | ~215 m |
+
+### 5.6 Removed obstacles (history)
 These were built and then removed at the player's request: the pen (drew a wall line from the side), the stylus (expanding ripple rings), the pencil sharpener (pulled the plane), the whiteout patch (hid hazards), thumbtack rows, the magnifying glass (its sun spot chased the plane), and in v37 the coffee spill (made the plane soggy) and the rubber stamp (slammed down on a marked spot). Avoid these kinds of mechanics in future obstacles.
 
 ---
@@ -375,6 +419,7 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
   | Seashells (v103) | Six shells in the Ocean: conch, scallop, nautilus, cowrie, sand dollar, pearl oyster (Static Hazards variants of the sea urchins, scaled to the urchin's hit circle). Each urchin has a 40% chance to be a shell not yet seen this run; once all 6 have appeared the urchins are plain again |
   | Legendary fish (v106) | Five fish in the Ocean: golden fish, narwhal, coelacanth, giant squid eye, ghost shark (Spinning Drifter variants of the starfish: they spin and drift like a starfish and are drawn inside its hit circle). Each starfish has a 50% chance to be a fish not yet seen this run; once all 5 have appeared the starfish are plain again. Unlike the background fish, these collide |
   | Legendary swords (v105) | Six original swords in the Dungeon: flame sword, frost blade, crystal sword, desert scimitar, rune blade, bone sword (Spinning Blades variants of the crossed swords; both blades of the pair are the same sword, drawn inside the blade hit shape). Each Spinning Blades obstacle has a 70% chance to be a sword not yet seen this run; once all 6 have appeared it uses its regular looks again |
+  | Neon signs (v113) | Eight big round neon signs in Neon City: ramen bowl, neon cat, cassette, lightning bolt, heart, music notes, coffee cup, palm tree (Wall Bulge, their own obstacle in the pool, save ids `neon-ramen` …). Each appears at most once per run; once all 8 have, a sign spawn becomes a regular Wall Bulge (dish, AC unit or clock). In the menu they are drawn whole with the icon in the middle |
   | Planets (v94) | The 8 Space planets, Mercury to Neptune (Wall Bulge). Each appears at most once per run; once all 8 have, planet spawns become regular moon edges (since v98; in v94 planets stopped). In the menu they are drawn whole (Saturn with its ring) on a dark-space background |
 
 - **Plane:** one classic white paper plane; the crumpled ball and paper scraps match it. There are no skins (removed in v42) and no trail (removed in v36).
@@ -383,7 +428,7 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
 
 ## 8. Music
 
-Background music is composed and played in code (`js/music.js`), in the style of a fantasy MMORPG soundtrack such as Knight Online's: minor keys, harp arpeggios, string pads and flute or horn leads. The melodies are original.
+Background music is composed and played in code (`js/music.js`), in the style of a fantasy MMORPG soundtrack such as Knight Online's: minor keys, harp arpeggios, string pads and flute or horn leads. Neon City has a synthwave theme instead. The melodies are original.
 
 | Theme | Plays | Feel |
 |---|---|---|
@@ -392,6 +437,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Ocean | During Ocean runs | Slow and dark in A minor: echoing harp, low lonely flute, deep bass (64 bpm, about 30 s loop) |
 | Space | During Space runs | Dreamy and floating: shimmering echoing harp over soft major-seventh chords and a slow, high, wavering lead (70 bpm, about 27 s loop) |
 | Dungeon | During Dungeon runs | Slow and mysterious in D minor: a low horn melody over echoing harp, with a soft drum on the downbeats (66 bpm, about 29 s loop) |
+| Neon City | During Neon City runs | Synthwave in A minor: a bright square-wave lead over echoing arpeggios and string pads, a kick on every beat, off-beat hi-hats and a clap on 2 and 4 (100 bpm, about 19 s loop) |
 
 - Themes cross-fade when they change. Pausing lowers the music to 30%; hiding the tab silences it.
 - The music sits below the sound effects (peaks about 0.08 against about 0.10 for a star chime).
@@ -404,10 +450,10 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Sound on/off | Top bar (speaker icon, crossed out when muted) | Mutes sound effects and music together. Both are generated in code (Web Audio), with no audio files |
 | Pause / Resume | Top bar (pause icon, becomes a play icon while paused), Space bar, Esc (P no longer pauses since v67) | Also pauses automatically when the tab is hidden |
 | Exit run | Pause menu, under Resume (since v71) | Ends the run and goes straight to the start menu. The run keeps what it earned, like a crash: a new best depth, its stars, and its metres as XP |
-| Map | Start and game-over screens | Paper / Ocean / Space / Dungeon picture tiles |
+| Map | Start and game-over screens | Paper / Ocean / Space / Dungeon / Neon City picture tiles |
 
 ### Saved data (browser localStorage)
-`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
+`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon`, `nosedive-best-city` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
 
 ---
 
@@ -446,7 +492,7 @@ airplane/
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
 ├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
-└── js/                     19 game scripts, listed in the order they load
+└── js/                     21 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
@@ -454,6 +500,7 @@ airplane/
     ├── sea-background.js   Ocean map: fish, specks, whales, shipwrecks
     ├── space-background.js Space map: the Earth at the start, satellites, planets, comets, galaxies
     ├── dungeon-background.js Dungeon map: the well opening, torches, bats, crystals, lava falls, dust and embers
+    ├── city-background.js  Neon City map: the rooftop at the start, drones, billboards, the subway, arcade pixels, rain and sparks
     ├── state.js            game state, power-up levels, controls, speed and difficulty rules
     ├── obstacles.js        obstacle generators and row spawning, for all maps
     ├── physics.js          collision, obstacle movement, steering, per-frame update
@@ -462,6 +509,7 @@ airplane/
     ├── draw-sea.js         Ocean obstacle art
     ├── draw-space.js       Space obstacle art
     ├── draw-dungeon.js     Dungeon obstacle art
+    ├── draw-city.js        Neon City obstacle art (and the neon signs)
     ├── render.js           plane, screen shake, frame drawing, map switching
     ├── ui.js               top bar, menus, start / pause / game over
     ├── collections.js      Collections: the sets, finding items during a run, the Collections screen
@@ -483,11 +531,11 @@ There is no build step and nothing to install. To play locally, open `index.html
 | To change… | Look in |
 |---|---|
 | Speed, difficulty, controls, starting state | `js/state.js` (`baseFallSpeed`, `difficulty`, `HOLD_MS`, `reset`) |
-| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_LOOKS`, `spawnRow`) |
+| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_LOOKS`, `cityPool`, `CITY_MAKERS`, `CITY_LOOKS`, `spawnRow`) |
 | How an obstacle moves or what counts as a hit | `js/physics.js` (`updateObstacle`, `computeShapes`) |
-| How an obstacle looks | `js/draw-paper.js`, `js/draw-sea.js`, `js/draw-space.js` or `js/draw-dungeon.js` (`draw*` / `paint*`) |
-| Background decorations | `js/paper-background.js` (formulas), `js/sea-background.js` (fish, specks, silhouettes), `js/space-background.js` or `js/dungeon-background.js` (scenery, specks, the opening at the start) |
-| Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`, `SPACE`, `DUNGEON`) and the map tiles in `index.html` |
+| How an obstacle looks | `js/draw-paper.js`, `js/draw-sea.js`, `js/draw-space.js`, `js/draw-dungeon.js` or `js/draw-city.js` (`draw*` / `paint*`) |
+| Background decorations | `js/paper-background.js` (formulas), `js/sea-background.js` (fish, specks, silhouettes), `js/space-background.js`, `js/dungeon-background.js` or `js/city-background.js` (scenery, specks, the opening at the start) |
+| Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`, `SPACE`, `DUNGEON`, `CITY`, `NEON_MARKS`) and the map tiles in `index.html` |
 | Plane look | `js/core.js` (`PLANE` colours), `js/render.js` (`paintPlane`) |
 | Power-ups | `js/state.js` (`POWER_MAX`, `MAGNET_RANGES`, `POWER_GAP`, `SLOWMO_TIME`, `STAR_TIME`, `timeScale`), `js/obstacles.js` (`pickPower`), `js/physics.js` (`collectPower`, `useExtraLife`), `js/render.js` (`drawPower`, `paintPowerIcon`) |
 | Collections (sets, items, the screen) | `js/collections.js` (`COLLECTIONS`, `noteFound`, `renderCollections`, `paintCollectionItem`) |
@@ -512,6 +560,8 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `maps.js` | `MAPS`, `mapId`, `SEA`, `RAINBOW`, `isDark`, `syncHudPage`, `drawPaper`, `drawFormulas`, `drawDepthMarkers` |
 | `draw-paper.js` | Paper obstacle `draw*` / `paint*` functions (`drawRuler`, `paintPencil`, `drawScissors`, `drawFan`, `drawPaw`, …) |
 | `draw-dungeon.js` | `drawDungeonObstacle` (picks the art for each mechanic), `paintSlider` and `paintRing` (also used by the Collections screen), `drawLedge`, `drawCrusher`, `drawSpikeBall`, `drawRockOutcrop`, `drawPlank`, `drawSkull`, `drawGhost`, `drawSpear`, `drawFireBar`, `drawDragonHead` |
+| `city-background.js` | `CITY_TIERS`, `spawnCityThing`, `cityStartY`, `drawCityStart`, `drawCityParticles`, `neonStroke` (scenery joins the `FISH` table) |
+| `draw-city.js` | `drawCityObstacle` (picks the art for each mechanic), `NEON_ICONS`, `paintNeonSign` (also used by the Collections screen), `drawCitySlab`, `drawCityJaw`, `drawCityHazard`, `drawCityBulge`, `drawCitySlider`, `drawCityTurret`, `drawCityBarrier`, `drawHoloField`, `drawCityCable` |
 | `dungeon-background.js` | `DUNGEON_TIERS`, `spawnDungeonThing`, `wellOpeningY`, `drawDungeonDetails`, `drawDungeonParticles` (scenery joins the `FISH` table) |
 | `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
 | `render.js` | `paintPlane`, `drawPlane`, `syncPaperLayers`, `render`, `applyMap` |
@@ -525,8 +575,8 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 | Command | What it does |
 |---|---|
-| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all four maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
-| `node tools/shot.js <notebook|sea> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
+| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all five maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
+| `node tools/shot.js <notebook|sea|space|dungeon|city> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
 | `node tools/shot.js title [sea]` | Title screen screenshot |
 | `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs), the bundled fonts (as data URLs) and the scripts into one page (for a single-file copy) |
 
@@ -534,7 +584,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 ## 11. Direction
 
-**Current focus: three maps, Paper, Ocean and Space,** each chosen from the menu. Any new map should be built from the mechanics in section 6, with new art.
+**Five maps: Paper, Ocean, Space, Dungeon and Neon City,** each chosen from the menu. Any new map should be built from the mechanics in section 6, with new art.
 
 ---
 

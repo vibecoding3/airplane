@@ -19,6 +19,8 @@ const COLLECTIONS = [
     items: SHELLS.map(n => ({ id: 'shell-' + n, name: { sanddollar: 'Sand dollar', pearl: 'Pearl oyster' }[n] || n[0].toUpperCase() + n.slice(1), shell: n })) },
   { id: 'fish', name: 'Legendary fish', map: 'Ocean', bg: '#3f92c0',
     items: LEGEND_FISH.map(n => ({ id: 'fish-' + n, name: { golden: 'Golden fish', narwhal: 'Narwhal', coelacanth: 'Coelacanth', squideye: 'Giant squid eye', ghostshark: 'Ghost shark' }[n], fish: n })) },
+  { id: 'neonsigns', name: 'Neon signs', map: 'Neon City', bg: '#1a1530',
+    items: NEON_SIGNS.map(n => ({ id: 'neon-' + n, name: NEON_ICONS[n].name, neon: n })) },
   { id: 'planets', name: 'Planets', map: 'Space', bg: '#141a3a',
     items: ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].map(n => ({ id: 'planet-' + n, name: n[0].toUpperCase() + n.slice(1), planet: n })) }
 ];
@@ -26,7 +28,7 @@ const COLLECTION_TOTAL = COLLECTIONS.reduce((n, set) => n + set.items.length, 0)
 let collectionFound;
 try { collectionFound = new Set(JSON.parse(store.get('nosedive-collection') || '[]')); } catch (e) { collectionFound = new Set(); }
 
-// called for every Dungeon obstacle drawn during a run (render.js)
+// called for every obstacle drawn during a run (render.js)
 function noteFound(o, sy) {
   if (state !== 'play' || sy < 0 || sy > H) return;
   const id = o.type === 'pencil' && COLLECTIBLE_LOOKS[o.look] ? COLLECTIBLE_LOOKS[o.look]
@@ -35,7 +37,8 @@ function noteFound(o, sy) {
            : o.origami ? 'origami-' + o.origami
            : o.shell ? 'shell-' + o.shell
            : o.sword ? 'sword-' + o.sword
-           : o.fish ? 'fish-' + o.fish : null;
+           : o.fish ? 'fish-' + o.fish
+           : o.neonSign ? 'neon-' + o.neonSign : null;
   if (!id || collectionFound.has(id)) return;
   collectionFound.add(id);
   store.set('nosedive-collection', JSON.stringify([...collectionFound]));
@@ -64,6 +67,9 @@ function paintCollectionItem(canvas, item, locked, wide) {
     } else if (item.origami) {
       const k = Hc / 52; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintOrigami(item.origami);
+    } else if (item.neon) {                         // a whole round sign with its icon in the middle
+      const k = Hc / 52; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintNeonSign(item.neon, 22);
     } else if (item.planet) {                       // every planet drawn the same size; Saturn smaller so its ring fits
       const ring = !!PLANETS[item.planet].ring, k = Math.min(Hc * (ring ? 0.34 : 0.4), Wc * (ring ? 0.25 : 0.4)) / 50;
       g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);

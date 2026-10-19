@@ -2,7 +2,7 @@
 'use strict';
 
 // Looping themes (title + one per map) in the style of a fantasy MMORPG soundtrack (minor keys, harp arpeggios, string
-// pads, flute / horn leads). The melodies are original. The title theme plays on the menus and game over;
+// pads, flute / horn leads; Neon City has a synthwave theme instead). The melodies are original. The title theme plays on the menus and game over;
 // each map has its own theme during a run. The sound button mutes music and effects together.
 
 // chords as MIDI notes (low voicings; the harp plays them an octave or two higher)
@@ -48,6 +48,16 @@ const THEMES = {
     melody: [
       [[62, 1], [65, 1], [69, 2]], [[70, 1.5], [69, 0.5], [65, 2]], [[67, 1], [70, 1], [74, 1.5], [72, 0.5]], [[73, 3], [null, 1]],
       [[74, 1.5], [72, 0.5], [69, 2]], [[72, 1], [69, 1], [65, 2]], [[67, 1], [65, 1], [64, 1], [67, 1]], [[69, 2], [61, 2]]
+    ]
+  },
+  // Neon City: synthwave in A minor — a bright square-wave lead over echoing arpeggios, a kick on every beat,
+  // off-beat hi-hats and a clap on 2 and 4
+  city: {
+    bpm: 100, lead: 'synth', harp: [0, 1, 2, 4, 3, 2, 1, 2], harpStep: 0.5, echo: 0.35, beat: true,
+    chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'Dm', 'E'],
+    melody: [
+      [[76, 1], [74, 0.5], [72, 0.5], [69, 2]], [[72, 1], [74, 1], [76, 1.5], [77, 0.5]], [[79, 1.5], [76, 0.5], [72, 2]], [[74, 3], [null, 1]],
+      [[69, 0.5], [72, 0.5], [76, 1], [81, 1.5], [79, 0.5]], [[77, 1], [76, 1], [72, 2]], [[74, 1], [77, 1], [76, 1], [74, 1]], [[71, 2], [68, 1], [null, 1]]
     ]
   },
   // Ocean: slow and dark, long echoing harp notes and a lonely low flute
@@ -132,6 +142,11 @@ function playBar(th, i, t0, bus) {
     s += b;
   }
   if (th.drum) { drum(bus, t0); drum(bus, t0 + 2 * beat, 0.6); }
+  if (th.beat) for (let b = 0; b < 4; b++) {     // a dance beat: kick, off-beat hat, clap on 2 and 4
+    drum(bus, t0 + b * beat, b % 2 ? 0.55 : 0.8);
+    hiss(bus, t0 + (b + 0.5) * beat, 0.05, 7000, 0.035);
+    if (b % 2) hiss(bus, t0 + b * beat, 0.14, 1500, 0.05);
+  }
 }
 
 // one sustained note with an attack / release envelope
@@ -156,22 +171,22 @@ function pluck(bus, f, t, dur, vol, echo) {
   if (echo) { const e = a.createGain(); e.gain.value = echo; g.connect(e).connect(music.echo); }
   osc.start(t); osc.stop(t + dur + 0.05);
 }
-// lead voices: flute (sine with vibrato), deep flute (lower, slower), horn (filtered saw)
+// lead voices: flute (sine with vibrato), deep flute (lower, slower), horn (filtered saw), synth (filtered square)
 function lead(bus, kind, f, t, dur) {
   const a = actx, osc = a.createOscillator(), g = a.createGain(), vib = a.createOscillator(), vg = a.createGain();
-  const horn = kind === 'horn';
-  osc.type = horn ? 'sawtooth' : 'sine'; osc.frequency.value = f;
+  const horn = kind === 'horn', synth = kind === 'synth';
+  osc.type = horn ? 'sawtooth' : synth ? 'square' : 'sine'; osc.frequency.value = f;
   vib.frequency.value = kind === 'deep' ? 4 : kind === 'space' ? 3 : 5.5; vg.gain.value = f * (kind === 'space' ? 0.009 : 0.006);
   vib.connect(vg).connect(osc.frequency);
-  const vol = horn ? 0.035 : kind === 'deep' ? 0.07 : kind === 'space' ? 0.05 : 0.06, att = horn ? 0.12 : kind === 'space' ? 0.25 : 0.08;
+  const vol = horn ? 0.035 : synth ? 0.026 : kind === 'deep' ? 0.07 : kind === 'space' ? 0.05 : 0.06, att = horn ? 0.12 : synth ? 0.02 : kind === 'space' ? 0.25 : 0.08;
   g.gain.setValueAtTime(0, t);
   g.gain.linearRampToValueAtTime(vol, t + att);
   g.gain.setValueAtTime(vol * 0.85, Math.max(t + att, t + dur - 0.15));
   g.gain.linearRampToValueAtTime(0, t + dur + 0.05);
   let out = osc;
-  if (horn) { const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1300; osc.connect(lp); out = lp; }
+  if (horn || synth) { const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = horn ? 1300 : 2200; osc.connect(lp); out = lp; }
   out.connect(g).connect(bus);
-  if (kind === 'deep' || kind === 'space') { const e = a.createGain(); e.gain.value = kind === 'space' ? 0.45 : 0.3; g.connect(e).connect(music.echo); }
+  if (kind === 'deep' || kind === 'space' || synth) { const e = a.createGain(); e.gain.value = kind === 'space' ? 0.45 : synth ? 0.25 : 0.3; g.connect(e).connect(music.echo); }
   osc.start(t); vib.start(t); osc.stop(t + dur + 0.1); vib.stop(t + dur + 0.1);
 }
 // a soft low drum (for the title theme)
@@ -181,4 +196,19 @@ function drum(bus, t, vol = 1) {
   g.gain.setValueAtTime(0.12 * vol, t); g.gain.exponentialRampToValueAtTime(0.0005, t + 0.5);
   osc.connect(g).connect(bus);
   osc.start(t); osc.stop(t + 0.55);
+}
+// a short burst of filtered noise: a hi-hat (high, short) or a clap (lower, longer)
+let hissBuf = null;
+function hiss(bus, t, dur, freq, vol) {
+  const a = actx;
+  if (!hissBuf) {
+    hissBuf = a.createBuffer(1, Math.floor(a.sampleRate * 0.2), a.sampleRate);
+    const d = hissBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+  src.buffer = hissBuf; f.type = freq > 4000 ? 'highpass' : 'bandpass'; f.frequency.value = freq;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0005, t + dur);
+  src.connect(f).connect(g).connect(bus);
+  src.start(t); src.stop(t + dur + 0.02);
 }
