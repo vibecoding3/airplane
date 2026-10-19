@@ -314,6 +314,7 @@ function update(dt) {
   }
   if (plane.slowmo > 0) plane.slowmo = Math.max(0, plane.slowmo - dt / SLOWMO_SCALE);   // real seconds
   if (plane.boost > 0) plane.boost = Math.max(0, plane.boost - dt / timeScale());       // real seconds
+  if (plane.ink > 0) plane.ink = Math.max(0, plane.ink - dt / timeScale());             // real seconds
   for (const o of obstacles) {
     if (o.type !== 'bubbles' || plane.star > 0 || Math.abs(plane.x - o.x) > o.w / 2 || Math.abs(dist + planeScreenY() - o.y) > o.h / 2) continue;
     plane.bubbled = 0.3;
@@ -365,11 +366,12 @@ function update(dt) {
     if (plane.alive) {
       const py = dist + planeScreenY(), dx = plane.x - p.x, dy = py - p.y, dd = Math.hypot(dx, dy);
       const reach = plane.magnet > 0 ? Math.max(NEAR_PULL, magnetRange()) : NEAR_PULL;
-      if (dd < reach && dd > 1) {
+      if (dd < reach && dd > 1 && p.kind !== 'squid') {   // nothing pulls the squid in: it is a debuff
         const step = Math.min(dd, (300 + speed) * dt);
         p.x += dx / dd * step; p.y += dy / dd * step;
       }
     }
+    if (p.kind === 'squid' && plane.star > 0) continue;   // the invincibility star flies straight through the squid
     if (circles.some(c => (c.x - p.x) ** 2 + (c.y - p.y) ** 2 < (c.r + p.r + 4) ** 2)) {
       pickups.splice(i, 1);
       if (p.kind) { collectPower(p); continue; }
@@ -437,6 +439,9 @@ function collectPower(p) {
   } else if (p.kind === 'boost') {
     plane.boost = BOOST_TIME;
     floaters.push({ follow: true, x: fx, y: p.y, life: 1.4, col: '#23964a', text: 'Speed boost!' });
+  } else if (p.kind === 'squid') {
+    plane.ink = INK_TIME; plane.inkSplats = inkSplats();
+    floaters.push({ follow: true, x: fx, y: p.y, life: 1.4, col: '#4a3a7a', text: 'Inked!' });
   } else if (p.kind === 'slowmo') {
     plane.slowmo = SLOWMO_TIME;
     floaters.push({ follow: true, x: fx, y: p.y, life: 1.4, col: '#8a4fc2', text: 'Slow motion!' });
@@ -446,7 +451,22 @@ function collectPower(p) {
   }
   const col = POWER_RIMS[p.kind];
   for (let k = 0; k < 12; k++) { const s = spark(p.x, p.y); s.col = col; particles.push(s); }
-  p.kind === 'slowmo' ? sfx.slowmo() : p.kind === 'superstar' ? sfx.superstar() : p.kind === 'boost' ? sfx.boost() : sfx.power();
+  p.kind === 'slowmo' ? sfx.slowmo() : p.kind === 'superstar' ? sfx.superstar() : p.kind === 'boost' ? sfx.boost() : p.kind === 'squid' ? sfx.ink() : sfx.power();
+}
+
+// the squid's ink: 3–4 big blobs in screen space, below the plane (where obstacles come from), never on the plane;
+// each blob is a wobbly outline, a drip or two and a few droplets
+function inkSplats() {
+  const out = [], py = planeScreenY(), n = ri(3, 4);
+  for (let tries = 0; out.length < n && tries < 60; tries++) {
+    const r = rand(55, 80), x = rand(40, W - 40), y = rand(py + r + 40, H - 40);
+    if (out.some(s => Math.hypot(s.x - x, s.y - y) < (s.r + r) * 0.75)) continue;   // spread them out
+    const pts = []; for (let i = 0; i < 14; i++) pts.push(r * rand(0.78, 1.08));
+    const drops = []; for (let i = 0; i < ri(3, 5); i++) { const a = rand(0, 6.28), d = r * rand(1.15, 1.45); drops.push([Math.cos(a) * d, Math.sin(a) * d, rand(4, 9)]); }
+    const drips = []; for (let i = 0; i < ri(1, 2); i++) drips.push([rand(-r * 0.5, r * 0.5), rand(r * 0.35, r * 0.7), rand(5, 8)]);
+    out.push({ x, y, r, pts, drops, drips, rot: rand(0, 6.28) });
+  }
+  return out;
 }
 
 // a shield level is used up: the hit is forgiven and the plane blinks through obstacles for a moment

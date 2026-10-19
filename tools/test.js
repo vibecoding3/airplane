@@ -29,7 +29,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   const deep = await page.evaluate(depth => {
     const out = {};
     for (const m of ['notebook', 'sea', 'space', 'dungeon']) {
-      mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0, slowmo: 0, superstar: 0, boost: 0 }, counted = new Set();
+      mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0, slowmo: 0, superstar: 0, boost: 0, squid: 0 }, counted = new Set();
       let maxMagnet = 0, maxShield = 0;
       while (dist / PX_PER_M < depth && f < 60 * 1200) {
         if (f % 45 === 0) { const s = Math.random() < 0.5 ? -1 : 1; press(s, 'sim'); release('sim'); }
@@ -62,8 +62,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
     const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})` + (d.windRetries ? ` (wind found on extra run ${d.windRetries})` : ''));
-    check(d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && d.powers.superstar > 0 && d.powers.boost > 0 && (DEPTH < 1500 || (d.maxMagnet === 3 && d.maxShield === 3)),
-      `${m}: power-ups spawned (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}, star ${d.powers.superstar}, boost ${d.powers.boost}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
+    check(d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && d.powers.superstar > 0 && d.powers.boost > 0 && (DEPTH < 1500 || (d.powers.squid > 0 && d.maxMagnet === 3 && d.maxShield === 3)),
+      `${m}: power-ups spawned (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}, star ${d.powers.superstar}, boost ${d.powers.boost}, squid ${d.powers.squid}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
   }
 
   // normal runs (3 lives) end in a game over
@@ -108,6 +108,30 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   });
   check(boost.normal === 1 && boost.boosted === 1.1 && boost.after === 1,
     `speed boost: fall speed x${boost.normal} -> x${boost.boosted} with the boost -> x${boost.after} after 5 s`);
+
+  // the squid (a debuff): ink splats below the plane for 3 s; nothing pulls it in; the invincibility star flies through it
+  const squid = await page.evaluate(() => {
+    mapId = 'sea'; applyMap(); start(); plane.invuln = 99; obstacles.length = 0; pickups.length = 0; nextRowY = 1e12;
+    dist = 300 * PX_PER_M; const py = planeScreenY();
+    plane.magnet = 3; plane.x = W / 2;
+    const p = { kind: 'squid', x: W / 2 + 90, y: dist + py + 5, r: 18, spin: 0 }; pickups.push(p);
+    for (let f = 0; f < 10; f++) { plane.vx = 0; clearControls(); update(1 / 60); }
+    const notPulled = pickups.includes(p) && Math.abs(p.x - (W / 2 + 90)) < 1;
+    pickups.length = 0; plane.star = 1;
+    pickups.push({ kind: 'squid', x: plane.x, y: dist + py, r: 18, spin: 0 }); update(1 / 60);
+    const starSafe = plane.ink === 0;
+    plane.star = 0; pickups.length = 0;
+    pickups.push({ kind: 'squid', x: plane.x, y: dist + py, r: 18, spin: 0 }); update(1 / 60);
+    const inked = plane.ink > 2.9, n = plane.inkSplats.length;
+    const clear = plane.inkSplats.every(s => s.y - s.r - 30 > py);   // never over the plane
+    render();
+    for (let f = 0; f < 60 * 3.1; f++) { plane.invuln = 99; update(1 / 60); }
+    const gone = plane.ink === 0;
+    gameOver();
+    return { notPulled, starSafe, inked, n, clear, gone };
+  });
+  check(squid.notPulled && squid.starSafe && squid.inked && squid.n >= 3 && squid.clear && squid.gone,
+    `squid: magnet doesn't pull it ${squid.notPulled}, star flies through ${squid.starSafe}, inks ${squid.inked} with ${squid.n} splats below the plane ${squid.clear}, gone after 3 s ${squid.gone}`);
 
   // gold stars never spawn less than 50 m apart (power-ups are not stars)
   const starGap = await page.evaluate(() => {

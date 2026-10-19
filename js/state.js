@@ -29,7 +29,8 @@ const SLOWMO_FROM_M = 300;                    // it only appears from this depth
 const STAR_TIME = 6, STAR_FROM_M = 150;       // invincibility star: 6 real seconds, appears from 150 m
 const BOOST_TIME = 5, BOOST_FACTOR = 1.1, BOOST_FROM_M = 100;   // speed boost: falls 10% faster for 5 real seconds, from 100 m
 // each power-up's colour: the pickup badge's rim, its sparks and its time-left bar
-const POWER_RIMS = { magnet: '#d9443a', shield: '#2f8fe0', slowmo: '#8a4fc2', superstar: '#f2b53a', boost: '#23964a' };
+const INK_TIME = 3, INK_FROM_M = 200;   // the squid (a debuff): ink splats over part of the screen for 3 real seconds, from 200 m
+const POWER_RIMS = { magnet: '#d9443a', shield: '#2f8fe0', slowmo: '#8a4fc2', superstar: '#f2b53a', boost: '#23964a', squid: '#2a2140' };
 const timeScale = () => (plane.slowmo > 0 && state === 'play' ? SLOWMO_SCALE : 1);
 const NEAR_PULL = 60;                      // every star and power-up this close is pulled in, magnet or not
 const magnetRange = () => MAGNET_RANGES[plane.magnet];
@@ -84,7 +85,7 @@ const maxSideSpeed = () => 300 + 0.4 * (baseFallSpeed() - 150);
 const score = () => Math.floor(dist / PX_PER_M);   // stars are a collected total, not metres
 
 function reset() {
-  plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, slowmo: 0, star: 0, boost: 0, invuln: 0, bubbled: 0 };
+  plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, slowmo: 0, star: 0, boost: 0, ink: 0, inkSplats: [], invuln: 0, bubbled: 0 };
   obstacles = []; pickups = []; particles = []; floaters = [];
   dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
   nextRowY = H + 140; lastPowerY = 0; lastStarY = -1e9; runCollected.clear(); passedBest = false; lastMilestone = 0; flash = 0; medalsAnnounced.clear();

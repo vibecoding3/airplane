@@ -47,6 +47,17 @@ function paintPowerIcon(c, id) {
     c.strokeStyle = COL.ink; c.lineWidth = 2; c.lineJoin = 'round'; c.stroke();
     c.fillStyle = 'rgba(255,255,255,.75)'; c.beginPath(); c.ellipse(-4, -3, 3, 5, -0.4, 0, Math.PI * 2); c.fill();
     c.fillStyle = '#ff6fa8'; for (const [x, y] of [[-17, -12], [16, -14], [15, 13]]) { c.beginPath(); c.arc(x, y, 1.8, 0, Math.PI * 2); c.fill(); }
+  } else if (id === 'squid') {                         // a cartoon squid with a puff of ink: a debuff
+    c.lineJoin = 'round'; c.lineCap = 'round'; c.strokeStyle = COL.ink;
+    c.fillStyle = '#2a2140'; for (const [x, y, r] of [[11, 10, 5], [15, 4, 3.4], [7, 15, 3]]) { c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); }   // ink
+    c.fillStyle = '#e0607a'; c.lineWidth = 4.6;
+    c.beginPath(); for (const x of [-7, -3.5, 0, 3.5, 7]) { c.moveTo(x, 4); c.quadraticCurveTo(x * 1.4 + (x < 0 ? -2 : 2), 11, x * 1.2, 16); } c.stroke();   // tentacles (outlined)
+    c.strokeStyle = '#e0607a'; c.lineWidth = 2.6; c.stroke();
+    c.strokeStyle = COL.ink; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(0, -17); c.quadraticCurveTo(10, -8, 9, 3); c.quadraticCurveTo(0, 7, -9, 3); c.quadraticCurveTo(-10, -8, 0, -17); c.closePath(); c.fill(); c.stroke();   // mantle
+    c.beginPath(); c.moveTo(-6, -10); c.lineTo(-12, -6); c.lineTo(-7, -4); c.moveTo(6, -10); c.lineTo(12, -6); c.lineTo(7, -4); c.fill(); c.stroke();   // fins
+    c.fillStyle = '#ffffff'; for (const x of [-3.6, 3.6]) { c.beginPath(); c.arc(x, -2, 2.8, 0, Math.PI * 2); c.fill(); }
+    c.fillStyle = COL.ink; for (const x of [-3, 4.2]) { c.beginPath(); c.arc(x, -1.6, 1.4, 0, Math.PI * 2); c.fill(); }
   } else if (id === 'slowmo') {                        // an hourglass
     c.fillStyle = '#efe6ff'; c.strokeStyle = COL.ink; c.lineWidth = 2; c.lineJoin = 'round';
     c.beginPath(); c.moveTo(-10, -14); c.lineTo(10, -14); c.lineTo(1.5, 0); c.lineTo(10, 14); c.lineTo(-10, 14); c.lineTo(-1.5, 0); c.closePath();
@@ -96,6 +107,32 @@ function paintPowerIcon(c, id) {
     c.beginPath(); c.arc(0, -6, 14, Math.PI * 1.15, Math.PI * 1.5, false); c.stroke();
   }
 }
+// the squid's ink over the playfield: blobs pop in, stay, and fade out over the last second
+function drawInk() {
+  const age = INK_TIME - plane.ink, pop = Math.min(1, age / 0.15);
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, plane.ink);   // fully opaque until the last second
+  const inkCol = darkPage ? '#3d3163' : '#1b1530';   // on dark maps a lighter ink with a pale edge, so it reads as ink
+  ctx.fillStyle = inkCol;
+  for (const s of plane.inkSplats) {
+    ctx.save(); ctx.translate(s.x, s.y); ctx.scale(pop, pop);
+    ctx.beginPath();
+    const n = s.pts.length, at = i => { const a = s.rot + i / n * Math.PI * 2, r = s.pts[i % n]; return [Math.cos(a) * r, Math.sin(a) * r]; };
+    for (let i = 0; i <= n; i++) {             // a smooth wobbly outline through the midpoints
+      const [x0, y0] = at(i), [x1, y1] = at(i + 1), mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
+      i ? ctx.quadraticCurveTo(x0, y0, mx, my) : ctx.moveTo(mx, my);
+    }
+    ctx.closePath(); ctx.fill();
+    if (darkPage) { ctx.strokeStyle = 'rgba(220,210,255,.45)'; ctx.lineWidth = 2.5 / pop; ctx.stroke(); }
+    for (const [x, y, r] of s.drops) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+    for (const [x, len, w] of s.drips) { ctx.beginPath(); roundRectPath(x - w / 2, 0, w, s.r * 0.6 + len, w / 2); ctx.fill(); ctx.beginPath(); ctx.arc(x, s.r * 0.6 + len, w * 0.8, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.ellipse(-s.r * 0.3, -s.r * 0.35, s.r * 0.28, s.r * 0.12, -0.5, 0, Math.PI * 2); ctx.fill();   // a wet shine
+    ctx.fillStyle = inkCol;
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
 // a power-up pickup: its icon in a round white badge with a coloured rim, gently pulsing
 function drawPower(p, sy) {
   const s = sharedSprite('power-' + p.kind, 48, 48, 24, 24, () => {
@@ -248,6 +285,7 @@ function render() {
     }
     ctx.restore();
   }
+  if (plane.ink > 0 && (state === 'play' || state === 'paused' || state === 'dying')) drawInk();
   ctx.textAlign = 'center';
   for (const f of floaters) {
     ctx.font = `700 ${f.size || 18}px Kalam, cursive`;
@@ -266,7 +304,7 @@ function render() {
   if (state === 'play') {
     // time left for each running timed power-up: bars stacked above the plane, each shrinking toward its centre
     let barY = planeScreenY() - 34;
-    for (const [left, total, kind] of [[plane.slowmo, SLOWMO_TIME, 'slowmo'], [plane.star, STAR_TIME, 'superstar'], [plane.boost, BOOST_TIME, 'boost']]) {
+    for (const [left, total, kind] of [[plane.slowmo, SLOWMO_TIME, 'slowmo'], [plane.star, STAR_TIME, 'superstar'], [plane.boost, BOOST_TIME, 'boost'], [plane.ink, INK_TIME, 'squid']]) {
       if (left <= 0) continue;
       const w = 110 * left / total;
       ctx.fillStyle = POWER_RIMS[kind]; ctx.beginPath(); roundRectPath(plane.x - w / 2, barY, w, 6, 3); ctx.fill();

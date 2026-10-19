@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v108** (2026-10-19)
+Current version: **v109** (2026-10-19)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -48,7 +48,7 @@ There are no on-screen steering arrows (removed in v44).
 | Sideways slowdown | Gliding sideways at full speed makes the plane fall up to 40% slower |
 | Difficulty | `1 − e^(−depth / 600)`. It controls when obstacles unlock, gap sizes, row spacing and obstacle speeds, and is nearly maxed by about 2,000 m. |
 | Obstacle rows | Rows spawn ahead of the plane. The same obstacle type never appears twice in a row. |
-| Pickup pull | Since v51, any star or power-up that comes within 60 units (2 m) of the plane is pulled in, so near misses still count. The magnet power-up extends this for stars and (since v54) power-ups |
+| Pickup pull | Since v51, any star or power-up that comes within 60 units (2 m) of the plane is pulled in, so near misses still count. The magnet power-up extends this for stars and (since v54) power-ups. The squid (a debuff, v109) is never pulled in |
 | Stars | About 28% of rows carry a gold star. Stars are a collected total (shown in the menu and top bar) and add nothing to the score. |
 | Fast-fall safety | At high speed each frame is split into sub-steps, so the plane can't skip through thin obstacles |
 | Best score | Saved per device and per map (since v49; the old single best went to Paper). During a run, a gold dashed line labelled "Your best · N m" marks the record depth, so you can see it coming; passing it pops "New best!" with a short fanfare |
@@ -356,7 +356,9 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
 
 **Speed boost** (since v69, timed, no levels): a white badge with a green rim and a red cartoon running shoe with speed lines. Picking it up makes the plane fall 10% faster for 5 seconds (real seconds, so slow motion does not stretch it); steering is unchanged. During the boost the plane can go 10% above the usual top speed (the 600 m cap). Shows "Speed boost!" in green with a rising whoosh. It appears from 100 m on, and only when no boost is running. There are no speed lines behind the plane (the plane trail was removed in v36).
 
-**Time-left bars:** each running timed power-up shows a bar above the plane that shrinks toward its centre: slow motion (purple) nearest the plane, then the invincibility star (gold), then the speed boost (green), stacked without gaps.
+**The Squid** (since v109, a debuff, timed, no levels): a white badge with a dark ink rim and a pink cartoon squid with a puff of ink. Flying through it splats 3–4 big ink blobs over the screen for 3 seconds (real seconds): they pop in at random spots below the plane (where obstacles come from, never over the plane), hide whatever is under them, and fade out over the last second. On dark maps the ink is a lighter purple with a pale edge so it reads as ink. Shows "Inked!" with a low splat sound. Nothing pulls the squid in (neither the magnet nor the near-miss pull), the invincibility star flies straight through it, and a shield does not block it (it is not a crash). It appears on every map from 200 m on, offered as often as the other power-ups, and only when no ink is on screen (`INK_TIME`, `INK_FROM_M` in `js/state.js`, `inkSplats` in `js/physics.js`, `drawInk` in `js/render.js`).
+
+**Time-left bars:** each running timed power-up shows a bar above the plane that shrinks toward its centre: slow motion (purple) nearest the plane, then the invincibility star (gold), then the speed boost (green), then the squid's ink (dark), stacked without gaps.
 
 - **Spawning:** from about 30 m on, a row can carry a power-up instead of a star, with at least about 45 m between power-ups (so roughly one every 50–80 m). A magnet or shield already at level 3 is not offered (a used shield level can be picked up again); once both are at level 3, only the timed power-ups (slow motion, the star and the speed boost) are still offered.
 - **Feedback:** "Magnet level 2!", "Shield level 3!", "Slow motion!", "Invincible!" or "Speed boost!" pops up in the power's colour, with a burst of sparks and a chime. Since v72 the message appears just under the plane and follows it as it fades, so it is easy to read (before, it stayed where the power-up was caught and scrolled up past the plane). Since v75 "Shield used!" appears there too. On dark maps every pop-up text (power-ups, shield saves, the "100 m!" milestones, medals, "New best!" and "+1 ★") gets a light outline so the coloured text stays readable (since v78; power-up messages only in v75). Using a shield shows "Shield used! N left".
