@@ -507,7 +507,8 @@ function addStar(x, y) {
   pickups.push({ x, y, r: 10, spin: rand(0, 6) });
 }
 
-// a magnet, shield or slow motion every so often, never a power the plane already has at the top level
+// a power-up every so often: never one the plane already has at the top level, and never the same kind as the
+// last one (v115); when the last kind is the only one left, the row gets no power-up
 function pickPower(y) {
   if (y < 30 * PX_PER_M || y - lastPowerY < POWER_GAP || Math.random() > 0.3) return null;
   const options = [];
@@ -517,9 +518,10 @@ function pickPower(y) {
   if (plane.star <= 0 && y / PX_PER_M >= STAR_FROM_M && Math.random() < 0.5) options.push('superstar');   // the rarest
   if (plane.boost <= 0 && y / PX_PER_M >= BOOST_FROM_M) options.push('boost');
   if (plane.ink <= 0 && y / PX_PER_M >= INK_FROM_M) options.push('squid');   // a debuff, offered like the others
-  if (!options.length) return null;
+  const fresh = options.filter(k => k !== lastPowerKind);
+  if (!fresh.length) return null;
   lastPowerY = y;
-  return options[ri(0, options.length - 1)];
+  return lastPowerKind = fresh[ri(0, fresh.length - 1)];
 }
 
 function spawnRow(y, d) {

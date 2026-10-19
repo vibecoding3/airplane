@@ -31,6 +31,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
     for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest']) {
       mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0, slowmo: 0, superstar: 0, boost: 0, squid: 0 }, counted = new Set();
       let maxMagnet = 0, maxShield = 0;
+      let prevKind = '', repeats = 0;
       while (dist / PX_PER_M < depth && f < 60 * 1200) {
         if (f % 45 === 0) { const s = Math.random() < 0.5 ? -1 : 1; press(s, 'sim'); release('sim'); }
         plane.invuln = 1;
@@ -39,10 +40,11 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
         if (pw) plane.x += clamp(pw.x - plane.x, -6, 6);
         update(1 / 60); if (f % 3 === 0) render(); f++;
         for (const o of obstacles) seen.add(o.type);
-        for (const p of pickups) if (p.kind && !counted.has(p)) { counted.add(p); powers[p.kind]++; }
+        // pickups spawn top to bottom, so new ones in order: the kind must differ from the one before
+        for (const p of pickups) if (p.kind && !counted.has(p)) { counted.add(p); powers[p.kind]++; if (p.kind === prevKind) repeats++; prevKind = p.kind; }
         maxMagnet = Math.max(maxMagnet, plane.magnet); maxShield = Math.max(maxShield, plane.lives);
       }
-      out[m] = { depth: Math.round(dist / PX_PER_M), types: [...seen].sort(), powers, maxMagnet, maxShield };
+      out[m] = { depth: Math.round(dist / PX_PER_M), types: [...seen].sort(), powers, maxMagnet, maxShield, repeats };
     }
     // wind obstacles (desk fan, ocean current, cold draft, city vent, forest breeze) only spawn before 700 m, so one run misses them about
     // 1 time in 10–15 by chance: look again in up to 6 short runs to 760 m before calling it missing
@@ -62,8 +64,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
     const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})` + (d.windRetries ? ` (wind found on extra run ${d.windRetries})` : ''));
-    check(d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && d.powers.superstar > 0 && d.powers.boost > 0 && (DEPTH < 1500 || (d.powers.squid > 0 && d.maxMagnet === 3 && d.maxShield === 3)),
-      `${m}: power-ups spawned (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}, star ${d.powers.superstar}, boost ${d.powers.boost}, squid ${d.powers.squid}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
+    check(d.repeats === 0 && d.powers.magnet > 0 && d.powers.shield > 0 && d.powers.slowmo > 0 && d.powers.superstar > 0 && d.powers.boost > 0 && (DEPTH < 1500 || (d.powers.squid > 0 && d.maxMagnet === 3 && d.maxShield === 3)),
+      `${m}: power-ups spawned, never the same kind twice in a row (repeats ${d.repeats}) (magnet ${d.powers.magnet}, shield ${d.powers.shield}, slow-mo ${d.powers.slowmo}, star ${d.powers.superstar}, boost ${d.powers.boost}, squid ${d.powers.squid}), reached magnet level ${d.maxMagnet}, shield level ${d.maxShield}`);
   }
 
   // normal runs (3 lives) end in a game over

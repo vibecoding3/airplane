@@ -37,6 +37,7 @@ const NEAR_PULL = 60;                      // every star and power-up this close
 const magnetRange = () => MAGNET_RANGES[plane.magnet];
 const POWER_GAP = 45 * PX_PER_M;           // at least ~45 m between power-ups
 let lastPowerY = 0;
+let lastPowerKind = '';                    // the last power-up offered: the next one is always a different kind
 const STAR_GAP = 50 * PX_PER_M;            // gold stars are at least 50 m apart
 let lastStarY = -1e9;
 // collectibles (the Collections items) spawned this run: each appears at most once per run (ids as in collections.js)
@@ -89,7 +90,7 @@ function reset() {
   plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, slowmo: 0, star: 0, boost: 0, ink: 0, inkSplats: [], invuln: 0, bubbled: 0 };
   obstacles = []; pickups = []; particles = []; floaters = [];
   dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
-  nextRowY = H + 140; lastPowerY = 0; lastStarY = -1e9; runCollected.clear(); passedBest = false; lastMilestone = 0; flash = 0; medalsAnnounced.clear();
+  nextRowY = H + 140; lastPowerY = 0; lastPowerKind = ''; lastStarY = -1e9; runCollected.clear(); passedBest = false; lastMilestone = 0; flash = 0; medalsAnnounced.clear();
   formulas = []; nextFormulaY = 60; usedFormulas.clear(); fishes.length = 0; lastSceneryY = -1e9;
 }
 reset();
