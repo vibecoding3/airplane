@@ -490,6 +490,55 @@ function forestPool(d, y) {
   if (d > 0.3) pool.push(['swing', 1.3]);
   return pool;
 }
+// Desert obstacles (v120): every one reuses a Paper or Ocean obstacle's movement and collision with desert art (draw-desert.js)
+const DESERT_MAKERS = { sandLedges: 'gate', slabs: 'erasers', cacti: 'blots', outcrop: 'protractor', carpet: 'pencil', coconuts: 'wad',
+                        vultures: 'notes', caravan: 'clips', tumbleweed: 'starfish', fronds: 'scissors', wellLever: 'compass',
+                        tongue: 'cutter', spitter: 'glue', glint: 'zap', scorpion: 'paw', cactusPod: 'mine', sandstorm: 'fan',
+                        heat: 'bubbles', rope: 'band' };
+// the desert falls through the rock layers: dunes, canyon (150 m), oasis seep (400 m), fossil beds (800 m), then amber (1,500 m)
+const desertLayer = y => { const m = y / PX_PER_M; return m < 150 ? 0 : m < 400 ? 1 : m < 800 ? 2 : m < 1500 ? 3 : 4; };
+// Fossils collection: Static Hazards variants (fossil stones among the cacti), each at most once per run
+const FOSSILS = ['trilobite', 'ammonite', 'fern', 'fish', 'sharktooth', 'raptorclaw', 'dinoskull', 'amberleaf'];
+const fossilsLeft = () => FOSSILS.filter(n => !runCollected.has('fossil-' + n));
+// each Desert mechanic has one to three looks sharing its hit box; some only appear in certain layers (DESERT_LAYERS)
+const DESERT_LOOKS = {
+  gate: { sandstone: ['#e0a060', '#d08a4a', '#c8b080'], adobe: ['#c88a5a', '#d8a070'] },
+  erasers: { slab: ['#d08a4a', '#c07840'], mesa: ['#b86a3a'] },
+  blot: { barrel: ['#5f9a4a', '#6aa85a'], pear: ['#7ab05a'], boulder: ['#b8a080', '#a08870'] },
+  protractor: { outcrop: ['#d08a4a', '#c07a40'], termite: ['#b88a5a'], dune: ['#f0d08a', '#e8c070'] },
+  pencil: { carpet: ['#c0303a', '#2f6fd1', '#8a4fc2'], driftwood: ['#c8b090'] },
+  wad: { coconut: ['#7a5030'], gourd: ['#e0b040', '#9ab040'], beetleball: ['#8a6a4a'] },
+  note: { vulture: ['#4a3a3a'], locust: ['#9ab040', '#c8a040'], hawk: ['#a0703a'] },
+  clips: { camel: ['#c8a060', '#b08a50'] },
+  starfish: { tumbleweed: ['#c8a46a', '#b08a50'], seedpod: ['#a07a40'] },
+  scissors: { fronds: ['#5fa846', '#7ab05a'], windpump: ['#a0a8b0'] },
+  compass: { lever: ['#8a5a32'], windvane: ['#a0a8b0'] },
+  cutter: { tongue: ['#5fae4a', '#d8a030', '#3fa0a0'], column: ['#d08a4a'] },
+  glue: { cactusgun: ['#5f9a4a'], camelspit: ['#c8a060'] },
+  zap: { glint: ['#fff6c0'], geyser: ['#e8c890'] },
+  paw: { scorpion: ['#c06a2a', '#3a3030'], pickaxe: ['#8a5a32'] },
+  mine: { cactusfruit: ['#e0406a'], jar: ['#c87a4a'] },
+  fan: { sandstorm: ['#f0dca0'] },
+  bubbles: { heat: ['#ffb060'] },
+  band: { rope: ['#c9a66b'] }
+};
+// looks tied to the layers they belong to (0 dunes, 1 canyon, 2 oasis, 3 fossil beds, 4 amber); the rest appear everywhere
+const DESERT_LAYERS = { dune: [0, 1], adobe: [0, 1, 2], fronds: [1, 2], coconut: [1, 2, 3], column: [1, 2, 3, 4], camelspit: [0, 1, 2] };
+function desertPool(d, y) {
+  const pool = [['sandLedges', 3], ['cacti', 2], ['carpet', 1 + 1.5 * d], ['outcrop', 1.4], ['coconuts', 1 + d], ['heat', 1]];
+  if (d > 0.05) pool.push(['rope', 1.2]);
+  if (d > 0.06) pool.push(['vultures', 1.3]);
+  if (d > 0.08) pool.push(['tumbleweed', 1.3], ['caravan', 1.3]);
+  if (d > 0.1) pool.push(['spitter', 1.2]);
+  if (d > 0.12) pool.push(['fronds', 0.6 + 1.6 * d]);
+  if (d > 0.12 && windAllowed(y)) pool.push(['sandstorm', 1.1]);
+  if (d > 0.15) pool.push(['tongue', 1.3]);
+  if (d > 0.18) pool.push(['cactusPod', 1.2]);
+  if (d > 0.2) pool.push(['glint', 1.2], ['scorpion', 1.3]);
+  if (d > 0.22) pool.push(['slabs', 1.4]);
+  if (d > 0.3) pool.push(['wellLever', 1.3]);
+  return pool;
+}
 function seaPool(d, y) {
   const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1]];
   if (d > 0.08) pool.push(['mine', 1.3]);
@@ -530,6 +579,7 @@ function spawnRow(y, d) {
   if (mapId === 'dungeon') return spawnFromPool(y, d, dungeonPool(d, y));
   if (mapId === 'city') return spawnFromPool(y, d, cityPool(d, y));
   if (mapId === 'forest') return spawnFromPool(y, d, forestPool(d, y));
+  if (mapId === 'desert') return spawnFromPool(y, d, desertPool(d, y));
   const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
   if (d > 0.08) pool.push(['clips', 1.4]);
   if (d > 0.12) pool.push(['scissors', 0.6 + 1.6 * d]);
@@ -551,7 +601,7 @@ function spawnFromPool(y, d, pool) {
   for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
   lastType = type;
   const before = obstacles.length;
-  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || FOREST_MAKERS[type] || type](y, d) || 0;
+  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || FOREST_MAKERS[type] || DESERT_MAKERS[type] || type](y, d) || 0;
   const rowPal = {}, rowSea = {};    // obstacles of the same kind in one row share a colour
   for (let i = before; i < obstacles.length; i++) {
     const o = obstacles[i];
@@ -625,9 +675,24 @@ function spawnFromPool(y, d, pool) {
         const left = birdsLeft();
         if (left.length && Math.random() < 0.5) { o.bird = left[ri(0, left.length - 1)]; runCollected.add('bird-' + o.bird); }
       }
+    } else if (mapId === 'desert') {
+      o.desert = true;
+      o.layer = desertLayer(o.y);
+      const looks = DESERT_LOOKS[o.type];
+      if (looks && !rowSea[o.type]) {
+        const all = Object.keys(looks), fit = all.filter(l => !DESERT_LAYERS[l] || DESERT_LAYERS[l].includes(o.layer));
+        const names = fit.length ? fit : all, look = names[ri(0, names.length - 1)], cols = looks[look];
+        rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
+      }
+      if (looks) [o.look, o.desCol] = rowSea[o.type];
+      if (o.type === 'compass') o.hh = 5;        // the well lever is a little thicker than a compass leg
+      if (o.type === 'blot') {                   // a fossil stone not yet seen this run (each once per run)
+        const left = fossilsLeft();
+        if (left.length && Math.random() < 0.4) { o.fossil = left[ri(0, left.length - 1)]; runCollected.add('fossil-' + o.fossil); }
+      }
     }
   }
-  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon', 'branches', 'trunk'].includes(type)) {
+  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon', 'branches', 'trunk', 'sandLedges', 'outcrop'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
     else if (Math.random() < 0.28) addStar(rand(40, W - 40), py);

@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v119** (2026-10-20)
+Current version: **v120** (2026-10-20)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,7 +10,7 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css` and 23 plain script files in `js/` (about 7,900 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
+- **Files:** `index.html`, `style.css` and 25 plain script files in `js/` (about 8,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
 - **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
@@ -53,7 +53,7 @@ There are no on-screen steering arrows (removed in v44).
 | Stars | About 28% of rows carry a gold star. Stars are a collected total (shown in the menu and top bar) and add nothing to the score. |
 | Fast-fall safety | At high speed each frame is split into sub-steps, so the plane can't skip through thin obstacles |
 | Best score | Saved per device and per map (since v49; the old single best went to Paper). During a run, a gold dashed line labelled "Your best · N m" marks the record depth, so you can see it coming; passing it pops "New best!" with a short fanfare |
-| Ranked Score | Since v104: the best depth of every map added up (a map not played yet counts as 0), for example Paper 800 + Ocean 260 + Space 0 + Dungeon 412 + Neon City 0 + Forest 0 = 1,472. Shown as "Ranked" on the start screen (next to Best and the stars) and on the game-over screen (next to Best, so a new record shows straight away) (`rankedScore` in `js/state.js`) |
+| Ranked Score | Since v104: the best depth of every map added up (a map not played yet counts as 0), for example Paper 800 + Ocean 260 + Space 0 + Dungeon 412 + Neon City 0 + Forest 0 + Desert 0 = 1,472. Shown as "Ranked" on the start screen (next to Best and the stars) and on the game-over screen (next to Best, so a new record shows straight away) (`rankedScore` in `js/state.js`) |
 | Medals | Each map has bronze / silver / gold medals for reaching 250 / 750 / 1,500 m. They show as three coins on the map tiles on the start screen, lit once earned. The first time a run reaches a medal depth on that map, "Bronze medal!" (or Silver / Gold) pops up with a fanfare |
 | Milestones | Every 100 m: "100 m!" pops up, the screen flashes white for a moment, the depth counter bounces and a two-note chime plays. Every 500 m it is bigger: a gold flash, a larger gold "500 m!", a burst of coloured sparks, a bigger bounce and a four-note arpeggio. Flashes and bounces are skipped when the device asks for reduced motion |
 
@@ -66,7 +66,7 @@ There are no on-screen steering arrows (removed in v44).
 
 ## 4. Maps
 
-Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a notebook page; Ocean: the surface with waves and a paper boat; Space: a big ringed planet and its moon; Dungeon: a stone archway between two torches); options were drawn as sheets in `ref/map-icons/` to choose from. Neon City's tile (v113) is a night skyline with neon signs; Forest's (v114) shows autumn, summer and spring trees under a blue sky. The map is chosen with six picture tiles in two rows of three (since v114; one row of five in v113), **Paper**, **Ocean**, **Space**, **Dungeon**, **Neon City** and **Forest**, on the start screen only (since v119; the game-over screen had them too until v118, so a map could be switched between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
+Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a notebook page; Ocean: the surface with waves and a paper boat; Space: a big ringed planet and its moon; Dungeon: a stone archway between two torches); options were drawn as sheets in `ref/map-icons/` to choose from. Neon City's tile (v113) is a night skyline with neon signs; Forest's (v114) shows autumn, summer and spring trees under a blue sky; Desert's (v120) dunes, a saguaro and a tumbleweed under the sun. The map is chosen with seven picture tiles in rows of four and three (since v120; two rows of three in v114–v119, one row of five in v113), **Paper**, **Ocean**, **Space**, **Dungeon**, **Neon City**, **Forest** and **Desert**, on the start screen only (since v119; the game-over screen had them too until v118, so a map could be switched between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
 
 ### 4.1 Paper
 - **Background:** ruled notebook paper with a red margin and punched holes.
@@ -176,6 +176,23 @@ The plane sets off from a bird's nest at the top of an endless forest and falls 
 | Night (1,500 m +) | Owls' eyes in the dark, foxes, deer, now and then the moon |
 | Rarely | Geese flying in a V (before 800 m); a great stag far behind (deeper) |
 
+### 4.7 Desert (since v120; internal id `desert`)
+The plane sets off from the top of a sunny mesa and falls into a deep canyon, down through the rock layers: the deeper, the older the rock, ending in a glowing amber layer. Cartoon and playful; desert life and geology only (no giant sandworm and no copy of a cartoon roadrunner).
+- **Background colour by layer:** dune sand (0–150 m), canyon sandstone oranges (150–400 m), the cool teal-green oasis seep (400–800 m), grey-brown fossil beds (800–1,500 m), then golden amber (1,500 m +) (`DESERT` in `js/maps.js`; `desertLayer` in `js/obstacles.js` gives the layer of a depth).
+- **Background layer:** faint wind ripples in the sand and scattered pebbles (one CSS layer, like the sea bubbles).
+- **The start:** blue sky with the sun, dunes far away, a little hot-air balloon and heat shimmer, and the flat orange top of a mesa with layered sides, a saguaro with a pink flower, and a lizard sunning on a rock that flicks its tongue now and then. It slides up out of view within the first ~35 m; the top bar has no background fade while it shows.
+- **Drifting specks by layer:** sand grains blowing sideways, rock dust falling, water drips seeping through the rock, pale bits of shell, then glowing amber motes rising. All faint, so they never hide an obstacle.
+- **Background scenery** (faded, never collides):
+
+| Layer | Scenery |
+|---|---|
+| Dunes (0–150 m) | Camels far away, a lizard on a rock, a little desert bird, a meerkat on guard, a shimmering mirage lake |
+| Canyon (150–400 m) | Lizards, a long-legged desert runner bird (an original design), fennec foxes, camels, meerkats |
+| Oasis (400–800 m) | Palms leaning out from the walls, dragonflies, mirages, fennec foxes |
+| Fossil beds (800–1,500 m) | Fossil ferns, fossil fish, spiral shells and old bones set in the rock |
+| Amber (1,500 m +) | Leaves trapped in amber, amber drops, fossil ferns and shells, bones |
+| Rarely | A hot-air balloon (0–400 m); a huge long-necked fossil skeleton (below 800 m) |
+
 ---
 
 ## 5. Obstacles
@@ -183,30 +200,30 @@ The plane sets off from a bird's nest at the top of an endless forest and falls 
 "Starts at" is the depth where an obstacle first joins the pool of possible obstacles. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
 
 ### 5.0 All obstacles at a glance
-One row per mechanic (section 6), names only; the details are in 5.1–5.6. For Dungeon, Neon City and Forest, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
+One row per mechanic (section 6), names only; the details are in 5.1–5.7. For Dungeon, Neon City, Forest and Desert, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
 
-| Mechanic | Paper | Ocean | Space | Dungeon | Neon City | Forest |
-|---|---|---|---|---|---|---|
-| Gap Wall | Rulers | Coral ledges | Station girders | Stone ledges / wooden beams / iron girders / goblin scaffolding | Neon shop signs / steel balconies | Leafy branches / fallen logs |
-| Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams / goblin barricade | Rolling shutters / subway doors | Log halves / beaver dam |
-| Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders / tombstones | Traffic cones / manhole covers / vending machines | Hornets' nests / pinecones / thistles |
-| Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern | Satellite dish / AC unit / station clock; neon signs | Tree trunk / birch trunk / shelf fungus |
-| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / crescent staff / twisted staff | Hover tram / neon tube | Leafy stick / frosted stick |
-| Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball / potion flask; magic rings | Soda can / arcade token / bouncy ball | Acorn / chestnut / apple / snowball |
-| Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps / witch hats / goblins | Delivery drones / paper lanterns / umbrellas | Bees / owls / bats; Forest birds |
-| Conveyor | Paper clips | — | Starlink train | Daggers / arrows / keys | Hover taxis / pods | Ducks / geese |
-| Spinning Drifter | Set square | Starfish | Tumbling asteroid | Saw blade / spiked wheel / eyeball / spiked goblin shield | Vent fan / neon hubcap / vinyl record | Chestnut husk / winged seed / snowflake |
-| Spinning Blades | Scissors | — | — | Crossed swords / spears / staffs | Drone rotors / neon tubes | Maple seeds |
-| Sweeping Arm | Drawing compass | — | Robot arm | Fire bar / chain with a spiked ball | Crane boom / street lamp arm | Leafy branch / rope swing |
-| Wall Piston | Cutter | Moray eel | Docking probe | Spear / trident / sword blade / goblin club; flamethrower | Fire escape ladder / neon arrow / antenna | Snake / woodpecker |
-| Wall Turret | Glue tube | Submarine | Twin-wing fighter | Dragon head / gargoyle / cannon / goblin with a slingshot | Security camera / dumpling steamer / spray can | Squirrel throwing acorns / frog spitting water |
-| Charged Beam | — | Electric eel | Laser gate | Rune stone / crystal cluster | Laser emitter / sparking neon sign | Sunbeam / frosty ray |
-| Telegraphed Sweep | Cat paw | Kelp | Energy blade | Skeleton arm / tentacle / thorny vine / reaper's scythe | Traffic barrier with a STOP sign / street-sweeper robot arm | Bear paw / falling branch |
-| Proximity Blast | — | Naval mine | — | Cursed rune / spore mushroom | Transformer box / fire hydrant | Puffball / wasps' nest |
-| Push Zone | Desk fan | Ocean current | — | Cold draft / steam vent | Street steam vent / AC exhaust | Breeze carrying leaves |
-| Effect Zone | — | Bubble column | Low-gravity field | — | Hologram field | Updraft of leaves (snow in winter) |
-| Spring Line | Rubber band | — | — | Spider web / slime strand | Power cable / string of lights | Spider web / vine |
-| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **20 obstacles, 65 looks** | **20 obstacles, 44 looks + 8 neon signs** | **19 obstacles, 41 looks + 8 birds** |
+| Mechanic | Paper | Ocean | Space | Dungeon | Neon City | Forest | Desert |
+|---|---|---|---|---|---|---|---|
+| Gap Wall | Rulers | Coral ledges | Station girders | Stone ledges / wooden beams / iron girders / goblin scaffolding | Neon shop signs / steel balconies | Leafy branches / fallen logs | Sandstone ledges / adobe walls |
+| Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams / goblin barricade | Rolling shutters / subway doors | Log halves / beaver dam | Sandstone slabs / mesa edges |
+| Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders / tombstones | Traffic cones / manhole covers / vending machines | Hornets' nests / pinecones / thistles | Barrel cactus / prickly pear / boulder with a lizard; fossils |
+| Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern | Satellite dish / AC unit / station clock; neon signs | Tree trunk / birch trunk / shelf fungus | Sandstone outcrop / termite mound / dune |
+| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / crescent staff / twisted staff | Hover tram / neon tube | Leafy stick / frosted stick | Flying carpet / driftwood |
+| Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball / potion flask; magic rings | Soda can / arcade token / bouncy ball | Acorn / chestnut / apple / snowball | Coconut / gourd / beetle's ball |
+| Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps / witch hats / goblins | Delivery drones / paper lanterns / umbrellas | Bees / owls / bats; Forest birds | Vultures / locusts / hawks |
+| Conveyor | Paper clips | — | Starlink train | Daggers / arrows / keys | Hover taxis / pods | Ducks / geese | Camel caravan |
+| Spinning Drifter | Set square | Starfish | Tumbling asteroid | Saw blade / spiked wheel / eyeball / spiked goblin shield | Vent fan / neon hubcap / vinyl record | Chestnut husk / winged seed / snowflake | Tumbleweed / seed pod |
+| Spinning Blades | Scissors | — | — | Crossed swords / spears / staffs | Drone rotors / neon tubes | Maple seeds | Palm fronds / windpump blades |
+| Sweeping Arm | Drawing compass | — | Robot arm | Fire bar / chain with a spiked ball | Crane boom / street lamp arm | Leafy branch / rope swing | Well lever with a bucket / windvane |
+| Wall Piston | Cutter | Moray eel | Docking probe | Spear / trident / sword blade / goblin club; flamethrower | Fire escape ladder / neon arrow / antenna | Snake / woodpecker | Chameleon tongue / sandstone column |
+| Wall Turret | Glue tube | Submarine | Twin-wing fighter | Dragon head / gargoyle / cannon / goblin with a slingshot | Security camera / dumpling steamer / spray can | Squirrel throwing acorns / frog spitting water | Cactus shooting needles / camel spitting |
+| Charged Beam | — | Electric eel | Laser gate | Rune stone / crystal cluster | Laser emitter / sparking neon sign | Sunbeam / frosty ray | Sun glint off a mirror rock / sand geyser |
+| Telegraphed Sweep | Cat paw | Kelp | Energy blade | Skeleton arm / tentacle / thorny vine / reaper's scythe | Traffic barrier with a STOP sign / street-sweeper robot arm | Bear paw / falling branch | Scorpion tail / pickaxe |
+| Proximity Blast | — | Naval mine | — | Cursed rune / spore mushroom | Transformer box / fire hydrant | Puffball / wasps' nest | Cactus fruit / clay jar |
+| Push Zone | Desk fan | Ocean current | — | Cold draft / steam vent | Street steam vent / AC exhaust | Breeze carrying leaves | Sandstorm gust |
+| Effect Zone | — | Bubble column | Low-gravity field | — | Hologram field | Updraft of leaves (snow in winter) | Heat shimmer |
+| Spring Line | Rubber band | — | — | Spider web / slime strand | Power cable / string of lights | Spider web / vine | Frayed rope |
+| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **20 obstacles, 65 looks** | **20 obstacles, 44 looks + 8 neon signs** | **19 obstacles, 41 looks + 8 birds** | **19 obstacles, 38 looks + 8 fossils** |
 
 ### 5.1 Paper map (16 types)
 
@@ -376,7 +393,32 @@ Every mechanic in section 6 except the Telegraphed Slam. Every Forest obstacle r
 | Logs (Closing Jaws) | Two halves of a log (bark on top, pale wood below) or a beaver dam of sticks, sliding shut and open | Erasers | ~150 m |
 | Swing (Sweeping Arm) | A leafy branch, or a rope swing with a wooden seat, turning round a knot | Drawing compass | ~215 m |
 
-### 5.7 Removed obstacles (history)
+### 5.7 Desert map (19 kinds on 19 mechanics, since v120)
+Every mechanic in section 6 except the Telegraphed Slam. Every Desert obstacle reuses the movement and collision of a Paper or Ocean obstacle (see `DESERT_MAKERS` in `js/obstacles.js`) with new art in `js/draw-desert.js`. Each mechanic has one to three looks sharing its hit box, in a few colours (`DESERT_LOOKS`); a row of the same obstacle shares one look and colour. Some looks only appear in their rock layers (`DESERT_LAYERS`): dunes near the top, adobe walls and spitting camels above the fossil beds, palm fronds in the canyon and oasis, coconuts from the canyon to the fossil beds, sandstone columns below the dunes. There is no quicksand (it would pull the plane, like the removed sharpener), and the sandstorm is faint streaks, never a haze that hides obstacles.
+
+| Desert obstacle | Looks | Based on | Starts at |
+|---|---|---|---|
+| Sand ledges (Gap Wall) | Layered sandstone ledges with a wind-worn end; adobe walls of mud bricks with a beam end | Rulers | 0 m |
+| Cacti (Static Hazards) | Round barrel cacti with ribs and a flower; prickly pears with a pink fruit; boulders with a lizard on top; sometimes a fossil stone (collectible, see section 7) | Ink blots | 0 m |
+| Carpet (Bouncing Slider) | A patterned flying carpet with tassels that ripples as it flies (an original design); bleached driftwood | Pencil | 0 m |
+| Outcrop (Wall Bulge) | A sandstone outcrop with curved layers and a little cactus; a termite mound; a sand dune (dunes and canyon only); slalom pairs deeper down | Protractor | 0 m |
+| Coconuts (Rising Projectile) | Coconuts, gourds, a beetle's rolling ball with the beetle on top, thrown up the canyon | Paper wad | 0 m |
+| Heat (Effect Zone) | Rising heat shimmer: a faint dashed zone with wavy lines drifting up; slows the fall, never hurts | Bubble column | 0 m |
+| Rope (Spring Line) | A frayed rope between two wooden posts: the rope bounces the plane, the posts hurt | Rubber band | ~30 m |
+| Vultures (Drifting Swarm) | 2–3 vultures (bald pink heads), locusts or hawks gliding down | Sticky notes | ~35 m |
+| Tumbleweed (Spinning Drifter) | A tumbleweed of tangled twigs, or a round seed pod with hooked spikes | Starfish | ~50 m |
+| Caravan (Conveyor) | A camel caravan crossing, each camel with a red saddle blanket | Paper clips | ~50 m |
+| Spitter (Wall Turret) | A saguaro arm shooting bundles of needles, or a camel poking its head out of the rock and spitting (a cartoon); the cactus bristles or the camel puffs before each shot | Glue tube | ~65 m |
+| Fronds (Spinning Blades) | Two palm fronds with a coconut at the base, or two windpump blades, spinning and scissoring | Scissors | ~80 m |
+| Sandstorm (Push Zone) | A gust of sand streaks and grains; pushes the plane sideways, nothing solid to hit. Only before 700 m, like all wind | Ocean current | ~80 m |
+| Tongue (Wall Piston) | A chameleon on a rock ledge shooting out its sticky pink tongue, or a sandstone column sliding out | Cutter | ~100 m |
+| Cactus pod (Proximity Blast) | A cactus fruit (bursts in spines) or a clay jar (shatters in shards); both swell and shake and show their blast circle first | Naval mine | ~120 m |
+| Glint (Charged Beam) | Sunlight flashing off a mirror-like rock flake, or a sand geyser blasting out of a crack (sand trickles while it charges); a dashed line warns first | Electric eel | ~135 m |
+| Scorpion (Telegraphed Sweep) | A scorpion's segmented tail with its stinger, or a swinging pickaxe, striking out of a hole after a dashed wedge | Cat paw | ~135 m |
+| Slabs (Closing Jaws) | Cut sandstone slabs or two mesa edges (with a little cactus), sliding shut and open | Erasers | ~150 m |
+| Well lever (Sweeping Arm) | A water-well lever with a bucket of water, or a windvane, turning round its post | Drawing compass | ~215 m |
+
+### 5.8 Removed obstacles (history)
 These were built and then removed at the player's request: the pen (drew a wall line from the side), the stylus (expanding ripple rings), the pencil sharpener (pulled the plane), the whiteout patch (hid hazards), thumbtack rows, the magnifying glass (its sun spot chased the plane), and in v37 the coffee spill (made the plane soggy) and the rubber stamp (slammed down on a marked spot). Avoid these kinds of mechanics in future obstacles.
 
 ---
@@ -463,6 +505,7 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
   | Legendary swords (v105) | Six original swords in the Dungeon: flame sword, frost blade, crystal sword, desert scimitar, rune blade, bone sword (Spinning Blades variants of the crossed swords; both blades of the pair are the same sword, drawn inside the blade hit shape). Each Spinning Blades obstacle has a 70% chance to be a sword not yet seen this run; once all 6 have appeared it uses its regular looks again |
   | Neon signs (v113) | Eight big round neon signs in Neon City: ramen bowl, neon cat, cassette, lightning bolt, heart, music notes, coffee cup, palm tree (Wall Bulge, their own obstacle in the pool, save ids `neon-ramen` …). Each appears at most once per run; once all 8 have, a sign spawn becomes a regular Wall Bulge (dish, AC unit or clock). In the menu they are drawn whole with the icon in the middle |
   | Forest birds (v114) | Eight round cartoon birds in the Forest: robin, blue jay, kingfisher, cardinal, hummingbird, goldfinch, snowy owl, magpie (Drifting Swarm variants of the bees, drawn inside their 42-unit square; save ids `bird-robin` …). Each swarm member has a 50% chance to be a bird not yet seen this run; once all 8 have appeared the swarms are plain again (`FOREST_BIRDS`, `paintForestBird`) |
+  | Fossils (v120) | Eight fossils in the Desert: trilobite, ammonite, fossil fern, fossil fish, shark tooth, raptor claw, dinosaur skull, leaf in amber (no insect in amber, too close to a famous film), each on a round stone (Static Hazards variants of the cacti, scaled to their hit circle; save ids `fossil-trilobite` …). Each cactus has a 40% chance to be a fossil not yet seen this run; once all 8 have appeared the cacti are plain again (`FOSSILS`, `paintFossil`) |
   | Planets (v94) | The 8 Space planets, Mercury to Neptune (Wall Bulge). Each appears at most once per run; once all 8 have, planet spawns become regular moon edges (since v98; in v94 planets stopped). In the menu they are drawn whole (Saturn with its ring) on a dark-space background |
 
 - **Plane:** one classic white paper plane; the crumpled ball and paper scraps match it. There are no skins (removed in v42) and no trail (removed in v36).
@@ -471,7 +514,7 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
 
 ## 8. Music
 
-Background music is composed and played in code (`js/music.js`), in the style of a fantasy MMORPG soundtrack such as Knight Online's: minor keys, harp arpeggios, string pads and flute or horn leads. Neon City has a synthwave theme and Forest a woodland one instead. The melodies are original.
+Background music is composed and played in code (`js/music.js`), in the style of a fantasy MMORPG soundtrack such as Knight Online's: minor keys, harp arpeggios, string pads and flute or horn leads. Neon City has a synthwave theme, Forest a woodland one and Desert a warm one with a hand drum instead. The melodies are original.
 
 | Theme | Plays | Feel |
 |---|---|---|
@@ -482,6 +525,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Dungeon | During Dungeon runs | Slow and mysterious in D minor: a low horn melody over echoing harp, with a soft drum on the downbeats (66 bpm, about 29 s loop) |
 | Neon City | During Neon City runs | Synthwave in A minor: a bright square-wave lead over echoing arpeggios and string pads, a kick on every beat, off-beat hi-hats and a clap on 2 and 4 (100 bpm, about 19 s loop) |
 | Forest | During Forest runs | Gentle woodland theme in E minor: a soft ocarina-like lead over plucked arpeggios and string pads, with little bird calls now and then (84 bpm, about 23 s loop) |
+| Desert | During Desert runs | Warm theme in D with a bent, exotic scale (a raised third over a flat second): a reedy lead over plucked lute-like arpeggios and string pads, with a soft hand drum (a deep beat on 1 and the and-of-3, light taps between) (92 bpm, about 21 s loop) |
 
 - Themes cross-fade when they change. Pausing lowers the music to 30%; hiding the tab silences it.
 - The music sits below the sound effects (peaks about 0.08 against about 0.10 for a star chime).
@@ -494,10 +538,10 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Sound on/off | Top bar (speaker icon, crossed out when muted) | Mutes sound effects and music together. Both are generated in code (Web Audio), with no audio files |
 | Pause / Resume | Space bar, Esc (P no longer pauses since v67); the phone Back button in the Android app. The top bar's pause button was removed in v118 | Also pauses automatically when the tab is hidden or the window loses focus |
 | Exit run | Pause menu, under Resume (since v71) | Ends the run and goes straight to the start menu. The run keeps what it earned, like a crash: a new best depth, its stars, and its metres as XP |
-| Map | Start screen only (since v119) | Paper / Ocean / Space / Dungeon / Neon City / Forest picture tiles |
+| Map | Start screen only (since v119) | Paper / Ocean / Space / Dungeon / Neon City / Forest / Desert picture tiles |
 
 ### Saved data (browser localStorage)
-`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon`, `nosedive-best-city`, `nosedive-best-forest` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
+`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon`, `nosedive-best-city`, `nosedive-best-forest`, `nosedive-best-desert` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
 
 ---
 
@@ -536,7 +580,7 @@ airplane/
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
 ├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
-└── js/                     23 game scripts, listed in the order they load
+└── js/                     25 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
@@ -546,6 +590,7 @@ airplane/
     ├── dungeon-background.js Dungeon map: the well opening, torches, bats, crystals, lava falls, dust and embers
     ├── city-background.js  Neon City map: the rooftop at the start, drones, billboards, the subway, arcade pixels, rain and sparks
     ├── forest-background.js Forest map: the treetops and nest at the start, seasonal scenery, petals, leaves, snow and fireflies
+    ├── desert-background.js Desert map: the mesa at the start, scenery by rock layer, sand, dust, drips, shell bits and amber motes
     ├── state.js            game state, power-up levels, controls, speed and difficulty rules
     ├── obstacles.js        obstacle generators and row spawning, for all maps
     ├── physics.js          collision, obstacle movement, steering, per-frame update
@@ -556,6 +601,7 @@ airplane/
     ├── draw-dungeon.js     Dungeon obstacle art
     ├── draw-city.js        Neon City obstacle art (and the neon signs)
     ├── draw-forest.js      Forest obstacle art (and the Forest birds)
+    ├── draw-desert.js      Desert obstacle art (and the Fossils)
     ├── render.js           plane, screen shake, frame drawing, map switching
     ├── ui.js               top bar, menus, start / pause / game over
     ├── collections.js      Collections: the sets, finding items during a run, the Collections screen
@@ -577,11 +623,11 @@ There is no build step and nothing to install. To play locally, open `index.html
 | To change… | Look in |
 |---|---|
 | Speed, difficulty, controls, starting state | `js/state.js` (`baseFallSpeed`, `difficulty`, `HOLD_MS`, `reset`) |
-| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_LOOKS`, `cityPool`, `CITY_MAKERS`, `CITY_LOOKS`, `forestPool`, `FOREST_MAKERS`, `FOREST_LOOKS`, `FOREST_SEASONS`, `spawnRow`) |
+| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_LOOKS`, `cityPool`, `CITY_MAKERS`, `CITY_LOOKS`, `forestPool`, `FOREST_MAKERS`, `FOREST_LOOKS`, `FOREST_SEASONS`, `desertPool`, `DESERT_MAKERS`, `DESERT_LOOKS`, `DESERT_LAYERS`, `spawnRow`) |
 | How an obstacle moves or what counts as a hit | `js/physics.js` (`updateObstacle`, `computeShapes`) |
-| How an obstacle looks | `js/draw-paper.js`, `js/draw-sea.js`, `js/draw-space.js`, `js/draw-dungeon.js`, `js/draw-city.js` or `js/draw-forest.js` (`draw*` / `paint*`) |
-| Background decorations | `js/paper-background.js` (formulas), `js/sea-background.js` (fish, specks, silhouettes), `js/space-background.js`, `js/dungeon-background.js`, `js/city-background.js` or `js/forest-background.js` (scenery, specks, the opening at the start) |
-| Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`, `SPACE`, `DUNGEON`, `CITY`, `NEON_MARKS`, `FOREST`, `DARK_SCENES`) and the map tiles in `index.html` |
+| How an obstacle looks | `js/draw-paper.js`, `js/draw-sea.js`, `js/draw-space.js`, `js/draw-dungeon.js`, `js/draw-city.js`, `js/draw-forest.js` or `js/draw-desert.js` (`draw*` / `paint*`) |
+| Background decorations | `js/paper-background.js` (formulas), `js/sea-background.js` (fish, specks, silhouettes), `js/space-background.js`, `js/dungeon-background.js`, `js/city-background.js`, `js/forest-background.js` or `js/desert-background.js` (scenery, specks, the opening at the start) |
+| Page and water colours, a new map entry | `js/maps.js` (`MAPS`, `RAINBOW`, `SEA`, `SPACE`, `DUNGEON`, `CITY`, `NEON_MARKS`, `FOREST`, `DESERT`, `DARK_SCENES`) and the map tiles in `index.html` |
 | Plane look | `js/core.js` (`PLANE` colours), `js/render.js` (`paintPlane`) |
 | Power-ups | `js/state.js` (`POWER_MAX`, `MAGNET_RANGES`, `POWER_GAP`, `SLOWMO_TIME`, `STAR_TIME`, `timeScale`), `js/obstacles.js` (`pickPower`), `js/physics.js` (`collectPower`, `useExtraLife`), `js/render.js` (`drawPower`, `paintPowerIcon`) |
 | Collections (sets, items, the screen) | `js/collections.js` (`COLLECTIONS`, `noteFound`, `renderCollections`, `paintCollectionItem`) |
@@ -606,6 +652,8 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `maps.js` | `MAPS`, `mapId`, `SEA`, `RAINBOW`, `isDark`, `syncHudPage`, `drawPaper`, `drawFormulas`, `drawDepthMarkers` |
 | `draw-paper.js` | Paper obstacle `draw*` / `paint*` functions (`drawRuler`, `paintPencil`, `drawScissors`, `drawFan`, `drawPaw`, …) |
 | `draw-dungeon.js` | `drawDungeonObstacle` (picks the art for each mechanic), `paintSlider` and `paintRing` (also used by the Collections screen), `drawLedge`, `drawCrusher`, `drawSpikeBall`, `drawRockOutcrop`, `drawPlank`, `drawSkull`, `drawGhost`, `drawSpear`, `drawFireBar`, `drawDragonHead` |
+| `desert-background.js` | `DESERT_TIERS`, `spawnDesertThing`, `desertStartY`, `drawDesertStart`, `drawDesertParticles` (scenery joins the `FISH` table) |
+| `draw-desert.js` | `drawDesertObstacle` (picks the art for each mechanic), `FOSSIL_NAMES`, `paintFossil` (also used by the Collections screen), `drawDesertLedge`, `drawDesertHazard`, `drawDesertCarpet`, `drawDesertTumble`, `drawDesertTongue`, `drawDesertSpitter`, `drawDesertScorpion`, `drawDesertHeat`, `drawDesertRope` |
 | `forest-background.js` | `LEAF_COLS`, `FOREST_TIERS`, `spawnForestThing`, `forestStartY`, `drawForestStart`, `drawForestParticles` (scenery joins the `FISH` table) |
 | `draw-forest.js` | `drawForestObstacle` (picks the art for each mechanic), `BIRD_LOOKS`, `paintForestBird` (also used by the Collections screen), `drawForestBranch`, `drawForestBulge`, `drawForestFlyer`, `drawForestThrower`, `drawForestSweep`, `drawForestUpdraft`, `drawForestVine` |
 | `city-background.js` | `CITY_TIERS`, `spawnCityThing`, `cityStartY`, `drawCityStart`, `drawCityParticles`, `neonStroke` (scenery joins the `FISH` table) |
@@ -623,8 +671,8 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 | Command | What it does |
 |---|---|
-| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all six maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
-| `node tools/shot.js <notebook|sea|space|dungeon|city|forest> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
+| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all seven maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
+| `node tools/shot.js <notebook|sea|space|dungeon|city|forest|desert> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
 | `node tools/shot.js title [sea]` | Title screen screenshot |
 | `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs), the bundled fonts (as data URLs) and the scripts into one page (for a single-file copy) |
 
@@ -632,7 +680,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 ## 11. Direction
 
-**Six maps: Paper, Ocean, Space, Dungeon, Neon City and Forest,** each chosen from the menu. Any new map should be built from the mechanics in section 6, with new art.
+**Seven maps: Paper, Ocean, Space, Dungeon, Neon City, Forest and Desert,** each chosen from the main menu. Any new map should be built from the mechanics in section 6, with new art.
 
 ---
 

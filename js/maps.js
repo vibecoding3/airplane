@@ -24,6 +24,10 @@ const NEON_MARKS = ['#ff4fd8', '#3ff0ff', '#b6ff3f', '#ffb03f', '#9a7cff'];
 // winter blue-greys (800 m), then the dark teal night (1,500 m)
 const FOREST = ['#d4ecb4', '#c4e4a2', '#9fcf78', '#8cc266', '#ecc07a', '#e6ad66', '#dc9a58', '#d08a4e', '#d4dee4', '#c6d2da',
                 '#b8c6d0', '#aabac6', '#9caebc', '#8ea2b2', '#8296a8', '#1f3d3c', '#1a3534', '#162e2e', '#122828'];
+// desert: through the rock layers: dune sand, canyon sandstone (150 m), the cool oasis seep (400 m), grey-brown fossil
+// beds (800 m), then the golden amber (1,500 m)
+const DESERT = ['#f4dc9c', '#f0d08a', '#eab070', '#e09a5c', '#9cc8b0', '#8cbea4', '#7cb498', '#6caa8c', '#b0a490', '#a69a86',
+                '#9c907c', '#928672', '#887c68', '#7e725e', '#746854', '#c8862a', '#b8761e', '#a86814', '#985a0c'];
 const SPACE = ['#2a5298', '#1a3570', '#10204a', '#0b1432', '#140f33', '#0a1b2e', '#1a0e2c', '#0c1533', '#120a28', '#0a1026', '#06070f'];
 const MAPS = {
   notebook: { name: 'Paper', colour: k => (k < 1 ? COL.paper : RAINBOW[(k - 1) % RAINBOW.length]), formulas: true },
@@ -31,7 +35,8 @@ const MAPS = {
   space: { name: 'Space', colour: k => SPACE[clamp(k, 0, SPACE.length - 1)], formulas: false },
   dungeon: { name: 'Dungeon', colour: k => DUNGEON[clamp(k, 0, DUNGEON.length - 1)], formulas: false },
   city: { name: 'Neon City', colour: k => CITY[clamp(k, 0, CITY.length - 1)], formulas: false },
-  forest: { name: 'Forest', colour: k => FOREST[clamp(k, 0, FOREST.length - 1)], formulas: false }
+  forest: { name: 'Forest', colour: k => FOREST[clamp(k, 0, FOREST.length - 1)], formulas: false },
+  desert: { name: 'Desert', colour: k => DESERT[clamp(k, 0, DESERT.length - 1)], formulas: false }
 };
 let mapId = MAPS[store.get('nosedive-map')] ? store.get('nosedive-map') : 'notebook';
 const pageColor = k => MAPS[mapId].colour(k);
@@ -43,11 +48,11 @@ const isDark = hex => {
 let darkPage = false;
 
 // where each map's starting scene is on screen (its lowest point); it slides away within the first ~35 m
-const START_SCENES = { notebook: () => paperStartY(), sea: () => seaStartY(), space: () => earthLimbY(), dungeon: () => wellOpeningY(), city: () => cityStartY(), forest: () => forestStartY() };
+const START_SCENES = { notebook: () => paperStartY(), sea: () => seaStartY(), space: () => earthLimbY(), dungeon: () => wellOpeningY(), city: () => cityStartY(), forest: () => forestStartY(), desert: () => desertStartY() };
 const DARK_SCENES = new Set(['space', 'dungeon', 'city']);   // starting scenes the HUD needs light text over
 let hudPage = '';
 function syncHudPage() {         // the HUD's fade matches the page colour behind it
-  // no fade while the map's starting scene (notebook top, sea surface, Earth, well opening, rooftop, treetops) is in view, so it
+  // no fade while the map's starting scene (notebook top, sea surface, Earth, well opening, rooftop, treetops, mesa) is in view, so it
   // isn't painted over; the text stays dark over the light paper and sky, light over Earth and the well
   const scene = START_SCENES[mapId]() > -150;
   const c = scene ? 'transparent' : pageColor(pageIndexAt(dist + 40));
@@ -63,6 +68,7 @@ function syncHudPage() {         // the HUD's fade matches the page colour behin
 function drawPaper() {
   if (MAPS[mapId].formulas) { belowLine(paperStartY() + 52, drawFormulas); drawPaperStart(); }   // no formulas over the header
   else if (mapId === 'sea') { drawSeaStart(); drawSeaParticles(); belowLine(seaStartY() + 8, drawFishes); }   // no fish in the sky
+  else if (mapId === 'desert') { drawDesertStart(); drawDesertParticles(); belowLine(desertStartY() + 4, drawFishes); }   // no scenery over the mesa
   else if (mapId === 'forest') { drawForestStart(); drawForestParticles(); belowLine(forestStartY() + 4, drawFishes); }   // no scenery over the treetops
   else if (mapId === 'city') { drawCityStart(); drawCityParticles(); belowLine(cityStartY() + 4, drawFishes); }   // no scenery over the rooftop
   else { mapId === 'space' ? drawSpaceDetails() : drawDungeonDetails(); drawFishes(); }
