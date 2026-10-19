@@ -191,7 +191,10 @@ function syncPaperLayers() {
   ruling.style.transform = `translate3d(0, ${px(-(dist % PAPER_REPEAT))}px, 0)`;
   const k = pageIndexAt(dist);
   const now = pageColor(k), next = pageColor(k + 1);
-  if (now !== pageNowCol) pageNow.style.background = pageNowCol = now;
+  if (now !== pageNowCol) {
+    pageNow.style.background = pageNowCol = now;
+    world.classList.toggle('map-night', mapId === 'forest' && isDark(now));   // the Forest's pale night trunks
+  }
   if (next !== pageNextCol) pageNext.style.background = pageNextCol = next;
   const boundary = pageTop(k + 1) - dist;                         // where the next colour starts on screen
   pageNext.style.transform = `translate3d(0, ${px(Math.min(boundary, H + 10))}px, 0)`;
