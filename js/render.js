@@ -223,6 +223,7 @@ function render() {
     noteFound(o, sy);
     if (o.dungeon) { drawDungeonObstacle(o, sy); continue; }
     if (o.city) { drawCityObstacle(o, sy); continue; }
+    if (o.forest) { drawForestObstacle(o, sy); continue; }
     switch (o.type) {
       case 'gate': {
         const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
@@ -327,6 +328,7 @@ function applyMap() {
   world.classList.toggle('map-space', mapId === 'space');
   world.classList.toggle('map-dungeon', mapId === 'dungeon');
   world.classList.toggle('map-city', mapId === 'city');
+  world.classList.toggle('map-forest', mapId === 'forest');
   best = bests[mapId];
   // swap the background decorations right away: clear them and refill from just above the screen
   formulas = []; fishes.length = 0; lastSceneryY = -1e9;

@@ -2,7 +2,7 @@
 'use strict';
 
 // Looping themes (title + one per map) in the style of a fantasy MMORPG soundtrack (minor keys, harp arpeggios, string
-// pads, flute / horn leads; Neon City has a synthwave theme instead). The melodies are original. The title theme plays on the menus and game over;
+// pads, flute / horn leads; Neon City has a synthwave theme and Forest a woodland one). The melodies are original. The title theme plays on the menus and game over;
 // each map has its own theme during a run. The sound button mutes music and effects together.
 
 // chords as MIDI notes (low voicings; the harp plays them an octave or two higher)
@@ -58,6 +58,15 @@ const THEMES = {
     melody: [
       [[76, 1], [74, 0.5], [72, 0.5], [69, 2]], [[72, 1], [74, 1], [76, 1.5], [77, 0.5]], [[79, 1.5], [76, 0.5], [72, 2]], [[74, 3], [null, 1]],
       [[69, 0.5], [72, 0.5], [76, 1], [81, 1.5], [79, 0.5]], [[77, 1], [76, 1], [72, 2]], [[74, 1], [77, 1], [76, 1], [74, 1]], [[71, 2], [68, 1], [null, 1]]
+    ]
+  },
+  // Forest: a gentle woodland theme in E minor — a soft ocarina-like lead over plucked arpeggios, with birdsong
+  forest: {
+    bpm: 84, lead: 'ocarina', harp: [0, 2, 3, 1, 4, 2, 3, 1], harpStep: 0.5, echo: 0.25, birds: true,
+    chords: ['Em', 'C', 'G', 'D', 'Em', 'Am', 'C', 'B'],
+    melody: [
+      [[71, 1], [74, 0.5], [76, 0.5], [79, 2]], [[76, 1], [74, 1], [72, 2]], [[74, 1.5], [71, 0.5], [67, 1], [71, 1]], [[69, 3], [null, 1]],
+      [[76, 1], [79, 1], [83, 1.5], [81, 0.5]], [[79, 1], [76, 1], [72, 2]], [[74, 1], [76, 1], [72, 1], [71, 1]], [[71, 2], [66, 1], [null, 1]]
     ]
   },
   // Ocean: slow and dark, long echoing harp notes and a lonely low flute
@@ -142,6 +151,7 @@ function playBar(th, i, t0, bus) {
     s += b;
   }
   if (th.drum) { drum(bus, t0); drum(bus, t0 + 2 * beat, 0.6); }
+  if (th.birds) for (let b = 0; b < 4; b++) if (Math.random() < 0.3) chirp(bus, t0 + (b + Math.random() * 0.5) * beat);   // birdsong
   if (th.beat) for (let b = 0; b < 4; b++) {     // a dance beat: kick, off-beat hat, clap on 2 and 4
     drum(bus, t0 + b * beat, b % 2 ? 0.55 : 0.8);
     hiss(bus, t0 + (b + 0.5) * beat, 0.05, 7000, 0.035);
@@ -171,14 +181,14 @@ function pluck(bus, f, t, dur, vol, echo) {
   if (echo) { const e = a.createGain(); e.gain.value = echo; g.connect(e).connect(music.echo); }
   osc.start(t); osc.stop(t + dur + 0.05);
 }
-// lead voices: flute (sine with vibrato), deep flute (lower, slower), horn (filtered saw), synth (filtered square)
+// lead voices: flute (sine with vibrato), deep flute (lower, slower), horn (filtered saw), synth (filtered square), ocarina (soft triangle)
 function lead(bus, kind, f, t, dur) {
   const a = actx, osc = a.createOscillator(), g = a.createGain(), vib = a.createOscillator(), vg = a.createGain();
-  const horn = kind === 'horn', synth = kind === 'synth';
-  osc.type = horn ? 'sawtooth' : synth ? 'square' : 'sine'; osc.frequency.value = f;
+  const horn = kind === 'horn', synth = kind === 'synth', ocarina = kind === 'ocarina';
+  osc.type = horn ? 'sawtooth' : synth ? 'square' : ocarina ? 'triangle' : 'sine'; osc.frequency.value = f;
   vib.frequency.value = kind === 'deep' ? 4 : kind === 'space' ? 3 : 5.5; vg.gain.value = f * (kind === 'space' ? 0.009 : 0.006);
   vib.connect(vg).connect(osc.frequency);
-  const vol = horn ? 0.035 : synth ? 0.026 : kind === 'deep' ? 0.07 : kind === 'space' ? 0.05 : 0.06, att = horn ? 0.12 : synth ? 0.02 : kind === 'space' ? 0.25 : 0.08;
+  const vol = horn ? 0.035 : synth ? 0.026 : ocarina ? 0.07 : kind === 'deep' ? 0.07 : kind === 'space' ? 0.05 : 0.06, att = horn ? 0.12 : synth ? 0.02 : kind === 'space' ? 0.25 : 0.08;
   g.gain.setValueAtTime(0, t);
   g.gain.linearRampToValueAtTime(vol, t + att);
   g.gain.setValueAtTime(vol * 0.85, Math.max(t + att, t + dur - 0.15));
@@ -186,7 +196,7 @@ function lead(bus, kind, f, t, dur) {
   let out = osc;
   if (horn || synth) { const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = horn ? 1300 : 2200; osc.connect(lp); out = lp; }
   out.connect(g).connect(bus);
-  if (kind === 'deep' || kind === 'space' || synth) { const e = a.createGain(); e.gain.value = kind === 'space' ? 0.45 : synth ? 0.25 : 0.3; g.connect(e).connect(music.echo); }
+  if (kind === 'deep' || kind === 'space' || synth || ocarina) { const e = a.createGain(); e.gain.value = kind === 'space' ? 0.45 : synth || ocarina ? 0.25 : 0.3; g.connect(e).connect(music.echo); }
   osc.start(t); vib.start(t); osc.stop(t + dur + 0.1); vib.stop(t + dur + 0.1);
 }
 // a soft low drum (for the title theme)
@@ -211,4 +221,14 @@ function hiss(bus, t, dur, freq, vol) {
   g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0005, t + dur);
   src.connect(f).connect(g).connect(bus);
   src.start(t); src.stop(t + dur + 0.02);
+}
+// a little bird call: two quick rising whistles (Forest theme)
+function chirp(bus, t) {
+  const a = actx, f = 2400 + Math.random() * 1200;
+  for (const k of [0, 0.09]) {
+    const osc = a.createOscillator(), g = a.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(f, t + k); osc.frequency.exponentialRampToValueAtTime(f * 1.35, t + k + 0.06);
+    g.gain.setValueAtTime(0, t + k); g.gain.linearRampToValueAtTime(0.018, t + k + 0.01); g.gain.exponentialRampToValueAtTime(0.0005, t + k + 0.07);
+    osc.connect(g).connect(bus); osc.start(t + k); osc.stop(t + k + 0.08);
+  }
 }

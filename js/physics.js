@@ -50,7 +50,7 @@ function computeShapes(o) {
       return [{ k: 'b', x: o.x + c * o.L / 2, y: o.y + s * o.L / 2, hw: o.L / 2, hh: o.hh || 4, a: o.ang },
               { k: 'c', x: o.x, y: o.y, r: 8 }];
     }
-    case 'fan': return o.sea || o.dungeon || o.city ? [] : [{ k: 'c', x: o.side < 0 ? 0 : W, y: o.y, r: 24 }];   // an ocean current, cold draft or city vent has no body
+    case 'fan': return o.sea || o.dungeon || o.city || o.forest ? [] : [{ k: 'c', x: o.side < 0 ? 0 : W, y: o.y, r: 24 }];   // an ocean current, cold draft, city vent or forest breeze has no body
     case 'starfish': return [{ k: 'c', x: o.x, y: o.y, r: 20 }];
     case 'zap': {
       const x0 = wallX(o), i = inward(o);

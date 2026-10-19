@@ -169,7 +169,7 @@ function formulaAngle() {
 // the notebook gets formulas, the ocean gets fish; both use the same spacing down the page
 function updateFormulas(dt = 0) {
   while (nextFormulaY < dist + H + 140) {
-    const ext = (mapId === 'sea' ? spawnFish(nextFormulaY) : mapId === 'space' ? spawnSpaceThing(nextFormulaY) : mapId === 'dungeon' ? spawnDungeonThing(nextFormulaY) : mapId === 'city' ? spawnCityThing(nextFormulaY) : spawnFormula(nextFormulaY)) || 0;
+    const ext = (mapId === 'sea' ? spawnFish(nextFormulaY) : mapId === 'space' ? spawnSpaceThing(nextFormulaY) : mapId === 'dungeon' ? spawnDungeonThing(nextFormulaY) : mapId === 'city' ? spawnCityThing(nextFormulaY) : mapId === 'forest' ? spawnForestThing(nextFormulaY) : spawnFormula(nextFormulaY)) || 0;
     nextFormulaY += Math.max(30 * ri(4, 7), 30 * Math.ceil((ext / 2 + 105) / 30));
   }
   prune(formulas, f => f.y + f.ext / 2 > dist - 20);

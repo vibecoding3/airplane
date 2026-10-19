@@ -1,13 +1,13 @@
 # Paper Nosedive — notes for Claude
 
-Browser game: a paper plane always falls; the player steers left/right to dodge obstacles; score = depth in metres. Five maps: **Paper** (internal id `notebook`), **Ocean** (`sea`, called Deep sea until v78), **Space** (`space`), **Dungeon** (`dungeon`) and **Neon City** (`city`, v113: falls through the city's layers, rooftops to data core — not a Skyscraper map). README.md is the full game spec — read only the section you need.
+Browser game: a paper plane always falls; the player steers left/right to dodge obstacles; score = depth in metres. Six maps: **Paper** (internal id `notebook`), **Ocean** (`sea`, called Deep sea until v78), **Space** (`space`), **Dungeon** (`dungeon`), **Neon City** (`city`, v113: falls through the city's layers, rooftops to data core — not a Skyscraper map) and **Forest** (`forest`, v114: falls through the seasons, spring to night; nature only, no Dungeon-style magic). README.md is the full game spec — read only the section you need.
 
 ## Files
-`index.html` (page + menus) · `style.css` · `js/*.js` (21 classic scripts, one shared global scope, run in the order `index.html` lists them; `main.js` last). README section 10 has the file map, a "where to change things" table and key names per file. Grep for a name rather than reading whole files.
+`index.html` (page + menus) · `style.css` · `js/*.js` (23 classic scripts, one shared global scope, run in the order `index.html` lists them; `main.js` last). README section 10 has the file map, a "where to change things" table and key names per file. Grep for a name rather than reading whole files.
 
 ## After every change
 1. `node tools/test.js` — loads the game in headless Chrome, menus, deep runs on all maps (all obstacle types must appear), normal runs, pause/resume, page errors. Use `node tools/test.js 800` for a faster run (it skips the all-obstacle-types check, which needs 1,500 m+). Update `EXPECTED` in it when adding obstacles.
-2. Screenshots only for visual changes: `node tools/shot.js <notebook|sea|space|dungeon|city> <depth…>` or `node tools/shot.js title [map]` → `tools/out/*.png` (phone size 412×860).
+2. Screenshots only for visual changes: `node tools/shot.js <notebook|sea|space|dungeon|city|forest> <depth…>` or `node tools/shot.js title [map]` → `tools/out/*.png` (phone size 412×860).
 3. Bump the version label in `index.html` (`id="version">vN<`) and "Current version" in README for every pushed change. Keep README in sync with features.
 4. Push every change to GitHub without asking (user's standing instruction, 2026-10-18). Commit as the repo's local git identity (vibecoding3), then confirm GitHub Pages serves the new `vN` (https://vibecoding3.github.io/airplane/, ~1 min).
 5. Private claude.ai artifact copy (https://claude.ai/artifact/KJy3ncyQMyFFiAsPLhSYuf): `node tools/bundle.js` → publish `tools/out/paper-nosedive.html` to that URL.

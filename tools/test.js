@@ -3,7 +3,7 @@
 //   node tools/test.js 800        (deep runs to 800 m, faster)
 const { openGame, wait } = require('./lib');
 const DEPTH = +process.argv[2] || 2500;
-const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19 };   // obstacle types per map; update when adding obstacles
+const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, forest: 19 };   // obstacle types per map; update when adding obstacles
 
 (async () => {
   const { browser, page, errors } = await openGame();
@@ -28,7 +28,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19 };   
   // and level up to 3, no errors
   const deep = await page.evaluate(depth => {
     const out = {};
-    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city']) {
+    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest']) {
       mapId = m; applyMap(); start(); let f = 0; const seen = new Set(), powers = { magnet: 0, shield: 0, slowmo: 0, superstar: 0, boost: 0, squid: 0 }, counted = new Set();
       let maxMagnet = 0, maxShield = 0;
       while (dist / PX_PER_M < depth && f < 60 * 1200) {
@@ -44,9 +44,9 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19 };   
       }
       out[m] = { depth: Math.round(dist / PX_PER_M), types: [...seen].sort(), powers, maxMagnet, maxShield };
     }
-    // wind obstacles (desk fan, ocean current, cold draft, city vent) only spawn before 700 m, so one run misses them about
+    // wind obstacles (desk fan, ocean current, cold draft, city vent, forest breeze) only spawn before 700 m, so one run misses them about
     // 1 time in 10–15 by chance: look again in up to 6 short runs to 760 m before calling it missing
-    for (const m of ['notebook', 'sea', 'dungeon', 'city']) {
+    for (const m of ['notebook', 'sea', 'dungeon', 'city', 'forest']) {
       const types = out[m].types;
       for (let tries = 0; tries < 6 && !types.includes('fan'); tries++) {
         mapId = m; applyMap(); start();
@@ -58,7 +58,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19 };   
     }
     return out;
   }, DEPTH);
-  for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city']) {
+  for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest']) {
     const d = deep[m], full = DEPTH >= 1500;   // rarer obstacle types may not show up in short runs
     check(d.depth >= DEPTH && (!full || d.types.length >= EXPECTED[m]),
       `${m}: reached ${d.depth} m, ${d.types.length} obstacle types (${d.types.join(' ')})` + (d.windRetries ? ` (wind found on extra run ${d.windRetries})` : ''));
@@ -69,7 +69,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19 };   
   // normal runs (3 lives) end in a game over
   const runs = await page.evaluate(() => {
     const out = [];
-    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city']) {
+    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest']) {
       mapId = m; applyMap(); start(); plane.lives = 3; let f = 0;
       while (state !== 'over' && f < 60 * 300) {
         if (f % 45 === 0) { const s = Math.random() < 0.5 ? -1 : 1; press(s, 'sim'); release('sim'); }
@@ -136,7 +136,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19 };   
   // gold stars never spawn less than 50 m apart (power-ups are not stars)
   const starGap = await page.evaluate(() => {
     const out = [];
-    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city']) {
+    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest']) {
       mapId = m; applyMap(); start();
       const ys = new Map();   // each star once, where it first appeared (the magnet moves them)
       for (let f = 0; f < 60 * 400 && dist / PX_PER_M < 2000; f++) {
@@ -179,8 +179,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19 };   
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { found, saved, total: COLLECTION_TOTAL };
   });
-  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 50,
-    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 8 sets`);
+  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 58,
+    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 9 sets`);
   await page.evaluate(() => { state = 'title'; showCard('title'); });
   await page.click('#collBtn'); await wait(150);
   const collOpen = await page.evaluate(() => ({ shown: !$('collCard').hidden, tiles: document.querySelectorAll('.coll-item').length }));
@@ -188,7 +188,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19 };   
   const stillTitle = await page.evaluate(() => state);
   await page.keyboard.press('Escape'); await wait(150);
   const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
-  check(collOpen.shown && collOpen.tiles === 50 && stillTitle === 'title' && closed,
+  check(collOpen.shown && collOpen.tiles === 58 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
   // control tips in the top bar: shown at the start of a run, gone past 100 m and outside a run
@@ -328,10 +328,39 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19 };   
   check(signs.unlocked === 1 && signs.repeats === 0 && signs.seen >= 4 && (signs.seen < 8 || /^(dish|acunit|clock)(\+(dish|acunit|clock))?$/.test(signs.after)),
     `Neon signs collection: one on screen unlocks ${signs.unlocked}, ${signs.seen}/8 seen in a run to 2,500 m, repeats ${signs.repeats}, a sign spawn after all 8 is ${signs.after}`);
 
+  // the Forest birds collection: Drifting Swarm variants in the Forest, each once per run, plain swarms once all 8 have appeared
+  const birds = await page.evaluate(() => {
+    mapId = 'forest'; applyMap(); start(); const seen = new Map();
+    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
+      plane.invuln = 1; update(1 / 60);
+      for (const o of obstacles) if (o.bird) { if (!seen.has(o.bird)) seen.set(o.bird, new Set()); seen.get(o.bird).add(o); }
+    }
+    const repeats = [...seen.values()].filter(x => x.size > 1).length;
+    let after = 'n/a';
+    if (seen.size === 8) { const i = obstacles.length; lastType = ''; spawnFromPool(dist + 900, 0.9, [['bees', 1]]); after = obstacles.slice(i).every(o => !o.bird) ? 'plain swarm' : 'birds'; }
+    gameOver();
+    return { seen: seen.size, repeats, after };
+  });
+  check(birds.repeats === 0 && birds.seen >= 4 && (birds.seen < 8 || birds.after === 'plain swarm'),
+    `Forest birds collection: ${birds.seen}/8 seen in a run to 2,500 m, repeats ${birds.repeats}, a swarm row after all 8 is ${birds.after}`);
+
+  // Forest looks follow the seasons: no snowballs or frosty looks in spring and summer, no bees in winter or at night
+  const seasons = await page.evaluate(() => {
+    mapId = 'forest'; applyMap(); start(); const bad = [];
+    for (const m of [50, 300, 600, 1200, 2000]) for (let k = 0; k < 40; k++) {
+      obstacles.length = 0; lastType = '';
+      spawnFromPool(m * PX_PER_M, 0.5, [[['acorns', 'bees', 'twig', 'husk', 'sunbeam'][k % 5], 1]]);
+      for (const o of obstacles) if (o.look && FOREST_SEASONS[o.look] && !FOREST_SEASONS[o.look].includes(o.season)) bad.push(o.look + '@' + m);
+    }
+    gameOver();
+    return bad;
+  });
+  check(seasons.length === 0, 'Forest looks follow the seasons' + (seasons.length ? ': ' + seasons.slice(0, 5).join(', ') : ''));
+
   // Ranked Score: the best depths of every map added up, on the start and game-over screens
   const ranked = await page.evaluate(() => {
     const keep = { ...bests };
-    Object.assign(bests, { notebook: 800, sea: 260, space: 0, dungeon: 412, city: 0 }); best = bests[mapId];
+    Object.assign(bests, { notebook: 800, sea: 260, space: 0, dungeon: 412, city: 0, forest: 0 }); best = bests[mapId];
     state = 'title'; showCard('title');
     const title = $('menuRanked').textContent;
     mapId = 'space'; applyMap(); start(); dist = 333 * PX_PER_M; gameOver();

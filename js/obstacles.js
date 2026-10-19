@@ -442,6 +442,54 @@ function cityPool(d, y) {
   if (d > 0.3) pool.push(['crane', 1.3]);
   return pool;
 }
+// Forest obstacles (v114): every one reuses a Paper or Ocean obstacle's movement and collision with forest art (draw-forest.js)
+const FOREST_MAKERS = { branches: 'gate', logs: 'erasers', nests: 'blots', trunk: 'protractor', twig: 'pencil', acorns: 'wad',
+                        bees: 'notes', ducks: 'clips', husk: 'starfish', maple: 'scissors', swing: 'compass', snake: 'cutter',
+                        squirrel: 'glue', sunbeam: 'zap', bear: 'paw', puffball: 'mine', breeze: 'fan', updraft: 'bubbles', vines: 'band' };
+// the forest falls through the seasons: spring, summer (150 m), autumn (400 m), winter (800 m), then night (1,500 m)
+const forestSeason = y => { const m = y / PX_PER_M; return m < 150 ? 0 : m < 400 ? 1 : m < 800 ? 2 : m < 1500 ? 3 : 4; };
+// Forest birds collection: Drifting Swarm variants, each at most once per run
+const FOREST_BIRDS = ['robin', 'bluejay', 'kingfisher', 'cardinal', 'hummingbird', 'goldfinch', 'snowyowl', 'magpie'];
+const birdsLeft = () => FOREST_BIRDS.filter(n => !runCollected.has('bird-' + n));
+// each Forest mechanic has one to four looks sharing its hit box; some only appear in certain seasons (FOREST_SEASONS)
+const FOREST_LOOKS = {
+  gate: { branch: ['#7a5030', '#6b4a2a'], log: ['#8a5a32', '#9a6a3a'] },
+  erasers: { loghalf: ['#8a5a32', '#7a5030'], dam: ['#6b4a2a'] },
+  blot: { hornets: ['#c9b48a', '#b8a07a'], pinecone: ['#8a5a32', '#6b4a2a'], thistle: ['#9a6ac8', '#c070c0'] },
+  protractor: { trunk: ['#7a5030', '#6b5a48'], birch: ['#ece6da'], fungus: ['#d08a3a', '#c8a060'] },
+  pencil: { stick: ['#7a5030', '#8a5a32'], frost: ['#6b5a50'] },
+  wad: { acorn: ['#a0703a'], chestnut: ['#7a4a2a'], apple: ['#e0403a', '#8ac040'], snowball: ['#f4f8fc'] },
+  note: { bee: ['#ffc21f'], owl: ['#a0805a', '#8a8a8a'], bat: ['#4a3a5a'] },
+  clips: { duck: ['#3f8a4a', '#c08a4a'], goose: ['#8a8a8a'] },
+  starfish: { husk: ['#8ab040'], seed: ['#c8a46a'], snowflake: ['#e8f4ff'] },
+  scissors: { maple: ['#c8904a', '#e06a3a', '#9ab040'] },
+  compass: { branch: ['#7a5030'], rope: ['#c9a66b'] },
+  cutter: { snake: ['#5f9a3a', '#a08a3a'], woodpecker: ['#d9343a'] },
+  glue: { squirrel: ['#c0703a', '#8a7a6a'], frog: ['#5fae4a', '#8ab040'] },
+  zap: { sunbeam: ['#ffe58a'], frost: ['#bfe8ff'] },
+  paw: { bear: ['#6b4a2a', '#3a3a3a'], fallbranch: ['#7a5030'] },
+  mine: { puffball: ['#e8dcc0'], wasps: ['#e0b040'] },
+  fan: { breeze: ['#ffffff'] },
+  bubbles: { updraft: ['#ffffff'] },
+  band: { web: ['#f5f5ff'], vine: ['#4f8a3a'] }
+};
+// looks tied to the seasons they belong to (0 spring, 1 summer, 2 autumn, 3 winter, 4 night); the rest appear all year
+const FOREST_SEASONS = { snowball: [3, 4], frost: [3, 4], snowflake: [3, 4], bee: [0, 1, 2], bat: [4], sunbeam: [0, 1, 2], apple: [1, 2] };
+function forestPool(d, y) {
+  const pool = [['branches', 3], ['nests', 2], ['twig', 1 + 1.5 * d], ['trunk', 1.4], ['acorns', 1 + d], ['updraft', 1]];
+  if (d > 0.05) pool.push(['vines', 1.2]);
+  if (d > 0.06) pool.push(['bees', 1.4]);
+  if (d > 0.08) pool.push(['husk', 1.2], ['ducks', 1.3]);
+  if (d > 0.1) pool.push(['squirrel', 1.2]);
+  if (d > 0.12) pool.push(['maple', 0.6 + 1.6 * d]);
+  if (d > 0.12 && windAllowed(y)) pool.push(['breeze', 1.1]);
+  if (d > 0.15) pool.push(['snake', 1.3]);
+  if (d > 0.18) pool.push(['puffball', 1.2]);
+  if (d > 0.2) pool.push(['sunbeam', 1.2], ['bear', 1.3]);
+  if (d > 0.22) pool.push(['logs', 1.4]);
+  if (d > 0.3) pool.push(['swing', 1.3]);
+  return pool;
+}
 function seaPool(d, y) {
   const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1]];
   if (d > 0.08) pool.push(['mine', 1.3]);
@@ -479,6 +527,7 @@ function spawnRow(y, d) {
   if (mapId === 'space') return spawnFromPool(y, d, spacePool(d));
   if (mapId === 'dungeon') return spawnFromPool(y, d, dungeonPool(d, y));
   if (mapId === 'city') return spawnFromPool(y, d, cityPool(d, y));
+  if (mapId === 'forest') return spawnFromPool(y, d, forestPool(d, y));
   const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
   if (d > 0.08) pool.push(['clips', 1.4]);
   if (d > 0.12) pool.push(['scissors', 0.6 + 1.6 * d]);
@@ -500,7 +549,7 @@ function spawnFromPool(y, d, pool) {
   for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
   lastType = type;
   const before = obstacles.length;
-  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || type](y, d) || 0;
+  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || FOREST_MAKERS[type] || type](y, d) || 0;
   const rowPal = {}, rowSea = {};    // obstacles of the same kind in one row share a colour
   for (let i = before; i < obstacles.length; i++) {
     const o = obstacles[i];
@@ -559,9 +608,24 @@ function spawnFromPool(y, d, pool) {
       }
       if (looks) [o.look, o.cityCol] = rowSea[o.type];
       if (o.type === 'compass') o.hh = 5;        // the crane boom is a little thicker than a compass leg
+    } else if (mapId === 'forest') {
+      o.forest = true;
+      o.season = forestSeason(o.y);
+      const looks = FOREST_LOOKS[o.type];
+      if (looks && !rowSea[o.type]) {
+        const all = Object.keys(looks), fit = all.filter(l => !FOREST_SEASONS[l] || FOREST_SEASONS[l].includes(o.season));
+        const names = fit.length ? fit : all, look = names[ri(0, names.length - 1)], cols = looks[look];
+        rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
+      }
+      if (looks) [o.look, o.forCol] = rowSea[o.type];
+      if (o.type === 'compass') o.hh = 5;        // a leafy branch is a little thicker than a compass leg
+      if (o.type === 'note') {                   // a forest bird not yet seen this run (each once per run)
+        const left = birdsLeft();
+        if (left.length && Math.random() < 0.5) { o.bird = left[ri(0, left.length - 1)]; runCollected.add('bird-' + o.bird); }
+      }
     }
   }
-  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon'].includes(type)) {
+  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon', 'branches', 'trunk'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
     else if (Math.random() < 0.28) addStar(rand(40, W - 40), py);
