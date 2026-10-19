@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v107** (2026-10-19)
+Current version: **v108** (2026-10-19)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -36,7 +36,7 @@ There are no on-screen steering arrows (removed in v44).
 
 ---
 
-**Control tips** (since v91): for the first 100 m of a run, a small tip shows in the top bar to the left of the sound button, changing every 3 seconds and fading out over the last 10 m. Keyboards: "← → or A D to steer", "Space to pause". Phones and tablets (coarse pointer): "Tap left or right to steer" only (the "Hold for a sharp turn" tip was removed in v95, "Tap ⏸ to pause" in v96) (`HINTS` in `js/ui.js`). The separate "How to play" section stays removed (v44).
+**Control tips** (since v91): for the first 100 m of a run, a tip shows in the top bar (bold 17 px since v108, was 13 px) to the left of the sound button, changing every 3 seconds and fading out over the last 10 m. Keyboards: "← → or A D to steer", "Space to pause". Phones and tablets (coarse pointer): "Tap left or right to steer" only (the "Hold for a sharp turn" tip was removed in v95, "Tap ⏸ to pause" in v96) (`HINTS` in `js/ui.js`). The separate "How to play" section stays removed (v44).
 
 ## 3. Core rules
 

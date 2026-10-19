@@ -113,7 +113,7 @@ body {
 .hud .right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 17px; font-variant-numeric: tabular-nums; }
 .hud .tools { display: flex; gap: 6px; pointer-events: auto; }
 /* control tips for the first 100 m, left of the sound button */
-.hud .hint { align-self: center; max-width: 120px; margin-right: 2px; font-size: 13px; line-height: 1.15; text-align: right; opacity: .9; transition: opacity .6s; pointer-events: none; }
+.hud .hint { align-self: center; max-width: 160px; text-wrap: balance; margin-right: 2px; font-size: 17px; font-weight: 700; line-height: 1.15; text-align: right; opacity: .9; transition: opacity .6s; pointer-events: none; }
 .hud .hint.fade { opacity: 0; }
 .version {
   /* bottom centre, so it never collides with the top bar's buttons */
