@@ -185,16 +185,17 @@ function applyShake() {
 }
 
 // slide the paper layers to match the scroll position; only the transforms change each frame
-let pageNowCol = '', pageNextCol = '';
+let pageNowCol = '', pageNextCol = '', nightNow = -1;
+const NIGHT_FADE_M = 1450;
 function syncPaperLayers() {
   const px = v => Math.round(v * scale * dpr) / dpr;           // whole device pixels keep the lines crisp
   ruling.style.transform = `translate3d(0, ${px(-(dist % PAPER_REPEAT))}px, 0)`;
   const k = pageIndexAt(dist);
   const now = pageColor(k), next = pageColor(k + 1);
-  if (now !== pageNowCol) {
-    pageNow.style.background = pageNowCol = now;
-    world.classList.toggle('map-night', mapId === 'forest' && isDark(now));   // the Forest's pale night trunks
-  }
+  if (now !== pageNowCol) pageNow.style.background = pageNowCol = now;
+  // the Forest's moonlit trunks fade in as night falls, from 1,450 to 1,550 m (the night colour starts at 1,500 m)
+  const night = mapId === 'forest' ? Math.round(clamp((dist / PX_PER_M - NIGHT_FADE_M) / 100, 0, 1) * 50) / 50 : 0;
+  if (night !== nightNow) ruling.style.setProperty('--night', nightNow = night);
   if (next !== pageNextCol) pageNext.style.background = pageNextCol = next;
   const boundary = pageTop(k + 1) - dist;                         // where the next colour starts on screen
   pageNext.style.transform = `translate3d(0, ${px(Math.min(boundary, H + 10))}px, 0)`;

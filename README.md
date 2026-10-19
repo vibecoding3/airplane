@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v116** (2026-10-20)
+Current version: **v117** (2026-10-20)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -162,7 +162,7 @@ A rainy city at night, cartoon and playful like the other maps. The plane drops 
 ### 4.6 Forest (since v114; internal id `forest`)
 The plane sets off from a bird's nest at the top of an endless forest and falls down through the seasons: spring, summer, autumn, winter, then night. Cartoon and playful, nature only (the Dungeon already has the magic, the glowing mushrooms and the caverns). Obstacles are wood, leaves, nuts and animals with a dark brown outline; their leaves follow the season they are in (fresh green, deep green, orange, snow, dark green at night).
 - **Background colour by season:** spring greens (0–150 m), summer greens (150–400 m), autumn oranges (400–800 m), winter blue-greys (800–1,500 m), then a dark teal night (1,500 m +) (`FOREST` in `js/maps.js`; `forestSeason` in `js/obstacles.js` gives the season of a depth).
-- **Background layer** (since v116; faint, evenly spaced trunks before): tree trunks at two depths, pale thin ones far away and darker, wider ones nearer with bark grooves and knots, plus leafy branches reaching out between them. All faint silhouettes in one CSS layer (like the sea bubbles), 750 units tall so it does not repeat often. At night (dark pages) the same picture turns pale and moonlit so it still shows (`map-night` class, set in `syncPaperLayers`).
+- **Background layer** (since v116; faint, evenly spaced trunks before): tree trunks at two depths, pale thin ones far away and darker, wider ones nearer with bark grooves and knots, plus leafy branches reaching out between them. All faint silhouettes in one CSS layer (like the sea bubbles), 750 units tall so it does not repeat often. At night the same picture, pale and moonlit, fades in over it so it still shows: since v117 it fades in gradually from 1,450 to 1,550 m (in v116 it switched all at once) (a `::after` layer whose opacity is `--night`, set in `syncPaperLayers`).
 - **The start:** blue sky with the sun and clouds over two rows of tree crowns, and the top branch with a nest of two blue eggs and a sleepy owl that blinks now and then. It slides up out of view within the first ~35 m; the top bar has no background fade while it shows.
 - **Drifting specks by season:** blossom petals, floating pollen, falling autumn leaves, snow, then twinkling fireflies. All faint, so they never hide an obstacle.
 - **Background scenery** (faded, never collides):
