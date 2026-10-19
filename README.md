@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v110** (2026-10-19)
+Current version: **v111** (2026-10-19)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -156,7 +156,7 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.4. For 
 | Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams / goblin barricade |
 | Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders / tombstones |
 | Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern |
-| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / Frieren's staff / Fern's staff |
+| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / crescent staff / twisted staff |
 | Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball / potion flask; magic rings |
 | Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps / witch hats / goblins |
 | Conveyor | Paper clips | — | Starlink train | Daggers / arrows / keys |
@@ -265,7 +265,7 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Flamethrower (v81) | An iron nozzle in the wall with a flickering blue pilot light; a jet of flame shoots out, holds, then dies back. Its own obstacle (own spawn chance), always this look | Cutter | ~120 m |
 | Magic rings (v86) | Cartoon rings after a sheet of fantasy rings, thrown up the shaft spinning and bouncing off the walls. 9 designs: emerald (gold, big green gem), sapphire (silver, blue oval), ruby (gold, red gem with two side gems), crystal (silver, long blue crystal), amethyst (dark, a row of purple gems), amber (silver, orange hexagon), skull (dark, skull with purple eyes), zigzag (gold, engraved), leaf (silver, green leaves). Its own obstacle; since v87 its spawn weight is 3 (was 1.2), so rings are about 10% of rows, as common as the stone ledges, about 5–6 rings per run to 500 m | Paper wad | ~65 m |
 
-**Looks and colours** (since v73): every Dungeon obstacle comes in two to five different objects that share its mechanic and hit box, each in a few colours (64 looks in all; 12 Halloween and goblin looks added in v80, two anime staffs in v82; `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
+**Looks and colours** (since v73): every Dungeon obstacle comes in two to five different objects that share its mechanic and hit box, each in a few colours (64 looks in all; 12 Halloween and goblin looks added in v80, two mage staffs in v82; `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
 
 | Obstacle | Looks |
 |---|---|
@@ -273,7 +273,7 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Closing Jaws | Spiked stone crushers, spiked riveted iron doors, wooden battering rams with an iron cap, goblin barricades of sharpened stakes |
 | Static Hazards | Spiked iron balls (iron, rust, bronze), bubbling cauldrons (green, purple, orange brew), cracked boulders, "RIP" tombstones |
 | Wall Bulge | Rock outcrops, giant round shields (red, blue, green, gold) with an iron rim and boss, huge barrel ends, a giant jack-o'-lantern with its glowing face turned to the shaft |
-| Bouncing Slider | Wooden planks, long bones, wizard staffs with a glowing gem (purple, blue, red), witch's brooms, and since v82 cartoon staffs inspired by *Frieren: Beyond Journey's End*: Frieren's (dark red shaft, brass crescent around a red gem, red ribbon; since v85 the head is twice as big, with its own round hit area of radius 11 so the larger head stays fair while the shaft keeps the thin bar) and Fern's (crooked wood with a little zigzag in the middle since v85, purple wraps, silver bands, a red crystal on a string). Reference pictures go in `ref/`, which git ignores |
+| Bouncing Slider | Wooden planks, long bones, wizard staffs with a glowing gem (purple, blue, red), witch's brooms, and since v82 two mage staffs: the crescent staff (night-blue shaft, silver crescent around a blue gem, blue cloth wrap; since v85 the head is twice as big, with its own round hit area of radius 11 so the larger head stays fair while the shaft keeps the thin bar) and the twisted staff (crooked wood with a little zigzag in the middle since v85, green wraps, silver bands). Until v110 they copied two anime characters' staffs (names, colours and a hanging red crystal); v111 made them original before the Android release |
 | Rising Projectile | Grinning skulls, jack-o'-lanterns, slime balls with a face (green, purple, blue), bubbling potion flasks (purple, green, pink) |
 | Drifting Swarm | Ghosts, flying spellbooks (red, green, purple, blue covers), will-o'-wisps (blue, green, violet), flying witch hats (purple, orange, green band), grinning goblins |
 | Wall Piston | Spear, trident, sword blade, nail-studded goblin club |
@@ -369,8 +369,8 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
 
   | Set | Items |
   |---|---|
-  | Frieren | Frieren's staff, Fern's staff (Dungeon, Bouncing Slider looks) |
-  | Rings of Power | The 9 Dungeon magic rings: emerald, sapphire, ruby, crystal, amethyst, amber, skull, zigzag, leaf |
+  | Mage staffs | Crescent staff, twisted staff (Dungeon, Bouncing Slider looks). Called "Frieren" until v110; the save ids `staff-frieren` and `staff-fern` were kept so found items stay found (`COLLECTIBLE_LOOKS` in `js/obstacles.js`) |
+  | Enchanted rings | The 9 Dungeon magic rings: emerald, sapphire, ruby, crystal, amethyst, amber, skull, zigzag, leaf (called "Rings of Power" until v110) |
   | Origami (v102) | Six folded-paper figures on the Paper map: crane, frog, boat, star, fox, butterfly (Drifting Swarm variants of the sticky notes, faceted in three paper tones). In a sticky-note row each note has a 50% chance to be an origami not yet seen this run; once all 6 have appeared the notes are plain sticky notes again |
   | Seashells (v103) | Six shells in the Ocean: conch, scallop, nautilus, cowrie, sand dollar, pearl oyster (Static Hazards variants of the sea urchins, scaled to the urchin's hit circle). Each urchin has a 40% chance to be a shell not yet seen this run; once all 6 have appeared the urchins are plain again |
   | Legendary fish (v106) | Five fish in the Ocean: golden fish, narwhal, coelacanth, giant squid eye, ghost shark (Spinning Drifter variants of the starfish: they spin and drift like a starfish and are drawn inside its hit circle). Each starfish has a 50% chance to be a fish not yet seen this run; once all 5 have appeared the starfish are plain again. Unlike the background fish, these collide |
@@ -818,9 +818,9 @@ Ideas for new Collections sets (see Collections in section 7). The best fit is o
 - **Space · Space probes (5):** Sputnik, Voyager, Hubble, the Apollo capsule and a Mars rover (Bouncing Slider, like the GPS satellite).
 - ✅ **Built in v105.** **Dungeon · Legendary swords (6):** six original swords (flame, ice, crystal, curved, rune, bone), scissoring like the crossed swords (Spinning Blades).
 
-### 17.3 More anime or fantasy sets
+### 17.3 More fantasy sets
 
-- Built the same way as the Frieren staffs and the rings, for example another character's staff or weapon. Reference pictures go in `ref/` (which git ignores) and are drawn in the game's cartoon style.
+- Built the same way as the mage staffs and the rings, for example another staff or weapon. Designs must be original: no characters, names or recognizable designs from anime, films or games (the game is headed for Google Play; see v111). Reference pictures can still go in `ref/` (which git ignores) for general inspiration, drawn in the game's cartoon style.
 
 ### 17.4 Suggested next three
 

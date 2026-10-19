@@ -237,28 +237,24 @@ function paintSlider(o) {
     for (const x of [-L + 5, L - 5]) for (const y of [-2.2, 2.2]) { ctx.moveTo(x + 4.3, y); ctx.arc(x, y, 4.3, 0, Math.PI * 2); }
     dunStroke(1.3);
     ctx.fillStyle = dunLight(0.4); ctx.fillRect(-L + 12, -2.5, o.len - 24, 1.5);
-  } else if (look === 'frieren') {               // a cartoon staff inspired by Frieren's (Frieren: Beyond Journey's End)
-    const BRASS = '#c9a24a', HR = FRIEREN_HEAD, hx = L - HR;   // a big head, matching its own round hit area
-    ctx.fillStyle = col; ctx.beginPath(); ctx.rect(-L + 5, -3.6, o.len - 2 * HR - 14, 7.2); ctx.fill(); dunStroke(1.4);   // dark red shaft
+  } else if (look === 'crescent') {              // a mage's staff: a night-blue shaft, a silver crescent around a blue gem
+    const SILVER = '#cfd5df', HR = CRESCENT_HEAD, hx = L - HR;   // a big head, matching its own round hit area
+    ctx.fillStyle = col; ctx.beginPath(); ctx.rect(-L + 5, -3.6, o.len - 2 * HR - 14, 7.2); ctx.fill(); dunStroke(1.4);   // night-blue shaft
     ctx.fillStyle = dunLight(0.25); ctx.fillRect(-L + 6, -2.8, o.len - 2 * HR - 16, 1.8);
-    ctx.fillStyle = BRASS; ctx.beginPath(); roundRectPath(-L, -4.6, 8, 9.2, 2.5); ctx.fill(); dunStroke(1.3);      // butt cap
-    ctx.fillStyle = '#a0302a'; ctx.beginPath(); ctx.rect(hx - HR - 12, -4.4, 9, 8.8); ctx.fill(); dunStroke(1.2);   // red cloth wrap
-    ctx.strokeStyle = 'rgba(60,10,10,.6)'; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.fillStyle = SILVER; ctx.beginPath(); roundRectPath(-L, -4.6, 8, 9.2, 2.5); ctx.fill(); dunStroke(1.3);     // butt cap
+    ctx.fillStyle = '#4a72c4'; ctx.beginPath(); ctx.rect(hx - HR - 12, -4.4, 9, 8.8); ctx.fill(); dunStroke(1.2);   // blue cloth wrap
+    ctx.strokeStyle = 'rgba(10,20,60,.6)'; ctx.lineWidth = 1; ctx.beginPath();
     for (const x of [hx - HR - 10, hx - HR - 7]) { ctx.moveTo(x, -4.4); ctx.lineTo(x + 2.5, 4.4); } ctx.stroke();
-    ctx.fillStyle = BRASS; ctx.beginPath(); roundRectPath(hx - HR - 3.5, -4.8, 4.5, 9.6, 1.2); ctx.fill(); dunStroke(1.2);   // collar
-    ctx.strokeStyle = '#a0302a'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';                                   // ribbon and its red crystal
-    ctx.beginPath(); ctx.moveTo(hx - HR - 9, 3.5); ctx.quadraticCurveTo(hx - HR - 16, 7, hx - HR - 26, 5.4); ctx.stroke();
-    const cx = hx - HR - 26;
-    ctx.fillStyle = '#e03a3a'; ctx.beginPath(); ctx.moveTo(cx, 3.8); ctx.lineTo(cx - 4, 5.4); ctx.lineTo(cx, 7); ctx.lineTo(cx + 1.8, 5.4); ctx.closePath(); ctx.fill(); dunStroke(0.8);
-    ctx.strokeStyle = DUN_LINE; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(hx, 0, HR - 3, 0.85, Math.PI * 2 - 0.85); ctx.stroke();   // brass crescent
-    ctx.strokeStyle = BRASS; ctx.lineWidth = 4.6; ctx.stroke();
+    ctx.fillStyle = SILVER; ctx.beginPath(); roundRectPath(hx - HR - 3.5, -4.8, 4.5, 9.6, 1.2); ctx.fill(); dunStroke(1.2);  // collar
+    ctx.strokeStyle = DUN_LINE; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(hx, 0, HR - 3, 0.85, Math.PI * 2 - 0.85); ctx.stroke();   // silver crescent
+    ctx.strokeStyle = SILVER; ctx.lineWidth = 4.6; ctx.stroke();
     ctx.strokeStyle = dunLight(0.45); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(hx, 0, HR - 3.6, 1.6, 3.6); ctx.stroke();
-    ctx.fillStyle = BRASS; ctx.beginPath(); ctx.arc(hx, 0, 6.6, 0, Math.PI * 2); ctx.fill(); dunStroke(1.3);  // the ring and the red gem
-    ctx.fillStyle = '#c8202a'; ctx.beginPath(); ctx.arc(hx, 0, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = 'rgba(120,10,20,.5)'; ctx.beginPath(); ctx.arc(hx + 1.2, 1.2, 3.4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = SILVER; ctx.beginPath(); ctx.arc(hx, 0, 6.6, 0, Math.PI * 2); ctx.fill(); dunStroke(1.3);  // the ring and the blue gem
+    ctx.fillStyle = '#2fa8e0'; ctx.beginPath(); ctx.arc(hx, 0, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(10,60,120,.5)'; ctx.beginPath(); ctx.arc(hx + 1.2, 1.2, 3.4, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = dunLight(0.85); ctx.beginPath(); ctx.arc(hx - 1.8, -1.8, 1.6, 0, Math.PI * 2); ctx.fill();
-  } else if (look === 'fern') {                  // a cartoon staff inspired by Fern's: crooked wood, purple wraps, silver bands
-    const SILVER = '#c4bfae', PURPLE = '#8a4fc2';
+  } else if (look === 'twisted') {               // a crooked wooden staff: green wraps and silver bands
+    const SILVER = '#c4bfae', GREEN = '#4f9a4a';
     const pts = [[-L, 0.8], [-L * 0.45, -1], [-L * 0.02, 1.2], [L * 0.08, -1.6], [L * 0.16, 1.6], [L * 0.24, -1.4], [L * 0.32, 0.8], [L - 3, 0.6]];   // a little zigzag in the middle
     const crook = () => { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); };
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
@@ -266,7 +262,7 @@ function paintSlider(o) {
     crook(); ctx.strokeStyle = col; ctx.lineWidth = 7; ctx.stroke();
     ctx.save(); ctx.translate(0, -1.3); crook(); ctx.strokeStyle = dunLight(0.25); ctx.lineWidth = 1.2; ctx.stroke(); ctx.restore();
     const yAt = x => { for (let i = 1; i < pts.length; i++) if (x <= pts[i][0]) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); } return 0; };
-    ctx.strokeStyle = PURPLE; ctx.lineWidth = 3.2; ctx.beginPath();                                            // purple wraps at both ends
+    ctx.strokeStyle = GREEN; ctx.lineWidth = 3.2; ctx.beginPath();                                             // green wraps at both ends
     for (let x = -L + 4; x < -L * 0.25; x += 7) { const y = yAt(x); ctx.moveTo(x - 2, y - 3.4); ctx.lineTo(x + 2, y + 3.4); }
     for (let x = L * 0.56; x < L - 6; x += 7) { const y = yAt(x); ctx.moveTo(x - 2, y - 3.4); ctx.lineTo(x + 2, y + 3.4); }
     ctx.stroke();
@@ -275,8 +271,6 @@ function paintSlider(o) {
       ctx.fillStyle = SILVER; ctx.beginPath(); roundRectPath(x - w / 2, y - hh, w, hh * 2, 1.2); ctx.fill(); dunStroke(1.1);
       if (w > 5) { ctx.strokeStyle = 'rgba(80,70,50,.45)'; ctx.lineWidth = 0.9; ctx.beginPath(); for (const k of [-0.25, 0.25]) { ctx.moveTo(x + w * k, y - hh); ctx.lineTo(x + w * k, y + hh); } ctx.stroke(); }
     }
-    ctx.strokeStyle = PURPLE; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L * 0.62, yAt(L * 0.62) + 2); ctx.lineTo(L * 0.54, 5); ctx.stroke();   // the string
-    ctx.fillStyle = '#e03a3a'; ctx.beginPath(); ctx.moveTo(L * 0.54, 3.6); ctx.lineTo(L * 0.54 - 1.6, 5.2); ctx.lineTo(L * 0.54, 6.4); ctx.lineTo(L * 0.54 + 1.6, 5.2); ctx.closePath(); ctx.fill(); dunStroke(0.8);
   } else if (look === 'broom') {                 // a witch's broomstick: a knobbly handle and a bundle of straw
     ctx.fillStyle = '#6b4a2a'; ctx.beginPath(); roundRectPath(-L, -4, o.len - 30, 8, 4); ctx.fill(); dunStroke(1.2);
     ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(L - 36, -4.5); ctx.lineTo(L, -6.5); ctx.lineTo(L, 6.5); ctx.lineTo(L - 36, 4.5); ctx.closePath(); ctx.fill(); dunStroke(1.2);
@@ -309,7 +303,7 @@ function paintSlider(o) {
   }
 }
 function drawPlank(o, sy) {
-  // 30 tall: room for the big head of Frieren's staff
+  // 30 tall: room for the big head of the crescent staff
   blit(ownSprite(o, 'spr', o.len + 8, 30, o.len / 2 + 4, 15, () => paintSlider(o)), o.x, sy, o.a);
 }
 

@@ -166,12 +166,13 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(flame.inPool && flame.type === 'cutter' && flame.look === 'flamethrower',
     `Dungeon flamethrower: in the pool ${flame.inPool}, spawns as ${flame.type}/${flame.look}`);
 
-  // Collections: a ring and Frieren's staff seen on screen during a Dungeon run unlock (and are saved); off screen they don't
+  // Collections: a ring and the crescent staff seen on screen during a Dungeon run unlock (and are saved); off screen they don't.
+  // The crescent staff keeps its pre-v111 save id, staff-frieren, so items found before the rename stay found.
   const coll = await page.evaluate(() => {
     const keep = new Set(collectionFound); collectionFound.clear();
     mapId = 'dungeon'; applyMap(); start(); obstacles.length = 0; pickups.length = 0; nextRowY = 1e12;
     const add = (pool, y, look, col) => { lastType = ''; const i = obstacles.length; spawnFromPool(dist + y, 0.5, [[pool, 1]]); obstacles[i].look = look; obstacles[i].dunCol = col; obstacles[i].active = false; obstacles.length = i + 1; };
-    add('rings', 300, 'ring', 'ruby'); add('plank', 500, 'frieren', '#8a2a2a'); add('rings', H + 200, 'ring', 'amber');   // the last one is below the screen
+    add('rings', 300, 'ring', 'ruby'); add('plank', 500, 'crescent', '#2f4a8a'); add('rings', H + 200, 'ring', 'amber');   // the last one is below the screen
     render();
     const found = [...collectionFound].sort().join(','), saved = JSON.parse(store.get('nosedive-collection')).length;
     gameOver();
@@ -207,7 +208,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
     for (let f = 0; f < 60 * 700 && dist / PX_PER_M < 1800; f++) {
       plane.invuln = 1; update(1 / 60);
       for (const o of obstacles) {
-        const id = o.look === 'ring' ? 'ring-' + o.dunCol : (o.look === 'frieren' || o.look === 'fern') ? 'staff-' + o.look : null;
+        const id = o.look === 'ring' ? 'ring-' + o.dunCol : COLLECTIBLE_LOOKS[o.look] || null;
         if (id) { if (!seen.has(id)) seen.set(id, new Set()); seen.get(id).add(o); }
       }
     }
@@ -365,13 +366,13 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
   check(rings.inPool && rings.type === 'wad' && rings.look === 'ring' && rings.known,
     `Dungeon rings: in the pool ${rings.inPool}, spawns as ${rings.type}/${rings.look} (${rings.design})`);
 
-  // Frieren's staff: its big head has its own round hit area at the +x end of the slider
+  // the crescent staff: its big head has its own round hit area at the +x end of the slider
   const staff = await page.evaluate(() => {
     mapId = 'dungeon'; applyMap(); start();
     let o = null;
     for (let i = 0; i < 400 && !o; i++) {
       obstacles.length = 0; lastType = ''; spawnFromPool(dist + 600, 0.5, [['plank', 1]]);
-      if (obstacles[0].look === 'frieren') o = obstacles[0];
+      if (obstacles[0].look === 'crescent') o = obstacles[0];
     }
     if (!o) { gameOver(); return { found: false }; }
     o.a = 0; o.x = W / 2;
@@ -382,7 +383,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18 };   // obstacl
     return { found: true, n: sh.length, headR: o.headR, hit, miss };
   });
   check(staff.found && staff.n === 2 && staff.headR === 11 && staff.hit && !staff.miss,
-    `Frieren's staff head hit area: found ${staff.found}, shapes ${staff.n}, radius ${staff.headR}, head hits ${staff.hit}, beside the shaft hits ${staff.miss}`);
+    `crescent staff head hit area: found ${staff.found}, shapes ${staff.n}, radius ${staff.headR}, head hits ${staff.hit}, beside the shaft hits ${staff.miss}`);
 
   // drifting into an edge, then one press the other way turns the plane at once (not straight down)
   const edge = await page.evaluate(() => {

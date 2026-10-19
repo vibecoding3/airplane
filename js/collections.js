@@ -5,11 +5,12 @@
 // are saved per device; locked ones show as a black silhouette in the menu. Completing a set gives no reward.
 const ringName = d => d[0].toUpperCase() + d.slice(1) + ' ring';
 const COLLECTIONS = [
-  { id: 'frieren', name: 'Frieren', map: 'Dungeon', bg: '#3d3631', items: [
-    { id: 'staff-frieren', name: "Frieren's staff", slider: 'frieren' },
-    { id: 'staff-fern', name: "Fern's staff", slider: 'fern' }
+  // the staffs keep their pre-v111 save ids (COLLECTIBLE_LOOKS in obstacles.js), so items already found stay found
+  { id: 'staffs', name: 'Mage staffs', map: 'Dungeon', bg: '#3d3631', items: [
+    { id: COLLECTIBLE_LOOKS.crescent, name: 'Crescent staff', slider: 'crescent' },
+    { id: COLLECTIBLE_LOOKS.twisted, name: 'Twisted staff', slider: 'twisted' }
   ] },
-  { id: 'rings', name: 'Rings of Power', map: 'Dungeon', bg: '#3d3631', items: DUNGEON_SOLO.rings.cols.map(d => ({ id: 'ring-' + d, name: ringName(d), ring: d })) },
+  { id: 'rings', name: 'Enchanted rings', map: 'Dungeon', bg: '#3d3631', items: DUNGEON_SOLO.rings.cols.map(d => ({ id: 'ring-' + d, name: ringName(d), ring: d })) },
   { id: 'swords', name: 'Legendary swords', map: 'Dungeon', bg: '#3d3631',
     items: SWORDS.map(n => ({ id: 'sword-' + n, name: { flame: 'Flame sword', frost: 'Frost blade', crystal: 'Crystal sword', scimitar: 'Desert scimitar', rune: 'Rune blade', bone: 'Bone sword' }[n], sword: n })) },
   { id: 'origami', name: 'Origami', map: 'Paper', bg: '#fbf9f1',
@@ -28,7 +29,7 @@ try { collectionFound = new Set(JSON.parse(store.get('nosedive-collection') || '
 // called for every Dungeon obstacle drawn during a run (render.js)
 function noteFound(o, sy) {
   if (state !== 'play' || sy < 0 || sy > H) return;
-  const id = o.type === 'pencil' && (o.look === 'frieren' || o.look === 'fern') ? 'staff-' + o.look
+  const id = o.type === 'pencil' && COLLECTIBLE_LOOKS[o.look] ? COLLECTIBLE_LOOKS[o.look]
            : o.look === 'ring' ? 'ring-' + o.dunCol
            : o.look === 'planet' ? 'planet-' + o.planet
            : o.origami ? 'origami-' + o.origami

@@ -26,7 +26,7 @@ function computeShapes(o) {
     }
     case 'pencil': {
       const out = [{ k: 'b', x: o.x, y: o.y, hw: o.len / 2, hh: o.hh || 6.5, a: o.a }];
-      if (o.headR) {                 // a big head at the +x end (Frieren's staff) gets its own round hit area
+      if (o.headR) {                 // a big head at the +x end (the crescent staff) gets its own round hit area
         const d = o.len / 2 - o.headR;
         out.push({ k: 'c', x: o.x + Math.cos(o.a) * d, y: o.y + Math.sin(o.a) * d, r: o.headR });
       }

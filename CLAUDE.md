@@ -27,6 +27,7 @@ Tools setup (once): `cd tools && npm install`. Chrome is auto-detected (or set `
 - Collectibles are obstacles with a specific variant which only appear once per run. When all collectibles of an obstacle have appeared, the obstacle still appears with the regular variants (rings become skulls, pumpkins, slimes or potions; planets become moon edges; staffs leave the slider's regular looks). New collection sets must follow this.
 - Daily quests are on hold (decided 2026-10-19): don't build or start the quest system until the player asks; README section 16 keeps the ideas.
 - No Sky dive / Skyscraper / single-journey map — dropped for good. New maps reuse the 20 mechanics in README section 6 with new art.
+- Original designs only (decided 2026-10-19, v111, for the Google Play release): no names, characters or recognizable designs from anime, films, games or other brands. The former Frieren and Rings of Power sets are now "Mage staffs" and "Enchanted rings". Never change a collection item's save id (e.g. `staff-frieren`): players' found items are stored under it.
 
 ## Style
 Talk to the user in short, plain language: what changed, what was verified, what wasn't.

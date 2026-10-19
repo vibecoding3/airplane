@@ -342,10 +342,11 @@ const swordsLeft = () => SWORDS.filter(n => !runCollected.has('sword-' + n));
 // Legendary fish collection (Ocean map): starfish variants, each at most once per run
 const LEGEND_FISH = ['golden', 'narwhal', 'coelacanth', 'squideye', 'ghostshark'];
 const fishLeft = () => LEGEND_FISH.filter(n => !runCollected.has('fish-' + n));
-// collectibles appear at most once per run: the ring designs and the two anime staffs not yet seen this run
+// collectibles appear at most once per run: the ring designs and the two mage staffs not yet seen this run
 const ringsLeft = () => DUNGEON_SOLO.rings.cols.filter(d => !runCollected.has('ring-' + d));
-const COLLECTIBLE_LOOKS = { frieren: 'staff-frieren', fern: 'staff-fern' };
-const FRIEREN_HEAD = 11;          // radius of the head of Frieren's staff (drawn in draw-dungeon.js, hit area in physics.js)
+// staff look → collection id; the ids are older than the looks' names (v111) and must not change, saves use them
+const COLLECTIBLE_LOOKS = { crescent: 'staff-frieren', twisted: 'staff-fern' };
+const CRESCENT_HEAD = 11;         // radius of the head of the crescent staff (drawn in draw-dungeon.js, hit area in physics.js)
 const DUNGEON_SOLO = { flamethrower: { look: 'flamethrower', cols: ['#4a4f58', '#5e4a3a'] },
   // magic rings thrown up the shaft (Rising Projectile, v86); each colour entry is a ring design (RING_DESIGNS in draw-dungeon.js)
   rings: { look: 'ring', cols: ['emerald', 'sapphire', 'ruby', 'crystal', 'amethyst', 'amber', 'skull', 'zigzag', 'leaf'] } };
@@ -356,7 +357,7 @@ const DUNGEON_LOOKS = {
   erasers: { crusher: ['#9a958c', '#8f8476', '#a39a86'], irondoor: ['#4f555e', '#5e4a3a'], ram: ['#8a5a32', '#6b4a2a'], barricade: ['#8a5a32', '#6b4a2a'] },
   blot: { spikeball: ['#5b6068', '#7a5a44', '#8a6a3a'], cauldron: ['#5fd16a', '#b77cf0', '#ff7a3a'], boulder: ['#8f877a', '#7f8288', '#93806a'], tombstone: ['#8f8a84', '#7a7f86'] },
   protractor: { rock: ['#8f877a', '#7f8288', '#93806a'], shield: ['#a0302a', '#2f5fa8', '#2f7a44', '#c79a2a'], barrel: ['#8a5a32', '#6b4a2a'], pumpkin: ['#f28c28', '#e8a33a'] },
-  pencil: { plank: ['#a06a3a', '#8a5a32', '#b07c48'], bone: ['#efe6d0', '#e0d6bc'], staff: ['#b77cf0', '#4ab8ff', '#ff5a5a'], broom: ['#d9b25a', '#c99a3a'], frieren: ['#8a2a2a'], fern: ['#8a5a32'] },
+  pencil: { plank: ['#a06a3a', '#8a5a32', '#b07c48'], bone: ['#efe6d0', '#e0d6bc'], staff: ['#b77cf0', '#4ab8ff', '#ff5a5a'], broom: ['#d9b25a', '#c99a3a'], crescent: ['#2f4a8a'], twisted: ['#8a5a32'] },
   wad: { skull: ['#efe6d0', '#e6dcc0', '#f4efe2'], pumpkin: ['#f28c28', '#e8a33a'], slime: ['#5fd16a', '#b77cf0', '#4ab8ff'], potion: ['#b77cf0', '#5fd16a', '#ff5a7a'] },
   note: { ghost: ['#eef2ff', '#dff7e6', '#e2ecff'], book: ['#a0302a', '#2f6b3a', '#5a2f8a', '#2f4f8a'], wisp: ['#7fd8ff', '#9dffb8', '#c79cff'], witchhat: ['#8a4fc2', '#f28c28', '#3f8f5a'], goblin: ['#6fae4a', '#8ab84a', '#5a9a6a'] },
   cutter: { spear: ['#8f877a', '#9a958c', '#7f8288'], trident: ['#8f877a', '#7f8288'], blade: ['#9a958c', '#8f8476'], club: ['#8f877a', '#7f8288'] },
@@ -488,7 +489,7 @@ function spawnFromPool(y, d, pool) {
         rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
       }
       if (looks) [o.look, o.dunCol] = rowSea[o.type];
-      if (o.look === 'frieren') o.headR = FRIEREN_HEAD;   // its big crescent head reaches past the 13-unit slider bar
+      if (o.look === 'crescent') o.headR = CRESCENT_HEAD;   // its big crescent head reaches past the 13-unit slider bar
       if (o.type === 'compass') o.hh = 7;        // the fire bar's flames are thicker than a compass leg
       if (o.type === 'scissors') {               // a pair of legendary swords not yet seen this run (each once per run)
         const left = swordsLeft();
