@@ -402,6 +402,8 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
   const collButtons = await page.evaluate(() => [...document.querySelectorAll('.coll-open')].map(b => b.closest('.menu').id).join(','));
   await page.click('#overMenuBtn'); await wait(150);
   const toMenu = await page.evaluate(() => state === 'title' && !$('titleCard').hidden && $('overCard').hidden && obstacles.length === 0);
+  const overTiles = await page.evaluate(() => document.querySelectorAll('#overCard .map-tile').length);
+  check(overTiles === 0, 'map selection only on the main menu: ' + overTiles + ' map tiles on the game-over screen');
   await page.click('#collBtn'); await wait(150);
   const fromMenu = await page.evaluate(() => !$('collCard').hidden);
   await page.click('#collBack'); await wait(150);

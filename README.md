@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v118** (2026-10-20)
+Current version: **v119** (2026-10-20)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -11,7 +11,7 @@ Repository: https://github.com/vibecoding3/airplane
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
 - **Files:** `index.html`, `style.css` and 23 plain script files in `js/` (about 7,900 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
-- **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, the map tiles, Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
+- **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
@@ -54,7 +54,7 @@ There are no on-screen steering arrows (removed in v44).
 | Fast-fall safety | At high speed each frame is split into sub-steps, so the plane can't skip through thin obstacles |
 | Best score | Saved per device and per map (since v49; the old single best went to Paper). During a run, a gold dashed line labelled "Your best · N m" marks the record depth, so you can see it coming; passing it pops "New best!" with a short fanfare |
 | Ranked Score | Since v104: the best depth of every map added up (a map not played yet counts as 0), for example Paper 800 + Ocean 260 + Space 0 + Dungeon 412 + Neon City 0 + Forest 0 = 1,472. Shown as "Ranked" on the start screen (next to Best and the stars) and on the game-over screen (next to Best, so a new record shows straight away) (`rankedScore` in `js/state.js`) |
-| Medals | Each map has bronze / silver / gold medals for reaching 250 / 750 / 1,500 m. They show as three coins on the map tiles (start and game-over screens), lit once earned. The first time a run reaches a medal depth on that map, "Bronze medal!" (or Silver / Gold) pops up with a fanfare |
+| Medals | Each map has bronze / silver / gold medals for reaching 250 / 750 / 1,500 m. They show as three coins on the map tiles on the start screen, lit once earned. The first time a run reaches a medal depth on that map, "Bronze medal!" (or Silver / Gold) pops up with a fanfare |
 | Milestones | Every 100 m: "100 m!" pops up, the screen flashes white for a moment, the depth counter bounces and a two-note chime plays. Every 500 m it is bigger: a gold flash, a larger gold "500 m!", a burst of coloured sparks, a bigger bounce and a four-note arpeggio. Flashes and bounces are skipped when the device asks for reduced motion |
 
 ### Plane states
@@ -66,7 +66,7 @@ There are no on-screen steering arrows (removed in v44).
 
 ## 4. Maps
 
-Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a notebook page; Ocean: the surface with waves and a paper boat; Space: a big ringed planet and its moon; Dungeon: a stone archway between two torches); options were drawn as sheets in `ref/map-icons/` to choose from. Neon City's tile (v113) is a night skyline with neon signs; Forest's (v114) shows autumn, summer and spring trees under a blue sky. The map is chosen with six picture tiles in two rows of three (since v114; one row of five in v113), **Paper**, **Ocean**, **Space**, **Dungeon**, **Neon City** and **Forest**, on the start screen and on the game-over screen (so you can switch between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
+Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a notebook page; Ocean: the surface with waves and a paper boat; Space: a big ringed planet and its moon; Dungeon: a stone archway between two torches); options were drawn as sheets in `ref/map-icons/` to choose from. Neon City's tile (v113) is a night skyline with neon signs; Forest's (v114) shows autumn, summer and spring trees under a blue sky. The map is chosen with six picture tiles in two rows of three (since v114; one row of five in v113), **Paper**, **Ocean**, **Space**, **Dungeon**, **Neon City** and **Forest**, on the start screen only (since v119; the game-over screen had them too until v118, so a map could be switched between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
 
 ### 4.1 Paper
 - **Background:** ruled notebook paper with a red margin and punched holes.
@@ -494,7 +494,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Sound on/off | Top bar (speaker icon, crossed out when muted) | Mutes sound effects and music together. Both are generated in code (Web Audio), with no audio files |
 | Pause / Resume | Space bar, Esc (P no longer pauses since v67); the phone Back button in the Android app. The top bar's pause button was removed in v118 | Also pauses automatically when the tab is hidden or the window loses focus |
 | Exit run | Pause menu, under Resume (since v71) | Ends the run and goes straight to the start menu. The run keeps what it earned, like a crash: a new best depth, its stars, and its metres as XP |
-| Map | Start and game-over screens | Paper / Ocean / Space / Dungeon / Neon City / Forest picture tiles |
+| Map | Start screen only (since v119) | Paper / Ocean / Space / Dungeon / Neon City / Forest picture tiles |
 
 ### Saved data (browser localStorage)
 `nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon`, `nosedive-best-city`, `nosedive-best-forest` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
