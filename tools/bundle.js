@@ -11,12 +11,13 @@ let html = read('index.html');
 const css = read('style.css').replace(/url\("(img\/[\w.-]+\.svg)"\)/g,
   (_, f) => `url("data:image/svg+xml;base64,${Buffer.from(read(f)).toString('base64')}")`);
 html = html.replace('<link rel="stylesheet" href="style.css">', () => '<style>\n' + css + '</style>');
+html = html.replace('<link rel="stylesheet" href="depth-art.css">', () => '<style>\n' + read('depth-art.css') + '</style>');
 // the bundled fonts are embedded as data URLs
 const fonts = read('fonts/fonts.css').replace(/url\(([\w.-]+\.woff2)\)/g,
   (_, f) => `url(data:font/woff2;base64,${fs.readFileSync(path.join(ROOT, 'fonts', f)).toString('base64')})`);
 html = html.replace('<link rel="stylesheet" href="fonts/fonts.css">', () => '<style>\n' + fonts + '</style>');
 html = html.replace(/<script src="(js\/[\w-]+\.js)"><\/script>/g, (_, f) => '<script>\n' + read(f) + '</script>');
-if (/<script src=|href="style\.css"|href="fonts\//.test(html)) throw new Error('something was not inlined');
+if (/<script src=|href="style\.css"|href="depth-art\.css"|href="fonts\//.test(html)) throw new Error('something was not inlined');
 // the artifact host adds its own document skeleton
 html = html.split('\n').filter(l => !/^<!doctype|^<\/?html|^<\/?head>|^<\/?body>|^<meta /i.test(l)).join('\n');
 fs.writeFileSync(out, html);

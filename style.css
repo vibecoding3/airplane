@@ -31,10 +31,9 @@ body {
       var(--desk) calc(var(--u) * 9), rgba(0,0,0,.12) calc(var(--u) * 9), rgba(0,0,0,.12) calc(var(--u) * 11), transparent calc(var(--u) * 11)),
     linear-gradient(to right,
       transparent calc(var(--u) * 51.4), var(--margin) calc(var(--u) * 51.4), var(--margin) calc(var(--u) * 52.6), transparent calc(var(--u) * 52.6),
-      transparent calc(var(--u) * 54.4), var(--margin) calc(var(--u) * 54.4), var(--margin) calc(var(--u) * 55.6), transparent calc(var(--u) * 55.6)),
-    repeating-linear-gradient(to bottom, var(--rule) 0, var(--rule) calc(var(--u) * 1), transparent calc(var(--u) * 1), transparent calc(var(--u) * 30));
-  background-size: 100% calc(var(--u) * 250), 100% 100%, 100% calc(var(--u) * 30);
-  background-repeat: repeat-y, no-repeat, repeat-y;
+      transparent calc(var(--u) * 54.4), var(--margin) calc(var(--u) * 54.4), var(--margin) calc(var(--u) * 55.6), transparent calc(var(--u) * 55.6));
+  background-size: 100% calc(var(--u) * 250), 100% 100%;
+  background-repeat: repeat-y, no-repeat;   /* the ruled lines are depth art (layer 0 of Paper, depth-art.css) since v134 */
 }
 /* Deep sea map: rising bubbles (two repeat sizes so the pattern doesn't look tiled). Both repeats
    divide 750 units, so scrolling stays seamless. */

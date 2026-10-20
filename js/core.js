@@ -31,7 +31,7 @@ const store = {
 
 // the canvas is transparent: the paper behind it is a set of browser layers (see #world in the CSS)
 const stage = $('stage'), wrap = $('wrap'), canvas = $('game'), world = $('world');
-const pageNow = $('pageNow'), pageNext = $('pageNext'), ruling = $('ruling');
+const pageNow = $('pageNow'), pageNext = $('pageNext'), ruling = $('ruling'), artA = $('artA'), artB = $('artB');
 let ctx = canvas.getContext('2d');   // `let`: sprites temporarily swap it (see makeSprite)
 let H = 640, scale = 1, dpr = 1;
 
@@ -54,7 +54,7 @@ function resize() {
   H = sh / scale;
   // paper layers: one world unit = `scale` CSS px; the ruling layer is one pattern repeat taller than the view
   world.style.setProperty('--u', scale + 'px');
-  ruling.style.height = Math.ceil((H + PAPER_REPEAT) * scale) + 'px';
+  ruling.style.height = artA.style.height = artB.style.height = Math.ceil((H + PAPER_REPEAT) * scale) + 'px';
   invalidateSprites();
 }
 // the ruling pattern repeats every 750 units: lines every 30, punched holes every 250

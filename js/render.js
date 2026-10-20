@@ -187,9 +187,39 @@ function applyShake() {
 // slide the paper layers to match the scroll position; only the transforms change each frame
 let pageNowCol = '', pageNextCol = '', nightNow = -1;
 const NIGHT_FADE_M = 1450;
+// Depth art (v134): each map has a faint background pattern per layer (CSS classes art-<map>-<layer> in depth-art.css), shown
+// on two layers that cross-fade over 50 m around each layer boundary. ART_BASE lists the layers where the map's own #ruling
+// pattern is the art (or 'all' when it stays at every depth, with the depth art on top of it); ART_NONE the layers with no
+// extra art.
+const ART_BOUNDS = { city: [200, 400, 800, 1500] }, ART_BOUNDS_STD = [150, 400, 800, 1500], ART_FADE_M = 50;
+const ART_BASE = { notebook: 'all', sea: 'all', space: 'all', forest: 'all', dungeon: [0], city: [0], desert: [0], volcano: [2], kitchen: [2] };
+const ART_NONE = { space: [1], forest: [4] };
+let artKey = '';
+const artClass = (k) => {
+  const base = ART_BASE[mapId], none = ART_NONE[mapId];
+  return (base !== 'all' && base && base.includes(k)) || (none && none.includes(k)) ? '' : 'art-' + mapId + '-' + k;
+};
+function syncDepthArt() {
+  const m = (dist + H / 2) / PX_PER_M, bounds = ART_BOUNDS[mapId] || ART_BOUNDS_STD;
+  let L = 0; while (L < bounds.length && m >= bounds[L] + ART_FADE_M / 2) L++;   // the layer we are in, or fading out of
+  const t = L < bounds.length ? Math.round(clamp((m - (bounds[L] - ART_FADE_M / 2)) / ART_FADE_M, 0, 1) * 25) / 25 : 0;
+  const key = mapId + L + ':' + t;
+  if (key === artKey) return;
+  artKey = key;
+  const show = (el, k, w) => {
+    const cls = k <= 4 ? artClass(k) : '';
+    el.className = 'depth-art ' + cls;
+    el.style.visibility = cls && w > 0 ? 'visible' : 'hidden';
+    el.style.opacity = w;
+  };
+  show(artA, L, 1 - t); show(artB, L + 1, t);
+  const base = ART_BASE[mapId];   // the map's own pattern: always, or only in its layers
+  ruling.style.opacity = base === 'all' ? 1 : (base.includes(L) ? 1 - t : 0) + (base.includes(L + 1) ? t : 0);
+}
 function syncPaperLayers() {
   const px = v => Math.round(v * scale * dpr) / dpr;           // whole device pixels keep the lines crisp
-  ruling.style.transform = `translate3d(0, ${px(-(dist % PAPER_REPEAT))}px, 0)`;
+  ruling.style.transform = artA.style.transform = artB.style.transform = `translate3d(0, ${px(-(dist % PAPER_REPEAT))}px, 0)`;
+  syncDepthArt();
   const k = pageIndexAt(dist);
   const now = pageColor(k), next = pageColor(k + 1);
   if (now !== pageNowCol) pageNow.style.background = pageNowCol = now;

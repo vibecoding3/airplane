@@ -4,7 +4,7 @@
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
 const WWW = path.join(__dirname, 'www');
-const COPY = ['index.html', 'style.css', 'js', 'img', 'fonts'];
+const COPY = ['index.html', 'style.css', 'depth-art.css', 'js', 'img', 'fonts'];
 
 fs.rmSync(WWW, { recursive: true, force: true });
 for (const f of COPY) fs.cpSync(path.join(ROOT, f), path.join(WWW, f), { recursive: true });
