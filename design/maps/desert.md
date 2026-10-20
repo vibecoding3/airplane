@@ -28,6 +28,36 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 | Slabs | Closing Jaws | Sandstone slabs / mesa edges | ~150 m | ⚠️ | Rock moving by itself is abstract. Fine. |
 | Well lever | Sweeping Arm | Well lever with bucket / windvane | ~215 m | ⚠️ | A windvane spins, so it fits. A well lever spinning all the way round doesn't. |
 
+## Spawn chances (v126)
+The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
+- **Weights grow with depth** for some obstacles (the slider, the projectile and the spinning blades), so they get more common as you fall.
+- **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place.
+- **Never the same obstacle twice in a row**, which slightly evens out the numbers.
+- **Looks:** each row picks one look, all looks allowed in that rock layer being equally likely.
+- **Fossils (collectible):** each cactus has a 40% chance to be a fossil not yet seen this run, until all 8 have appeared.
+
+| Obstacle | 0 m | 500 m | 1,000 m | 2,000 m |
+|---|---|---|---|---|
+| Sand ledges | 11% | 10% | 10% | 11% |
+| Cacti | 8% | 7% | 7% | 7% |
+| Carpet | 4% | 7% | 8% | 9% |
+| Coconuts | 4% | 6% | 7% | 7% |
+| Fronds | 2% | 5% | 7% | 8% |
+| Slabs | 5% | 5% | 5% | 5% |
+| Tongue | 5% | 5% | 5% | 5% |
+| Outcrop | 6% | 5% | 5% | 5% |
+| Well lever | 5% | 5% | 5% | 5% |
+| Caravan | 5% | 5% | 5% | — |
+| Tumbleweed | 5% | 5% | 5% | 5% |
+| Scorpion | 5% | 5% | 5% | 5% |
+| Vultures | 5% | 5% | 5% | 5% |
+| Spitter | 5% | 4% | 4% | 5% |
+| Rope | 5% | 4% | 5% | 5% |
+| Glint | 5% | 4% | 4% | 5% |
+| Cactus pod | 5% | 4% | 4% | 5% |
+| Sandstorm | 4% | 4% | — | — |
+| Heat | 4% | 4% | 4% | 4% |
+
 ## Gaps and ideas
 - Replace the **flying carpet** and the **coconuts**. Swap the **clay jar** for a geology burst.
 - The deepest layers (fossil beds, amber) could get their own looks, for example **bones** as sliders and **amber drops** as projectiles, so the end of the run feels different from the top.

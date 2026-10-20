@@ -29,6 +29,37 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 | Shutters | Closing Jaws | Rolling shutters / subway doors | ~150 m | ✅ | Subway doors closing in your face is a feeling everyone knows. |
 | Crane | Sweeping Arm | Crane boom / street lamp arm | ~215 m | ✅ | Construction cranes rotate. Good. |
 
+## Spawn chances (v126)
+The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
+- **Weights grow with depth** for some obstacles (the slider, the projectile and the spinning blades), so they get more common as you fall.
+- **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place.
+- **Never the same obstacle twice in a row**, which slightly evens out the numbers.
+- **Looks:** each row picks one look, all looks being equally likely.
+- **Neon signs (collectible)** have their own row type: a sign not yet seen this run, then a regular Bulge once all 8 have appeared.
+
+| Obstacle | 0 m | 500 m | 1,000 m | 2,000 m |
+|---|---|---|---|---|
+| Signs | 11% | 10% | 10% | 10% |
+| Cones | 8% | 7% | 7% | 7% |
+| Tram | 4% | 6% | 8% | 8% |
+| Cans | 4% | 6% | 6% | 7% |
+| Rotors | 2% | 5% | 6% | 8% |
+| Shutters | 5% | 5% | 5% | 5% |
+| Taxis | 5% | 5% | 5% | — |
+| Ladder | 5% | 5% | 5% | 5% |
+| Barrier | 5% | 5% | 5% | 5% |
+| Neon signs (collectible) | 5% | 5% | 4% | 5% |
+| Drones | 5% | 5% | 5% | 5% |
+| Crane | 5% | 4% | 5% | 5% |
+| Fan | 5% | 4% | 4% | 4% |
+| Transformer | 5% | 4% | 4% | 4% |
+| Camera | 5% | 4% | 4% | 4% |
+| Cable | 5% | 4% | 4% | 4% |
+| Laser | 5% | 4% | 4% | 5% |
+| Bulge | 4% | 4% | 4% | 4% |
+| Vent | 4% | 4% | — | — |
+| Hologram field | 4% | 4% | 4% | 4% |
+
 ## Gaps and ideas
 - **Biggest win: make the looks follow the layers**, the way Forest (seasons), Desert (rock layers) and Volcano already do. Roughly:
   - rooftops: antennas and AC units
