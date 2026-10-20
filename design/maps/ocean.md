@@ -23,6 +23,8 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 
 > **Done in v124:** all seven new obstacles below were added (school of fish, pufferfish / sea turtle, big rock / brain coral / sleeping whale, swordfish / driftwood / broken mast, fishing line / net strand, anchor chain / squid tentacle, crab / lobster). Every older obstacle got a second or third look too, including the electric ray and the octopus arm suggested above (the eel and the kelp stay as well). Species that became obstacles were taken out of the background scenery. The "Fit" table above describes the map before v124.
 
+> **Done in v133:** from 400 to 1,500 m the Ocean is now a sunken city: ruins and temples (400–800 m), then a glowing dome city (800–1,500 m). Every obstacle takes a city look there, and the sea looks keep to the reef above and the abyss below. A third collection, Sunken treasures (8), lives in the city. Distant towers, domes, arches and chimneys were added to the background; none of them is also an obstacle.
+
 ## Spawn chances (v129)
 The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
 - **Every obstacle has the same weight** (since v127), so they are all equally likely: 1 in 19 (about 5%) when every obstacle is allowed. Until v126 some had more weight, and three grew more common with depth.

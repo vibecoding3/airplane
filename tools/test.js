@@ -195,8 +195,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { found, saved, total: COLLECTION_TOTAL };
   });
-  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 82,
-    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 12 sets`);
+  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 90,
+    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 13 sets`);
   await page.evaluate(() => { state = 'title'; showCard('title'); });
   await page.click('#collBtn'); await wait(150);
   const collOpen = await page.evaluate(() => ({ shown: !$('collCard').hidden, tiles: document.querySelectorAll('.coll-item').length }));
@@ -204,7 +204,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   const stillTitle = await page.evaluate(() => state);
   await page.keyboard.press('Escape'); await wait(150);
   const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
-  check(collOpen.shown && collOpen.tiles === 82 && stillTitle === 'title' && closed,
+  check(collOpen.shown && collOpen.tiles === 90 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
   // control tips in the top bar: shown for the first 200 m of a run, gone after and outside a run; no pause button
@@ -445,6 +445,33 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     return bad;
   });
   check(vlayers.length === 0, 'Volcano looks follow the layers' + (vlayers.length ? ': ' + vlayers.slice(0, 5).join(', ') : ''));
+
+  // the Sunken treasures collection: treasures among the Ocean's city relics (400–1,500 m), each once per run
+  const treasures = await page.evaluate(() => {
+    mapId = 'sea'; applyMap(); start(); const seen = new Map(); let outside = 0;
+    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
+      plane.invuln = 1; update(1 / 60);
+      for (const o of obstacles) if (o.treasure) { if (!seen.has(o.treasure)) seen.set(o.treasure, new Set()); seen.get(o.treasure).add(o); if (o.layer !== 2 && o.layer !== 3) outside++; }
+    }
+    gameOver();
+    return { seen: seen.size, repeats: [...seen.values()].filter(x => x.size > 1).length, outside };
+  });
+  check(treasures.repeats === 0 && treasures.seen >= 4 && treasures.outside === 0,
+    `Sunken treasures collection: ${treasures.seen}/8 seen in a run to 2,500 m, repeats ${treasures.repeats}, outside the city ${treasures.outside}`);
+
+  // the Ocean's sunken city: from 400 to 1,500 m every look is a city look, and no city look appears outside it
+  const city = await page.evaluate(() => {
+    mapId = 'sea'; applyMap(); start(); const bad = [];
+    for (const m of [50, 300, 600, 1200, 2000]) for (let k = 0; k < 60; k++) {
+      obstacles.length = 0; lastType = '';
+      spawnFromPool(m * PX_PER_M, 0.5, [[['coral', 'urchins', 'jellies', 'swordfish', 'bigRock', 'sub', 'zap', 'anchor', 'fishline', 'crab'][k % 10], 1]]);
+      const inCity = m >= 400 && m < 1500;
+      for (const o of obstacles) if (o.look && SEA_LAYERS[o.look] && !!SEA_CITY[o.look] !== inCity) bad.push(o.look + '@' + m);
+    }
+    gameOver();
+    return bad;
+  });
+  check(city.length === 0, 'Ocean sunken city: city looks only from 400 to 1,500 m, sea looks only outside' + (city.length ? ': ' + city.slice(0, 5).join(', ') : ''));
 
   // the Pastries collection: pastries among the Kitchen's produce, each once per run, plain produce once all 8 have appeared
   const pastries = await page.evaluate(() => {

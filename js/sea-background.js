@@ -188,7 +188,7 @@ const FISH = {
 // lanternfish in v124; jellyfish and moray eel in v128) are not in the scenery, so a background fish never looks like one that hurts
 const FISH_TIERS = [
   ['clown', 'tang', 'seahorse'], ['angel', 'parrot'],
-  ['lion', 'barracuda', 'tuna'], ['reefshark', 'hammer', 'sunfish'],
+  ['lion', 'barracuda', 'tuna', 'ucArch', 'ucTowers'], ['reefshark', 'hammer', 'sunfish', 'ucDomes', 'ucChimney', 'ucTowers'],
   ['white', 'squid', 'oarfish'], ['viper', 'gulper', 'hatchet']
 ];
 let lastSceneryY = -1e9;
@@ -204,6 +204,26 @@ FISH.whale = { w: 300, h: 110, alpha: 0.2, paint() {
   ctx.strokeStyle = 'rgba(160,200,225,.5)'; ctx.lineWidth = 1.4;                      // throat grooves
   ctx.beginPath(); for (const y of [16, 22, 28]) { ctx.moveTo(110, y - 8); ctx.quadraticCurveTo(70, y + 4, 30, y + 4); } ctx.stroke();
   ctx.fillStyle = 'rgba(190,220,240,.7)'; ctx.beginPath(); ctx.arc(96, -6, 2.5, 0, Math.PI * 2); ctx.fill();
+} };
+// the sunken city far behind (v133): flat dark silhouettes with a few warm windows, drawn behind everything else
+FISH.ucTowers = { w: 180, h: 160, alpha: 0.28, still: true, paint() {
+  ctx.fillStyle = '#0e2a44';
+  for (const [x, w, h] of [[-80, 26, 110], [-50, 34, 150], [-12, 22, 90], [14, 38, 130], [56, 28, 100]]) { ctx.fillRect(x, 75 - h, w, h); ctx.beginPath(); ctx.moveTo(x, 75 - h); ctx.lineTo(x + w / 2, 75 - h - 14); ctx.lineTo(x + w, 75 - h); ctx.fill(); }
+  ctx.fillStyle = '#ffd07a'; for (const [x, y] of [[-72, 0], [-40, -40], [-30, 10], [22, -20], [40, 20], [64, 0]]) ctx.fillRect(x, y, 4, 5);
+} };
+FISH.ucDomes = { w: 220, h: 110, alpha: 0.28, still: true, paint() {
+  ctx.fillStyle = '#0e2a44';
+  for (const [x, r] of [[-60, 44], [20, 54], [86, 30]]) { ctx.beginPath(); ctx.arc(x, 50, r, Math.PI, 0); ctx.fill(); }
+  ctx.fillStyle = '#ffd07a'; for (const [x, y] of [[-70, 30], [-48, 20], [10, 10], [30, 26], [84, 36]]) { ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill(); }
+} };
+FISH.ucArch = { w: 160, h: 120, alpha: 0.24, still: true, paint() {      // a ruined arch with a broken top
+  ctx.fillStyle = '#16334e';
+  ctx.beginPath(); ctx.moveTo(-60, 60); ctx.lineTo(-60, -10); ctx.quadraticCurveTo(-58, -50, -14, -54); ctx.lineTo(-10, -40); ctx.quadraticCurveTo(-40, -36, -38, 0); ctx.lineTo(-38, 60); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(60, 60); ctx.lineTo(60, -10); ctx.quadraticCurveTo(58, -46, 24, -50); ctx.lineTo(26, -36); ctx.quadraticCurveTo(38, -30, 38, 0); ctx.lineTo(38, 60); ctx.closePath(); ctx.fill();
+} };
+FISH.ucChimney = { w: 60, h: 150, alpha: 0.3, still: true, paint() {    // a chimney with bubbles streaming up
+  ctx.fillStyle = '#0e2a44'; ctx.fillRect(-10, 30, 20, 45);
+  ctx.strokeStyle = '#cfefff'; ctx.lineWidth = 2; for (const [y, r] of [[18, 4], [0, 5], [-22, 4], [-44, 6], [-64, 4]]) { ctx.beginPath(); ctx.arc(Math.sin(y) * 6, y, r, 0, Math.PI * 2); ctx.stroke(); }
 } };
 FISH.wreck = { w: 300, h: 140, alpha: 0.22, still: true, paint() {
   ctx.rotate(-0.12);
@@ -221,6 +241,7 @@ function spawnFish(lineY) {
   for (let i = 1; i < FORMULA_DEPTHS.length; i++) if (m >= FORMULA_DEPTHS[i]) tier = i;
   if (tier > 0 && Math.random() < 0.2) tier--;                   // the odd smaller fish keeps it varied
   let kind = FISH_TIERS[tier][ri(0, FISH_TIERS[tier].length - 1)];
+  if (kind.startsWith('uc')) { if (lineY - lastSceneryY < 600) kind = FISH_TIERS[tier][0]; else lastSceneryY = lineY; }   // city silhouettes keep apart
   // rare far-away scenery, never two close together (at least ~30 m apart)
   if (lineY - lastSceneryY > 900) {
     if (m >= 100 && m < 800 && Math.random() < 0.12) kind = 'whale';     // a whale passing far away

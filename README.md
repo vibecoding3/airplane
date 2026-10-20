@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v132** (2026-10-21)
+Current version: **v133** (2026-10-21)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,7 +10,7 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css` and 30 plain script files in `js/` (about 11,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
+- **Files:** `index.html`, `style.css` and 31 plain script files in `js/` (about 12,400 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
 - **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
@@ -100,8 +100,8 @@ Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a n
 |---|---|
 | 0–150 m | Clownfish, tang, seahorse |
 | 150–400 m | Angelfish, parrotfish |
-| 400–800 m | Lionfish, barracuda, tuna |
-| 800–1,500 m | Reef shark, hammerhead shark, ocean sunfish |
+| 400–800 m | Lionfish, barracuda, tuna; far behind, the ruins of the sunken city (towers with a few lit windows, broken arches) |
+| 800–1,500 m | Reef shark, hammerhead shark, ocean sunfish; far behind, the glowing dome city (domes with lit windows, chimneys trailing bubbles, towers) |
 | 1,500–2,500 m | Great white shark, giant squid, oarfish |
 | 2,500 m + | Viperfish, gulper eel, hatchetfish |
 
@@ -314,6 +314,30 @@ Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reus
 | Electric eel (Charged Beam) | Charges with a dashed preview line, then zaps a short lightning bolt out from the wall (14–22% of the width); or an electric ray (a sea animal) whose organs glow while it charges | New | ~135 m |
 | Kelp (Telegraphed Sweep) | Seaweed frond sweeps out from the wall after a green dashed warning; or an octopus arm with suckers reaching out of a crevice | Cat paw | ~135 m |
 | Anchor (Sweeping Arm, v124) | An anchor on its chain swinging all the way round a ring bolt, or a giant squid's tentacle (400 m on) | Drawing compass | ~215 m |
+
+**The sunken city (v133).** From 400 to 1,500 m the Ocean becomes a sunken city: every obstacle takes a city look there, and the sea looks above keep to the reef (0–400 m) and the abyss (1,500 m +); nothing was deleted (`SEA_CITY_LOOKS`, `SEA_CITY` in `js/obstacles.js`, art in `js/draw-sunken-city.js`). Ruins and temples first (400–800 m: pale stone, gold, carved symbols that glow), then the dome city (800–1,500 m: glass, brass, warm windows). Original designs only: no famous sunken city, no merfolk.
+
+| Obstacle | Ruins and temples (400–800 m) | Dome city (800–1,500 m) |
+|---|---|---|
+| Gap Wall | Fallen marble columns with a scrolled capital at the gap | A glass tube walkway with brass rings and lights |
+| Closing Jaws | Carved stone temple doors with a glowing symbol | Riveted dome hatches with a lit porthole and a warning stripe |
+| Static Hazards | Old amphoras; sometimes a sunken treasure (collectible) | Glowing glass orbs on brass stands; sometimes a treasure |
+| Wall Bulge | A huge calm stone face, cracked and mossy | Half a glass dome house with brass ribs and lit windows |
+| Bouncing Slider | A long stone oar | A little tram car with lit windows |
+| Rising Projectile | A lantern float rising | An air capsule shooting up |
+| Drifting Swarm | Round paper lanterns glowing warm | Glass mail pods with a letter inside |
+| Conveyor | A line of message capsules | A line of tram pods |
+| Spinning Drifter | A stone calendar wheel; a giant gold coin | A giant gold coin |
+| Spinning Blades | Two water-mill paddles | Two dome fan blades |
+| Sweeping Arm | The iron hand of a sunken clock tower turning round its faint face | The same clock hand, or a harbour crane jib |
+| Wall Piston | A statue's gold trident thrusting out | A gangplank sliding out of a steel block |
+| Wall Turret | A stone fish fountain spitting water bolts | A dome cannon firing bubble shots |
+| Charged Beam | A stone slab whose carved symbols light up and fire | A sparking power cable |
+| Telegraphed Sweep | A stone statue arm swinging out | A brass mechanical claw |
+| Proximity Blast | A trembling bubble mine | A red pressure valve |
+| Push Zone (before 700 m) | A pumping-station current carrying bubbles | — (no wind from 700 m) |
+| Effect Zone | An elevator shaft of rising bubbles between brass rails | The same |
+| Spring Line | A mooring rope between two stone posts | A glowing cable between two buoys |
 
 ### 5.3 Space map (25 kinds on 17 mechanics, since v53; 6 added in v57, 6 in v129)
 Every Space obstacle reuses the movement and collision of a Paper or Ocean obstacle (see `SPACE_MAKERS` in `js/obstacles.js`) with new art in `js/draw-space.js`. Outlines are pale so they read on black. Space has no wind or explosions: the solar wind and the space mine were removed in v55.
@@ -620,6 +644,7 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
   | Enchanted rings | The 9 Dungeon magic rings: emerald, sapphire, ruby, crystal, amethyst, amber, skull, zigzag, leaf (called "Rings of Power" until v110) |
   | Origami (v102) | Six folded-paper figures on the Paper map: crane, frog, boat, star, fox, butterfly (Drifting Swarm variants of the sticky notes, faceted in three paper tones). In a sticky-note row each note has a 50% chance to be an origami not yet seen this run; once all 6 have appeared the notes are plain sticky notes again |
   | Seashells (v103) | Six shells in the Ocean: conch, scallop, nautilus, cowrie, sand dollar, pearl oyster (Static Hazards variants of the sea urchins, scaled to the urchin's hit circle). Each urchin has a 40% chance to be a shell not yet seen this run; once all 6 have appeared the urchins are plain again |
+  | Sunken treasures (v133) | Eight treasures in the Ocean's sunken city (400–1,500 m only): crown, sceptre, gold coin, chalice, pearl necklace, brass compass, music box, crystal key (Static Hazards variants of the city relics, scaled to their hit circle; save ids `treasure-crown` …). In the city each relic has a 40% chance to be a treasure not yet seen this run (and otherwise may still be a seashell); once all 8 have appeared the relics are plain again (`TREASURES`, `paintTreasure`) |
   | Legendary fish (v106) | Five fish in the Ocean: golden fish, narwhal, coelacanth, giant squid eye, ghost shark (Spinning Drifter variants of the starfish: they spin and drift like a starfish and are drawn inside its hit circle). Each starfish has a 50% chance to be a fish not yet seen this run; once all 5 have appeared the starfish are plain again. Unlike the background fish, these collide |
   | Legendary swords (v105) | Six original swords in the Dungeon: flame sword, frost blade, crystal sword, desert scimitar, rune blade, bone sword (Spinning Blades variants of the crossed swords; both blades of the pair are the same sword, drawn inside the blade hit shape). Each Spinning Blades obstacle has a 70% chance to be a sword not yet seen this run; once all 6 have appeared it uses its regular looks again |
   | Neon signs (v113) | Eight big round neon signs in Neon City: ramen bowl, neon cat, cassette, lightning bolt, heart, music notes, coffee cup, palm tree (Wall Bulge, their own obstacle in the pool, save ids `neon-ramen` …). Each appears at most once per run; once all 8 have, a sign spawn becomes a regular Wall Bulge (dish, AC unit or clock). In the menu they are drawn whole with the icon in the middle |
@@ -703,7 +728,7 @@ airplane/
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
 ├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
-└── js/                     30 game scripts, listed in the order they load
+└── js/                     31 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
@@ -723,6 +748,7 @@ airplane/
     ├── draw-paper.js       Paper obstacle art
     ├── draw-sea.js         Ocean obstacle art (the original looks)
     ├── draw-ocean.js       Ocean obstacle art: the looks and obstacles added in v124
+    ├── draw-sunken-city.js Ocean obstacle art: the sunken city from 400 to 1,500 m (and the Sunken treasures)
     ├── draw-space.js       Space obstacle art
     ├── draw-dungeon.js     Dungeon obstacle art
     ├── draw-city.js        Neon City obstacle art (and the neon signs)
@@ -751,7 +777,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | To change… | Look in |
 |---|---|
 | Speed, difficulty, controls, starting state | `js/state.js` (`baseFallSpeed`, `difficulty`, `HOLD_MS`, `reset`) |
-| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `SEA_LOOKS`, `SEA_LAYERS`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_LOOKS`, `cityPool`, `CITY_MAKERS`, `CITY_LOOKS`, `forestPool`, `FOREST_MAKERS`, `FOREST_LOOKS`, `FOREST_SEASONS`, `desertPool`, `DESERT_MAKERS`, `DESERT_LOOKS`, `DESERT_LAYERS`, `PAPER_LOOKS`, `SPACE_ALT`, `CITY_LAYERS`, `volcanoPool`, `VOLCANO_MAKERS`, `VOLCANO_LOOKS`, `VOLCANO_LAYERS`, `kitchenPool`, `KITCHEN_MAKERS`, `KITCHEN_LOOKS`, `KITCHEN_LAYERS`, `spawnRow`) |
+| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `SEA_LOOKS`, `SEA_LAYERS`, `SEA_CITY_LOOKS`, `SEA_CITY`, `TREASURES`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_LOOKS`, `cityPool`, `CITY_MAKERS`, `CITY_LOOKS`, `forestPool`, `FOREST_MAKERS`, `FOREST_LOOKS`, `FOREST_SEASONS`, `desertPool`, `DESERT_MAKERS`, `DESERT_LOOKS`, `DESERT_LAYERS`, `PAPER_LOOKS`, `SPACE_ALT`, `CITY_LAYERS`, `volcanoPool`, `VOLCANO_MAKERS`, `VOLCANO_LOOKS`, `VOLCANO_LAYERS`, `kitchenPool`, `KITCHEN_MAKERS`, `KITCHEN_LOOKS`, `KITCHEN_LAYERS`, `spawnRow`) |
 | How an obstacle moves or what counts as a hit | `js/physics.js` (`updateObstacle`, `computeShapes`) |
 | How an obstacle looks | `js/draw-paper.js`, `js/draw-sea.js`, `js/draw-space.js`, `js/draw-dungeon.js`, `js/draw-city.js`, `js/draw-forest.js`, `js/draw-desert.js`, `js/draw-volcano.js` or `js/draw-kitchen.js` (`draw*` / `paint*`) |
 | Background decorations | `js/paper-background.js` (formulas), `js/sea-background.js` (fish, specks, silhouettes), `js/space-background.js`, `js/dungeon-background.js`, `js/city-background.js`, `js/forest-background.js`, `js/desert-background.js` , `js/volcano-background.js` or `js/kitchen-background.js` (scenery, specks, the opening at the start) |
@@ -793,6 +819,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `dungeon-background.js` | `DUNGEON_TIERS`, `spawnDungeonThing`, `wellOpeningY`, `drawDungeonDetails`, `drawDungeonParticles` (scenery joins the `FISH` table) |
 | `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
 | `draw-ocean.js` | `drawOceanLook` (draws an Ocean obstacle's added look, or returns false for the original one), `drawSeaLedge`, `drawWreckHull`, `drawSeaHazard`, `drawSeaSwarm`, `drawSeaDrifter`, `drawMantis`, `drawSeaTurret`, `drawRay`, `drawOctopusArm`, `drawBarrel`, `drawWarmVent`, `drawSchoolFish`, `drawPuffer`, `drawSeaBulge`, `drawSwordfish`, `drawFishline`, `drawAnchorChain`, `drawCrab` |
+| `draw-sunken-city.js` | `drawSunkenCity` (the city looks of every Ocean mechanic), `TREASURE_NAMES`, `paintTreasure` (also used by the Collections screen) |
 | `render.js` | `paintPlane`, `drawPlane`, `syncPaperLayers`, `render`, `applyMap` |
 | `ui.js` | `updateHud`, `showCard`, `setXp`, `animateXp`, `start`, `pause`, `resume`, `exitRun`, `keepRunProgress`, `gameOver` |
 | `collections.js` | `COLLECTIONS`, `COLLECTION_TOTAL`, `collectionFound`, `noteFound`, `paintCollectionItem`, `renderCollections`, `openCollections` |

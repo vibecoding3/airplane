@@ -283,6 +283,40 @@ const seaLayer = y => { const m = y / PX_PER_M; return m < 150 ? 0 : m < 400 ? 1
 const SEA_LAYERS = { anglerfish: [2, 3, 4], vent: [2, 3, 4], whale: [3, 4], lanternfish: [3, 4], mast: [1, 2, 3, 4], tentacle: [2, 3, 4],
                      braincoral: [0, 1, 2], driftwood: [0, 1], butterfly: [0, 1, 2], sardines: [0, 1, 2], turtle: [0, 1, 2],
                      fishline: [0, 1, 2], anemone: [0, 1, 2, 3], drift: [0, 1] };
+// The sunken city (v133) takes over the dark and midnight layers: ruins and temples from 400 m, the glowing dome city from
+// 800 m to 1,500 m (art in draw-sunken-city.js). Its looks only live there, and the sea's own looks only above and below it.
+const SEA_CITY_LOOKS = {
+  gate: { columns: ['#e8e0d0'], tubewalk: ['#9fe0ff'] },
+  erasers: { templedoors: ['#c8b898'], hatch: ['#8aa0b8'] },
+  blot: { amphora: ['#d0784a', '#c89a5a'], orb: ['#7fe8ff', '#ffd07a'] },
+  protractor: { stoneface: ['#c8c0b0'], domehouse: ['#9fe0ff'] },
+  pencil: { oar: ['#c8a070'], tramcar: ['#ffc24a', '#7fd0ff'] },
+  wad: { lanternfloat: ['#ffb04a'], capsule: ['#c9ced6'] },
+  note: { lantern: ['#ff8a5a', '#ffd04a'], mailpod: ['#7fe8ff'] },
+  clips: { msgcapsules: ['#d8c090'], trampods: ['#ffc24a', '#7fd0ff'] },
+  starfish: { calendar: ['#c8c0b0'], coin: ['#f4c430'] },
+  scissors: { millwheel: ['#a8805a'], fanprop: ['#c9ced6'] },
+  compass: { clockhand: ['#2a2a30'], crane: ['#ffc24a'] },
+  cutter: { trident: ['#e0c060'], gangplank: ['#a8805a'] },
+  glue: { fishfountain: ['#c8c0b0'], domecannon: ['#8aa0b8'] },
+  zap: { glyph: ['#7fffd0'], cable: ['#ffe060'] },
+  paw: { statuearm: ['#c8c0b0'], claw: ['#ffc24a'] },
+  mine: { bubblemine: ['#9fe0ff'], valve: ['#e04a3a'] },
+  fan: { pump: [''] },
+  bubbles: { elevator: [''] },
+  band: { mooring: ['#c9a66b'], glowcable: ['#7fe8ff'] }
+};
+const SEA_CITY = { columns: [2], tubewalk: [3], templedoors: [2], hatch: [3], amphora: [2], orb: [3], stoneface: [2], domehouse: [3],
+                   oar: [2], tramcar: [3], lanternfloat: [2], capsule: [3], lantern: [2], mailpod: [3], msgcapsules: [2], trampods: [3],
+                   calendar: [2], coin: [2, 3], millwheel: [2], fanprop: [3], clockhand: [2, 3], crane: [3], trident: [2], gangplank: [3],
+                   fishfountain: [2], domecannon: [3], glyph: [2], cable: [3], statuearm: [2], claw: [3], bubblemine: [2], valve: [3],
+                   pump: [2, 3], elevator: [2, 3], mooring: [2], glowcable: [3] };
+for (const [type, looks] of Object.entries(SEA_LOOKS)) for (const l of Object.keys(looks)) SEA_LAYERS[l] = (SEA_LAYERS[l] || [0, 1, 2, 3, 4]).filter(k => k !== 2 && k !== 3);
+for (const [type, looks] of Object.entries(SEA_CITY_LOOKS)) Object.assign(SEA_LOOKS[type], looks);
+Object.assign(SEA_LAYERS, SEA_CITY);
+// Sunken treasures collection (Ocean, v133): Static Hazards variants in the sunken city, each at most once per run
+const TREASURES = ['crown', 'scepter', 'coin', 'chalice', 'necklace', 'compass', 'musicbox', 'crystalkey'];
+const treasuresLeft = () => TREASURES.filter(n => !runCollected.has('treasure-' + n));
 const MINERALS_LIST = ['iron', 'nickel', 'copper', 'gold', 'ice', 'amethyst'];   // asteroid minerals (art in draw-space.js)
 // obstacles that push the plane with wind (desk fan, ocean current) stop appearing from this depth
 const WIND_MAX_M = 700;
@@ -791,9 +825,10 @@ function spawnFromPool(y, d, pool) {
       }
       if (looks) [o.look, o.seaCol] = rowSea[o.type];
       if (o.type === 'compass') o.hh = 7;        // an anchor chain is thicker than a compass leg
-      if (o.type === 'blot') {
-        const left = shellsLeft();
-        if (left.length && Math.random() < 0.4) { o.shell = left[ri(0, left.length - 1)]; runCollected.add('shell-' + o.shell); }
+      if (o.type === 'blot') {                   // in the city a treasure not yet seen this run first, otherwise a seashell
+        const gold = o.layer === 2 || o.layer === 3 ? treasuresLeft() : [], left = shellsLeft();
+        if (gold.length && Math.random() < 0.4) { o.treasure = gold[ri(0, gold.length - 1)]; runCollected.add('treasure-' + o.treasure); }
+        else if (left.length && Math.random() < 0.4) { o.shell = left[ri(0, left.length - 1)]; runCollected.add('shell-' + o.shell); }
       }
       if (o.type === 'starfish') {               // a legendary fish not yet seen this run (each once per run)
         const left = fishLeft();

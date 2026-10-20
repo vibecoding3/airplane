@@ -17,6 +17,8 @@ const COLLECTIONS = [
     items: ORIGAMI.map(n => ({ id: 'origami-' + n, name: n[0].toUpperCase() + n.slice(1), origami: n })) },
   { id: 'shells', name: 'Seashells', map: 'Ocean', bg: '#3f92c0',
     items: SHELLS.map(n => ({ id: 'shell-' + n, name: { sanddollar: 'Sand dollar', pearl: 'Pearl oyster' }[n] || n[0].toUpperCase() + n.slice(1), shell: n })) },
+  { id: 'treasures', name: 'Sunken treasures', map: 'Ocean', bg: '#2a4a6a',
+    items: TREASURES.map(n => ({ id: 'treasure-' + n, name: TREASURE_NAMES[n], treasure: n })) },
   { id: 'fish', name: 'Legendary fish', map: 'Ocean', bg: '#3f92c0',
     items: LEGEND_FISH.map(n => ({ id: 'fish-' + n, name: { golden: 'Golden fish', narwhal: 'Narwhal', coelacanth: 'Coelacanth', squideye: 'Giant squid eye', ghostshark: 'Ghost shark' }[n], fish: n })) },
   { id: 'neonsigns', name: 'Neon signs', map: 'Neon City', bg: '#1a1530',
@@ -49,7 +51,8 @@ function collectionId(o) {
        : o.bird ? 'bird-' + o.bird
        : o.fossil ? 'fossil-' + o.fossil
        : o.stone ? 'stone-' + o.stone
-       : o.pastry ? 'pastry-' + o.pastry : null;
+       : o.pastry ? 'pastry-' + o.pastry
+       : o.treasure ? 'treasure-' + o.treasure : null;
 }
 
 // called for every obstacle drawn during a run (render.js)
@@ -151,6 +154,9 @@ function paintCollectionItem(canvas, item, locked, wide) {
     } else if (item.fossil) {
       const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintFossil(item.fossil);
+    } else if (item.treasure) {
+      const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintTreasure(item.treasure);
     } else if (item.pastry) {
       const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintPastry(item.pastry);
