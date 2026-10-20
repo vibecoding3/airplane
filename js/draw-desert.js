@@ -190,25 +190,33 @@ function drawDesertBulge(o, sy) {
 // ---------- Bouncing Slider: a flying carpet or a bleached driftwood plank, 13 thick ----------
 function drawDesertCarpet(o, sy) {
   const L = o.len / 2, col = o.desCol || '#c0303a', carpet = o.look !== 'driftwood';
-  const s = ownSprite(o, 'spr', o.len + 8, 22, L + 4, 11, () => {
-    if (carpet) {                                  // a patterned flying carpet with tassels (an original design)
-      ctx.beginPath(); roundRectPath(-L + 4, -5.5, o.len - 8, 11, 2); ctx.fillStyle = col; ctx.fill(); desStroke(1.3);
+  if (carpet) {                                    // a short, wide flying carpet (v132): border, a medallion, tassels on the short ends
+    const hh = o.hh || 17;
+    const s = ownSprite(o, 'spr', o.len + 8, hh * 2 + 8, L + 4, hh + 4, () => {
+      const x0 = -L + 5, w = o.len - 10;
+      ctx.beginPath(); roundRectPath(x0, -hh, w, hh * 2, 3); ctx.fillStyle = col; ctx.fill(); desStroke(1.4);
       ctx.save(); ctx.clip();
-      ctx.fillStyle = '#f4c430'; ctx.fillRect(-L, -5.5, o.len, 2); ctx.fillRect(-L, 3.5, o.len, 2);
-      ctx.fillStyle = '#f4ecd0'; for (let x = -L + 14; x < L - 10; x += 14) { ctx.beginPath(); ctx.moveTo(x, -2.5); ctx.lineTo(x + 3.5, 0); ctx.lineTo(x, 2.5); ctx.lineTo(x - 3.5, 0); ctx.closePath(); ctx.fill(); }
+      ctx.strokeStyle = '#f4c430'; ctx.lineWidth = 3; ctx.strokeRect(x0 + 4, -hh + 4, w - 8, hh * 2 - 8);             // the gold border
+      ctx.fillStyle = '#f4ecd0'; for (let x = x0 + 9; x < x0 + w - 6; x += 8) for (const y of [-hh + 4, hh - 4]) { ctx.beginPath(); ctx.arc(x, y, 1.2, 0, Math.PI * 2); ctx.fill(); }
+      ctx.fillStyle = '#1f3f7a'; ctx.beginPath(); ctx.moveTo(0, -hh + 9); ctx.lineTo(L * 0.55, 0); ctx.lineTo(0, hh - 9); ctx.lineTo(-L * 0.55, 0); ctx.closePath(); ctx.fill();   // the medallion
+      ctx.fillStyle = '#f4c430'; ctx.beginPath(); ctx.moveTo(0, -hh + 15); ctx.lineTo(L * 0.3, 0); ctx.lineTo(0, hh - 15); ctx.lineTo(-L * 0.3, 0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#f4ecd0'; for (const sx of [-1, 1]) for (const sy2 of [-1, 1]) { ctx.beginPath(); ctx.arc(sx * (L - 13), sy2 * (hh - 11), 2.4, 0, Math.PI * 2); ctx.fill(); }   // corner flowers
       ctx.restore();
-      ctx.strokeStyle = '#f4c430'; ctx.lineWidth = 1.2; ctx.beginPath();
-      for (const x of [-L + 4, L - 4]) for (const y of [-4, 0, 4]) { ctx.moveTo(x, y); ctx.lineTo(x + (x < 0 ? -3.5 : 3.5), y); }
+      ctx.strokeStyle = '#f4c430'; ctx.lineWidth = 1.4; ctx.beginPath();                                               // tassels on the short ends
+      for (const x of [x0, x0 + w]) for (let y = -hh + 3; y <= hh - 3; y += 5) { ctx.moveTo(x, y); ctx.lineTo(x + (x < 0 ? -4 : 4), y); }
       ctx.stroke();
-    } else {                                       // bleached driftwood with a knot and cracks
-      ctx.beginPath(); ctx.moveTo(-L, -3); ctx.quadraticCurveTo(0, -6.5, L, -2); ctx.lineTo(L, 3); ctx.quadraticCurveTo(0, 6.5, -L, 4); ctx.closePath();
-      ctx.fillStyle = col; ctx.fill(); desStroke(1.3);
-      ctx.strokeStyle = desShade(0.2); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-L + 6, 0); ctx.quadraticCurveTo(0, -2, L - 8, 1); ctx.stroke();
-      ctx.fillStyle = desShade(0.3); ctx.beginPath(); ctx.ellipse(L * 0.3, 0, 3, 2, 0, 0, Math.PI * 2); ctx.fill();
-    }
+    });
+    blit(s, o.x, sy, o.a + Math.sin(time * 6 + o.len) * 0.02, 1, 1 + Math.sin(time * 9 + o.len) * 0.03);   // a gentle ripple as it flies
+    return;
+  }
+  const s = ownSprite(o, 'spr', o.len + 8, 22, L + 4, 11, () => {   // bleached driftwood with a knot and cracks
+    ctx.beginPath(); ctx.moveTo(-L, -3); ctx.quadraticCurveTo(0, -6.5, L, -2); ctx.lineTo(L, 3); ctx.quadraticCurveTo(0, 6.5, -L, 4); ctx.closePath();
+    ctx.fillStyle = col; ctx.fill(); desStroke(1.3);
+    ctx.strokeStyle = desShade(0.2); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-L + 6, 0); ctx.quadraticCurveTo(0, -2, L - 8, 1); ctx.stroke();
+    ctx.fillStyle = desShade(0.3); ctx.beginPath(); ctx.ellipse(L * 0.3, 0, 3, 2, 0, 0, Math.PI * 2); ctx.fill();
   });
-  const wave = carpet ? Math.sin(time * 6 + o.len) * 0.05 : 0;   // the carpet ripples as it flies
-  blit(s, o.x, sy, o.a + wave);
+  blit(s, o.x, sy, o.a);
 }
 
 // ---------- Rising Projectile: coconuts, gourds or a beetle's rolling ball, thrown up the canyon ----------

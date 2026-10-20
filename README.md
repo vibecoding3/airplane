@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v131** (2026-10-21)
+Current version: **v132** (2026-10-21)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -465,7 +465,7 @@ Every mechanic in section 6 except the Telegraphed Slam. Every Desert obstacle r
 |---|---|---|---|
 | Sand ledges (Gap Wall) | Layered sandstone ledges with a wind-worn end; adobe walls of mud bricks with a beam end | Rulers | 0 m |
 | Cacti (Static Hazards) | Round barrel cacti with ribs and a flower; prickly pears with a pink fruit; boulders with a lizard on top; sometimes a fossil stone (collectible, see section 7) | Ink blots | 0 m |
-| Carpet (Bouncing Slider) | A patterned flying carpet with tassels that ripples as it flies (an original design); bleached driftwood | Pencil | 0 m |
+| Carpet (Bouncing Slider) | A short, wide flying carpet (since v132: 80–100 long and 34 tall, hit box included, barely tilted) with a gold border, a diamond medallion and tassels on its short ends, rippling as it flies (an original design); bleached driftwood (still a long thin bar) | Pencil | 0 m |
 | Outcrop (Wall Bulge) | A sandstone outcrop with curved layers and a little cactus; a termite mound; a sand dune (dunes and canyon only); slalom pairs deeper down | Protractor | 0 m |
 | Coconuts (Rising Projectile) | Coconuts, gourds, a beetle's rolling ball with the beetle on top, thrown up the canyon | Paper wad | 0 m |
 | Heat (Effect Zone) | Rising heat shimmer: a faint dashed zone with wavy lines drifting up; slows the fall, never hurts | Bubble column | 0 m |

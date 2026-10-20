@@ -876,6 +876,10 @@ function spawnFromPool(y, d, pool) {
       }
       if (looks) [o.look, o.desCol] = rowSea[o.type];
       if (o.type === 'compass') o.hh = 5;        // the well lever is a little thicker than a compass leg
+      if (o.look === 'carpet') {                 // a flying carpet is a short, wide rug (v132): 80–100 long, 34 tall, barely tilted
+        o.len = rand(80, 100); o.hh = 17; o.a *= 0.4;
+        const ext = o.len / 2 * Math.cos(o.a); o.x = clamp(o.x, ext + 6, W - ext - 6);
+      }
       if (o.type === 'blot') {                   // a fossil stone not yet seen this run (each once per run)
         const left = fossilsLeft();
         if (left.length && Math.random() < 0.4) { o.fossil = left[ri(0, left.length - 1)]; runCollected.add('fossil-' + o.fossil); }
