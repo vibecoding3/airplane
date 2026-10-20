@@ -444,7 +444,7 @@ const EXPECTED = { notebook: 16, sea: 12, space: 15, dungeon: 18, city: 19, fore
     for (const m of Object.keys(keep)) { bests[m] = keep[m]; store.set('nosedive-best-' + m, String(keep[m])); }
     return { title, over };
   });
-  check(ranked.title === '1,472' && ranked.over === 'Ranked 1,805', `Ranked Score: start screen ${ranked.title}, after a new 333 m Space best "${ranked.over}"`);
+  check(ranked.title === '1,472' && ranked.over === 'Total score 1,805', `Ranked Score: start screen ${ranked.title}, after a new 333 m Space best "${ranked.over}"`);
 
   // the speedometer: the fall speed in m/s left of the frame rate during a run, gone outside a run
   await page.evaluate(() => { mapId = 'notebook'; applyMap(); start(); plane.invuln = 99; dist = 200 * PX_PER_M; });

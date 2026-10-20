@@ -173,7 +173,7 @@ function gameOver() {
   const { record, xpBefore, levelUp } = keepRunProgress(s);
   ui.overTitle.textContent = fmt(s) + ' m';
   ui.overBest.textContent = 'Best ' + fmt(best) + ' m';
-  $('overRanked').textContent = 'Ranked ' + fmt(rankedScore());
+  $('overRanked').textContent = 'Total score ' + fmt(rankedScore());
   ui.stamp.hidden = !record;
   ui.overBank.textContent = (stars ? '★ +' + stars + ' this run · ' : '') + '★ ' + fmt(bank) + ' in total';
   $('levelStamp').hidden = !levelUp;
