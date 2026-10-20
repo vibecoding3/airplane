@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v124** (2026-10-20)
+Current version: **v125** (2026-10-20)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -216,7 +216,7 @@ The plane dives into the crater of a tropical island volcano and falls down its 
 
 ## 5. Obstacles
 
-"Starts at" is the depth where an obstacle first joins the pool of possible obstacles. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
+Since v125 every obstacle can appear at any depth, from the first metres on, on every map (the player's choice); only wind (desk fan, ocean current and the like) still stops at 700 m. Depth still makes obstacles faster, bigger and more frequent. The "Started at" columns below are the depths where each obstacle first joined the pool until v124. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
 
 ### 5.0 All obstacles at a glance
 One row per mechanic (section 6), names only; the details are in 5.1–5.8. For Ocean, Dungeon, Neon City, Forest, Desert and Volcano, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
@@ -246,7 +246,7 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.8. For 
 
 ### 5.1 Paper map (16 types)
 
-| Obstacle | Behaviour | Starts at |
+| Obstacle | Behaviour | Started at (until v124) |
 |---|---|---|
 | Rulers | Two rulers from the walls with a gap; deeper down the gap moves side to side | 0 m |
 | Ink blots | 1–3 static ink splats | 0 m |
@@ -270,7 +270,7 @@ The extra hazard next to desk fans deeper down is a small ink blot.
 ### 5.2 Ocean map (19 obstacles on 19 mechanics; 12 until v123)
 Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in `js/obstacles.js`); four are mechanics the Ocean brought in (starfish, bubble column, naval mine, electric eel). Since v124 each obstacle has two or three looks sharing its hit box, in a few colours (`SEA_LOOKS`); a row of the same obstacle shares one look and colour. The first look is the original (art in `js/draw-sea.js`), the others are in `js/draw-ocean.js`. Some looks only live at some depths (`SEA_LAYERS`, by `seaLayer`: sunlit 0–150 m, twilight 150–400 m, dark 400–800 m, midnight 800–1,500 m, the abyss 1,500 m +): driftwood and the kelp-carrying current near the surface; brain coral, sardines, butterflyfish, sea turtles and fishing lines above 800 m; anemones above 1,500 m; anglerfish, warm vents and squid tentacles from 400 m; broken masts from 150 m; lanternfish and the sleeping whale from 800 m.
 
-| Sea obstacle | Looks | Based on | Starts at |
+| Sea obstacle | Looks | Based on | Started at (until v124) |
 |---|---|---|---|
 | Coral ledges (Gap Wall) | Coral from both walls with a gap; a grey rock ledge with little anemones; the broken planks of a shipwreck with barnacles | Rulers | 0 m |
 | Sea urchins (Static Hazards) | Static spiky urchins; a stinging sea anemone; a grumpy lumpy stonefish with spines; sometimes a seashell (collectible, see section 7) | Ink blots | 0 m |
@@ -295,7 +295,7 @@ Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reus
 ### 5.3 Space map (19 kinds on 15 mechanics, since v53; 6 added in v57)
 Every Space obstacle reuses the movement and collision of a Paper or Ocean obstacle (see `SPACE_MAKERS` in `js/obstacles.js`) with new art in `js/draw-space.js`. Outlines are pale so they read on black. Space has no wind or explosions: the solar wind and the space mine were removed in v55.
 
-| Space obstacle | Behaviour | Based on | Starts at |
+| Space obstacle | Behaviour | Based on | Started at (until v124) |
 |---|---|---|---|
 | Station girders | Steel trusses from both walls with a gap; red lights blink on the end plates | Rulers | 0 m |
 | Asteroids | 1–3 cratered rocks that stay put. Each shows a mineral: iron (red veins), nickel (silver flecks), copper (green patches), gold (gold flecks), ice (white patches) or amethyst (purple crystals) | Ink blots | 0 m |
@@ -320,7 +320,7 @@ Every Space obstacle reuses the movement and collision of a Paper or Ocean obsta
 ### 5.4 Dungeon map (20 kinds on 18 mechanics: 10 in v68, 8 more in v70, the flamethrower in v81, the magic rings in v86)
 Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (left out on purpose, see 14.3). Every Dungeon obstacle reuses the movement and collision of a Paper obstacle (see `DUNGEON_MAKERS` in `js/obstacles.js`) with new art in `js/draw-dungeon.js`, and every drawing stays inside its collision shape (a sword's crossguard pokes out a few units, harmlessly). The walls are dark, so obstacles are light stone, bone, wood and fire with a dark outline.
 
-| Dungeon obstacle | Behaviour | Based on | Starts at |
+| Dungeon obstacle | Behaviour | Based on | Started at (until v124) |
 |---|---|---|---|
 | Stone ledges | Mossy stone slabs from both walls with a gap (sandstone, grey, mossy or reddish) | Rulers | 0 m |
 | Spiked iron balls | 1–3 spiked balls (iron, rust or bronze) that stay put | Ink blots | 0 m |
@@ -371,7 +371,7 @@ Also fixed in v73: the spiked crusher blocks reached 9 units past their hit box 
 ### 5.5 Neon City map (20 kinds on 19 mechanics, since v113)
 Every mechanic in section 6 except the Telegraphed Slam. Every Neon City obstacle reuses the movement and collision of a Paper or Ocean obstacle (see `CITY_MAKERS` in `js/obstacles.js`) with new art in `js/draw-city.js`. Like the Dungeon, each mechanic has two or three looks sharing its hit box, each in a few neon colours (`CITY_LOOKS`); a row of the same obstacle shares one look and colour. Solid parts stay inside the hit shape; only the soft neon glow spills a little past it.
 
-| Neon City obstacle | Looks | Based on | Starts at |
+| Neon City obstacle | Looks | Based on | Started at (until v124) |
 |---|---|---|---|
 | Signs (Gap Wall) | Dark boards with a neon border and neon "lettering" (pink, cyan, lime, orange); steel balconies with a railing and a strip of lit windows | Rulers | 0 m |
 | Cones (Static Hazards) | Traffic cones on a square base; iron manhole covers with glowing slots; vending machines with a lit window of cans | Ink blots | 0 m |
@@ -397,7 +397,7 @@ Every mechanic in section 6 except the Telegraphed Slam. Every Neon City obstacl
 ### 5.6 Forest map (19 kinds on 19 mechanics, since v114)
 Every mechanic in section 6 except the Telegraphed Slam. Every Forest obstacle reuses the movement and collision of a Paper or Ocean obstacle (see `FOREST_MAKERS` in `js/obstacles.js`) with new art in `js/draw-forest.js`. Each mechanic has one to four looks sharing its hit box, in a few colours (`FOREST_LOOKS`); a row of the same obstacle shares one look and colour. Some looks only appear in their seasons (`FOREST_SEASONS`): snowballs, frosted sticks, snowflakes and the frosty ray in winter and at night, bees and sunbeams in spring to autumn, bats at night, apples in summer and autumn. Leaves on branches, sticks, swings and vines take the colour of the season.
 
-| Forest obstacle | Looks | Based on | Starts at |
+| Forest obstacle | Looks | Based on | Started at (until v124) |
 |---|---|---|---|
 | Branches (Gap Wall) | A branch with a layer of leaves and a cut end; a fallen log with moss (snow in winter) and tree rings at its end | Rulers | 0 m |
 | Nests (Static Hazards) | Papery hornets' nests with two hornets; pinecones; purple thistles | Ink blots | 0 m |
@@ -422,7 +422,7 @@ Every mechanic in section 6 except the Telegraphed Slam. Every Forest obstacle r
 ### 5.7 Desert map (19 kinds on 19 mechanics, since v120)
 Every mechanic in section 6 except the Telegraphed Slam. Every Desert obstacle reuses the movement and collision of a Paper or Ocean obstacle (see `DESERT_MAKERS` in `js/obstacles.js`) with new art in `js/draw-desert.js`. Each mechanic has one to three looks sharing its hit box, in a few colours (`DESERT_LOOKS`); a row of the same obstacle shares one look and colour. Some looks only appear in their rock layers (`DESERT_LAYERS`): dunes near the top, adobe walls and spitting camels above the fossil beds, palm fronds in the canyon and oasis, coconuts from the canyon to the fossil beds, sandstone columns below the dunes. There is no quicksand (it would pull the plane, like the removed sharpener), and the sandstorm is faint streaks, never a haze that hides obstacles.
 
-| Desert obstacle | Looks | Based on | Starts at |
+| Desert obstacle | Looks | Based on | Started at (until v124) |
 |---|---|---|---|
 | Sand ledges (Gap Wall) | Layered sandstone ledges with a wind-worn end; adobe walls of mud bricks with a beam end | Rulers | 0 m |
 | Cacti (Static Hazards) | Round barrel cacti with ribs and a flower; prickly pears with a pink fruit; boulders with a lizard on top; sometimes a fossil stone (collectible, see section 7) | Ink blots | 0 m |
@@ -447,7 +447,7 @@ Every mechanic in section 6 except the Telegraphed Slam. Every Desert obstacle r
 ### 5.8 Volcano map (19 kinds on 19 mechanics, since v121)
 Every mechanic in section 6 except the Telegraphed Slam. Every Volcano obstacle reuses the movement and collision of a Paper or Ocean obstacle (see `VOLCANO_MAKERS` in `js/obstacles.js`) with new art in `js/draw-volcano.js`. Each mechanic has one to three looks sharing its hit box, in a few colours (`VOLCANO_LOOKS`); a row of the same obstacle shares one look and colour. Some looks only appear in their layers (`VOLCANO_LAYERS`): jungle vines and cinder moths near the top, ash puffs in the ash cloud and crater, rope lava from 150 m on, lightning from the ash cloud to the lava tubes, lava frogs from the crater down. There is no lava floor pulling the plane in, and ash and steam are always see-through, never a cloud that hides obstacles.
 
-| Volcano obstacle | Looks | Based on | Starts at |
+| Volcano obstacle | Looks | Based on | Started at (until v124) |
 |---|---|---|---|
 | Basalt ledges (Gap Wall) | Basalt column ledges with a six-sided end; a cooled lava crust with a glowing crack | Rulers | 0 m |
 | Bombs (Static Hazards) | Volcanic bombs with glowing cracks; yellow sulfur crystals; pale pumice full of holes | Ink blots | 0 m |

@@ -520,10 +520,10 @@ const EXPECTED = { notebook: 16, sea: 19, space: 15, dungeon: 18, city: 19, fore
     const out = [];
     for (const s of [1, -1]) {
       press(s, 'sim'); release('sim');
-      for (let f = 0; f < 240; f++) { plane.invuln = 1; update(1 / 60); }
+      for (let f = 0; f < 240; f++) { plane.invuln = 1; obstacles.length = 0; update(1 / 60); }   // no bands or wind to push it
       const atEdge = s > 0 ? plane.x >= W - 16 : plane.x <= 16;
       press(-s, 'sim'); release('sim');
-      for (let f = 0; f < 12; f++) { plane.invuln = 1; update(1 / 60); }
+      for (let f = 0; f < 12; f++) { plane.invuln = 1; obstacles.length = 0; update(1 / 60); }
       out.push(atEdge && plane.vx * -s > 30);
     }
     gameOver();
