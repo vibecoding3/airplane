@@ -69,18 +69,6 @@ const FISH = {
     body(); fishOutline(COL.ink);
     fishEye(9, -2);
   } },
-  jelly: { w: 42, h: 64, cols: [{ bell: 'rgba(240,140,200,.8)', line: '#b0507f', arm: '#d97fb0' },
-                                { bell: 'rgba(140,190,250,.8)', line: '#4f7fb0', arm: '#7fb0e0' },
-                                { bell: 'rgba(190,150,250,.8)', line: '#7a50b0', arm: '#a77fe0' },
-                                { bell: 'rgba(250,180,110,.8)', line: '#b07a3a', arm: '#e0a46a' }], paint(c) {
-    ctx.strokeStyle = c.arm; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
-    for (const x of [-9, -3, 3, 9]) {
-      ctx.beginPath(); ctx.moveTo(x, -8); ctx.quadraticCurveTo(x + 5, 6, x - 2, 14); ctx.quadraticCurveTo(x - 6, 22, x + 1, 28); ctx.stroke();
-    }
-    ctx.fillStyle = c.bell;
-    ctx.beginPath(); ctx.arc(0, -8, 15, Math.PI, 0); ctx.quadraticCurveTo(8, -4, 0, -5); ctx.quadraticCurveTo(-8, -4, -15, -8); ctx.closePath(); ctx.fill();
-    fishOutline(c.line);
-  } },
   parrot: { w: 66, h: 38, cols: [{ body: '#3fb8a0', belly: '#9fe0c8', fin: '#f08ab0' }, { body: '#5a7fe0', belly: '#a8c0f4', fin: '#f2c84b' },
                                  { body: '#e46a8f', belly: '#f6b3c6', fin: '#3fb8a0' }], paint(c) {
     fishTail(-19, 9, 12, c.fin, COL.ink);
@@ -116,16 +104,6 @@ const FISH = {
     ctx.fillStyle = '#ffffff'; for (let x = 33; x < 44; x += 3) { ctx.beginPath(); ctx.moveTo(x, 2); ctx.lineTo(x + 1.5, 4); ctx.lineTo(x + 3, 2); ctx.fill(); }
     ctx.fillStyle = '#4a5562'; for (let x = -24; x < 20; x += 8) { ctx.beginPath(); ctx.arc(x, -2, 1.3, 0, Math.PI * 2); ctx.fill(); }
     fishEye(28, -2, 1.6);
-  } },
-  moray: { w: 112, h: 44, paint() {
-    const y = x => Math.sin(x * 0.09) * 6;
-    const spine = () => { ctx.beginPath(); for (let x = -46; x <= 38; x += 4) (x === -46 ? ctx.moveTo(x, y(x)) : ctx.lineTo(x, y(x))); };
-    spine(); ctx.strokeStyle = COL.ink; ctx.lineWidth = 12.5; ctx.lineCap = 'round'; ctx.stroke();
-    spine(); ctx.strokeStyle = '#5f7f3a'; ctx.lineWidth = 10; ctx.stroke();
-    ctx.fillStyle = '#3f5a24'; for (let x = -36; x < 34; x += 9) { ctx.beginPath(); ctx.arc(x, y(x) - 1, 1.4, 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = '#5f7f3a'; ctx.beginPath(); ctx.ellipse(44, y(44), 10, 7, 0.2, 0, Math.PI * 2); ctx.fill(); fishOutline(COL.ink);
-    ctx.beginPath(); ctx.moveTo(53, y(44) + 1); ctx.lineTo(44, y(44) + 3); fishOutline(COL.ink, 1);
-    fishEye(46, y(44) - 3, 1.6);
   } },
   tuna: { w: 112, h: 42, cols: [{ back: '#24476e', belly: '#c9d6e2', fin: '#f2c84b' }, { back: '#3a5f4a', belly: '#d6e0d0', fin: '#e0a21a' }], paint(c) {
     ctx.fillStyle = c.back;
@@ -207,10 +185,10 @@ const FISH = {
   } }
 };
 // species that are also Ocean obstacles (school, butterflyfish, puffer, turtle, octopus, ray, swordfish, anglerfish,
-// lanternfish) were taken out of the scenery in v124, so a fish in the background never looks like one that hurts
+// lanternfish in v124; jellyfish and moray eel in v128) are not in the scenery, so a background fish never looks like one that hurts
 const FISH_TIERS = [
-  ['clown', 'tang', 'seahorse'], ['angel', 'jelly', 'parrot'],
-  ['lion', 'barracuda', 'moray', 'tuna'], ['reefshark', 'hammer', 'sunfish'],
+  ['clown', 'tang', 'seahorse'], ['angel', 'parrot'],
+  ['lion', 'barracuda', 'tuna'], ['reefshark', 'hammer', 'sunfish'],
   ['white', 'squid', 'oarfish'], ['viper', 'gulper', 'hatchet']
 ];
 let lastSceneryY = -1e9;

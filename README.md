@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v127** (2026-10-20)
+Current version: **v128** (2026-10-20)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -99,17 +99,17 @@ Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a n
 | Depth | Fish |
 |---|---|
 | 0–150 m | Clownfish, tang, seahorse |
-| 150–400 m | Angelfish, jellyfish, parrotfish |
-| 400–800 m | Lionfish, barracuda, moray eel, tuna |
+| 150–400 m | Angelfish, parrotfish |
+| 400–800 m | Lionfish, barracuda, tuna |
 | 800–1,500 m | Reef shark, hammerhead shark, ocean sunfish |
 | 1,500–2,500 m | Great white shark, giant squid, oarfish |
 | 2,500 m + | Viperfish, gulper eel, hatchetfish |
 
-Since v124 the scenery leaves out the species that became obstacles (the school of fish, butterflyfish, pufferfish, sea turtle, octopus, stingray, swordfish, anglerfish and lanternfish), so a harmless background fish never looks like one that hurts.
+Since v124 the scenery leaves out the species that became obstacles (the school of fish, butterflyfish, pufferfish, sea turtle, octopus, stingray, swordfish, anglerfish and lanternfish; since v128 also the jellyfish and moray eel), so a harmless background fish never looks like one that hurts.
 
 The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fish have pale outlines so they show against dark water. About 20% of the time a fish from the level above appears, for variety.
 
-**Colour variants:** most species come in 2–4 colour schemes, picked at random when each fish appears (19 species since v124; 28 before). For example: clownfish in orange, maroon, dark-banded or golden; tangs in blue, yellow or purple; jellyfish in pink, blue, violet or amber. Background fish never collide with the plane.
+**Colour variants:** most species come in 2–4 colour schemes, picked at random when each fish appears (17 species since v128; 19 in v124–v127, 28 before). For example: clownfish in orange, maroon, dark-banded or golden; tangs in blue, yellow or purple; angelfish and parrotfish in several colours. Background fish never collide with the plane.
 
 ### 4.3 Space (since v53)
 The plane is thrown out of orbit and falls away from Earth into deeper and stranger space. Cartoon and playful in tone.
