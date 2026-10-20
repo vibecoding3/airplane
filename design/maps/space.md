@@ -28,34 +28,34 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 | Battle station | Wall Bulge | A big grey sphere with a dish and a trench | ~170 m | ❌ | A grey sphere with a dish and a trench describes one specific famous film station. Same store risk. An **asteroid base** or a **gas giant's moon with a mining rig** would be safe. |
 | Robot arm | Sweeping Arm | A station arm with a claw swinging round | ~215 m | ✅ | Real stations have robot arms. Great. |
 
-## Spawn chances (v126)
+## Spawn chances (v127)
 The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
-- **Weights grow with depth** for some obstacles (the slider, the projectile and the spinning blades), so they get more common as you fall.
-- **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place.
+- **Every obstacle has the same weight** (since v127), so they are all equally likely: 1 in 19 (about 5%) when every obstacle is allowed. Until v126 some had more weight, and three grew more common with depth.
+- **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place, so each gets a little more there.
 - **Never the same obstacle twice in a row**, which slightly evens out the numbers.
 - **Planets (collectible):** a "Planet" row shows a planet not yet seen this run; once all 8 have appeared it becomes a moon edge.
 
 | Obstacle | 0 m | 500 m | 1,000 m | 2,000 m |
 |---|---|---|---|---|
-| Station girders | 12% | 11% | 11% | 12% |
-| Asteroids | 8% | 8% | 8% | 8% |
-| GPS satellite | 4% | 6% | 8% | 8% |
+| Airlock doors | 5% | 5% | 5% | 6% |
+| Asteroids | 5% | 5% | 5% | 6% |
+| Battle station | 5% | 5% | 5% | 6% |
+| Black hole | 5% | 5% | 6% | 5% |
+| Docking probe | 5% | 5% | 5% | 6% |
+| Energy blade | 5% | 5% | 5% | 6% |
+| GPS satellite | 5% | 5% | 5% | 5% |
+| Ice chunks | 5% | 5% | 5% | 6% |
+| ISS | 5% | 5% | 5% | 6% |
+| Laser gate | 5% | 5% | 5% | 6% |
+| Low-gravity field | 5% | 5% | 5% | 6% |
+| Moon edge | 5% | 5% | 5% | 6% |
 | Planet | 5% | 5% | 5% | 6% |
+| Robot arm | 6% | 5% | 5% | 6% |
+| Rocket | 5% | 5% | 5% | 6% |
+| Station girders | 5% | 5% | 5% | 6% |
+| Tumbling asteroid | 5% | 5% | 5% | 6% |
+| Twin-wing fighter | 5% | 5% | 5% | 6% |
 | Starlink train | 5% | 5% | 5% | — |
-| Tumbling asteroid | 5% | 5% | 5% | 5% |
-| Robot arm | 5% | 5% | 5% | 5% |
-| Rocket | 5% | 5% | 5% | 5% |
-| Ice chunks | 5% | 5% | 5% | 5% |
-| Docking probe | 5% | 5% | 5% | 5% |
-| Energy blade | 5% | 5% | 5% | 5% |
-| ISS | 5% | 5% | 5% | 5% |
-| Airlock doors | 5% | 5% | 5% | 5% |
-| Twin-wing fighter | 5% | 5% | 5% | 5% |
-| Laser gate | 4% | 4% | 4% | 5% |
-| Black hole | 5% | 4% | 4% | 5% |
-| Low-gravity field | 4% | 4% | 4% | 4% |
-| Battle station | 4% | 4% | 4% | 4% |
-| Moon edge | 4% | 4% | 4% | 4% |
 
 ## Gaps and ideas
 - Unused mechanics apart from the ones banned on purpose (wind, explosions):

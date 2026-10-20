@@ -28,35 +28,35 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 | Plates | Closing Jaws | Grinding rock plates / obsidian slabs | ~150 m | ✅ | Grinding rock plates suggest tectonics. Nice. |
 | Steam arm | Sweeping Arm | Steam jet / lava spout | ~215 m | ⚠️ | A rotating jet is a bit mechanical, as if a sprinkler were in the volcano. It reads fine. |
 
-## Spawn chances (v126)
+## Spawn chances (v127)
 The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
-- **Weights grow with depth** for some obstacles (the slider, the projectile and the spinning blades), so they get more common as you fall.
-- **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place.
+- **Every obstacle has the same weight** (since v127), so they are all equally likely: 1 in 19 (about 5%) when every obstacle is allowed. Until v126 some had more weight, and three grew more common with depth.
+- **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place, so each gets a little more there.
 - **Never the same obstacle twice in a row**, which slightly evens out the numbers.
 - **Looks:** each row picks one look, all looks allowed in that layer being equally likely.
 - **Volcanic stones (collectible):** each lava bomb has a 50% chance to be a stone not yet seen this run, until all 8 have appeared.
 
 | Obstacle | 0 m | 500 m | 1,000 m | 2,000 m |
 |---|---|---|---|---|
-| Basalt ledges | 11% | 11% | 10% | 11% |
-| Bombs | 8% | 7% | 7% | 8% |
-| Raft | 4% | 7% | 8% | 9% |
-| Lava bombs | 5% | 6% | 7% | 8% |
-| Shards | 2% | 6% | 7% | 8% |
-| Plates | 6% | 5% | 6% | 5% |
-| Dome | 6% | 5% | 5% | 5% |
-| Lava tongue | 5% | 5% | 5% | 5% |
-| Lava wave | 5% | 5% | 5% | 5% |
-| Rollers | 5% | 5% | 5% | — |
-| Moths | 5% | 5% | 5% | 5% |
-| Lava vent | 5% | 5% | 4% | 5% |
-| Steam arm | 6% | 5% | 5% | 5% |
-| Mud pot | 5% | 4% | 4% | 5% |
-| Spindle | 5% | 4% | 4% | 4% |
-| Rope lava | 5% | 4% | 4% | 5% |
-| Lightning | 5% | 4% | 4% | 5% |
-| Ash gust | 4% | 4% | — | — |
-| Steam column | 4% | 4% | 4% | 4% |
+| Basalt ledges | 5% | 5% | 5% | 6% |
+| Bombs | 5% | 5% | 6% | 6% |
+| Dome | 5% | 5% | 6% | 6% |
+| Lava bombs | 5% | 5% | 5% | 6% |
+| Lava tongue | 5% | 5% | 6% | 6% |
+| Lava vent | 5% | 5% | 6% | 6% |
+| Lava wave | 5% | 5% | 6% | 6% |
+| Lightning | 5% | 5% | 6% | 6% |
+| Moths | 5% | 5% | 6% | 6% |
+| Mud pot | 5% | 5% | 6% | 6% |
+| Plates | 5% | 5% | 6% | 6% |
+| Raft | 5% | 5% | 6% | 6% |
+| Rope lava | 5% | 5% | 5% | 6% |
+| Shards | 5% | 5% | 6% | 6% |
+| Spindle | 5% | 5% | 6% | 6% |
+| Steam arm | 5% | 5% | 6% | 6% |
+| Steam column | 5% | 6% | 6% | 6% |
+| Rollers | 5% | 5% | 6% | — |
+| Ash gust | 6% | 5% | — | — |
 
 ## Gaps and ideas
 - Decide whether invented volcanic creatures are OK. If they are, they could become a feature (a "volcano critters" collection). If not, swap the moths, beetles and frog for embers, ash and a second vent look.

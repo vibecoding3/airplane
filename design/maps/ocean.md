@@ -23,35 +23,35 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 
 > **Done in v124:** all seven new obstacles below were added (school of fish, pufferfish / sea turtle, big rock / brain coral / sleeping whale, swordfish / driftwood / broken mast, fishing line / net strand, anchor chain / squid tentacle, crab / lobster). Every older obstacle got a second or third look too, including the electric ray and the octopus arm suggested above (the eel and the kelp stay as well). Species that became obstacles were taken out of the background scenery. The "Fit" table above describes the map before v124.
 
-## Spawn chances (v126)
+## Spawn chances (v127)
 The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
-- **Weights grow with depth** for some obstacles (the slider, the projectile and the spinning blades), so they get more common as you fall.
-- **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place.
+- **Every obstacle has the same weight** (since v127), so they are all equally likely: 1 in 19 (about 5%) when every obstacle is allowed. Until v126 some had more weight, and three grew more common with depth.
+- **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place, so each gets a little more there.
 - **Never the same obstacle twice in a row**, which slightly evens out the numbers.
 - **Looks:** each row picks one look, all looks allowed at that depth being equally likely (for example coral / rock ledge / wreck planks: 1 in 3 each; anglerfish only from 400 m).
 - **Seashells (collectible):** each urchin has a 40% chance to be a shell not yet seen this run. **Legendary fish:** each starfish has a 50% chance to be one, until all 5 have appeared.
 
 | Obstacle | 0 m | 500 m | 1,000 m | 2,000 m |
 |---|---|---|---|---|
-| Coral ledges | 11% | 10% | 10% | 11% |
-| Sea urchins | 8% | 7% | 7% | 7% |
-| Swordfish | 4% | 7% | 8% | 9% |
-| Pufferfish | 5% | 6% | 7% | 8% |
-| Crab | 2% | 5% | 7% | 8% |
-| Jellyfish | 5% | 5% | 5% | 5% |
-| Starfish | 6% | 5% | 5% | 5% |
-| Big rock | 6% | 5% | 5% | 5% |
-| Anchor | 5% | 5% | 5% | 5% |
-| Naval mine | 5% | 5% | 5% | 5% |
-| School of fish | 5% | 5% | 5% | — |
-| Giant clam | 5% | 5% | 5% | 5% |
-| Moray eel | 5% | 5% | 5% | 5% |
-| Fishing line | 5% | 4% | 4% | 4% |
-| Kelp | 5% | 4% | 4% | 4% |
-| Electric eel | 5% | 4% | 4% | 5% |
-| Submarine | 5% | 4% | 4% | 4% |
-| Ocean current | 4% | 4% | — | — |
-| Bubble column | 4% | 4% | 4% | 4% |
+| Anchor | 5% | 5% | 6% | 6% |
+| Big rock | 5% | 5% | 6% | 6% |
+| Bubble column | 5% | 6% | 6% | 6% |
+| Coral ledges | 5% | 5% | 5% | 6% |
+| Crab | 5% | 5% | 5% | 6% |
+| Electric eel | 5% | 5% | 6% | 6% |
+| Fishing line | 6% | 5% | 6% | 6% |
+| Giant clam | 5% | 5% | 6% | 6% |
+| Jellyfish | 5% | 5% | 6% | 6% |
+| Kelp | 5% | 5% | 6% | 6% |
+| Moray eel | 5% | 5% | 6% | 6% |
+| Naval mine | 5% | 5% | 6% | 6% |
+| Pufferfish | 5% | 5% | 6% | 6% |
+| Sea urchins | 5% | 5% | 6% | 6% |
+| Starfish | 5% | 5% | 6% | 6% |
+| Submarine | 5% | 5% | 6% | 6% |
+| Swordfish | 5% | 5% | 6% | 6% |
+| School of fish | 5% | 6% | 5% | — |
+| Ocean current | 5% | 5% | — | — |
 
 ## Gaps and ideas (biggest opportunity in the game)
 The map has no Wall Bulge, Bouncing Slider, Rising Projectile, Conveyor, Spinning Blades, Sweeping Arm or Spring Line. Natural sea versions:

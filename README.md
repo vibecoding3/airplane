@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v126** (2026-10-20)
+Current version: **v127** (2026-10-20)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -216,7 +216,7 @@ The plane dives into the crater of a tropical island volcano and falls down its 
 
 ## 5. Obstacles
 
-Since v125 every obstacle can appear at any depth, from the first metres on, on every map (the player's choice); only wind (desk fan, ocean current and the like) still stops at 700 m, and since v126 conveyors (paper clips, fish schools, satellite trains, flying daggers, hover taxis, ducks, camel caravans, rolling lava rocks) stop at 1,500 m (`conveyorAllowed` in `js/obstacles.js`). Depth still makes obstacles faster, bigger and more frequent. The "Started at" columns below are the depths where each obstacle first joined the pool until v124. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
+Since v125 every obstacle can appear at any depth, from the first metres on, on every map (the player's choice); only wind (desk fan, ocean current and the like) still stops at 700 m, and since v126 conveyors (paper clips, fish schools, satellite trains, flying daggers, hover taxis, ducks, camel caravans, rolling lava rocks) stop at 1,500 m (`conveyorAllowed` in `js/obstacles.js`). Since v127 every obstacle on a map also has the same spawn weight, so each is equally likely (the extra weights of v126 and before, such as the walls, the static hazards and the Dungeon's magic rings, are gone; see the spawn tables in `design/maps/`). Depth still makes obstacles faster, bigger and more frequent. The "Started at" columns below are the depths where each obstacle first joined the pool until v124. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
 
 ### 5.0 All obstacles at a glance
 One row per mechanic (section 6), names only; the details are in 5.1–5.8. For Ocean, Dungeon, Neon City, Forest, Desert and Volcano, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
@@ -341,7 +341,7 @@ Every mechanic in section 6 except the Telegraphed Slam and the Effect Zone (lef
 | Rune beam (v70) | A rune stone on the wall: its runes light up and a dashed line shows the path, then a magic beam fires | Electric eel | ~135 m |
 | Skeleton arm (v70) | A dashed wedge shows its reach, then a bony arm swipes out of a crack in the wall | Cat paw | ~135 m |
 | Flamethrower (v81) | An iron nozzle in the wall with a flickering blue pilot light; a jet of flame shoots out, holds, then dies back. Its own obstacle (own spawn chance), always this look | Cutter | ~120 m |
-| Magic rings (v86) | Cartoon rings after a sheet of fantasy rings, thrown up the shaft spinning and bouncing off the walls. 9 designs: emerald (gold, big green gem), sapphire (silver, blue oval), ruby (gold, red gem with two side gems), crystal (silver, long blue crystal), amethyst (dark, a row of purple gems), amber (silver, orange hexagon), skull (dark, skull with purple eyes), zigzag (gold, engraved), leaf (silver, green leaves). Its own obstacle; since v87 its spawn weight is 3 (was 1.2), so rings are about 10% of rows, as common as the stone ledges, about 5–6 rings per run to 500 m | Paper wad | ~65 m |
+| Magic rings (v86) | Cartoon rings after a sheet of fantasy rings, thrown up the shaft spinning and bouncing off the walls. 9 designs: emerald (gold, big green gem), sapphire (silver, blue oval), ruby (gold, red gem with two side gems), crystal (silver, long blue crystal), amethyst (dark, a row of purple gems), amber (silver, orange hexagon), skull (dark, skull with purple eyes), zigzag (gold, engraved), leaf (silver, green leaves). Its own obstacle; its spawn weight was 3 in v87–v126 (about 10% of rows); since v127 it has the same weight as every other obstacle (about 5% of rows) | Paper wad | ~65 m |
 
 **Looks and colours** (since v73): every Dungeon obstacle comes in two to five different objects that share its mechanic and hit box, each in a few colours (64 looks in all; 12 Halloween and goblin looks added in v80, two mage staffs in v82; `DUNGEON_LOOKS` in `js/obstacles.js`). A row of the same obstacle shares one look and colour.
 

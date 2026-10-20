@@ -244,7 +244,8 @@ function clipXs(o) {
   return xs;
 }
 
-// how often each obstacle appears; since v125 every obstacle can appear at any depth (only wind stops at 700 m)
+// which obstacles can appear; since v125 every obstacle can appear at any depth (wind stops at 700 m, conveyors at
+// 1,500 m) and since v127 they all have the same weight, so each is equally likely on its map
 let lastType = '';
 // Ocean obstacles. Most reuse a notebook obstacle's movement and collision with an underwater look
 // (the generator named on the right); mines, electric eels, bubble columns and starfish are their own.
@@ -338,15 +339,15 @@ const SPACE_COLS = {
   protractor: ['#d8d4c8', '#c9b9a6', '#b8c4d0']                               // moons
 };
 function spacePool(d, y) {
-  const pool = [['girders', 3], ['asteroids', 2], ['ice', 1.2], ['tumbler', 1.2], ['lowgrav', 1], ['gps', 1 + 1.2 * d]];
-  pool.push(['planet', 1.3]);
-  pool.push(['rocket', 1.2]);
-  if (conveyorAllowed(y)) pool.push(['starlink', 1.3]);
-  pool.push(['moon', 0.9], ['iss', 1.2]);
-  pool.push(['airlock', 1.2], ['probe', 1.2], ['blackhole', 1.1]);
-  pool.push(['laser', 1.1], ['fighter', 1.2]);
-  pool.push(['blade', 1.2], ['station', 1]);
-  pool.push(['arm', 1.2]);
+  const pool = [['girders', 1], ['asteroids', 1], ['ice', 1], ['tumbler', 1], ['lowgrav', 1], ['gps', 1]];
+  pool.push(['planet', 1]);
+  pool.push(['rocket', 1]);
+  if (conveyorAllowed(y)) pool.push(['starlink', 1]);
+  pool.push(['moon', 1], ['iss', 1]);
+  pool.push(['airlock', 1], ['probe', 1], ['blackhole', 1]);
+  pool.push(['laser', 1], ['fighter', 1]);
+  pool.push(['blade', 1], ['station', 1]);
+  pool.push(['arm', 1]);
   return pool;
 }
 // Dungeon obstacles: ten in v68, eight more in v70; each on an existing mechanic with dungeon art (draw-dungeon.js)
@@ -398,21 +399,21 @@ const DUNGEON_LOOKS = {
   band: { web: ['#f5f5ff'], slime: ['#5fd16a', '#b77cf0'] }
 };
 function dungeonPool(d, y) {
-  const pool = [['ledges', 3], ['spikeballs', 2], ['plank', 1 + 1.5 * d], ['rock', 1.4], ['skull', 1 + d]];
-  pool.push(['web', 1.2]);
-  pool.push(['ghosts', 1.3]);
-  pool.push(['saw', 1.2]);
-  if (conveyorAllowed(y)) pool.push(['daggers', 1.3]);
-  pool.push(['swords', 0.6 + 1.6 * d]);
-  if (windAllowed(y)) pool.push(['draft', 1.1]);
-  pool.push(['curse', 1.2]);
-  pool.push(['runebeam', 1.2], ['skelarm', 1.3]);
-  pool.push(['flamethrower', 1.2]);
-  pool.push(['rings', 3]);            // weight 3 since v87; regular Rising Projectile looks once all 9 rings have appeared
-  pool.push(['dragon', 1.2]);
-  pool.push(['spear', 1.3]);
-  pool.push(['crusher', 1.4]);
-  pool.push(['firebar', 1.3]);
+  const pool = [['ledges', 1], ['spikeballs', 1], ['plank', 1], ['rock', 1], ['skull', 1]];
+  pool.push(['web', 1]);
+  pool.push(['ghosts', 1]);
+  pool.push(['saw', 1]);
+  if (conveyorAllowed(y)) pool.push(['daggers', 1]);
+  pool.push(['swords', 1]);
+  if (windAllowed(y)) pool.push(['draft', 1]);
+  pool.push(['curse', 1]);
+  pool.push(['runebeam', 1], ['skelarm', 1]);
+  pool.push(['flamethrower', 1]);
+  pool.push(['rings', 1]);            // regular Rising Projectile looks once all 9 rings have appeared (weight 3 in v87–v126)
+  pool.push(['dragon', 1]);
+  pool.push(['spear', 1]);
+  pool.push(['crusher', 1]);
+  pool.push(['firebar', 1]);
   return pool;
 }
 // Neon City obstacles (v113): every one reuses a Paper or Ocean obstacle's movement and collision with city art (draw-city.js)
@@ -454,19 +455,19 @@ const CITY_LOOKS = {
   band: { cable: ['#2b2b3a'], lights: ['#ffd36a'] }
 };
 function cityPool(d, y) {
-  const pool = [['signs', 3], ['cones', 2], ['tram', 1 + 1.5 * d], ['bulge', 1.1], ['neon', 1.3], ['cans', 1 + d], ['holo', 1]];
-  pool.push(['cable', 1.2]);
-  pool.push(['drones', 1.3]);
-  pool.push(['fanspin', 1.2]);
-  if (conveyorAllowed(y)) pool.push(['taxis', 1.3]);
-  pool.push(['camera', 1.2]);
-  pool.push(['rotors', 0.6 + 1.6 * d]);
-  if (windAllowed(y)) pool.push(['vent', 1.1]);
-  pool.push(['ladder', 1.3]);
-  pool.push(['transformer', 1.2]);
-  pool.push(['laser', 1.2], ['barrier', 1.3]);
-  pool.push(['shutters', 1.4]);
-  pool.push(['crane', 1.3]);
+  const pool = [['signs', 1], ['cones', 1], ['tram', 1], ['bulge', 1], ['neon', 1], ['cans', 1], ['holo', 1]];
+  pool.push(['cable', 1]);
+  pool.push(['drones', 1]);
+  pool.push(['fanspin', 1]);
+  if (conveyorAllowed(y)) pool.push(['taxis', 1]);
+  pool.push(['camera', 1]);
+  pool.push(['rotors', 1]);
+  if (windAllowed(y)) pool.push(['vent', 1]);
+  pool.push(['ladder', 1]);
+  pool.push(['transformer', 1]);
+  pool.push(['laser', 1], ['barrier', 1]);
+  pool.push(['shutters', 1]);
+  pool.push(['crane', 1]);
   return pool;
 }
 // Forest obstacles (v114): every one reuses a Paper or Ocean obstacle's movement and collision with forest art (draw-forest.js)
@@ -503,19 +504,19 @@ const FOREST_LOOKS = {
 // looks tied to the seasons they belong to (0 spring, 1 summer, 2 autumn, 3 winter, 4 night); the rest appear all year
 const FOREST_SEASONS = { snowball: [3, 4], frost: [3, 4], snowflake: [3, 4], bee: [0, 1, 2], bat: [4], sunbeam: [0, 1, 2], apple: [1, 2] };
 function forestPool(d, y) {
-  const pool = [['branches', 3], ['nests', 2], ['twig', 1 + 1.5 * d], ['trunk', 1.4], ['acorns', 1 + d], ['updraft', 1]];
-  pool.push(['vines', 1.2]);
-  pool.push(['bees', 1.4]);
-  pool.push(['husk', 1.2]);
-  if (conveyorAllowed(y)) pool.push(['ducks', 1.3]);
-  pool.push(['squirrel', 1.2]);
-  pool.push(['maple', 0.6 + 1.6 * d]);
-  if (windAllowed(y)) pool.push(['breeze', 1.1]);
-  pool.push(['snake', 1.3]);
-  pool.push(['puffball', 1.2]);
-  pool.push(['sunbeam', 1.2], ['bear', 1.3]);
-  pool.push(['logs', 1.4]);
-  pool.push(['swing', 1.3]);
+  const pool = [['branches', 1], ['nests', 1], ['twig', 1], ['trunk', 1], ['acorns', 1], ['updraft', 1]];
+  pool.push(['vines', 1]);
+  pool.push(['bees', 1]);
+  pool.push(['husk', 1]);
+  if (conveyorAllowed(y)) pool.push(['ducks', 1]);
+  pool.push(['squirrel', 1]);
+  pool.push(['maple', 1]);
+  if (windAllowed(y)) pool.push(['breeze', 1]);
+  pool.push(['snake', 1]);
+  pool.push(['puffball', 1]);
+  pool.push(['sunbeam', 1], ['bear', 1]);
+  pool.push(['logs', 1]);
+  pool.push(['swing', 1]);
   return pool;
 }
 // Desert obstacles (v120): every one reuses a Paper or Ocean obstacle's movement and collision with desert art (draw-desert.js)
@@ -553,19 +554,19 @@ const DESERT_LOOKS = {
 // looks tied to the layers they belong to (0 dunes, 1 canyon, 2 oasis, 3 fossil beds, 4 amber); the rest appear everywhere
 const DESERT_LAYERS = { dune: [0, 1], adobe: [0, 1, 2], fronds: [1, 2], coconut: [1, 2, 3], column: [1, 2, 3, 4], camelspit: [0, 1, 2] };
 function desertPool(d, y) {
-  const pool = [['sandLedges', 3], ['cacti', 2], ['carpet', 1 + 1.5 * d], ['outcrop', 1.4], ['coconuts', 1 + d], ['heat', 1]];
-  pool.push(['rope', 1.2]);
-  pool.push(['vultures', 1.3]);
-  pool.push(['tumbleweed', 1.3]);
-  if (conveyorAllowed(y)) pool.push(['caravan', 1.3]);
-  pool.push(['spitter', 1.2]);
-  pool.push(['fronds', 0.6 + 1.6 * d]);
-  if (windAllowed(y)) pool.push(['sandstorm', 1.1]);
-  pool.push(['tongue', 1.3]);
-  pool.push(['cactusPod', 1.2]);
-  pool.push(['glint', 1.2], ['scorpion', 1.3]);
-  pool.push(['slabs', 1.4]);
-  pool.push(['wellLever', 1.3]);
+  const pool = [['sandLedges', 1], ['cacti', 1], ['carpet', 1], ['outcrop', 1], ['coconuts', 1], ['heat', 1]];
+  pool.push(['rope', 1]);
+  pool.push(['vultures', 1]);
+  pool.push(['tumbleweed', 1]);
+  if (conveyorAllowed(y)) pool.push(['caravan', 1]);
+  pool.push(['spitter', 1]);
+  pool.push(['fronds', 1]);
+  if (windAllowed(y)) pool.push(['sandstorm', 1]);
+  pool.push(['tongue', 1]);
+  pool.push(['cactusPod', 1]);
+  pool.push(['glint', 1], ['scorpion', 1]);
+  pool.push(['slabs', 1]);
+  pool.push(['wellLever', 1]);
   return pool;
 }
 // Volcano obstacles (v121): every one reuses a Paper or Ocean obstacle's movement and collision with volcano art (draw-volcano.js)
@@ -604,33 +605,33 @@ const VOLCANO_LOOKS = {
 // looks tied to the layers they belong to (0 jungle, 1 ash cloud, 2 crater, 3 lava tubes, 4 magma); the rest appear everywhere
 const VOLCANO_LAYERS = { vine: [0, 1], ropelava: [1, 2, 3, 4], charlog: [0, 1, 2], ashpuff: [1, 2], lightning: [1, 2, 3], lavafrog: [2, 3, 4], moth: [0, 1, 2] };
 function volcanoPool(d, y) {
-  const pool = [['basaltLedges', 3], ['bombs', 2], ['raft', 1 + 1.5 * d], ['dome', 1.4], ['lavaBombs', 1.2 + d], ['steamColumn', 1]];
-  pool.push(['ropeLava', 1.2]);
-  pool.push(['moths', 1.3]);
-  pool.push(['spindle', 1.2]);
-  if (conveyorAllowed(y)) pool.push(['rollers', 1.3]);
-  pool.push(['lavaVent', 1.2]);
-  pool.push(['shards', 0.6 + 1.6 * d]);
-  if (windAllowed(y)) pool.push(['ashGust', 1.1]);
-  pool.push(['lavaTongue', 1.3]);
-  pool.push(['mudPot', 1.2]);
-  pool.push(['lightning', 1.2], ['lavaWave', 1.3]);
-  pool.push(['plates', 1.4]);
-  pool.push(['steamArm', 1.3]);
+  const pool = [['basaltLedges', 1], ['bombs', 1], ['raft', 1], ['dome', 1], ['lavaBombs', 1], ['steamColumn', 1]];
+  pool.push(['ropeLava', 1]);
+  pool.push(['moths', 1]);
+  pool.push(['spindle', 1]);
+  if (conveyorAllowed(y)) pool.push(['rollers', 1]);
+  pool.push(['lavaVent', 1]);
+  pool.push(['shards', 1]);
+  if (windAllowed(y)) pool.push(['ashGust', 1]);
+  pool.push(['lavaTongue', 1]);
+  pool.push(['mudPot', 1]);
+  pool.push(['lightning', 1], ['lavaWave', 1]);
+  pool.push(['plates', 1]);
+  pool.push(['steamArm', 1]);
   return pool;
 }
 function seaPool(d, y) {
-  const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1],
-                ['swordfish', 1 + 1.5 * d], ['bigRock', 1.4], ['puffer', 1.2 + d]];
-  pool.push(['fishline', 1.2]);
-  if (conveyorAllowed(y)) pool.push(['school', 1.3]);
-  pool.push(['crab', 0.6 + 1.6 * d]);
-  pool.push(['anchor', 1.3]);
-  pool.push(['mine', 1.3]);
-  pool.push(['moray', 1.3]);
-  if (windAllowed(y)) pool.push(['current', 1.1]);
-  pool.push(['clam', 1.3], ['sub', 1.2]);
-  pool.push(['zap', 1.2], ['kelp', 1.2]);
+  const pool = [['coral', 1], ['urchins', 1], ['jellies', 1], ['starfish', 1], ['bubbles', 1],
+                ['swordfish', 1], ['bigRock', 1], ['puffer', 1]];
+  pool.push(['fishline', 1]);
+  if (conveyorAllowed(y)) pool.push(['school', 1]);
+  pool.push(['crab', 1]);
+  pool.push(['anchor', 1]);
+  pool.push(['mine', 1]);
+  pool.push(['moray', 1]);
+  if (windAllowed(y)) pool.push(['current', 1]);
+  pool.push(['clam', 1], ['sub', 1]);
+  pool.push(['zap', 1], ['kelp', 1]);
   return pool;
 }
 
@@ -666,18 +667,18 @@ function spawnRow(y, d) {
   if (mapId === 'forest') return spawnFromPool(y, d, forestPool(d, y));
   if (mapId === 'desert') return spawnFromPool(y, d, desertPool(d, y));
   if (mapId === 'volcano') return spawnFromPool(y, d, volcanoPool(d, y));
-  const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
-  if (conveyorAllowed(y)) pool.push(['clips', 1.4]);
-  pool.push(['scissors', 0.6 + 1.6 * d]);
-  if (windAllowed(y)) pool.push(['fan', 1.1]);
-  pool.push(['erasers', 1.4]);
-  pool.push(['compass', 1.3]);
-  pool.push(['glue', 1.2]);
-  pool.push(['cutter', 1.3]);
-  pool.push(['notes', 1.2]);
-  pool.push(['band', 1.2]);
-  pool.push(['setsquare', 1.2]);
-  pool.push(['paw', 1.3]);
+  const pool = [['gate', 1], ['blots', 1], ['pencil', 1], ['protractor', 1], ['wad', 1]];
+  if (conveyorAllowed(y)) pool.push(['clips', 1]);
+  pool.push(['scissors', 1]);
+  if (windAllowed(y)) pool.push(['fan', 1]);
+  pool.push(['erasers', 1]);
+  pool.push(['compass', 1]);
+  pool.push(['glue', 1]);
+  pool.push(['cutter', 1]);
+  pool.push(['notes', 1]);
+  pool.push(['band', 1]);
+  pool.push(['setsquare', 1]);
+  pool.push(['paw', 1]);
   return spawnFromPool(y, d, pool);
 }
 

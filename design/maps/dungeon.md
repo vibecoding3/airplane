@@ -29,36 +29,36 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 | Rune beam | Charged Beam | Rune stone / crystal cluster | ~135 m | ✅ | Good. |
 | Skeleton arm | Telegraphed Sweep | Skeleton arm / tentacle / thorny vine / reaper's scythe | ~135 m | ✅ | A bony arm swiping out of a crack is spooky and fun. |
 
-## Spawn chances (v126)
+## Spawn chances (v127)
 The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
-- **Weights grow with depth** for some obstacles (the slider, the projectile and the spinning blades), so they get more common as you fall.
-- **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place.
+- **Every obstacle has the same weight** (since v127), so they are all equally likely: 1 in 20 (about 5%) when every obstacle is allowed. Until v126 some had more weight, and three grew more common with depth.
+- **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place, so each gets a little more there.
 - **Never the same obstacle twice in a row**, which slightly evens out the numbers.
 - **Looks:** each row picks one look, all looks being equally likely (for example 1 in 4 for the four Gap Wall looks). The two mage staffs are Wooden plank looks and appear at most once each per run.
-- **Magic rings (collectible)** have the highest weight on the map: a ring row shows a ring not yet seen this run, then regular Rising Projectiles once all 9 have appeared. **Legendary swords:** each Crossed swords row has a 70% chance to be a pair not yet seen this run.
+- **Magic rings (collectible):** a ring row shows a ring not yet seen this run, then regular Rising Projectiles once all 9 have appeared. **Legendary swords:** each Crossed swords row has a 70% chance to be a pair not yet seen this run.
 
 | Obstacle | 0 m | 500 m | 1,000 m | 2,000 m |
 |---|---|---|---|---|
-| Magic rings | 10% | 10% | 10% | 10% |
-| Stone ledges | 10% | 9% | 9% | 10% |
-| Spiked iron balls | 7% | 7% | 6% | 7% |
-| Wooden plank | 4% | 6% | 7% | 8% |
-| Bouncing skull | 4% | 5% | 6% | 7% |
-| Crossed swords | 2% | 5% | 6% | 7% |
-| Spiked crusher | 5% | 5% | 5% | 5% |
-| Rock outcrop | 5% | 5% | 5% | 5% |
-| Spear trap | 5% | 4% | 4% | 5% |
-| Fire bar | 5% | 4% | 4% | 4% |
-| Ghosts | 5% | 4% | 4% | 4% |
-| Flying daggers | 5% | 4% | 4% | — |
-| Skeleton arm | 5% | 4% | 5% | 4% |
-| Flamethrower | 4% | 4% | 4% | 4% |
-| Rune beam | 4% | 4% | 4% | 4% |
-| Saw blade | 4% | 4% | 4% | 4% |
-| Cursed rune | 4% | 4% | 4% | 4% |
-| Spider web | 4% | 4% | 4% | 4% |
-| Dragon statue | 5% | 4% | 4% | 4% |
-| Cold draft | 4% | 4% | — | — |
+| Bouncing skull | 5% | 5% | 5% | 5% |
+| Crossed swords | 5% | 5% | 5% | 6% |
+| Cursed rune | 5% | 5% | 5% | 6% |
+| Dragon statue | 5% | 5% | 5% | 6% |
+| Fire bar | 5% | 5% | 5% | 5% |
+| Flamethrower | 5% | 5% | 5% | 6% |
+| Ghosts | 5% | 5% | 6% | 6% |
+| Magic rings | 5% | 5% | 5% | 5% |
+| Rock outcrop | 5% | 5% | 5% | 6% |
+| Rune beam | 5% | 5% | 5% | 6% |
+| Saw blade | 5% | 5% | 5% | 6% |
+| Skeleton arm | 5% | 5% | 5% | 6% |
+| Spear trap | 5% | 5% | 5% | 6% |
+| Spider web | 5% | 5% | 5% | 6% |
+| Spiked crusher | 5% | 5% | 5% | 6% |
+| Spiked iron balls | 5% | 5% | 5% | 6% |
+| Stone ledges | 5% | 5% | 5% | 6% |
+| Wooden plank | 5% | 5% | 5% | 6% |
+| Flying daggers | 5% | 5% | 5% | — |
+| Cold draft | 5% | 5% | — | — |
 
 ## Gaps and ideas
 - The **Effect Zone** was left out on purpose. A "healing fountain mist" could be a nice exception if you ever want one.
