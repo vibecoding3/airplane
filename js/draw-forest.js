@@ -12,6 +12,7 @@ const BARK = '#6b4a2a', WOOD = '#e0c08a';
 const leafCol = o => LEAF_COLS[o.season || 0];
 
 function drawForestObstacle(o, sy) {
+  if (FOREST_EXTRA[o.look] && FOREST_EXTRA[o.look](o, sy) !== false) return;   // the looks added in v129
   switch (o.type) {
     case 'gate': {
       const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
@@ -635,4 +636,141 @@ function drawForestVine(o, sy) {
     ctx.strokeStyle = 'rgba(120,80,40,.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, 2.6, 0, Math.PI * 2); ctx.stroke();
   });
   blit(knot, o.x1, sy + dy1); blit(knot, o.x2, sy + dy2);
+}
+
+// ---------- Looks added in v129 (FOREST_LOOKS / FOREST_SEASONS in obstacles.js) ----------
+// a jet of spring water or of sap instead of only light for the beam; beavers pushing the logs; a spider spinning on
+// its thread; and three for the moonlit night: a cluster of fireflies, glowing mushrooms and an owl swooping out.
+const FOREST_EXTRA = {
+  spring: (o, sy) => drawForestJet(o, sy), sap: (o, sy) => drawForestJet(o, sy),
+  beavers: (o, sy) => { const l = o.cx - o.gap / 2, r = o.cx + o.gap / 2; drawBeaverLog(-10, l, sy, l, -1, o); drawBeaverLog(r, W + 10, sy, r, 1, o); },
+  spider: (o, sy) => drawSpinningSpider(o, sy),
+  fireflies: (o, sy) => (o.bird ? false : drawFireflies(o, sy)),
+  mushrooms: (o, sy) => drawGlowMushrooms(o, sy),
+  owlswoop: (o, sy) => drawOwlSwoop(o, sy)
+};
+
+// Charged Beam: water spurting from a crack in a mossy rock (spring), or sap squirting from a cut branch stub
+function drawForestJet(o, sy) {
+  const x0 = ZAP_BODY, L = o.len, sap = o.look === 'sap', col = o.forCol || (sap ? '#e8a030' : '#8ad0ff');
+  ctx.save();
+  toolFrame(o, sy);
+  if (o.phase === 'charge') {                      // a dashed line, and drips gathering at the opening
+    ctx.save(); ctx.strokeStyle = col; ctx.globalAlpha = 0.3 + 0.6 * Math.min(1, o.t / 0.7); ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + L, 0); ctx.stroke(); ctx.restore();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x0 + 2, 3 + (o.t * 20) % 6, 2, 0, Math.PI * 2); ctx.fill();
+  } else if (o.phase === 'zap') {
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = 11; ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + L, 0); ctx.stroke();
+    ctx.globalAlpha = 1; ctx.lineWidth = 6; ctx.stroke();
+    ctx.strokeStyle = sap ? '#ffe0a0' : '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); for (let x = x0; x <= x0 + L; x += 8) ctx.lineTo(x, Math.sin(x * 0.3 + time * 20) * 1.5); ctx.stroke();
+    ctx.fillStyle = col; for (const k of [0.3, 0.55, 0.8]) { ctx.beginPath(); ctx.arc(x0 + L * k, (k * 31 % 2 ? 1 : -1) * 5, 1.8, 0, Math.PI * 2); ctx.fill(); }
+  }
+  if (sap) {                                       // a cut branch stub: bark, then pale rings at its end
+    ctx.beginPath(); roundRectPath(-6, -7, x0 + 2, 14, 6); ctx.fillStyle = BARK; ctx.fill(); forStroke(1.3);
+    ctx.strokeStyle = forShade(0.3); ctx.lineWidth = 1; ctx.beginPath(); for (let x = 4; x < x0 - 10; x += 9) { ctx.moveTo(x, -6); ctx.lineTo(x + 3, 6); } ctx.stroke();
+    ctx.fillStyle = WOOD; ctx.beginPath(); ctx.ellipse(x0 - 4, 0, 3.5, 7, 0, 0, Math.PI * 2); ctx.fill(); forStroke(1);
+    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x0 - 3, 0, 1.6, 3, 0, 0, Math.PI * 2); ctx.fill();
+  } else {                                         // a mossy rock with a crack the water comes out of
+    ctx.beginPath(); ctx.moveTo(-6, -9); ctx.quadraticCurveTo(x0 * 0.5, -12, x0, -6); ctx.lineTo(x0, 6); ctx.quadraticCurveTo(x0 * 0.5, 12, -6, 9); ctx.closePath();
+    ctx.fillStyle = '#8a8478'; ctx.fill(); forStroke(1.3);
+    ctx.fillStyle = o.season >= 3 ? '#f4f8fc' : '#6fae4a'; ctx.beginPath(); ctx.ellipse(x0 * 0.4, -8, 16, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#3a3428'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x0 - 18, -4); ctx.lineTo(x0 - 8, 1); ctx.lineTo(x0, 0); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// Closing Jaws: a log pushed out by a beaver lying along it, its head toward the gap, 28 thick (the beaver stays on the log)
+function drawBeaverLog(x0, x1, sy, innerX, outDir, o) {
+  if (x1 - x0 < 1) return;
+  ctx.save();
+  ctx.beginPath(); roundRectPath(x0, sy - 14, x1 - x0, 28, 10); ctx.fillStyle = o.forCol || '#8a5a32'; ctx.fill(); forStroke(1.4);
+  ctx.strokeStyle = forShade(0.25); ctx.lineWidth = 1; ctx.beginPath(); for (let x = innerX + outDir * 14; outDir > 0 ? x < x1 : x > x0; x += outDir * 13) { ctx.moveTo(x, sy - 12); ctx.lineTo(x + outDir * 6, sy + 12); } ctx.stroke();
+  ctx.fillStyle = WOOD; ctx.beginPath(); ctx.ellipse(innerX + outDir * 5, sy, 5, 13, 0, 0, Math.PI * 2); ctx.fill(); forStroke(1.1);   // the cut end with its rings
+  ctx.strokeStyle = 'rgba(120,80,40,.5)'; ctx.beginPath(); ctx.ellipse(innerX + outDir * 5, sy, 2.4, 7, 0, 0, Math.PI * 2); ctx.stroke();
+  const bx = innerX + outDir * 36;                 // the beaver: flat tail, body, head with buck teeth
+  ctx.fillStyle = '#5a3a20'; ctx.beginPath(); ctx.ellipse(bx + outDir * 21, sy + 1, 8, 4, 0, 0, Math.PI * 2); ctx.fill(); forStroke(1.1);
+  ctx.fillStyle = '#b0743e'; ctx.beginPath(); ctx.ellipse(bx, sy, 14, 8, 0, 0, Math.PI * 2); ctx.fill(); forStroke(1.3);
+  ctx.beginPath(); ctx.arc(bx - outDir * 15, sy - 1, 6, 0, Math.PI * 2); ctx.fill(); forStroke(1.2);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(bx - outDir * 20 - 1.5, sy + 2, 3, 3.5);
+  ctx.fillStyle = FOR_LINE; ctx.beginPath(); ctx.arc(bx - outDir * 16, sy - 3, 1.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(bx - outDir * 21, sy - 1.5, 1.3, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+// Sweeping Arm: a spider spinning round on its silk thread from a knot
+function drawSpinningSpider(o, sy) {
+  ctx.save();
+  ctx.translate(o.x, sy); ctx.rotate(o.ang);
+  ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(6, 0); ctx.lineTo(o.L - 6, 0); ctx.stroke();
+  ctx.strokeStyle = 'rgba(42,29,18,.35)'; ctx.lineWidth = 3.2; ctx.beginPath(); ctx.moveTo(6, 0); ctx.lineTo(o.L - 6, 0); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 1.4; ctx.stroke();
+  ctx.translate(o.L - 3, 0);                       // the spider at the end
+  ctx.strokeStyle = FOR_LINE; ctx.lineWidth = 1.2; ctx.beginPath();
+  for (const s of [-1, 1]) for (const a of [0.5, 1.1, 1.8, 2.4]) { ctx.moveTo(0, 0); ctx.quadraticCurveTo(Math.cos(a) * 4, s * Math.sin(a) * 6, Math.cos(a) * 3, s * Math.sin(a) * 7.5); }
+  ctx.stroke();
+  ctx.fillStyle = o.forCol || '#3a3040'; ctx.beginPath(); ctx.ellipse(1, 0, 5.5, 4.5, 0, 0, Math.PI * 2); ctx.fill(); forStroke(1);
+  ctx.fillStyle = '#ffffff'; for (const y of [-1.6, 1.6]) { ctx.beginPath(); ctx.arc(4.5, y, 1.1, 0, Math.PI * 2); ctx.fill(); }
+  ctx.restore();
+  ctx.fillStyle = '#8a5a32'; ctx.beginPath(); ctx.arc(o.x, sy, 8.5, 0, Math.PI * 2); ctx.fill(); forStroke(1.5);
+  ctx.strokeStyle = 'rgba(60,40,20,.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(o.x, sy, 4.5, 0, Math.PI * 2); ctx.stroke();
+}
+
+// Drifting Swarm (night): a glowing cloud of fireflies filling the 42-unit square
+function drawFireflies(o, sy) {
+  const col = o.forCol || '#fff070', t = time + o.ph;
+  ctx.save();
+  ctx.translate(o.x, sy);
+  ctx.fillStyle = 'rgba(255,240,120,.18)'; ctx.beginPath(); ctx.arc(0, 0, 21, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,240,120,.55)'; ctx.lineWidth = 1.2; ctx.setLineDash([3, 4]); ctx.stroke(); ctx.setLineDash([]);
+  for (let k = 0; k < 6; k++) {
+    const a = k * 1.05 + t * 0.8, d = 6 + (k % 3) * 5, x = Math.cos(a) * d, y = Math.sin(a * 1.3) * d;
+    const glow = 0.6 + 0.4 * Math.sin(t * 5 + k * 2);
+    ctx.fillStyle = `rgba(255,240,120,${0.4 * glow})`; ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#2a2420'; ctx.beginPath(); ctx.ellipse(x - 2.2, y - 1.2, 2, 1.3, 0.5, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+// Static Hazards (night): a cluster of glowing mushrooms in the hit circle
+function drawGlowMushrooms(o, sy) {
+  const R = o.r * 0.88, col = o.forCol || '#5ff0d0';
+  blit(ownSprite(o, 'sprF', R * 2 + 12, R * 2 + 12, R + 6, R + 6, () => {
+    ctx.fillStyle = hexA(col, 0.22); ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+    for (const [x, y, s] of [[-0.35, 0.15, 0.55], [0.3, 0.05, 0.7], [0, 0.45, 0.45]]) {
+      const cx = x * R, cy = y * R, cr = s * R * 0.6;
+      ctx.fillStyle = '#e8e0d0'; ctx.beginPath(); roundRectPath(cx - cr * 0.22, cy - cr * 0.1, cr * 0.44, cr * 1.1, cr * 0.15); ctx.fill(); forStroke(1);   // the stem
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(cx, cy, cr, Math.PI, 0); ctx.closePath(); ctx.fill(); forStroke(1.2);                                   // the glowing cap
+      ctx.fillStyle = forLight(0.7); for (const k of [-0.45, 0, 0.45]) { ctx.beginPath(); ctx.arc(cx + k * cr, cy - cr * 0.45, cr * 0.1, 0, Math.PI * 2); ctx.fill(); }
+    }
+  }), o.x, sy);
+}
+
+// Telegraphed Sweep (night): an owl swooping out of a hollow, one wing stretched out, talons first
+function drawOwlSwoop(o, sy) {
+  const col = o.forCol || '#a0805a';
+  ctx.save();
+  toolFrame(o, sy);
+  ctx.fillStyle = '#1a1410'; ctx.beginPath(); ctx.ellipse(2, 0, 7, 16, 0, 0, Math.PI * 2); ctx.fill();
+  if (o.phase === 'warn') {
+    const k = Math.min(1, o.t / o.warn);
+    ctx.save(); ctx.strokeStyle = '#c8b8f0'; ctx.globalAlpha = 0.35 + 0.55 * k; ctx.lineWidth = 2.2; ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, o.L + 20, -PAW_SWEEP, PAW_SWEEP); ctx.closePath(); ctx.stroke(); ctx.restore();
+  }
+  if (o.ext > 0) {
+    const len = o.L * o.ext;
+    ctx.rotate(o.ang);
+    ctx.beginPath(); ctx.moveTo(-8, -9); ctx.lineTo(len - 14, -10); ctx.lineTo(len - 14, 8);             // the wing: long feathers
+    for (let x = len - 14; x > -8; x -= 12) ctx.quadraticCurveTo(x - 6, 13, x - 12, 9);
+    ctx.closePath(); ctx.fillStyle = col; ctx.fill(); forStroke(1.3);
+    ctx.strokeStyle = forShade(0.3); ctx.lineWidth = 1; ctx.beginPath(); for (let x = 6; x < len - 18; x += 12) { ctx.moveTo(x, -8); ctx.lineTo(x + 6, 7); } ctx.stroke();
+    ctx.translate(len, 0);                         // the owl: round body, big eyes, ear tufts, a beak
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); forStroke(1.4);
+    ctx.beginPath(); ctx.moveTo(-9, -11); ctx.lineTo(-12, -16); ctx.lineTo(-4, -13); ctx.moveTo(9, -11); ctx.lineTo(12, -16); ctx.lineTo(4, -13); ctx.fill(); forStroke(1);
+    for (const x of [-5.5, 5.5]) { ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.arc(x, -3, 5, 0, Math.PI * 2); ctx.fill(); forStroke(1); ctx.fillStyle = FOR_LINE; ctx.beginPath(); ctx.arc(x, -3, 2.4, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#e0a030'; ctx.beginPath(); ctx.moveTo(-2, 1); ctx.lineTo(2, 1); ctx.lineTo(0, 5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#e8dcc0'; ctx.beginPath(); ctx.ellipse(0, 9, 7, 4, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
 }

@@ -23,7 +23,7 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 
 > **Done in v124:** all seven new obstacles below were added (school of fish, pufferfish / sea turtle, big rock / brain coral / sleeping whale, swordfish / driftwood / broken mast, fishing line / net strand, anchor chain / squid tentacle, crab / lobster). Every older obstacle got a second or third look too, including the electric ray and the octopus arm suggested above (the eel and the kelp stay as well). Species that became obstacles were taken out of the background scenery. The "Fit" table above describes the map before v124.
 
-## Spawn chances (v127)
+## Spawn chances (v129)
 The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
 - **Every obstacle has the same weight** (since v127), so they are all equally likely: 1 in 19 (about 5%) when every obstacle is allowed. Until v126 some had more weight, and three grew more common with depth.
 - **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place, so each gets a little more there.
@@ -35,22 +35,22 @@ The chance that a new row is this obstacle, measured by running the game's own s
 |---|---|---|---|---|
 | Anchor | 5% | 5% | 6% | 6% |
 | Big rock | 5% | 5% | 6% | 6% |
-| Bubble column | 5% | 6% | 6% | 6% |
-| Coral ledges | 5% | 5% | 5% | 6% |
-| Crab | 5% | 5% | 5% | 6% |
+| Bubble column | 5% | 5% | 6% | 6% |
+| Coral ledges | 5% | 5% | 6% | 6% |
+| Crab | 5% | 5% | 6% | 6% |
 | Electric eel | 5% | 5% | 6% | 6% |
 | Fishing line | 6% | 5% | 6% | 6% |
 | Giant clam | 5% | 5% | 6% | 6% |
-| Jellyfish | 5% | 5% | 6% | 6% |
+| Jellyfish | 5% | 6% | 6% | 6% |
 | Kelp | 5% | 5% | 6% | 6% |
 | Moray eel | 5% | 5% | 6% | 6% |
-| Naval mine | 5% | 5% | 6% | 6% |
-| Pufferfish | 5% | 5% | 6% | 6% |
+| Naval mine | 5% | 5% | 5% | 6% |
+| Pufferfish | 5% | 5% | 5% | 6% |
 | Sea urchins | 5% | 5% | 6% | 6% |
 | Starfish | 5% | 5% | 6% | 6% |
 | Submarine | 5% | 5% | 6% | 6% |
 | Swordfish | 5% | 5% | 6% | 6% |
-| School of fish | 5% | 6% | 5% | — |
+| School of fish | 5% | 5% | 6% | — |
 | Ocean current | 5% | 5% | — | — |
 
 ## Gaps and ideas (biggest opportunity in the game)

@@ -38,6 +38,7 @@ function drawDungeonObstacle(o, sy) {
     case 'mine': drawCurse(o, sy); break;
     case 'fan': drawDraft(o, sy); break;
     case 'band': drawWeb(o, sy); break;
+    case 'bubbles': drawFountainMist(o, sy); break;
   }
 }
 
@@ -1007,4 +1008,20 @@ function drawWeb(o, sy) {
         ctx.fillStyle = '#ff4a3a'; for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(s * 2.2, -2, 1.2, 0, Math.PI * 2); ctx.fill(); }
       });
   blit(anchor, o.x1, sy + dy1); blit(anchor, o.x2, sy + dy2);
+}
+
+// ---------- Effect Zone (v129): the cool mist rising from a magic fountain set in the wall; slows the fall, never hurts ----------
+function drawFountainMist(o, sy) {
+  const x0 = o.x - o.w / 2, y0 = sy - o.h / 2, col = o.dunCol || '#9fe0ff';
+  ctx.save();
+  ctx.globalAlpha = 0.12; ctx.fillStyle = col; ctx.fillRect(x0, y0, o.w, o.h); ctx.globalAlpha = 1;
+  ctx.strokeStyle = col; ctx.lineWidth = 1.2; ctx.setLineDash([4, 6]); ctx.strokeRect(x0, y0, o.w, o.h); ctx.setLineDash([]);
+  for (let k = 0; k < 12; k++) {                   // droplets and sparkles drifting up
+    const ph = (o.t * 0.6 + k / 12) % 1, x = o.x + Math.sin(k * 2.1 + o.t * 1.3) * o.w * 0.32, y = y0 + o.h - ph * o.h;
+    ctx.globalAlpha = Math.min(1, Math.min(ph, 1 - ph) * 5) * 0.85;
+    ctx.fillStyle = k % 3 ? col : '#ffffff';
+    if (k % 3) { ctx.beginPath(); ctx.arc(x, y, 2 + (k % 2), 0, Math.PI * 2); ctx.fill(); }
+    else { ctx.beginPath(); ctx.moveTo(x, y - 4); ctx.lineTo(x + 1, y - 1); ctx.lineTo(x + 4, y); ctx.lineTo(x + 1, y + 1); ctx.lineTo(x, y + 4); ctx.lineTo(x - 1, y + 1); ctx.lineTo(x - 4, y); ctx.lineTo(x - 1, y - 1); ctx.closePath(); ctx.fill(); }
+  }
+  ctx.restore();
 }

@@ -28,7 +28,9 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 | Logs | Closing Jaws | Log halves / beaver dam | ~150 m | ⚠️ | Two log halves sliding shut is abstract. The beaver dam is better. **Two beavers pushing logs** would explain the movement. |
 | Swing | Sweeping Arm | Leafy branch / rope swing | ~215 m | ⚠️ | A rope swing makes sense swinging back and forth, but not spinning all the way round. A **spider spinning on its thread** might read better. |
 
-## Spawn chances (v127)
+> **Done in v129:** added a spring water jet and squirting sap as beams (the sunbeam and frosty ray stay), beavers pushing logs, a spider spinning on its thread, and night-only fireflies, glowing mushrooms and a swooping owl.
+
+## Spawn chances (v129)
 The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
 - **Every obstacle has the same weight** (since v127), so they are all equally likely: 1 in 19 (about 5%) when every obstacle is allowed. Until v126 some had more weight, and three grew more common with depth.
 - **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place, so each gets a little more there.
@@ -38,8 +40,8 @@ The chance that a new row is this obstacle, measured by running the game's own s
 
 | Obstacle | 0 m | 500 m | 1,000 m | 2,000 m |
 |---|---|---|---|---|
-| Acorns | 5% | 5% | 5% | 6% |
-| Bear | 5% | 5% | 6% | 6% |
+| Acorns | 5% | 5% | 6% | 6% |
+| Bear | 5% | 5% | 5% | 6% |
 | Bees | 5% | 5% | 6% | 6% |
 | Branches | 5% | 5% | 6% | 6% |
 | Husk | 5% | 5% | 6% | 6% |
@@ -47,15 +49,15 @@ The chance that a new row is this obstacle, measured by running the game's own s
 | Maple | 5% | 5% | 6% | 6% |
 | Nests | 5% | 5% | 6% | 6% |
 | Puffball | 5% | 5% | 6% | 6% |
-| Snake | 5% | 5% | 6% | 6% |
+| Snake | 6% | 5% | 6% | 6% |
 | Squirrel | 5% | 5% | 6% | 6% |
-| Sunbeam | 5% | 5% | 5% | 6% |
-| Swing | 6% | 5% | 6% | 6% |
-| Trunk | 6% | 5% | 5% | 6% |
+| Sunbeam | 5% | 5% | 6% | 6% |
+| Swing | 5% | 5% | 6% | 6% |
+| Trunk | 5% | 5% | 5% | 6% |
 | Twig | 5% | 5% | 6% | 6% |
 | Updraft | 5% | 5% | 6% | 6% |
 | Vines | 5% | 5% | 6% | 6% |
-| Ducks | 5% | 5% | 6% | — |
+| Ducks | 5% | 5% | 5% | — |
 | Breeze | 5% | 5% | — | — |
 
 ## Gaps and ideas

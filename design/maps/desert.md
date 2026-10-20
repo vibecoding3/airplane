@@ -28,7 +28,9 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 | Slabs | Closing Jaws | Sandstone slabs / mesa edges | ~150 m | ⚠️ | Rock moving by itself is abstract. Fine. |
 | Well lever | Sweeping Arm | Well lever with bucket / windvane | ~215 m | ⚠️ | A windvane spins, so it fits. A well lever spinning all the way round doesn't. |
 
-## Spawn chances (v127)
+> **Done in v129:** added a dry branch, dates (oasis layers), a geode that cracks open, and a fossil bone and amber drops in the deep layers. The flying carpet, coconuts and clay jar were kept (no removals). Not done: a rope bridge under the caravan (it would look solid but would not be).
+
+## Spawn chances (v129)
 The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
 - **Every obstacle has the same weight** (since v127), so they are all equally likely: 1 in 19 (about 5%) when every obstacle is allowed. Until v126 some had more weight, and three grew more common with depth.
 - **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place, so each gets a little more there.
@@ -42,18 +44,18 @@ The chance that a new row is this obstacle, measured by running the game's own s
 | Cactus pod | 5% | 5% | 6% | 6% |
 | Carpet | 5% | 5% | 6% | 6% |
 | Coconuts | 5% | 5% | 6% | 6% |
-| Fronds | 6% | 5% | 6% | 6% |
-| Glint | 5% | 5% | 5% | 6% |
+| Fronds | 5% | 5% | 6% | 6% |
+| Glint | 5% | 5% | 6% | 6% |
 | Heat | 5% | 5% | 6% | 6% |
 | Outcrop | 5% | 5% | 6% | 6% |
-| Rope | 5% | 5% | 6% | 6% |
-| Sand ledges | 5% | 5% | 6% | 6% |
+| Rope | 5% | 5% | 5% | 6% |
+| Sand ledges | 6% | 6% | 5% | 6% |
 | Scorpion | 5% | 5% | 6% | 6% |
 | Slabs | 5% | 5% | 6% | 6% |
-| Spitter | 5% | 5% | 5% | 6% |
-| Tongue | 5% | 5% | 5% | 6% |
+| Spitter | 5% | 5% | 6% | 6% |
+| Tongue | 5% | 5% | 6% | 6% |
 | Tumbleweed | 5% | 5% | 6% | 6% |
-| Vultures | 5% | 5% | 5% | 6% |
+| Vultures | 5% | 5% | 6% | 6% |
 | Well lever | 5% | 5% | 6% | 6% |
 | Caravan | 5% | 5% | 6% | — |
 | Sandstorm | 5% | 5% | — | — |

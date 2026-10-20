@@ -295,7 +295,11 @@ const conveyorAllowed = y => y / PX_PER_M < CONVEYOR_MAX_M;
 const SPACE_MAKERS = { girders: 'gate', asteroids: 'blots', ice: 'notes', airlock: 'erasers', probe: 'cutter',
                        gps: 'pencil', rocket: 'wad', starlink: 'clips', tumbler: 'starfish', arm: 'compass',
                        laser: 'zap', lowgrav: 'bubbles', moon: 'protractor',
-                       fighter: 'glue', blade: 'paw', station: 'protractor' };   // no wind or explosions in space
+                       fighter: 'glue', blade: 'paw', station: 'protractor',
+                       tether: 'band', panels: 'scissors' };   // no wind or explosions in space; tether and panels since v129
+// original alternative looks (v129), picked half the time for a row of these obstacles: a wormhole instead of the black hole,
+// a hull turret instead of the fighter, a welding torch instead of the energy blade, an asteroid base instead of the battle station
+const SPACE_ALT = { blackhole: 'wormhole', fighter: 'turret', blade: 'torch', station: 'asteroidbase' };
 // space-only shapes on existing mechanics: the ISS (a long slider), planets (wall bulges), black holes (static)
 make.iss = (y, d) => {
   const len = rand(200, 235), a = rand(-0.12, 0.12), ext = len / 2 * Math.cos(a);
@@ -348,14 +352,29 @@ function spacePool(d, y) {
   pool.push(['laser', 1], ['fighter', 1]);
   pool.push(['blade', 1], ['station', 1]);
   pool.push(['arm', 1]);
+  pool.push(['tether', 1], ['panels', 1]);
   return pool;
 }
 // Dungeon obstacles: ten in v68, eight more in v70; each on an existing mechanic with dungeon art (draw-dungeon.js)
 const DUNGEON_MAKERS = { ledges: 'gate', crusher: 'erasers', spikeballs: 'blots', rock: 'protractor', plank: 'pencil',
                          skull: 'wad', ghosts: 'notes', spear: 'cutter', firebar: 'compass', dragon: 'glue',
                          daggers: 'clips', saw: 'starfish', swords: 'scissors', runebeam: 'zap', skelarm: 'paw',
-                         curse: 'mine', draft: 'fan', web: 'band', flamethrower: 'cutter', rings: 'wad' };
+                         curse: 'mine', draft: 'fan', web: 'band', flamethrower: 'cutter', rings: 'wad',
+                         fountain: 'bubbles' };   // the fountain mist (Effect Zone) since v129
 // obstacles that always have one look, with their own spawn chance (v81): a flamethrower is a Wall Piston whose flame shoots out
+// Paper looks (v129): the first look of each obstacle is the original one (drawn by draw-paper.js with its palette); the
+// others, and the three mechanics Paper got in v129 (a laser pointer or desk lamp beam, a popping highlighter cap or party
+// popper, a breath of air), have their own colours. A row of the same obstacle shares one look.
+const PAPER_LOOKS = {
+  gate: { ruler: [null], pencilcase: ['#3a66c4', '#c0392b', '#2f8f5b'] },
+  blot: { ink: [null], coffee: ['#8a5a32'] },
+  pencil: { pencil: [null], pen: ['#2f6fd1', '#c0392b', '#2b2b2b'] },
+  wad: { wad: [null], crumbs: ['#f2a7b8', '#e8d070'] },
+  note: { note: [null], card: ['#ffffff'] },
+  zap: { pointer: ['#ff3a3a'], lamp: ['#ffe58a'] },
+  mine: { cap: ['#f4e04a', '#ff7ac0', '#7ae070'], popper: ['#e0503a', '#3a8ad8'] },
+  bubbles: { breath: ['#cfe3f6'] }
+};
 // Origami collection (Paper map): sticky-note variants, each at most once per run
 const ORIGAMI = ['crane', 'frog', 'boat', 'star', 'fox', 'butterfly'];
 const origamiLeft = () => ORIGAMI.filter(n => !runCollected.has('origami-' + n));
@@ -379,6 +398,7 @@ const DUNGEON_SOLO = { flamethrower: { look: 'flamethrower', cols: ['#4a4f58', '
 // each Dungeon mechanic has two to four looks that share its hit box, each with its own colours; a row of the
 // same obstacle shares one look and colour (v73; Halloween and goblin looks added in v80)
 const DUNGEON_LOOKS = {
+  bubbles: { mist: ['#9fe0ff', '#b8ffcf'] },                               // a magic fountain's mist (v129)
   gate: { ledge: ['#b9ab8f', '#a9a59c', '#9fa88c', '#b5917a'], beam: ['#a06a3a', '#7a5030'], girder: ['#7d8590', '#8a5a44'], scaffold: ['#8a5a32', '#a06a3a'] },
   erasers: { crusher: ['#9a958c', '#8f8476', '#a39a86'], irondoor: ['#4f555e', '#5e4a3a'], ram: ['#8a5a32', '#6b4a2a'], barricade: ['#8a5a32', '#6b4a2a'] },
   blot: { spikeball: ['#5b6068', '#7a5a44', '#8a6a3a'], cauldron: ['#5fd16a', '#b77cf0', '#ff7a3a'], boulder: ['#8f877a', '#7f8288', '#93806a'], tombstone: ['#8f8a84', '#7a7f86'] },
@@ -414,6 +434,7 @@ function dungeonPool(d, y) {
   pool.push(['spear', 1]);
   pool.push(['crusher', 1]);
   pool.push(['firebar', 1]);
+  pool.push(['fountain', 1]);
   return pool;
 }
 // Neon City obstacles (v113): every one reuses a Paper or Ocean obstacle's movement and collision with city art (draw-city.js)
@@ -434,19 +455,19 @@ make.neon = (y, d) => {
 };
 // each Neon City mechanic has two or three looks sharing its hit box, each in a few neon colours; a row shares one
 const CITY_LOOKS = {
-  gate: { sign: ['#ff4fd8', '#3ff0ff', '#b6ff3f', '#ffb03f'], balcony: ['#ffd36a', '#7fe8ff'] },
-  erasers: { shutter: ['#8a93a8', '#a08a7a'], door: ['#ff4f6a', '#3fb0ff', '#ffb03f'] },
-  blot: { cone: ['#ff7a1f', '#ff4fd8'], manhole: ['#3ff0ff', '#ff4fd8', '#b6ff3f'], vending: ['#ff3f5a', '#3f8fff', '#3fd17a'] },
+  gate: { sign: ['#ff4fd8', '#3ff0ff', '#b6ff3f', '#ffb03f'], balcony: ['#ffd36a', '#7fe8ff'], pipes: ['#7a8aa0', '#a07a5a'], racks: ['#3ff0ff', '#3fff8a'] },
+  erasers: { shutter: ['#8a93a8', '#a08a7a'], door: ['#ff4f6a', '#3fb0ff', '#ffb03f'], ticketgate: ['#3fff8a'] },
+  blot: { cone: ['#ff7a1f', '#ff4fd8'], manhole: ['#3ff0ff', '#ff4fd8', '#b6ff3f'], vending: ['#ff3f5a', '#3f8fff', '#3fd17a'], holosign: ['#3ff0ff', '#ffb03f'] },
   protractor: { dish: ['#c9cfdb', '#e6e0d0'], acunit: ['#9aa3b5', '#b8b0a0'], clock: ['#f4f1ea'] },
   pencil: { tram: ['#ff4fd8', '#3ff0ff', '#ffb03f'], tube: ['#ff4fd8', '#3ff0ff', '#b6ff3f', '#ff3f5a'] },
   wad: { can: ['#ff3f5a', '#3f8fff', '#b6ff3f', '#ff4fd8'], token: ['#ffd23f', '#c9cfdb'], ball: ['#ff4fd8', '#3ff0ff', '#b6ff3f'] },
   note: { drone: ['#3ff0ff', '#ff4fd8', '#b6ff3f'], lantern: ['#ff3f3f', '#ffb03f', '#ff4fd8'], umbrella: ['#ff4fd8', '#3ff0ff', '#ffd23f', '#9a7cff'] },
-  clips: { taxi: ['#ffd23f', '#ff4fd8', '#3ff0ff'], pod: ['#e6ecf5', '#b6ff3f', '#ffb03f'] },
+  clips: { taxi: ['#ffd23f', '#ff4fd8', '#3ff0ff'], pod: ['#e6ecf5', '#b6ff3f', '#ffb03f'], datapackets: ['#3fff8a', '#3ff0ff'] },
   starfish: { fan: ['#9aa3b5', '#7fe8ff'], hubcap: ['#3ff0ff', '#ff4fd8', '#b6ff3f'], record: ['#ff3f5a', '#ffd23f', '#3ff0ff'] },
   scissors: { rotor: ['#3ff0ff', '#ff4fd8', '#ffb03f'], neon: ['#ff4fd8', '#3ff0ff', '#b6ff3f'] },
   compass: { crane: ['#ffc21f', '#ff7a1f'], lamp: ['#c9cfdb', '#7f8aa0'] },
   cutter: { ladder: ['#8a93a8', '#a06a4a'], arrow: ['#ff4fd8', '#3ff0ff', '#b6ff3f'], antenna: ['#c9cfdb'] },
-  glue: { camera: ['#ff3f5a', '#3ff0ff'], dumpling: ['#c8a46a'], spray: ['#ff4fd8', '#3ff0ff', '#b6ff3f', '#ffb03f'] },
+  glue: { camera: ['#ff3f5a', '#3ff0ff'], dumpling: ['#c8a46a'], spray: ['#ff4fd8', '#3ff0ff', '#b6ff3f', '#ffb03f'], canmachine: ['#ff3f5a', '#3f8fff'] },
   zap: { laser: ['#ff3f5a', '#3fff8a'], arc: ['#3ff0ff', '#ff4fd8', '#b6ff3f'] },
   paw: { barrier: ['#ff3f3f', '#ffc21f'], robot: ['#c9cfdb', '#ffb03f'] },
   mine: { transformer: ['#3ff0ff', '#b6ff3f'], hydrant: ['#ff3f3f', '#ffc21f', '#3f8fff'] },
@@ -454,6 +475,14 @@ const CITY_LOOKS = {
   bubbles: { holo: ['#3ff0ff', '#ff4fd8'] },
   band: { cable: ['#2b2b3a'], lights: ['#ffd36a'] }
 };
+// the city's layers (v129): rooftops (0–200 m), streets (200–400 m), the subway (400–800 m), the underground arcade
+// (800–1,500 m), the data core (1,500 m +); looks listed here only appear in those layers, the rest anywhere
+const cityLayer = y => { const m = y / PX_PER_M; return m < 200 ? 0 : m < 400 ? 1 : m < 800 ? 2 : m < 1500 ? 3 : 4; };
+const CITY_LAYERS = { sign: [0, 1, 2, 3], balcony: [0, 1], pipes: [2], racks: [4], door: [2], ticketgate: [2, 3],
+                      cone: [0, 1], manhole: [1], vending: [1, 2, 3], dish: [0], clock: [1, 2], tram: [0, 1, 2],
+                      can: [1, 2, 3], token: [3], lantern: [1, 2, 3], umbrella: [0, 1], taxi: [0, 1], pod: [1, 2, 3],
+                      datapackets: [4], hubcap: [1, 2], record: [3], crane: [0, 1], ladder: [0, 1], antenna: [0],
+                      dumpling: [1], spray: [1, 2], canmachine: [1, 2, 3], barrier: [1, 2], hydrant: [1], steam: [1, 2], lights: [1, 3] };
 function cityPool(d, y) {
   const pool = [['signs', 1], ['cones', 1], ['tram', 1], ['bulge', 1], ['neon', 1], ['cans', 1], ['holo', 1]];
   pool.push(['cable', 1]);
@@ -482,27 +511,28 @@ const birdsLeft = () => FOREST_BIRDS.filter(n => !runCollected.has('bird-' + n))
 // each Forest mechanic has one to four looks sharing its hit box; some only appear in certain seasons (FOREST_SEASONS)
 const FOREST_LOOKS = {
   gate: { branch: ['#7a5030', '#6b4a2a'], log: ['#8a5a32', '#9a6a3a'] },
-  erasers: { loghalf: ['#8a5a32', '#7a5030'], dam: ['#6b4a2a'] },
-  blot: { hornets: ['#c9b48a', '#b8a07a'], pinecone: ['#8a5a32', '#6b4a2a'], thistle: ['#9a6ac8', '#c070c0'] },
+  erasers: { loghalf: ['#8a5a32', '#7a5030'], dam: ['#6b4a2a'], beavers: ['#8a5a32'] },
+  blot: { hornets: ['#c9b48a', '#b8a07a'], pinecone: ['#8a5a32', '#6b4a2a'], thistle: ['#9a6ac8', '#c070c0'], mushrooms: ['#5ff0d0', '#9ad0ff'] },
   protractor: { trunk: ['#7a5030', '#6b5a48'], birch: ['#ece6da'], fungus: ['#d08a3a', '#c8a060'] },
   pencil: { stick: ['#7a5030', '#8a5a32'], frost: ['#6b5a50'] },
   wad: { acorn: ['#a0703a'], chestnut: ['#7a4a2a'], apple: ['#e0403a', '#8ac040'], snowball: ['#f4f8fc'] },
-  note: { bee: ['#ffc21f'], owl: ['#a0805a', '#8a8a8a'], bat: ['#4a3a5a'] },
+  note: { bee: ['#ffc21f'], owl: ['#a0805a', '#8a8a8a'], bat: ['#4a3a5a'], fireflies: ['#fff070'] },
   clips: { duck: ['#3f8a4a', '#c08a4a'], goose: ['#8a8a8a'] },
   starfish: { husk: ['#8ab040'], seed: ['#c8a46a'], snowflake: ['#e8f4ff'] },
   scissors: { maple: ['#c8904a', '#e06a3a', '#9ab040'] },
-  compass: { branch: ['#7a5030'], rope: ['#c9a66b'] },
+  compass: { branch: ['#7a5030'], rope: ['#c9a66b'], spider: ['#3a3040'] },
   cutter: { snake: ['#5f9a3a', '#a08a3a'], woodpecker: ['#d9343a'] },
   glue: { squirrel: ['#c0703a', '#8a7a6a'], frog: ['#5fae4a', '#8ab040'] },
-  zap: { sunbeam: ['#ffe58a'], frost: ['#bfe8ff'] },
-  paw: { bear: ['#6b4a2a', '#3a3a3a'], fallbranch: ['#7a5030'] },
+  zap: { sunbeam: ['#ffe58a'], frost: ['#bfe8ff'], spring: ['#8ad0ff'], sap: ['#e8a030'] },
+  paw: { bear: ['#6b4a2a', '#3a3a3a'], fallbranch: ['#7a5030'], owlswoop: ['#a0805a', '#8a8a8a'] },
   mine: { puffball: ['#e8dcc0'], wasps: ['#e0b040'] },
   fan: { breeze: ['#ffffff'] },
   bubbles: { updraft: ['#ffffff'] },
   band: { web: ['#f5f5ff'], vine: ['#4f8a3a'] }
 };
 // looks tied to the seasons they belong to (0 spring, 1 summer, 2 autumn, 3 winter, 4 night); the rest appear all year
-const FOREST_SEASONS = { snowball: [3, 4], frost: [3, 4], snowflake: [3, 4], bee: [0, 1, 2], bat: [4], sunbeam: [0, 1, 2], apple: [1, 2] };
+const FOREST_SEASONS = { snowball: [3, 4], frost: [3, 4], snowflake: [3, 4], bee: [0, 1, 2], bat: [4], sunbeam: [0, 1, 2], apple: [1, 2],
+                         spring: [0, 1, 2, 4], sap: [0, 1, 2], fireflies: [4], mushrooms: [4], owlswoop: [4] };   // added in v129
 function forestPool(d, y) {
   const pool = [['branches', 1], ['nests', 1], ['twig', 1], ['trunk', 1], ['acorns', 1], ['updraft', 1]];
   pool.push(['vines', 1]);
@@ -535,8 +565,8 @@ const DESERT_LOOKS = {
   erasers: { slab: ['#d08a4a', '#c07840'], mesa: ['#b86a3a'] },
   blot: { barrel: ['#5f9a4a', '#6aa85a'], pear: ['#7ab05a'], boulder: ['#b8a080', '#a08870'] },
   protractor: { outcrop: ['#d08a4a', '#c07a40'], termite: ['#b88a5a'], dune: ['#f0d08a', '#e8c070'] },
-  pencil: { carpet: ['#c0303a', '#2f6fd1', '#8a4fc2'], driftwood: ['#c8b090'] },
-  wad: { coconut: ['#7a5030'], gourd: ['#e0b040', '#9ab040'], beetleball: ['#8a6a4a'] },
+  pencil: { carpet: ['#c0303a', '#2f6fd1', '#8a4fc2'], driftwood: ['#c8b090'], drybranch: ['#a08060'], bone: ['#ece2c8'] },
+  wad: { coconut: ['#7a5030'], gourd: ['#e0b040', '#9ab040'], beetleball: ['#8a6a4a'], dates: ['#7a3a20'], amber: ['#e8a030'] },
   note: { vulture: ['#4a3a3a'], locust: ['#9ab040', '#c8a040'], hawk: ['#a0703a'] },
   clips: { camel: ['#c8a060', '#b08a50'] },
   starfish: { tumbleweed: ['#c8a46a', '#b08a50'], seedpod: ['#a07a40'] },
@@ -546,13 +576,14 @@ const DESERT_LOOKS = {
   glue: { cactusgun: ['#5f9a4a'], camelspit: ['#c8a060'] },
   zap: { glint: ['#fff6c0'], geyser: ['#e8c890'] },
   paw: { scorpion: ['#c06a2a', '#3a3030'], pickaxe: ['#8a5a32'] },
-  mine: { cactusfruit: ['#e0406a'], jar: ['#c87a4a'] },
+  mine: { cactusfruit: ['#e0406a'], jar: ['#c87a4a'], geode: ['#9a8a7a'] },
   fan: { sandstorm: ['#f0dca0'] },
   bubbles: { heat: ['#ffb060'] },
   band: { rope: ['#c9a66b'] }
 };
 // looks tied to the layers they belong to (0 dunes, 1 canyon, 2 oasis, 3 fossil beds, 4 amber); the rest appear everywhere
-const DESERT_LAYERS = { dune: [0, 1], adobe: [0, 1, 2], fronds: [1, 2], coconut: [1, 2, 3], column: [1, 2, 3, 4], camelspit: [0, 1, 2] };
+const DESERT_LAYERS = { dune: [0, 1], adobe: [0, 1, 2], fronds: [1, 2], coconut: [1, 2, 3], column: [1, 2, 3, 4], camelspit: [0, 1, 2],
+                       dates: [1, 2], bone: [3, 4], amber: [3, 4] };   // dates by the oasis palms, bones and amber in the deepest layers (v129)
 function desertPool(d, y) {
   const pool = [['sandLedges', 1], ['cacti', 1], ['carpet', 1], ['outcrop', 1], ['coconuts', 1], ['heat', 1]];
   pool.push(['rope', 1]);
@@ -588,13 +619,13 @@ const VOLCANO_LOOKS = {
   protractor: { dome: ['#3a2a24'], columns: ['#3a3a42'], mound: ['#8a7a6a'] },
   pencil: { charlog: ['#2a2420'], lavaraft: ['#3a302a'] },
   wad: { lavabomb: ['#3a2a24'], glowrock: ['#ff7a2a'] },
-  note: { moth: ['#8a6a5a'], beetle: ['#2a2a30'], ashpuff: ['#9a968e'] },
+  note: { moth: ['#8a6a5a'], beetle: ['#2a2a30'], ashpuff: ['#9a968e'], embers: ['#ff8a2a'] },
   clips: { rollers: ['#3a302a'], beetles: ['#2a2a30'] },
   starfish: { spindle: ['#3a2a24'], obsstar: ['#1e1a24'] },
   scissors: { obsidian: ['#1e1a24', '#2a2034'] },
   compass: { steam: ['#ffffff'], lavaspout: ['#ff7a2a'] },
   cutter: { lavatongue: ['#ff6a1e'], column: ['#3a3a42'] },
-  glue: { vent: ['#3a302a'], lavafrog: ['#c84a2a'] },
+  glue: { vent: ['#3a302a'], lavafrog: ['#c84a2a'], fumarole: ['#b8a878'] },
   zap: { lightning: ['#d8e8ff'], steambeam: ['#ffffff'] },
   paw: { lavawave: ['#ff6a1e'], pillar: ['#3a3a42'] },
   mine: { mudpot: ['#8a6a5a'], gaspocket: ['#c8c040'] },
@@ -667,7 +698,7 @@ function spawnRow(y, d) {
   if (mapId === 'forest') return spawnFromPool(y, d, forestPool(d, y));
   if (mapId === 'desert') return spawnFromPool(y, d, desertPool(d, y));
   if (mapId === 'volcano') return spawnFromPool(y, d, volcanoPool(d, y));
-  const pool = [['gate', 1], ['blots', 1], ['pencil', 1], ['protractor', 1], ['wad', 1]];
+  const pool = [['gate', 1], ['blots', 1], ['pencil', 1], ['protractor', 1], ['wad', 1], ['zap', 1], ['mine', 1], ['bubbles', 1]];
   if (conveyorAllowed(y)) pool.push(['clips', 1]);
   pool.push(['scissors', 1]);
   if (windAllowed(y)) pool.push(['fan', 1]);
@@ -715,12 +746,19 @@ function spawnFromPool(y, d, pool) {
     } else if (mapId === 'space') {
       o.space = true;
       o.look = o.look || type;                   // which space obstacle this is (several share a mechanic)
+      if (SPACE_ALT[o.look]) { if (rowSea.alt == null) rowSea.alt = Math.random() < 0.5; if (rowSea.alt) o.look = SPACE_ALT[o.look]; }
       const cols = SPACE_COLS[o.type];
       if (cols) o.spaceCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
-      if (o.look === 'station') o.r = rand(95, 110);
-    } else if (mapId === 'notebook' && o.type === 'note') {
-      const left = origamiLeft();
-      if (left.length && Math.random() < 0.5) { o.origami = left[ri(0, left.length - 1)]; runCollected.add('origami-' + o.origami); }
+      if (o.look === 'station' || o.look === 'asteroidbase') o.r = rand(95, 110);
+    } else if (mapId === 'notebook') {
+      o.paper = true;
+      const looks = PAPER_LOOKS[o.type];
+      if (looks && !rowSea[o.type]) { const names = Object.keys(looks), look = names[ri(0, names.length - 1)], cols = looks[look]; rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]]; }
+      if (looks) [o.look, o.paperCol] = rowSea[o.type];
+      if (o.type === 'note') {                   // an origami not yet seen this run (each once per run)
+        const left = origamiLeft();
+        if (left.length && Math.random() < 0.5) { o.origami = left[ri(0, left.length - 1)]; runCollected.add('origami-' + o.origami); }
+      }
     } else if (mapId === 'dungeon') {
       o.dungeon = true;
       const looks = DUNGEON_LOOKS[o.type], solo = DUNGEON_SOLO[type];
@@ -746,10 +784,12 @@ function spawnFromPool(y, d, pool) {
       }
     } else if (mapId === 'city') {
       o.city = true;
+      o.layer = cityLayer(o.y);
       if (o.neonSign) continue;                  // a collectible neon sign has its own art
       const looks = CITY_LOOKS[o.type];
       if (looks && !rowSea[o.type]) {
-        const names = Object.keys(looks), look = names[ri(0, names.length - 1)], cols = looks[look];
+        const all = Object.keys(looks), fit = all.filter(l => !CITY_LAYERS[l] || CITY_LAYERS[l].includes(o.layer));
+        const names = fit.length ? fit : all, look = names[ri(0, names.length - 1)], cols = looks[look];
         rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
       }
       if (looks) [o.look, o.cityCol] = rowSea[o.type];

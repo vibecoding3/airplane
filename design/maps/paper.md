@@ -25,31 +25,36 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 | Erasers | Closing Jaws | Two erasers slide shut and open | ~150 m | ⚠️ | On theme, but erasers don't move by themselves. It still reads fine. |
 | Drawing compass | Sweeping Arm | Spins its leg, pencilling the arc | ~215 m | ✅ | A compass really does draw circles. The pencilled arc is a lovely touch. |
 
-## Spawn chances (v127)
+> **Done in v129:** the three unused mechanics were added (a laser pointer / desk lamp beam, a highlighter cap / party popper that pops, a breath of air that slows you), and five obstacles got the second looks suggested below (pencil case, coffee ring, pen, eraser crumbs, index cards). The table above describes the map before v129.
+
+## Spawn chances (v129)
 The chance that a new row is this obstacle, measured by running the game's own spawner 40,000 times at each depth (so ±0.5% or so). Each depth adds up to 100%. Since v125 there are no start depths: every obstacle can appear from 0 m (the "Starts" column above is how it was before). What still changes with depth:
-- **Every obstacle has the same weight** (since v127), so they are all equally likely: 1 in 16 (about 6%) when every obstacle is allowed. Until v126 some had more weight, and three grew more common with depth.
+- **Every obstacle has the same weight** (since v127), so they are all equally likely: 1 in 19 (about 5%) when every obstacle is allowed. Until v126 some had more weight, and three grew more common with depth.
 - **Wind stops at 700 m** and **conveyors stop at 1,500 m** ("—"); the other obstacles share their place, so each gets a little more there.
 - **Never the same obstacle twice in a row**, which slightly evens out the numbers.
 - **Origami (collectible):** in a sticky-note row, each note has a 50% chance to be an origami not yet seen this run, until all 6 have appeared.
 
 | Obstacle | 0 m | 500 m | 1,000 m | 2,000 m |
 |---|---|---|---|---|
-| Cat paw | 6% | 6% | 7% | 7% |
-| Cutter | 6% | 6% | 7% | 7% |
-| Drawing compass | 6% | 6% | 6% | 7% |
-| Erasers | 6% | 6% | 7% | 7% |
-| Glue tube | 6% | 6% | 7% | 7% |
-| Ink blots | 6% | 6% | 7% | 7% |
-| Paper wad | 6% | 6% | 7% | 7% |
-| Pencil | 6% | 6% | 7% | 7% |
-| Protractor | 6% | 6% | 7% | 7% |
-| Rubber band | 6% | 6% | 7% | 7% |
-| Rulers | 6% | 6% | 7% | 7% |
-| Scissors | 6% | 6% | 7% | 7% |
-| Set square | 6% | 6% | 7% | 7% |
-| Sticky notes | 6% | 6% | 7% | 7% |
-| Paper clips | 6% | 6% | 7% | — |
-| Desk fan | 6% | 6% | — | — |
+| Breath of air | 5% | 5% | 6% | 6% |
+| Cat paw | 5% | 5% | 6% | 6% |
+| Cutter | 5% | 5% | 6% | 6% |
+| Drawing compass | 5% | 5% | 6% | 6% |
+| Erasers | 5% | 5% | 6% | 6% |
+| Glue tube | 5% | 5% | 6% | 6% |
+| Highlighter cap / party popper | 5% | 5% | 6% | 6% |
+| Ink blots | 5% | 5% | 6% | 6% |
+| Laser pointer / desk lamp | 5% | 5% | 6% | 6% |
+| Paper wad | 5% | 5% | 6% | 6% |
+| Pencil | 5% | 5% | 5% | 6% |
+| Protractor | 5% | 5% | 6% | 6% |
+| Rubber band | 5% | 5% | 6% | 6% |
+| Rulers | 5% | 5% | 5% | 6% |
+| Scissors | 5% | 5% | 6% | 6% |
+| Set square | 5% | 5% | 6% | 6% |
+| Sticky notes | 5% | 5% | 6% | 6% |
+| Paper clips | 5% | 5% | 5% | — |
+| Desk fan | 5% | 5% | — | — |
 
 ## Gaps and ideas
 - **Unused mechanics:** Charged Beam, Proximity Blast and Effect Zone. On-theme options:

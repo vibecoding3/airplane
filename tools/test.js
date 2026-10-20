@@ -3,7 +3,7 @@
 //   node tools/test.js 800        (deep runs to 800 m, faster)
 const { openGame, wait } = require('./lib');
 const DEPTH = +process.argv[2] || 2500;
-const EXPECTED = { notebook: 16, sea: 19, space: 15, dungeon: 18, city: 19, forest: 19, desert: 19, volcano: 19 };   // obstacle types per map; update when adding obstacles
+const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, forest: 19, desert: 19, volcano: 19 };   // obstacle types per map; update when adding obstacles
 
 (async () => {
   const { browser, page, errors } = await openGame();
@@ -403,6 +403,19 @@ const EXPECTED = { notebook: 16, sea: 19, space: 15, dungeon: 18, city: 19, fore
     return bad;
   });
   check(layers.length === 0, 'Desert looks follow the rock layers' + (layers.length ? ': ' + layers.slice(0, 5).join(', ') : ''));
+
+  // Neon City looks follow the city's layers (v129): balconies only up top, pipes in the subway, server racks in the data core…
+  const clayers = await page.evaluate(() => {
+    mapId = 'city'; applyMap(); start(); const bad = [], seen = new Set();
+    for (const m of [50, 300, 600, 1200, 2000]) for (let k = 0; k < 60; k++) {
+      obstacles.length = 0; lastType = '';
+      spawnFromPool(m * PX_PER_M, 0.5, [[['signs', 'shutters', 'cones', 'taxis', 'camera', 'bulge'][k % 6], 1]]);
+      for (const o of obstacles) { if (o.look) seen.add(o.look); if (o.look && CITY_LAYERS[o.look] && !CITY_LAYERS[o.look].includes(o.layer)) bad.push(o.look + '@' + m); }
+    }
+    gameOver();
+    return { bad, added: ['pipes', 'racks', 'ticketgate', 'holosign', 'datapackets', 'canmachine'].filter(l => seen.has(l)).length };
+  });
+  check(clayers.bad.length === 0 && clayers.added === 6, `Neon City looks follow the layers, ${clayers.added}/6 added looks seen` + (clayers.bad.length ? ': ' + clayers.bad.slice(0, 5).join(', ') : ''));
 
   // the Volcanic stones collection: stones among the Volcano's lava bombs, each once per run, plain bombs once all 8 have appeared
   const stones = await page.evaluate(() => {

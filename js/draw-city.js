@@ -11,6 +11,7 @@ const METAL = '#3a3f58', METAL_HI = '#5a6180', HAZARD = '#ffc21f', GLASS = '#142
 const cityLight = a => `rgba(255,255,255,${a})`, cityShade = a => `rgba(0,0,0,${a})`;
 
 function drawCityObstacle(o, sy) {
+  if (CITY_EXTRA[o.look] && CITY_EXTRA[o.look](o, sy) !== false) return;   // the looks added in v129
   switch (o.type) {
     case 'gate': {
       const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
@@ -727,4 +728,127 @@ function drawCityCable(o, sy) {
         ctx.fillStyle = '#ff3f3f'; ctx.beginPath(); ctx.arc(0, 0, 2.6, 0, Math.PI * 2); ctx.fill();
       });
   blit(anchor, o.x1, sy + dy1); blit(anchor, o.x2, sy + dy2);
+}
+
+// ---------- Looks added in v129, one per layer of the city (CITY_LAYERS in obstacles.js) ----------
+// subway: pipes along the tunnel walls and ticket gates; arcade: a vending machine firing cans; data core: server racks
+// and glowing data packets; anywhere: holographic warning signs. Each draws its whole obstacle inside the hit shape.
+const CITY_EXTRA = {
+  pipes: o => cityGate(o, drawCityPipes), racks: o => cityGate(o, drawCityRack),
+  ticketgate: (o, sy) => { const l = o.cx - o.gap / 2, r = o.cx + o.gap / 2; drawTicketGate(-10, l, sy, l, -1, o); drawTicketGate(r, W + 10, sy, r, 1, o); },
+  holosign: (o, sy) => drawHoloSign(o, sy),
+  datapackets: (o, sy) => { for (const x of clipXs(o)) drawDataPacket(x, sy, o.v > 0 ? 1 : -1, o.cityCol); },
+  canmachine: (o, sy) => drawCanMachine(o, sy)
+};
+function cityGate(o, draw) {
+  const sy = o.y - dist, l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
+  draw(-10, l, sy, l, -1, o); draw(r, W + 10, sy, r, 1, o);
+}
+
+// Gap Wall (subway): two pipes along the tunnel wall with flanges and a red valve wheel near the gap, 22 thick
+function drawCityPipes(x0, x1, sy, innerX, outDir, o) {
+  if (x1 - x0 < 1) return;
+  const col = o.cityCol || '#7a8aa0';
+  ctx.save();
+  for (const [y, h] of [[-11, 11], [1, 10]]) {
+    ctx.beginPath(); roundRectPath(x0, sy + y, x1 - x0, h, h / 2); ctx.fillStyle = col; ctx.fill(); cityStroke(1.3);
+    ctx.fillStyle = cityLight(0.25); ctx.fillRect(x0, sy + y + 2, x1 - x0, 2);
+  }
+  for (let x = innerX + outDir * 30; outDir > 0 ? x < x1 : x > x0; x += outDir * 44) {     // flanges
+    ctx.fillStyle = METAL_HI; ctx.beginPath(); ctx.rect(x - 2.5, sy - 11, 5, 22); ctx.fill(); cityStroke(1);
+  }
+  ctx.fillStyle = METAL; ctx.beginPath(); ctx.arc(innerX + outDir * 6, sy, 6, 0, Math.PI * 2); ctx.fill(); cityStroke(1.1);   // the pipe end
+  const vx = innerX + outDir * 16;                 // a valve wheel
+  ctx.strokeStyle = '#ff3f3f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(vx, sy - 6, 4.5, 0, Math.PI * 2); ctx.moveTo(vx - 4.5, sy - 6); ctx.lineTo(vx + 4.5, sy - 6); ctx.moveTo(vx, sy - 10.5); ctx.lineTo(vx, sy - 1.5); ctx.stroke();
+  ctx.restore();
+}
+
+// Gap Wall (data core): a server rack lying from the wall, rows of blinking lights, 22 thick
+function drawCityRack(x0, x1, sy, innerX, outDir, o) {
+  if (x1 - x0 < 1) return;
+  const col = o.cityCol || '#3ff0ff', t = time;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x0, sy - 11, x1 - x0, 22); ctx.fillStyle = '#1a1f30'; ctx.fill();
+  ctx.save(); ctx.clip();
+  ctx.fillStyle = METAL; for (const y of [-11, -0.5]) ctx.fillRect(x0, sy + y, x1 - x0, 1.2);
+  for (let x = innerX + outDir * 8, k = 0; outDir > 0 ? x < x1 : x > x0; x += outDir * 7, k++) {
+    for (const y of [-6, 5]) {
+      const on = Math.sin(t * 6 + k * 1.7 + y) > 0.2;
+      ctx.fillStyle = on ? col : 'rgba(80,90,120,.6)'; ctx.fillRect(x - 1.2, sy + y - 1.2, 2.4, 2.4);
+    }
+  }
+  ctx.restore();
+  ctx.beginPath(); ctx.rect(x0, sy - 11, x1 - x0, 22); cityStroke(1.4);
+  ctx.strokeStyle = col; ctx.globalAlpha = 0.6; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(innerX, sy - 10); ctx.lineTo(innerX, sy + 10); ctx.stroke();
+  ctx.restore();
+}
+
+// Closing Jaws (subway, arcade): ticket gates whose glass paddles slide shut and open, 28 thick
+function drawTicketGate(x0, x1, sy, innerX, outDir, o) {
+  if (x1 - x0 < 1) return;
+  const col = o.cityCol || '#3fff8a';
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x0, sy - 14, x1 - x0, 28); ctx.fillStyle = METAL; ctx.fill(); cityStroke(1.5);
+  ctx.fillStyle = METAL_HI; ctx.fillRect(x0, sy - 14, x1 - x0, 5);
+  const p0 = innerX + outDir * 2, p1 = innerX + outDir * 26;            // the glass paddle at the closing edge
+  ctx.fillStyle = 'rgba(160,220,255,.55)'; ctx.beginPath(); ctx.rect(Math.min(p0, p1), sy - 12, 24, 24); ctx.fill(); cityStroke(1.1);
+  ctx.fillStyle = cityLight(0.5); ctx.fillRect(Math.min(p0, p1) + 4, sy - 10, 3, 20);
+  const lx = innerX + outDir * 36;                 // the green/red light and the card reader
+  ctx.fillStyle = Math.sin(time * 3) > 0 ? col : '#ff3f5a'; ctx.beginPath(); ctx.arc(lx, sy - 5, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#14203a'; ctx.fillRect(lx - 4, sy + 2, 8, 6);
+  ctx.restore();
+}
+
+// Static Hazards: a holographic warning sign: a flickering "!" triangle over a little projector, inside the hit circle
+function drawHoloSign(o, sy) {
+  const R = o.r * 0.88, col = o.cityCol || '#3ff0ff', flick = 0.75 + 0.25 * Math.sin(time * 17 + o.x);
+  ctx.save();
+  ctx.translate(o.x, sy);
+  ctx.fillStyle = METAL; ctx.beginPath(); ctx.ellipse(0, R * 0.78, R * 0.45, R * 0.16, 0, 0, Math.PI * 2); ctx.fill(); cityStroke(1.2);   // the projector
+  ctx.globalAlpha = flick;
+  ctx.beginPath(); ctx.moveTo(0, -R * 0.85); ctx.lineTo(R * 0.8, R * 0.55); ctx.lineTo(-R * 0.8, R * 0.55); ctx.closePath();
+  ctx.fillStyle = hexA(col, 0.28); ctx.fill();
+  ctx.strokeStyle = col; ctx.lineWidth = 2.6; ctx.lineJoin = 'round'; ctx.stroke();
+  ctx.strokeStyle = cityLight(0.25); ctx.lineWidth = 1; ctx.beginPath(); for (let y = -R * 0.6; y < R * 0.5; y += 4) { ctx.moveTo(-R * 0.7, y); ctx.lineTo(R * 0.7, y); } ctx.stroke();
+  ctx.fillStyle = col; ctx.fillRect(-R * 0.08, -R * 0.4, R * 0.16, R * 0.5); ctx.beginPath(); ctx.arc(0, R * 0.32, R * 0.09, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+// a #rrggbb colour with an alpha (also used by draw-forest.js)
+const hexA = (hex, a) => `rgba(${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)},${a})`;
+
+// Conveyor (data core): glowing data packets streaming across, each 34 x 12 with a trail of bits behind it
+function drawDataPacket(x, sy, dir, col = '#3fff8a') {
+  blit(sharedSprite('packet' + dir + col, 44, 16, 22, 8, () => {
+    ctx.scale(dir, 1);
+    ctx.fillStyle = hexA(col, 0.25); ctx.beginPath(); roundRectPath(-17, -6, 34, 12, 3); ctx.fill();
+    ctx.fillStyle = '#0d1a20'; ctx.beginPath(); roundRectPath(-4, -5, 20, 10, 2); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.fillStyle = col; for (const [px, py] of [[0, -2], [4, -2], [8, 1], [12, -2], [0, 2], [8, -2]]) ctx.fillRect(px - 0.8, py - 0.8, 1.6, 1.6);
+    for (const [px, w] of [[-8, 2.4], [-12, 1.8], [-16, 1.2]]) ctx.fillRect(px, -w / 2, w, w);
+  }), x, sy);
+}
+
+// Wall Turret (streets to arcade): a vending machine on the wall shooting cans out of its slot; the slot flashes first
+function drawCanMachine(o, sy) {
+  const dir = inward(o), col = o.cityCol || '#ff3f5a';
+  for (const b of o.blobs) {                       // flying soda cans, tumbling
+    ctx.save(); ctx.translate(b.x, sy); ctx.rotate(b.wob);
+    ctx.fillStyle = col; ctx.beginPath(); roundRectPath(-b.r * 0.6, -b.r * 0.9, b.r * 1.2, b.r * 1.8, 2); ctx.fill(); cityStroke(1);
+    ctx.fillStyle = '#e6ecf5'; ctx.fillRect(-b.r * 0.6, -b.r * 0.2, b.r * 1.2, b.r * 0.4);
+    ctx.restore();
+  }
+  const body = sharedSprite('canmachine' + dir + col, 176, 52, 88, 26, () => {
+    ctx.scale(dir, 1);
+    ctx.fillStyle = col; ctx.beginPath(); roundRectPath(-4, -11, 64, 22, 3); ctx.fill(); cityStroke(1.4);
+    ctx.fillStyle = GLASS; ctx.beginPath(); roundRectPath(2, -8, 34, 16, 2); ctx.fill();                     // the window of cans
+    const tones = ['#ff3f5a', '#3f8fff', '#b6ff3f', '#ffd23f'];
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 6; c++) { ctx.fillStyle = tones[(r + c) % 4]; ctx.fillRect(4 + c * 5.4, -6 + r * 7, 3.6, 5); }
+    ctx.fillStyle = '#e6ecf5'; ctx.fillRect(40, -7, 8, 5); ctx.fillStyle = '#1a1a24'; ctx.fillRect(42, 1, 4, 6);  // buttons and coin slot
+    ctx.fillStyle = METAL; ctx.beginPath(); roundRectPath(58, -4, 20, 8, 2); ctx.fill(); cityStroke(1.1);          // the chute
+    ctx.fillStyle = '#0a0a14'; ctx.fillRect(74, -3, 4, 6);
+  });
+  blit(body, wallX(o), sy);
+  if (o.timer < 0.35 && o.y - dist < H) {
+    ctx.fillStyle = Math.floor(o.timer * 20) % 2 ? '#ffffff' : col;
+    ctx.beginPath(); ctx.arc(wallX(o) + dir * 77, sy, 3.5, 0, Math.PI * 2); ctx.fill();
+  }
 }

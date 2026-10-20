@@ -10,6 +10,7 @@ const desLight = a => `rgba(255,255,255,${a})`, desShade = a => `rgba(0,0,0,${a}
 const CACTUS = '#5f9a4a', CACTUS_DARK = '#3f7a2a', SPINE = '#f4ecd0', DWOOD = '#8a5a32';
 
 function drawDesertObstacle(o, sy) {
+  if (DESERT_EXTRA[o.look] && DESERT_EXTRA[o.look](o, sy) !== false) return;   // the looks added in v129
   switch (o.type) {
     case 'gate': {
       const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
@@ -571,4 +572,84 @@ function drawDesertRope(o, sy) {
     ctx.strokeStyle = 'rgba(120,80,40,.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, 2.6, 0, Math.PI * 2); ctx.stroke();
   });
   blit(post, o.x1, sy + dy1); blit(post, o.x2, sy + dy2);
+}
+
+// ---------- Looks added in v129 (DESERT_LOOKS / DESERT_LAYERS in obstacles.js) ----------
+// a dry branch and, in the deep layers, a long fossil bone as sliders; date clusters from the oasis palms and, deep down,
+// drops of amber as projectiles; a geode that cracks open in a burst of crystals as a proximity blast
+const DESERT_EXTRA = {
+  drybranch: (o, sy) => drawDesertBar(o, sy), bone: (o, sy) => drawDesertBar(o, sy),
+  dates: (o, sy) => drawDesertDrop(o, sy), amber: (o, sy) => drawDesertDrop(o, sy),
+  geode: (o, sy) => drawGeodeBurst(o, sy)
+};
+
+// Bouncing Slider: a forked dry branch, or a long fossil bone with knobbly ends, 13 thick
+function drawDesertBar(o, sy) {
+  const L = o.len / 2, col = o.desCol || (o.look === 'bone' ? '#ece2c8' : '#a08060');
+  blit(ownSprite(o, 'sprX', o.len + 8, 22, L + 4, 11, () => {
+    if (o.look === 'bone') {
+      ctx.fillStyle = col;
+      ctx.beginPath(); roundRectPath(-L + 8, -5, o.len - 16, 10, 4); ctx.fill(); desStroke(1.2);
+      for (const s of [-1, 1]) for (const y of [-3, 3]) { ctx.beginPath(); ctx.arc(s * (L - 6), y, 4.6, 0, Math.PI * 2); ctx.fill(); desStroke(1.2); }
+      ctx.beginPath(); roundRectPath(-L + 8, -5, o.len - 16, 10, 4); ctx.fill();
+      ctx.strokeStyle = 'rgba(160,130,90,.6)'; ctx.lineWidth = 1; ctx.beginPath(); for (let x = -L + 16; x < L - 16; x += 14) { ctx.moveTo(x, -2); ctx.lineTo(x + 5, 1.5); } ctx.stroke();
+    } else {
+      ctx.strokeStyle = DES_LINE; ctx.lineWidth = 12.4; ctx.lineCap = 'round';
+      const path = () => { ctx.beginPath(); ctx.moveTo(-L + 2, 1); ctx.quadraticCurveTo(0, -2, L - 2, 0); ctx.moveTo(L * 0.25, -0.5); ctx.lineTo(L * 0.42, -1.5); ctx.moveTo(-L * 0.4, 0.5); ctx.lineTo(-L * 0.55, 1.5); };
+      path(); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = 10; path(); ctx.stroke();
+      ctx.strokeStyle = desLight(0.35); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-L + 6, -0.5); ctx.quadraticCurveTo(0, -3, L - 6, -1.5); ctx.stroke();
+    }
+  }), o.x, sy, o.a);
+}
+
+// Rising Projectile: a cluster of dates on a little stalk, or a glowing drop of amber with a tiny leaf inside
+function drawDesertDrop(o, sy) {
+  const s = o.r / 16, amber = o.look === 'amber', col = o.desCol || (amber ? '#e8a030' : '#7a3a20');
+  blit(sharedSprite('ddrop' + o.look + col, 36, 36, 18, 18, () => {
+    if (amber) {
+      ctx.fillStyle = 'rgba(255,190,80,.35)'; ctx.beginPath(); ctx.arc(0, 1, 14, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, -13); ctx.quadraticCurveTo(12, -2, 10, 6); ctx.quadraticCurveTo(7, 13, 0, 13); ctx.quadraticCurveTo(-7, 13, -10, 6); ctx.quadraticCurveTo(-12, -2, 0, -13); ctx.fill(); desStroke(1.4);
+      ctx.fillStyle = '#5a7a2a'; ctx.beginPath(); ctx.ellipse(0, 4, 4, 2, 0.6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = desLight(0.55); ctx.beginPath(); ctx.ellipse(-4, -2, 2, 4, 0.3, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.strokeStyle = '#c8a040'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(0, -6); ctx.stroke();
+      for (const [x, y] of [[-6, -3], [6, -3], [0, -1], [-4, 6], [4, 6], [0, 11]]) {
+        ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, y, 4.2, 5.5, x * 0.04, 0, Math.PI * 2); ctx.fill(); desStroke(1.1);
+        ctx.fillStyle = desLight(0.4); ctx.beginPath(); ctx.arc(x - 1.5, y - 2, 1.2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }), o.x, sy, o.rot * (amber ? 0.4 : 1), s, s);
+}
+
+// Proximity Blast: a round rock that swells, shakes and cracks open in a burst of purple crystals
+function drawGeodeBurst(o, sy) {
+  const col = o.desCol || '#9a8a7a';
+  if (o.phase === 'boom' || o.phase === 'gone') {
+    const t = o.phase === 'boom' ? o.t : 0.35 + o.t;
+    if (t > 0.65) return;
+    const r = o.blast * Math.min(1, t / 0.12), fade = t < 0.35 ? 1 : 1 - (t - 0.35) / 0.3;
+    ctx.save();
+    ctx.globalAlpha = 0.3 * fade; ctx.fillStyle = '#c8a0f0'; ctx.beginPath(); ctx.arc(o.x, sy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = fade; ctx.strokeStyle = '#8a5ad8'; ctx.lineWidth = 4; ctx.stroke();
+    for (let i = 0; i < 14; i++) {                 // crystal shards flying out
+      const a = i * 2.4, d = r * (0.3 + 0.6 * ((i * 37) % 10) / 10), x = o.x + Math.cos(a) * d, y = sy + Math.sin(a) * d;
+      ctx.fillStyle = i % 2 ? '#b07af0' : '#e8d8ff'; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * 6, y + Math.sin(a) * 6); ctx.lineTo(x - Math.sin(a) * 2.5, y + Math.cos(a) * 2.5); ctx.lineTo(x + Math.sin(a) * 2.5, y - Math.cos(a) * 2.5); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+    return;
+  }
+  const blink = o.phase === 'blink';
+  if (blink) {
+    ctx.save(); ctx.strokeStyle = '#8a5ad8'; ctx.globalAlpha = 0.35 + 0.5 * Math.min(1, o.t / 0.6); ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.arc(o.x, sy, o.blast, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+  }
+  const swell = blink ? 1 + 0.08 * Math.sin(o.t * 40) : 1;
+  blit(sharedSprite('geode' + col, 40, 40, 20, 20, () => {
+    ctx.fillStyle = col; ctx.beginPath();
+    for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, d = i % 2 ? 12 : 13.5; ctx.lineTo(Math.cos(a) * d, Math.sin(a) * d); }
+    ctx.closePath(); ctx.fill(); desStroke(1.4);
+    ctx.fillStyle = desShade(0.15); for (const [x, y] of [[-5, 4], [4, -6], [6, 5]]) { ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill(); }
+    ctx.strokeStyle = '#8a5ad8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-10, -3); ctx.lineTo(-3, 0); ctx.lineTo(2, -5); ctx.lineTo(9, -2); ctx.stroke();   // a crack showing purple inside
+    ctx.strokeStyle = '#e8d8ff'; ctx.lineWidth = 0.8; ctx.stroke();
+  }), o.x, sy, blink ? Math.sin(o.t * 50) * 0.08 : 0, swell, swell);
 }

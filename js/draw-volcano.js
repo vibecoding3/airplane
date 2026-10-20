@@ -20,6 +20,8 @@ function lavaGlow(w = 2.4) {
 function hexPath(x, y, r) { ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } ctx.closePath(); }
 
 function drawVolcanoObstacle(o, sy) {
+  if (o.look === 'embers') { drawEmbers(o, sy); return; }        // looks added in v129
+  if (o.look === 'fumarole') { drawFumarole(o, sy); return; }
   switch (o.type) {
     case 'gate': {
       const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
@@ -231,11 +233,11 @@ function paintVolcStone(name) {
 function drawVolcanoBomb(o, sy) {
   const s = o.r / 16;
   if (o.stone) { blit(sharedSprite('stone-' + o.stone, 36, 36, 18, 18, () => paintVolcStone(o.stone)), o.x, sy, o.rot * 0.4, s, s); return; }
-  const glow = o.look === 'glowrock';
-  blit(sharedSprite('vbomb' + o.look, 40, 40, 20, 20, () => {
-    if (glow) {                                    // a red-hot rock, bright at its core
+  const glow = o.look === 'glowrock', magma = o.layer === 4;
+  blit(sharedSprite('vbomb' + o.look + magma, 40, 40, 20, 20, () => {
+    if (glow) {                                    // a red-hot rock, bright at its core (a dark crust in the magma layer, v129)
       ctx.fillStyle = 'rgba(255,120,30,.35)'; ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = LAVA; ctx.beginPath(); ctx.moveTo(-12, 2); ctx.lineTo(-8, -10); ctx.lineTo(4, -12); ctx.lineTo(12, -3); ctx.lineTo(9, 9); ctx.lineTo(-4, 12); ctx.closePath(); ctx.fill(); volStroke(1.3);
+      ctx.fillStyle = magma ? '#2a1a14' : LAVA; ctx.beginPath(); ctx.moveTo(-12, 2); ctx.lineTo(-8, -10); ctx.lineTo(4, -12); ctx.lineTo(12, -3); ctx.lineTo(9, 9); ctx.lineTo(-4, 12); ctx.closePath(); ctx.fill(); volStroke(1.3);
       ctx.fillStyle = LAVA_HOT; ctx.beginPath(); ctx.arc(1, 0, 5.5, 0, Math.PI * 2); ctx.fill();
     } else {                                       // a lava bomb: a dark crusty blob, bright cracks, a hot trail underneath
       ctx.fillStyle = 'rgba(255,120,30,.4)'; ctx.beginPath(); ctx.ellipse(0, 8, 8, 6, 0, 0, Math.PI * 2); ctx.fill();
@@ -359,6 +361,7 @@ function drawVolcanoTongue(o, sy) {
       ctx.beginPath(); ctx.moveTo(h - 6, -5); ctx.lineTo(tip - 6, -5.5); ctx.arc(tip - 6, 0, 5.5, -Math.PI / 2, Math.PI / 2); ctx.lineTo(h - 6, 5); ctx.closePath();
       ctx.fillStyle = 'rgba(255,110,30,.45)'; ctx.fill();
       ctx.beginPath(); ctx.moveTo(h - 6, -3.5); ctx.lineTo(tip - 6, -4); ctx.arc(tip - 6, 0, 4, -Math.PI / 2, Math.PI / 2); ctx.lineTo(h - 6, 3.5); ctx.closePath(); ctx.fillStyle = LAVA; ctx.fill();
+      if (o.layer === 4) { ctx.beginPath(); ctx.moveTo(h - 6, -5.5); ctx.lineTo(tip - 6, -5.5); ctx.arc(tip - 6, 0, 5.5, -Math.PI / 2, Math.PI / 2); ctx.lineTo(h - 6, 5.5); volStroke(2.2); }   // a dark crust edge on the orange magma (v129)
       ctx.fillStyle = LAVA_HOT; ctx.fillRect(h - 6, -1.2, e - 4, 2.4);
       ctx.fillStyle = '#3a2a24'; ctx.beginPath(); ctx.arc(tip - 5, -2, 2, 0, Math.PI * 2); ctx.fill();
     }
@@ -588,4 +591,42 @@ function drawVolcanoRope(o, sy) {
     ctx.beginPath(); ctx.moveTo(-4, -3); ctx.lineTo(0, 1); ctx.lineTo(4, -2); lavaGlow(1.3);
   });
   blit(knob, o.x1, sy + dy1); blit(knob, o.x2, sy + dy2);
+}
+
+// ---------- Looks added in v129 ----------
+// Drifting Swarm: a little cloud of glowing embers drifting down, in the 42-unit square (instead of only critters)
+function drawEmbers(o, sy) {
+  const t = time + (o.ph || 0);
+  ctx.save();
+  ctx.translate(o.x, sy);
+  ctx.fillStyle = 'rgba(60,40,30,.35)'; ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.fill();   // a puff of dark smoke holding them
+  ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2); volStroke(1.2);
+  for (let k = 0; k < 9; k++) {
+    const a = k * 2.4 + t * 0.6, d = 4 + (k % 4) * 4, x = Math.cos(a) * d, y = Math.sin(a) * d * 0.9;
+    const glow = 0.6 + 0.4 * Math.sin(t * 7 + k);
+    ctx.fillStyle = `rgba(255,140,40,${0.45 * glow})`; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = k % 3 ? LAVA : LAVA_HOT; ctx.beginPath(); ctx.arc(x, y, 1.8, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+// Wall Turret: a fumarole, a crusty yellow-grey vent in the wall puffing hot steam balls; it hisses (glows) before each one
+function drawFumarole(o, sy) {
+  const dir = inward(o), col = o.volCol || '#b8a878';
+  for (const b of o.blobs) {                       // steam balls with a hot core
+    ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.arc(b.x - dir * b.r * 0.6, sy, b.r * 0.7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#f4f0e8'; ctx.beginPath(); ctx.arc(b.x, sy, b.r * 0.9, 0, Math.PI * 2); ctx.fill(); volStroke(1);
+    ctx.fillStyle = 'rgba(255,170,90,.6)'; ctx.beginPath(); ctx.arc(b.x, sy, b.r * 0.4, 0, Math.PI * 2); ctx.fill();
+  }
+  const head = sharedSprite('fumarole' + dir + col, 170, 50, 85, 25, () => {
+    ctx.scale(dir, 1);
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-4, -11); ctx.quadraticCurveTo(30, -13, 58, -7); ctx.lineTo(78, -4); ctx.lineTo(78, 4); ctx.lineTo(58, 7); ctx.quadraticCurveTo(30, 13, -4, 11); ctx.closePath(); ctx.fill(); volStroke(1.5);
+    ctx.fillStyle = '#e8d040'; for (const [x, y, r] of [[14, -5, 3], [26, 4, 3.5], [40, -3, 2.6], [52, 3, 2.4], [62, -2, 2]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }   // sulfur crust
+    ctx.fillStyle = '#2a2018'; ctx.beginPath(); ctx.ellipse(76, 0, 2, 3.4, 0, 0, Math.PI * 2); ctx.fill();
+  });
+  blit(head, wallX(o), sy);
+  if (o.timer < 0.35 && o.y - dist < H) {
+    ctx.fillStyle = Math.floor(o.timer * 20) % 2 ? '#ffffff' : LAVA_HOT;
+    ctx.beginPath(); ctx.arc(wallX(o) + dir * 78, sy, 4.5, 0, Math.PI * 2); ctx.fill();
+  }
 }

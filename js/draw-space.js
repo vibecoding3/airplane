@@ -411,3 +411,143 @@ function drawEnergyBlade(o, sy) {
   ctx.fillStyle = '#4a4f58'; for (const x of [2, 7, 12]) ctx.fillRect(x, -5, 2, 10);
   ctx.restore();
 }
+
+// ---------- Space's added looks and mechanics (v129) ----------
+// Original alternatives (SPACE_ALT in obstacles.js) to the looks that echo famous films, picked half the time: a wormhole,
+// a hull turret, a robotic welding torch and an asteroid base; plus two mechanics Space had not used: a tether cable
+// between two little satellites (Spring Line) and a satellite spinning two solar panels (Spinning Blades).
+// Returns false for every other look, so render.js draws it.
+function drawSpaceExtra(o, sy) {
+  switch (o.look) {
+    case 'wormhole': drawWormhole(o, sy); return true;
+    case 'turret': drawHullTurret(o, sy); return true;
+    case 'torch': drawWeldingTorch(o, sy); return true;
+    case 'asteroidbase': drawAsteroidBase(o, sy); return true;
+    case 'tether': drawTether(o, sy); return true;
+    case 'panels': drawSolarPanels(o, sy); return true;
+  }
+  return false;
+}
+
+// Static Hazards: a wormhole, swirling rings around a bright core (deadly to touch, pulls nothing), in the hit circle
+function drawWormhole(o, sy) {
+  const R = o.r * 0.88, t = performance.now() / 1000;
+  ctx.save();
+  ctx.translate(o.x, sy);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+  g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, '#b48cff'); g.addColorStop(0.7, '#3a2a8a'); g.addColorStop(1, 'rgba(40,20,90,.2)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+  ctx.lineCap = 'round';
+  for (let k = 0; k < 4; k++) {                    // spiral arms turning
+    ctx.strokeStyle = k % 2 ? 'rgba(120,220,255,.8)' : 'rgba(220,180,255,.8)'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let s = 0; s <= 1; s += 0.08) { const a = t * 1.5 + k * Math.PI / 2 + s * 3.2, d = R * (0.15 + 0.8 * s); ctx.lineTo(Math.cos(a) * d, Math.sin(a) * d); }
+    ctx.stroke();
+  }
+  ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); spaceStroke(1.6);
+  ctx.restore();
+}
+
+// Wall Turret: a gun turret bolted to the station hull, firing blue plasma balls; its muzzle glows before each shot
+function drawHullTurret(o, sy) {
+  const dir = inward(o);
+  for (const b of o.blobs) {
+    ctx.fillStyle = 'rgba(90,180,255,.35)'; ctx.beginPath(); ctx.arc(b.x, sy, b.r * 1.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#7fd0ff'; ctx.beginPath(); ctx.arc(b.x, sy, b.r * 0.85, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(b.x, sy, b.r * 0.4, 0, Math.PI * 2); ctx.fill();
+  }
+  const gun = sharedSprite('hullturret' + dir, 180, 52, 90, 26, () => {
+    ctx.scale(dir, 1);
+    ctx.fillStyle = '#8d96a3'; ctx.beginPath(); ctx.moveTo(-4, -11); ctx.lineTo(40, -11); ctx.quadraticCurveTo(58, -10, 60, 0); ctx.quadraticCurveTo(58, 10, 40, 11); ctx.lineTo(-4, 11); ctx.closePath(); ctx.fill(); spaceStroke(1.3);
+    ctx.fillStyle = '#e8b030'; for (let x = 0; x < 30; x += 8) { ctx.beginPath(); ctx.moveTo(x, 11); ctx.lineTo(x + 4, 11); ctx.lineTo(x + 8, 5); ctx.lineTo(x + 4, 5); ctx.closePath(); ctx.fill(); }   // hazard stripes
+    ctx.fillStyle = '#5a6270'; ctx.beginPath(); ctx.arc(34, -2, 6, 0, Math.PI * 2); ctx.fill(); spaceStroke(1);                                              // the sensor eye
+    ctx.fillStyle = '#7fd0ff'; ctx.beginPath(); ctx.arc(34, -2, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#c9ced6'; ctx.beginPath(); roundRectPath(56, -4, 22, 8, 2); ctx.fill(); spaceStroke(1.1);                                             // the barrel
+    ctx.fillStyle = '#2b3240'; ctx.fillRect(74, -2.5, 4, 5);
+  });
+  blit(gun, wallX(o), sy);
+  if (o.timer < 0.35 && o.y - dist < H) {
+    ctx.fillStyle = Math.floor(o.timer * 20) % 2 ? '#7fd0ff' : '#ffffff';
+    ctx.beginPath(); ctx.arc(wallX(o) + dir * 78, sy, 4, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+// Telegraphed Sweep: a robotic welding arm swinging out of a hatch, a blue flame at its nozzle, after a dashed wedge
+function drawWeldingTorch(o, sy) {
+  ctx.save();
+  toolFrame(o, sy);
+  if (o.phase === 'warn') {
+    const k = Math.min(1, o.t / o.warn);
+    ctx.save(); ctx.strokeStyle = '#7fd0ff'; ctx.globalAlpha = 0.3 + 0.55 * k; ctx.lineWidth = 2.2; ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, o.L + 20, -PAW_SWEEP, PAW_SWEEP); ctx.closePath(); ctx.stroke(); ctx.restore();
+  }
+  ctx.rotate(o.ext > 0 ? o.ang : 0);
+  if (o.ext > 0) {
+    const len = o.L * o.ext;
+    ctx.fillStyle = '#c9ced6'; ctx.beginPath(); roundRectPath(10, -7, len - 34, 14, 5); ctx.fill(); spaceStroke(1.2);   // the arm
+    ctx.fillStyle = '#e8b030'; for (let x = 24; x < len - 30; x += 26) ctx.fillRect(x, -7, 5, 14);                       // joints
+    ctx.fillStyle = '#8d96a3'; ctx.beginPath(); ctx.moveTo(len - 26, -9); ctx.lineTo(len - 14, -5); ctx.lineTo(len - 14, 5); ctx.lineTo(len - 26, 9); ctx.closePath(); ctx.fill(); spaceStroke(1.1);   // the nozzle
+    ctx.fillStyle = 'rgba(90,180,255,.4)'; ctx.beginPath(); ctx.ellipse(len - 3, 0, 15, 11, 0, 0, Math.PI * 2); ctx.fill();   // the flame
+    ctx.fillStyle = '#7fd0ff'; ctx.beginPath(); ctx.moveTo(len - 14, -5); ctx.quadraticCurveTo(len + 10, 0, len - 14, 5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(len - 14, -2.5); ctx.quadraticCurveTo(len, 0, len - 14, 2.5); ctx.closePath(); ctx.fill();
+  }
+  ctx.fillStyle = '#5a6270'; ctx.beginPath(); roundRectPath(-6, -10, 22, 20, 3); ctx.fill(); spaceStroke(1.2);           // the hatch it comes out of
+  ctx.restore();
+}
+
+// Wall Bulge: a cratered asteroid with a little base on it: domes, an antenna and lit windows (an exact half-disc)
+function drawAsteroidBase(o, sy) {
+  const cx = o.side < 0 ? 0 : W, R = o.r + 6, i = -o.side;
+  const s = ownSprite(o, 'sprA', R * 2, R * 2, R, R, () => {
+    ctx.beginPath(); ctx.arc(0, 0, o.r, 0, Math.PI * 2); ctx.fillStyle = '#8a7f74'; ctx.fill();
+    ctx.save(); ctx.clip();
+    craters(o.r, 3);
+    ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.beginPath(); ctx.arc(-i * o.r * 0.2, -o.r * 0.3, o.r * 0.7, 0, Math.PI * 2); ctx.fill();
+    for (const [a, d, r] of [[-0.5, 0.55, 16], [0.15, 0.62, 12], [0.6, 0.5, 10]]) {          // domes with lit windows
+      const x = i * Math.cos(a) * o.r * d, y = Math.sin(a) * o.r * d;
+      ctx.fillStyle = '#c9ced6'; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); spaceStroke(1.2);
+      ctx.fillStyle = '#ffe58a'; for (const k of [-0.4, 0, 0.4]) ctx.fillRect(x + k * r - 1.5, y - 1.5, 3, 3);
+    }
+    const ax = i * o.r * 0.35, ay = -o.r * 0.6;    // a dish antenna on a mast
+    ctx.strokeStyle = '#c9ced6'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(ax, ay + 10); ctx.lineTo(ax, ay - 2); ctx.stroke();
+    ctx.fillStyle = '#c9ced6'; ctx.beginPath(); ctx.ellipse(ax, ay - 4, 8, 3.5, -0.4, 0, Math.PI * 2); ctx.fill(); spaceStroke(1);
+    ctx.fillStyle = '#ff4040'; ctx.beginPath(); ctx.arc(ax + 3, ay - 9, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(0, 0, o.r, 0, Math.PI * 2); spaceStroke(1.6);
+  });
+  blit(s, cx, sy);
+}
+
+// Spring Line: a tether cable between two little satellites; the cable bounces the plane, the satellites hurt
+function drawTether(o, sy) {
+  const dy1 = o.y1 - o.y, dy2 = o.y2 - o.y;
+  const len = Math.hypot(o.x2 - o.x1, o.y2 - o.y1), nx = -(o.y2 - o.y1) / len, ny = (o.x2 - o.x1) / len;
+  const k = clamp((o.hitX - o.x1) / (o.x2 - o.x1), 0.1, 0.9), bend = Math.sin(o.t * 32) * o.wob * 14;
+  const cx = o.x1 + (o.x2 - o.x1) * k + nx * bend, cy = sy + dy1 + (dy2 - dy1) * k + ny * bend + 3;
+  const line = () => { ctx.beginPath(); ctx.moveTo(o.x1, sy + dy1); ctx.quadraticCurveTo(cx, cy, o.x2, sy + dy2); };
+  ctx.save(); ctx.lineCap = 'round';
+  line(); ctx.strokeStyle = 'rgba(230,238,255,.5)'; ctx.lineWidth = 4; ctx.stroke();
+  line(); ctx.strokeStyle = '#e8b030'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.restore();
+  const sat = sharedSprite('tethersat', 24, 24, 12, 12, () => {
+    ctx.fillStyle = '#4f8ff0'; ctx.fillRect(-9, -3, 4, 6); ctx.fillRect(5, -3, 4, 6);
+    ctx.fillStyle = '#e0b040'; ctx.beginPath(); roundRectPath(-5, -5, 10, 10, 2); ctx.fill(); spaceStroke(1.1);
+    ctx.fillStyle = '#ff4040'; ctx.beginPath(); ctx.arc(0, 0, 1.6, 0, Math.PI * 2); ctx.fill();
+  });
+  blit(sat, o.x1, sy + dy1); blit(sat, o.x2, sy + dy2);
+}
+
+// Spinning Blades: a satellite spinning two long solar panels that open and close, a counterweight pod behind each
+function drawSolarPanels(o, sy) {
+  const wing = sharedSprite('solarwing', 106, 26, 34, 13, () => {
+    ctx.fillStyle = '#c9ced6'; ctx.fillRect(-2, -1.5, 10, 3);                                       // the boom
+    ctx.fillStyle = '#2f5fb8'; ctx.beginPath(); ctx.rect(8, -4, 58, 8); ctx.fill(); spaceStroke(1.1);   // the panel
+    ctx.strokeStyle = 'rgba(200,220,255,.6)'; ctx.lineWidth = 0.8; ctx.beginPath();
+    for (let x = 15; x < 66; x += 7) { ctx.moveTo(x, -4); ctx.lineTo(x, 4); } ctx.moveTo(8, 0); ctx.lineTo(66, 0); ctx.stroke();
+    ctx.fillStyle = '#e0b040'; ctx.beginPath(); ctx.arc(-22, 0, 9, 0, Math.PI * 2); ctx.fill(); spaceStroke(1.2);   // the pod
+    ctx.fillStyle = '#c9ced6'; ctx.fillRect(-14, -1.5, 12, 3);
+    ctx.fillStyle = '#ff4040'; ctx.beginPath(); ctx.arc(-22, 0, 2, 0, Math.PI * 2); ctx.fill();
+  });
+  for (const s of [-1, 1]) blit(wing, o.x, sy, o.rot + s * o.open / 2);
+  ctx.fillStyle = '#c9ced6'; ctx.beginPath(); ctx.arc(o.x, sy, 5, 0, Math.PI * 2); ctx.fill(); spaceStroke(1.1);
+}
