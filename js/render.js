@@ -221,10 +221,12 @@ function render() {
   syncPaperLayers();
   drawPaper();
 
+  const shiny = [];                               // collection items: a glow behind, twinkles drawn over everything after
   for (const o of obstacles) {
     const sy = o.y - dist;
     if (sy < -120 || sy > H + 120) continue;
     noteFound(o, sy);
+    if (collectionId(o)) { drawShinyGlow(o, sy); shiny.push([o, sy]); }
     if (o.dungeon) { drawDungeonObstacle(o, sy); continue; }
     if (o.city) { drawCityObstacle(o, sy); continue; }
     if (o.forest) { drawForestObstacle(o, sy); continue; }
@@ -267,6 +269,7 @@ function render() {
       case 'paw': o.space ? drawEnergyBlade(o, sy) : o.sea ? drawKelp(o, sy) : drawPaw(o, sy); break;
     }
   }
+  for (const [o, sy] of shiny) drawShinySparkles(o, sy);
   for (const p of pickups) p.kind ? drawPower(p, p.y - dist) : drawStar(p, p.y - dist);
 
   const py = planeScreenY();

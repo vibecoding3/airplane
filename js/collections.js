@@ -34,23 +34,92 @@ const COLLECTION_TOTAL = COLLECTIONS.reduce((n, set) => n + set.items.length, 0)
 let collectionFound;
 try { collectionFound = new Set(JSON.parse(store.get('nosedive-collection') || '[]')); } catch (e) { collectionFound = new Set(); }
 
+// the collection item id an obstacle shows, or null for a regular obstacle
+function collectionId(o) {
+  return o.type === 'pencil' && COLLECTIBLE_LOOKS[o.look] ? COLLECTIBLE_LOOKS[o.look]
+       : o.look === 'ring' ? 'ring-' + o.dunCol
+       : o.look === 'planet' ? 'planet-' + o.planet
+       : o.origami ? 'origami-' + o.origami
+       : o.shell ? 'shell-' + o.shell
+       : o.sword ? 'sword-' + o.sword
+       : o.fish ? 'fish-' + o.fish
+       : o.neonSign ? 'neon-' + o.neonSign
+       : o.bird ? 'bird-' + o.bird
+       : o.fossil ? 'fossil-' + o.fossil
+       : o.stone ? 'stone-' + o.stone : null;
+}
+
 // called for every obstacle drawn during a run (render.js)
 function noteFound(o, sy) {
   if (state !== 'play' || sy < 0 || sy > H) return;
-  const id = o.type === 'pencil' && COLLECTIBLE_LOOKS[o.look] ? COLLECTIBLE_LOOKS[o.look]
-           : o.look === 'ring' ? 'ring-' + o.dunCol
-           : o.look === 'planet' ? 'planet-' + o.planet
-           : o.origami ? 'origami-' + o.origami
-           : o.shell ? 'shell-' + o.shell
-           : o.sword ? 'sword-' + o.sword
-           : o.fish ? 'fish-' + o.fish
-           : o.neonSign ? 'neon-' + o.neonSign
-           : o.bird ? 'bird-' + o.bird
-           : o.fossil ? 'fossil-' + o.fossil
-           : o.stone ? 'stone-' + o.stone : null;
+  const id = collectionId(o);
   if (!id || collectionFound.has(id)) return;
   collectionFound.add(id);
   store.set('nosedive-collection', JSON.stringify([...collectionFound]));
+}
+
+// Shiny collectibles: every collection item in a run gets a soft golden glow behind it and white star twinkles
+// popping around it, so it stands out like a rare find. Purely visual: hit boxes don't change.
+// Where to glow: a centre, a radius, and for long sliders (the staffs) the bar's angle and half-length.
+function shinyArea(o, sy) {
+  switch (o.type) {
+    case 'protractor': return { x: o.side < 0 ? 0 : W, y: sy, r: o.r, side: o.side };   // planets, neon signs: the half on screen
+    case 'pencil': return { x: o.x, y: sy, r: 14, a: o.a, half: o.len / 2 };
+    case 'scissors': return { x: o.x, y: sy, r: 52 };
+    case 'starfish': return { x: o.x, y: sy, r: 24 };
+    case 'note': return { x: o.x, y: sy, r: 24 };
+    default: return { x: o.x, y: sy, r: (o.r || 18) + 4 };
+  }
+}
+// a point around the item for twinkle k, picked fresh each time the twinkle restarts
+function shinyPoint(s, seed) {
+  const h = n => { const v = Math.sin(n * 127.1 + seed * 311.7) * 43758.5453; return v - Math.floor(v); };
+  if (s.half) {                                    // along the staff, a little to either side
+    const t = (h(1) * 2 - 1) * s.half, off = (h(2) * 2 - 1) * 12;
+    return [s.x + Math.cos(s.a) * t - Math.sin(s.a) * off, s.y + Math.sin(s.a) * t + Math.cos(s.a) * off];
+  }
+  let ang = h(1) * Math.PI * 2;
+  if (s.side) ang = (h(1) - 0.5) * Math.PI * 0.9 + (s.side < 0 ? 0 : Math.PI);   // only on the visible half of a bulge
+  const d = s.r * (0.45 + 0.75 * h(2));
+  return [s.x + Math.cos(ang) * d, s.y + Math.sin(ang) * d];
+}
+// behind the item: a pulsing golden halo
+function drawShinyGlow(o, sy) {
+  const s = shinyArea(o, sy), pulse = 0.8 + 0.2 * Math.sin(time * 4);
+  const R = s.r * 1.55 + 10;
+  ctx.save();
+  ctx.translate(s.x, s.y);
+  if (s.half) { ctx.rotate(s.a); ctx.scale((s.half + 16) / R, 1); }
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+  g.addColorStop(0, `rgba(255,248,190,${0.55 * pulse})`);
+  g.addColorStop(0.55, `rgba(255,214,90,${0.3 * pulse})`);
+  g.addColorStop(1, 'rgba(255,200,60,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+// in front of the item: four-pointed stars that pop in, twinkle and fade, each at a new spot every time
+function drawShinySparkles(o, sy) {
+  const s = shinyArea(o, sy);
+  if (o.shinySeed == null) o.shinySeed = Math.random() * 100;
+  const n = s.half ? 8 : s.r > 40 ? 10 : 6, period = 0.9;
+  for (let k = 0; k < n; k++) {
+    const ph = time / period + k / n + o.shinySeed, cycle = Math.floor(ph), t = ph - cycle;
+    if (t > 0.6) continue;                         // a short rest between twinkles
+    const [x, y] = shinyPoint(s, o.shinySeed + k * 17.3 + cycle * 5.1);
+    const size = Math.sin(t / 0.6 * Math.PI) * (k % 3 ? 7 : 11);
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(t * 1.2);
+    ctx.fillStyle = 'rgba(255,230,120,.55)';       // a soft gold rim, then the white star
+    starburst(size * 1.35, size * 0.35);
+    ctx.fillStyle = '#ffffff';
+    starburst(size, size * 0.22);
+    ctx.restore();
+  }
+}
+function starburst(R, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 - Math.PI / 2, d = i % 2 ? r : R; ctx.lineTo(Math.cos(a) * d, Math.sin(a) * d); }
+  ctx.closePath(); ctx.fill();
 }
 
 // draws an item into a canvas with the game's own art (or as a black silhouette while it is locked)
