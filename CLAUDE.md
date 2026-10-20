@@ -3,7 +3,7 @@
 Browser game: a paper plane always falls; the player steers left/right to dodge obstacles; score = depth in metres. Eight maps: **Paper** (internal id `notebook`), **Ocean** (`sea`, called Deep sea until v78), **Space** (`space`), **Dungeon** (`dungeon`), **Neon City** (`city`, v113: falls through the city's layers, rooftops to data core — not a Skyscraper map), **Forest** (`forest`, v114: falls through the seasons, spring to night; nature only, no Dungeon-style magic) **Desert** (`desert`, v120: falls through the rock layers, dunes to amber; no quicksand pull, no sandworm) and **Volcano** (`volcano`, v121: dives into a crater, jungle slope to magma chamber; rock, ash, steam and lava only, no dragons). README.md is the full game spec — read only the section you need.
 
 ## Files
-`index.html` (page + menus) · `style.css` · `js/*.js` (27 classic scripts, one shared global scope, run in the order `index.html` lists them; `main.js` last). README section 10 has the file map, a "where to change things" table and key names per file. Grep for a name rather than reading whole files.
+`index.html` (page + menus) · `style.css` · `js/*.js` (28 classic scripts, one shared global scope, run in the order `index.html` lists them; `main.js` last). README section 10 has the file map, a "where to change things" table and key names per file. Grep for a name rather than reading whole files.
 
 ## After every change
 1. `node tools/test.js` — loads the game in headless Chrome, menus, deep runs on all maps (all obstacle types must appear), normal runs, pause/resume, page errors. Use `node tools/test.js 800` for a faster run (it skips the all-obstacle-types check, which needs 1,500 m+). Update `EXPECTED` in it when adding obstacles.
@@ -20,7 +20,7 @@ Capacitor 8 wrapper around the game in the repo root; README section 18 has the 
 ## Player decisions — don't undo
 - Controls: 3 drift positions only (left / straight / right); hold for a sharp turn. A 5-position version was rejected.
 - No drop shadows anywhere (removed v29).
-- Ocean has no rock-wall side columns (removed v31) and no sun rays (removed v39). Background fish never collide; new ones are background only unless asked.
+- Ocean has no rock-wall side columns (removed v31) and no sun rays (removed v39). Background fish never collide; new ones are background only unless asked. Species that are also obstacles (since v124: school, butterflyfish, puffer, turtle, octopus, ray, swordfish, anglerfish, lanternfish) stay out of the scenery so a harmless fish never looks like a dangerous one.
 - Removed obstacles — avoid similar mechanics: pen wall line, stylus ripple rings, sharpener pull, whiteout patch, thumbtack rows, magnifier homing, coffee spill (soggy), rubber stamp (slam).
 - No Shop (removed v46): magnet and shield are power-ups picked up during a run, 3 levels each, reset every run; slow motion (4 s at half speed, from 300 m), the invincibility star (6 s, from 150 m, rarest) and the speed boost (+10% fall speed for 5 s, from 100 m, v69) are timed power-ups. The Squid (v109) is a debuff pickup asked for by the player: ink splats below the plane for 3 s, all maps, from 200 m; the star flies through it, nothing pulls it in. It is the one allowed exception to "avoid hiding hazards" (whiteout patch). Stars are a collected total (no metres). No skins: one classic white plane (skins removed v42).
 - No wind obstacles (desk fan, ocean current) from 700 m on; Space has no wind or explosion obstacles at all (v55).

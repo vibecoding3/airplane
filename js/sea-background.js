@@ -46,25 +46,6 @@ const FISH = {
     ctx.beginPath(); ctx.moveTo(-8, -7); ctx.quadraticCurveTo(4, -2, -4, 7); fishOutline(c.mark, 2.4);
     fishEye(9, -3);
   } },
-  school: { w: 62, h: 42, cols: [{ body: '#c9d6e2' }, { body: '#f2d27a' }, { body: '#9cc8ee' }, { body: '#f4a6a0' }], paint(c) {
-    for (const [x, y] of [[-16, -9], [4, -13], [16, 2], [-3, 6], [-20, 12]]) {
-      ctx.save(); ctx.translate(x, y);
-      fishTail(-5, 3, 5, c.body, COL.ink);
-      ctx.fillStyle = c.body; ctx.beginPath(); ctx.ellipse(0, 0, 7, 3.5, 0, 0, Math.PI * 2); ctx.fill(); fishOutline(COL.ink, 0.9);
-      ctx.restore();
-    }
-  } },
-  butterfly: { w: 46, h: 40, cols: [{ body: '#f6d23a', band: '#1f1f1f' }, { body: '#f4efe2', band: '#e07a1f' },
-                                    { body: '#f6d23a', band: '#2f6fd1' }, { body: '#f4efe2', band: '#1f1f1f' }], paint(c) {
-    fishTail(-13, 6, 8, c.body, COL.ink);
-    const body = () => { ctx.beginPath(); ctx.ellipse(0, 0, 14, 13, 0, 0, Math.PI * 2); };
-    ctx.fillStyle = c.body; body(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(12, -3); ctx.lineTo(20, -1); ctx.lineTo(12, 3); ctx.closePath(); ctx.fill(); fishOutline(COL.ink, 1);
-    ctx.save(); body(); ctx.clip(); ctx.fillStyle = c.band; ctx.fillRect(6, -14, 4, 28); ctx.restore();
-    ctx.fillStyle = c.band; ctx.beginPath(); ctx.arc(-6, -5, 2.6, 0, Math.PI * 2); ctx.fill();
-    body(); fishOutline(COL.ink);
-    fishEye(9, -2, 1.5);
-  } },
   seahorse: { w: 34, h: 58, cols: [{ body: '#f2a33a', ridge: '#c4741a' }, { body: '#e8607a', ridge: '#b03a54' },
                                    { body: '#f2d35a', ridge: '#c4a52a' }], paint(c) {
     ctx.lineCap = 'round';
@@ -77,18 +58,6 @@ const FISH = {
     ctx.beginPath(); for (let y = -8; y <= 8; y += 4) { ctx.moveTo(-3, y); ctx.lineTo(4, y + 1); } fishOutline(c.ridge, 1);
     ctx.beginPath(); ctx.moveTo(-1, -21); ctx.lineTo(1, -25); ctx.lineTo(4, -21); fishOutline(COL.ink, 1);
     fishEye(4, -17, 1.4);
-  } },
-  puffer: { w: 48, h: 44, cols: [{ body: '#e8c46a', spine: '#8a6a14', spot: '#9c7a2a', tail: '#d9b45a' },
-                                 { body: '#e6edf2', spine: '#7a8a96', spot: '#5a6a78', tail: '#cfd8df' },
-                                 { body: '#c99a6a', spine: '#6a4a2a', spot: '#7a5432', tail: '#b8895a' }], paint(c) {
-    fishTail(-12, 5, 8, c.tail, COL.ink);
-    ctx.beginPath();
-    for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; ctx.moveTo(Math.cos(a) * 12, Math.sin(a) * 12); ctx.lineTo(Math.cos(a) * 17, Math.sin(a) * 17); }
-    fishOutline(c.spine, 1.4);
-    ctx.fillStyle = c.body; ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI * 2); ctx.fill(); fishOutline(COL.ink);
-    ctx.fillStyle = c.spot;
-    for (const [x, y] of [[-5, -6], [2, -8], [-7, 2], [4, 6], [-1, 9]]) { ctx.beginPath(); ctx.arc(x, y, 1.4, 0, Math.PI * 2); ctx.fill(); }
-    fishEye(6, -3, 2.4);
   } },
   angel: { w: 46, h: 52, cols: [{ body: '#f4d35e', band: '#1f1f1f' }, { body: '#3a7fe0', band: '#f4d35e' },
                                 { body: '#f08a3a', band: '#ffffff' }], paint(c) {
@@ -127,19 +96,6 @@ const FISH = {
     ctx.fillStyle = '#f4f1e8'; ctx.beginPath(); ctx.moveTo(19, -3); ctx.lineTo(24, 1); ctx.lineTo(19, 5); ctx.closePath(); ctx.fill(); fishOutline(COL.ink, 1);
     fishEye(13, -3);
   } },
-  turtle: { w: 78, h: 60, cols: [{ shell: '#6b8e4e', plate: '#4f6e38', skin: '#a8c08a' }, { shell: '#8a6a3a', plate: '#6a4e28', skin: '#c9b07a' }], paint(c) {
-    ctx.fillStyle = c.skin;
-    for (const [x, y, a] of [[10, -18, -0.7], [10, 18, 0.7], [-16, -14, -2.4], [-16, 14, 2.4]]) {
-      const big = x > 0;
-      ctx.beginPath(); ctx.ellipse(x, y, big ? 13 : 7, big ? 5 : 4, a, 0, Math.PI * 2); ctx.fill(); fishOutline(COL.ink);
-    }
-    ctx.beginPath(); ctx.ellipse(27, 0, 8, 6.5, 0, 0, Math.PI * 2); ctx.fill(); fishOutline(COL.ink);
-    ctx.fillStyle = c.shell; ctx.beginPath(); ctx.ellipse(0, 0, 22, 17, 0, 0, Math.PI * 2); ctx.fill(); fishOutline(COL.ink, 1.3);
-    ctx.beginPath(); ctx.ellipse(0, 0, 11, 8, 0, 0, Math.PI * 2);
-    for (const a of [0.6, 1.6, 2.5, 3.8, 4.7, 5.6]) { ctx.moveTo(Math.cos(a) * 11, Math.sin(a) * 8); ctx.lineTo(Math.cos(a) * 21, Math.sin(a) * 16); }
-    fishOutline(c.plate, 1.2);
-    fishEye(30, -2, 1.5);
-  } },
   lion: { w: 72, h: 56, cols: [{ body: '#e9d6c4', stripe: '#b5413b' }, { body: '#efe8df', stripe: '#2b2b2b' }, { body: '#e9d6c4', stripe: '#8a5a2e' }], paint(c) {
     ctx.beginPath();
     for (let i = -5; i <= 5; i++) {
@@ -171,17 +127,6 @@ const FISH = {
     ctx.beginPath(); ctx.moveTo(53, y(44) + 1); ctx.lineTo(44, y(44) + 3); fishOutline(COL.ink, 1);
     fishEye(46, y(44) - 3, 1.6);
   } },
-  octopus: { w: 60, h: 66, cols: [{ body: '#d9534f', spot: '#f2a19e' }, { body: '#9b59b6', spot: '#d2a8e3' }, { body: '#e8913a', spot: '#f6c48a' }], paint(c) {
-    ctx.lineCap = 'round';
-    for (let i = 0; i < 6; i++) {
-      const x0 = -10 + i * 4, sway = (i % 2 ? 1 : -1) * 6;
-      ctx.beginPath(); ctx.moveTo(x0, 0); ctx.quadraticCurveTo(x0 + sway, 14, x0 - sway * 0.4 + (i - 2.5) * 3, 30);
-      ctx.strokeStyle = COL.ink; ctx.lineWidth = 6; ctx.stroke(); ctx.strokeStyle = c.body; ctx.lineWidth = 4; ctx.stroke();
-    }
-    ctx.fillStyle = c.body; ctx.beginPath(); ctx.ellipse(0, -12, 15, 17, 0, 0, Math.PI * 2); ctx.fill(); fishOutline(COL.ink, 1.3);
-    ctx.fillStyle = c.spot; for (const [x, y, r] of [[-5, -20, 2.4], [4, -24, 1.8], [6, -14, 2], [-7, -10, 1.6]]) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
-    fishEye(-5, -3, 2); fishEye(6, -3, 2);
-  } },
   tuna: { w: 112, h: 42, cols: [{ back: '#24476e', belly: '#c9d6e2', fin: '#f2c84b' }, { back: '#3a5f4a', belly: '#d6e0d0', fin: '#e0a21a' }], paint(c) {
     ctx.fillStyle = c.back;
     ctx.beginPath(); ctx.moveTo(-36, 0); ctx.lineTo(-52, -18); ctx.quadraticCurveTo(-44, 0, -52, 18); ctx.closePath(); ctx.fill(); fishOutline(COL.ink);
@@ -192,24 +137,6 @@ const FISH = {
     body(); fishOutline(COL.ink);
     ctx.fillStyle = c.fin; for (let x = -32; x <= -20; x += 4) for (const yy of [-7, 7]) { ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x + 2, yy * 1.35); ctx.lineTo(x + 3, yy); ctx.fill(); }
     fishEye(30, -3, 2);
-  } },
-  ray: { w: 140, h: 72, paint() {
-    ctx.beginPath(); ctx.moveTo(-22, 0); ctx.quadraticCurveTo(-45, 2, -66, 6); fishOutline('#55606d', 2);
-    const body = () => { ctx.beginPath(); ctx.moveTo(32, 0); ctx.quadraticCurveTo(10, -20, 0, -32); ctx.quadraticCurveTo(-10, -8, -24, 0); ctx.quadraticCurveTo(-10, 8, 0, 32); ctx.quadraticCurveTo(10, 20, 32, 0); ctx.closePath(); };
-    ctx.fillStyle = '#7d8a99'; body(); ctx.fill();
-    ctx.fillStyle = '#95a2b1'; ctx.beginPath(); ctx.ellipse(6, 0, 14, 8, 0, 0, Math.PI * 2); ctx.fill();
-    body(); fishOutline(COL.ink, 1.3);
-    ctx.fillStyle = '#1b222b'; for (const yy of [-6, 6]) { ctx.beginPath(); ctx.arc(16, yy, 1.6, 0, Math.PI * 2); ctx.fill(); }
-  } },
-  sword: { w: 166, h: 62, paint() {
-    ctx.fillStyle = '#2c4f7c';
-    ctx.beginPath(); ctx.moveTo(-34, 0); ctx.lineTo(-52, -20); ctx.lineTo(-44, 0); ctx.lineTo(-52, 20); ctx.closePath(); ctx.fill(); fishOutline(COL.ink);
-    ctx.beginPath(); ctx.moveTo(8, -8); ctx.lineTo(-4, -28); ctx.lineTo(-14, -8); ctx.closePath(); ctx.fill(); fishOutline(COL.ink);
-    ctx.beginPath(); ctx.ellipse(0, 0, 38, 9, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.save(); ctx.clip(); ctx.fillStyle = '#8fb3cf'; ctx.fillRect(-40, 2, 80, 10); ctx.restore();
-    ctx.beginPath(); ctx.ellipse(0, 0, 38, 9, 0, 0, Math.PI * 2); fishOutline(COL.ink);
-    ctx.beginPath(); ctx.moveTo(36, -1); ctx.lineTo(80, -2); fishOutline('#2c4f7c', 2.4);
-    fishEye(28, -3);
   } },
   reefshark: { w: 138, h: 66, paint() { sharkBody(1, '#7f8fa1', '#c7d0da', COL.ink, false); } },
   hammer: { w: 150, h: 70, paint() {
@@ -253,19 +180,6 @@ const FISH = {
     ctx.beginPath(); for (const [dx, dy] of [[-4, -16], [0, -20], [4, -15]]) { ctx.moveTo(88, y(88) - 3); ctx.lineTo(88 + dx, y(88) + dy); } ctx.stroke();
     fishEye(90, y(90) - 1, 1.6, '#0e1218');
   } },
-  angler: { w: 92, h: 84, lure: [24, -30], paint() {
-    ctx.beginPath(); ctx.moveTo(2, -16); ctx.quadraticCurveTo(10, -38, 24, -30); fishOutline(PALE, 1.5);
-    fishTail(-18, 9, 12, '#2a2f3a', PALE);
-    ctx.fillStyle = '#2a2f3a'; ctx.beginPath(); ctx.arc(0, 4, 20, 0, Math.PI * 2); ctx.fill(); fishOutline(PALE, 1.4);
-    ctx.fillStyle = '#12151c'; ctx.beginPath(); ctx.moveTo(19, -3); ctx.quadraticCurveTo(6, 6, 19, 16); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    for (let i = 0; i < 4; i++) {
-      const yy = -2 + i * 4.5;
-      ctx.beginPath(); ctx.moveTo(19 - (i % 2) * 2, yy); ctx.lineTo(13, yy + 2); ctx.lineTo(19 - (i % 2) * 2, yy + 3.5); ctx.closePath(); ctx.fill();
-    }
-    fishEye(9, -6, 2, '#0e1218');
-    ctx.fillStyle = '#f7f3a8'; ctx.beginPath(); ctx.arc(24, -30, 3, 0, Math.PI * 2); ctx.fill();
-  } },
   viper: { w: 104, h: 44, paint() {
     ctx.beginPath(); ctx.moveTo(-2, -6); ctx.lineTo(-6, -22); fishOutline(PALE, 1.2);
     ctx.fillStyle = '#7fe3ff'; ctx.beginPath(); ctx.arc(-6, -22, 2, 0, Math.PI * 2); ctx.fill();
@@ -284,13 +198,6 @@ const FISH = {
     ctx.fillStyle = '#1c2430'; ctx.beginPath(); ctx.arc(-3, -1, 6, 0, Math.PI * 2); ctx.fill(); fishOutline(PALE);
     fishEye(-1, -3, 1.3, '#0e1218');
   } },
-  lantern: { w: 56, h: 28, cols: [{ dot: '#7fe3ff' }, { dot: '#9effa8' }, { dot: '#ff9ed8' }], paint(c) {
-    fishTail(-17, 6, 8, '#2a3340', PALE);
-    ctx.fillStyle = '#2a3340'; ctx.beginPath(); ctx.ellipse(0, 0, 19, 7.5, 0, 0, Math.PI * 2); ctx.fill(); fishOutline(PALE);
-    ctx.fillStyle = c.dot;
-    for (let x = -14; x <= 12; x += 4.5) { ctx.beginPath(); ctx.arc(x, 4, 1.2, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(x + 2, -1, 0.9, 0, Math.PI * 2); ctx.fill(); }
-    fishEye(12, -2, 2.6, '#0e1218');
-  } },
   hatchet: { w: 42, h: 44, cols: [{ body: '#b9c6d3', dot: '#c38bff' }, { body: '#d6c7e8', dot: '#7fe3ff' }], paint(c) {
     fishTail(-12, 5, 7, c.body, PALE);
     const body = () => { ctx.beginPath(); ctx.moveTo(12, -6); ctx.lineTo(-10, -9); ctx.lineTo(-12, 0); ctx.quadraticCurveTo(-2, 18, 8, 16); ctx.quadraticCurveTo(14, 6, 12, -6); ctx.closePath(); };
@@ -299,10 +206,12 @@ const FISH = {
     fishEye(6, -2, 3, '#0e1218');
   } }
 };
+// species that are also Ocean obstacles (school, butterflyfish, puffer, turtle, octopus, ray, swordfish, anglerfish,
+// lanternfish) were taken out of the scenery in v124, so a fish in the background never looks like one that hurts
 const FISH_TIERS = [
-  ['clown', 'tang', 'school', 'butterfly', 'seahorse'], ['puffer', 'angel', 'jelly', 'parrot', 'turtle'],
-  ['lion', 'barracuda', 'moray', 'octopus', 'tuna'], ['ray', 'sword', 'reefshark', 'hammer', 'sunfish'],
-  ['white', 'squid', 'oarfish'], ['angler', 'viper', 'gulper', 'lantern', 'hatchet']
+  ['clown', 'tang', 'seahorse'], ['angel', 'jelly', 'parrot'],
+  ['lion', 'barracuda', 'moray', 'tuna'], ['reefshark', 'hammer', 'sunfish'],
+  ['white', 'squid', 'oarfish'], ['viper', 'gulper', 'hatchet']
 ];
 let lastSceneryY = -1e9;
 // far-away scenery: very faded silhouettes that appear now and then (never collide)

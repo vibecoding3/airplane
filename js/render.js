@@ -232,6 +232,7 @@ function render() {
     if (o.forest) { drawForestObstacle(o, sy); continue; }
     if (o.desert) { drawDesertObstacle(o, sy); continue; }
     if (o.volcano) { drawVolcanoObstacle(o, sy); continue; }
+    if (o.sea && drawOceanLook(o, sy)) continue;   // the Ocean's added looks (v124); the original ones are below
     switch (o.type) {
       case 'gate': {
         const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;

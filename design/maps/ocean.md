@@ -21,6 +21,8 @@ Fit: ✅ fits well · ⚠️ works, but something is off · ❌ doesn't fit
 | Electric eel | Charged Beam | Charges, then zaps a bolt from the wall | ~135 m | ⚠️ | Electric eels live in South American rivers, not the sea. An **electric ray** (a marine animal) would be accurate and keep the same mechanic. Most players won't notice. |
 | Kelp | Telegraphed Sweep | Frond sweeps out after a warning | ~135 m | ⚠️ | Kelp grows up from the sea floor and sways gently. A sudden swipe from a wall feels odd. An **octopus arm** would make much more sense for a fast swipe. |
 
+> **Done in v124:** all seven new obstacles below were added (school of fish, pufferfish / sea turtle, big rock / brain coral / sleeping whale, swordfish / driftwood / broken mast, fishing line / net strand, anchor chain / squid tentacle, crab / lobster). Every older obstacle got a second or third look too, including the electric ray and the octopus arm suggested above (the eel and the kelp stay as well). Species that became obstacles were taken out of the background scenery. The "Fit" table above describes the map before v124.
+
 ## Gaps and ideas (biggest opportunity in the game)
 The map has no Wall Bulge, Bouncing Slider, Rising Projectile, Conveyor, Spinning Blades, Sweeping Arm or Spring Line. Natural sea versions:
 - **Conveyor:** a school of fish crossing. This is the most natural fit for a conveyor anywhere in the game.

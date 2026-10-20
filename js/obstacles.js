@@ -249,17 +249,39 @@ let lastType = '';
 // Ocean obstacles. Most reuse a notebook obstacle's movement and collision with an underwater look
 // (the generator named on the right); mines, electric eels, bubble columns and starfish are their own.
 const SEA_MAKERS = { coral: 'gate', urchins: 'blots', jellies: 'notes', clam: 'erasers', moray: 'cutter',
-                     kelp: 'paw', sub: 'glue', current: 'fan' };
-const SEA_COLS = {
-  gate: ['#f08a7e', '#f4a259', '#b07cc6', '#e9c46a', '#7fc8a9'],              // coral
-  blot: ['#3b2a52', '#1f3b4d', '#5a1f3a', '#2d2d2d'],                         // urchin bodies
-  note: ['rgba(240,140,200,.85)', 'rgba(170,140,240,.85)', 'rgba(120,190,240,.85)', 'rgba(250,170,110,.85)'],   // jellyfish
-  erasers: ['#e9d3c4', '#f2c6c2', '#d8c8e8', '#cfe3d0'],                      // clam shells
-  cutter: ['#5f7f3a', '#6b8e23', '#4a6b3a'],                                  // moray eels
-  paw: ['#3f8f4f', '#2f7a5a', '#5a9a3a'],                                     // kelp
-  glue: ['#e0a21a', '#7f8fa1', '#c0392b', '#3a66c4'],                         // submarine hulls
-  starfish: ['#f28c28', '#e0503a', '#c75b9b', '#f2c84b', '#8a4fc2']
+                     kelp: 'paw', sub: 'glue', current: 'fan',
+                     school: 'clips', puffer: 'wad', bigRock: 'protractor', swordfish: 'pencil', fishline: 'band',
+                     anchor: 'compass', crab: 'scissors' };   // the seven added in v124
+// Each Ocean mechanic has a few looks sharing its hit box (v124), each with its colours; the first one is the original
+// look (art in draw-sea.js), the others are drawn in draw-ocean.js. A row of the same obstacle shares one look and colour.
+const SEA_LOOKS = {
+  gate: { coral: ['#f08a7e', '#f4a259', '#b07cc6', '#e9c46a', '#7fc8a9'], rockledge: ['#6b7a85', '#7a7068'], wreck: ['#8a6a4a', '#6f5236'] },
+  blot: { urchin: ['#3b2a52', '#1f3b4d', '#5a1f3a', '#2d2d2d'], anemone: ['#ff7a9a', '#ffa04a', '#b77cf0'], stonefish: ['#8a7a6a', '#7f6f5a'] },
+  note: { jelly: ['rgba(240,140,200,.85)', 'rgba(170,140,240,.85)', 'rgba(120,190,240,.85)', 'rgba(250,170,110,.85)'],
+          combjelly: ['rgba(215,235,255,.75)'], anglerfish: ['#4a3a58', '#3a4a5a'] },
+  erasers: { clam: ['#e9d3c4', '#f2c6c2', '#d8c8e8', '#cfe3d0'], wreckhull: ['#7a5a3a', '#6a4e36'] },
+  cutter: { moray: ['#5f7f3a', '#6b8e23', '#4a6b3a'], mantis: ['#3fb07a', '#e05a8a', '#3a9ad8'] },
+  paw: { kelp: ['#3f8f4f', '#2f7a5a', '#5a9a3a'], octopus: ['#d9534a', '#b05ac0', '#e08a3a'] },
+  glue: { sub: ['#e0a21a', '#7f8fa1', '#c0392b', '#3a66c4'], shrimp: ['#ff7a5a', '#f0a040'], cannon: ['#4a4a52'] },
+  starfish: { starfish: ['#f28c28', '#e0503a', '#c75b9b', '#f2c84b', '#8a4fc2'], brittlestar: ['#c75b9b', '#e0503a', '#8a4fc2'], wheel: ['#8a5a32'] },
+  zap: { eel: [''], ray: ['#c9a868', '#8a9aa8'] },
+  mine: { navalmine: [''], barrel: ['#5a6a4a', '#7a4a3a'] },
+  bubbles: { bubbles: [''], vent: [''] },
+  fan: { current: [''], drift: [''] },
+  clips: { sardines: ['#b8ccd8'], butterfly: ['#f4c430', '#f08a3a'], lanternfish: ['#2a3a5a'] },
+  wad: { puffer: ['#e8c860', '#d8a860'], turtle: ['#6a9a5a', '#7a8a4a'] },
+  protractor: { braincoral: ['#e8a0b0', '#d8c070', '#b0d090'], rock: ['#6b7a85', '#7a7068'], whale: ['#5a6f88', '#4a5a70'] },
+  pencil: { swordfish: ['#4a6a8a', '#5a7a9a'], driftwood: ['#a08a6a'], mast: ['#8a6a4a'] },
+  band: { fishline: ['#e0403a', '#f4a020'], netline: ['#4fa88a', '#5a8ac8'] },
+  compass: { anchor: ['#5a5f68'], tentacle: ['#c0392b', '#a04ab0'] },
+  scissors: { crab: ['#e0503a', '#f08a3a'], lobster: ['#b02a2a', '#3a5aa8'] }
 };
+// the sea gets darker as you sink: sunlit (0–150 m), twilight (150–400 m), dark (400–800 m), midnight (800–1,500 m),
+// the abyss (1,500 m +); some looks only live at some depths
+const seaLayer = y => { const m = y / PX_PER_M; return m < 150 ? 0 : m < 400 ? 1 : m < 800 ? 2 : m < 1500 ? 3 : 4; };
+const SEA_LAYERS = { anglerfish: [2, 3, 4], vent: [2, 3, 4], whale: [3, 4], lanternfish: [3, 4], mast: [1, 2, 3, 4], tentacle: [2, 3, 4],
+                     braincoral: [0, 1, 2], driftwood: [0, 1], butterfly: [0, 1, 2], sardines: [0, 1, 2], turtle: [0, 1, 2],
+                     fishline: [0, 1, 2], anemone: [0, 1, 2, 3], drift: [0, 1] };
 const MINERALS_LIST = ['iron', 'nickel', 'copper', 'gold', 'ice', 'amethyst'];   // asteroid minerals (art in draw-space.js)
 // obstacles that push the plane with wind (desk fan, ocean current) stop appearing from this depth
 const WIND_MAX_M = 700;
@@ -590,7 +612,12 @@ function volcanoPool(d, y) {
   return pool;
 }
 function seaPool(d, y) {
-  const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1]];
+  const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1],
+                ['swordfish', 1 + 1.5 * d], ['bigRock', 1.4], ['puffer', 1.2 + d]];
+  if (d > 0.05) pool.push(['fishline', 1.2]);
+  if (d > 0.08) pool.push(['school', 1.3]);
+  if (d > 0.12) pool.push(['crab', 0.6 + 1.6 * d]);
+  if (d > 0.3) pool.push(['anchor', 1.3]);
   if (d > 0.08) pool.push(['mine', 1.3]);
   if (d > 0.1) pool.push(['moray', 1.3]);
   if (d > 0.12 && windAllowed(y)) pool.push(['current', 1.1]);
@@ -659,8 +686,15 @@ function spawnFromPool(y, d, pool) {
     if (!o.pal) o.pal = rowPal[o.type] || (rowPal[o.type] = pickPal(o.type));
     if (mapId === 'sea') {
       o.sea = true;
-      const cols = SEA_COLS[o.type];
-      if (cols) o.seaCol = rowSea[o.type] || (rowSea[o.type] = cols[ri(0, cols.length - 1)]);
+      o.layer = seaLayer(o.y);
+      const looks = SEA_LOOKS[o.type];
+      if (looks && !rowSea[o.type]) {
+        const all = Object.keys(looks), fit = all.filter(l => !SEA_LAYERS[l] || SEA_LAYERS[l].includes(o.layer));
+        const names = fit.length ? fit : all, look = names[ri(0, names.length - 1)], cols = looks[look];
+        rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
+      }
+      if (looks) [o.look, o.seaCol] = rowSea[o.type];
+      if (o.type === 'compass') o.hh = 7;        // an anchor chain is thicker than a compass leg
       if (o.type === 'blot') {
         const left = shellsLeft();
         if (left.length && Math.random() < 0.4) { o.shell = left[ri(0, left.length - 1)]; runCollected.add('shell-' + o.shell); }
@@ -758,7 +792,7 @@ function spawnFromPool(y, d, pool) {
       }
     }
   }
-  if (!['gate', 'coral', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon', 'branches', 'trunk', 'sandLedges', 'outcrop', 'basaltLedges', 'dome'].includes(type)) {
+  if (!['gate', 'coral', 'bigRock', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon', 'branches', 'trunk', 'sandLedges', 'outcrop', 'basaltLedges', 'dome'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
     else if (Math.random() < 0.28) addStar(rand(40, W - 40), py);

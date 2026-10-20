@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v123** (2026-10-20)
+Current version: **v124** (2026-10-20)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,7 +10,7 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css` and 27 plain script files in `js/` (about 9,700 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
+- **Files:** `index.html`, `style.css` and 28 plain script files in `js/` (about 10,200 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
 - **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
@@ -98,16 +98,18 @@ Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a n
 
 | Depth | Fish |
 |---|---|
-| 0–150 m | Clownfish, tang, a small school of fish, butterflyfish, seahorse |
-| 150–400 m | Pufferfish, angelfish, jellyfish, parrotfish, sea turtle |
-| 400–800 m | Lionfish, barracuda, moray eel, octopus, tuna |
-| 800–1,500 m | Stingray, swordfish, reef shark, hammerhead shark, ocean sunfish |
+| 0–150 m | Clownfish, tang, seahorse |
+| 150–400 m | Angelfish, jellyfish, parrotfish |
+| 400–800 m | Lionfish, barracuda, moray eel, tuna |
+| 800–1,500 m | Reef shark, hammerhead shark, ocean sunfish |
 | 1,500–2,500 m | Great white shark, giant squid, oarfish |
-| 2,500 m + | Anglerfish (with a pulsing glowing lure), viperfish, gulper eel, lanternfish, hatchetfish |
+| 2,500 m + | Viperfish, gulper eel, hatchetfish |
+
+Since v124 the scenery leaves out the species that became obstacles (the school of fish, butterflyfish, pufferfish, sea turtle, octopus, stingray, swordfish, anglerfish and lanternfish), so a harmless background fish never looks like one that hurts.
 
 The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fish have pale outlines so they show against dark water. About 20% of the time a fish from the level above appears, for variety.
 
-**Colour variants:** most species come in 2–4 colour schemes, picked at random when each fish appears (60 looks across 28 species). For example: clownfish in orange, maroon, dark-banded or golden; tangs in blue, yellow or purple; jellyfish in pink, blue, violet or amber; octopuses in red, purple or orange; lanternfish with blue, green or pink lights. Background fish never collide with the plane.
+**Colour variants:** most species come in 2–4 colour schemes, picked at random when each fish appears (19 species since v124; 28 before). For example: clownfish in orange, maroon, dark-banded or golden; tangs in blue, yellow or purple; jellyfish in pink, blue, violet or amber. Background fish never collide with the plane.
 
 ### 4.3 Space (since v53)
 The plane is thrown out of orbit and falls away from Earth into deeper and stranger space. Cartoon and playful in tone.
@@ -217,30 +219,30 @@ The plane dives into the crater of a tropical island volcano and falls down its 
 "Starts at" is the depth where an obstacle first joins the pool of possible obstacles. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
 
 ### 5.0 All obstacles at a glance
-One row per mechanic (section 6), names only; the details are in 5.1–5.8. For Dungeon, Neon City, Forest, Desert and Volcano, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
+One row per mechanic (section 6), names only; the details are in 5.1–5.8. For Ocean, Dungeon, Neon City, Forest, Desert and Volcano, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
 
 | Mechanic | Paper | Ocean | Space | Dungeon | Neon City | Forest | Desert | Volcano |
 |---|---|---|---|---|---|---|---|---|
-| Gap Wall | Rulers | Coral ledges | Station girders | Stone ledges / wooden beams / iron girders / goblin scaffolding | Neon shop signs / steel balconies | Leafy branches / fallen logs | Sandstone ledges / adobe walls | Basalt column ledges / lava crust |
-| Closing Jaws | Erasers | Giant clam | Airlock doors | Spiked crushers / spiked iron doors / battering rams / goblin barricade | Rolling shutters / subway doors | Log halves / beaver dam | Sandstone slabs / mesa edges | Grinding rock plates / obsidian slabs |
-| Static Hazards | Ink blots | Sea urchins | Asteroids, black hole | Spiked iron balls / cauldrons / boulders / tombstones | Traffic cones / manhole covers / vending machines | Hornets' nests / pinecones / thistles | Barrel cactus / prickly pear / boulder with a lizard; fossils | Volcanic bomb / sulfur crystals / pumice |
-| Wall Bulge | Protractor | — | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern | Satellite dish / AC unit / station clock; neon signs | Tree trunk / birch trunk / shelf fungus | Sandstone outcrop / termite mound / dune | Lava dome / basalt columns / steaming mound |
-| Bouncing Slider | Pencil | — | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / crescent staff / twisted staff | Hover tram / neon tube | Leafy stick / frosted stick | Flying carpet / driftwood | Charred log / lava raft |
-| Rising Projectile | Paper wad | — | Rocket | Skull / jack-o'-lantern / slime ball / potion flask; magic rings | Soda can / arcade token / bouncy ball | Acorn / chestnut / apple / snowball | Coconut / gourd / beetle's ball | Lava bomb / glowing rock; volcanic stones |
-| Drifting Swarm | Sticky notes | Jellyfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps / witch hats / goblins | Delivery drones / paper lanterns / umbrellas | Bees / owls / bats; Forest birds | Vultures / locusts / hawks | Cinder moths / fire beetles / ash puffs |
-| Conveyor | Paper clips | — | Starlink train | Daggers / arrows / keys | Hover taxis / pods | Ducks / geese | Camel caravan | Rolling lava rocks / fire beetles |
-| Spinning Drifter | Set square | Starfish | Tumbling asteroid | Saw blade / spiked wheel / eyeball / spiked goblin shield | Vent fan / neon hubcap / vinyl record | Chestnut husk / winged seed / snowflake | Tumbleweed / seed pod | Spindle bomb / obsidian star |
-| Spinning Blades | Scissors | — | — | Crossed swords / spears / staffs | Drone rotors / neon tubes | Maple seeds | Palm fronds / windpump blades | Obsidian shards |
-| Sweeping Arm | Drawing compass | — | Robot arm | Fire bar / chain with a spiked ball | Crane boom / street lamp arm | Leafy branch / rope swing | Well lever with a bucket / windvane | Steam jet / lava spout |
-| Wall Piston | Cutter | Moray eel | Docking probe | Spear / trident / sword blade / goblin club; flamethrower | Fire escape ladder / neon arrow / antenna | Snake / woodpecker | Chameleon tongue / sandstone column | Lava tongue / basalt column |
-| Wall Turret | Glue tube | Submarine | Twin-wing fighter | Dragon head / gargoyle / cannon / goblin with a slingshot | Security camera / dumpling steamer / spray can | Squirrel throwing acorns / frog spitting water | Cactus shooting needles / camel spitting | Lava vent / lava frog |
-| Charged Beam | — | Electric eel | Laser gate | Rune stone / crystal cluster | Laser emitter / sparking neon sign | Sunbeam / frosty ray | Sun glint off a mirror rock / sand geyser | Volcanic lightning / steam jet |
-| Telegraphed Sweep | Cat paw | Kelp | Energy blade | Skeleton arm / tentacle / thorny vine / reaper's scythe | Traffic barrier with a STOP sign / street-sweeper robot arm | Bear paw / falling branch | Scorpion tail / pickaxe | Lava wave / toppling basalt pillar |
-| Proximity Blast | — | Naval mine | — | Cursed rune / spore mushroom | Transformer box / fire hydrant | Puffball / wasps' nest | Cactus fruit / clay jar | Mud pot / gas pocket |
-| Push Zone | Desk fan | Ocean current | — | Cold draft / steam vent | Street steam vent / AC exhaust | Breeze carrying leaves | Sandstorm gust | Ash gust |
-| Effect Zone | — | Bubble column | Low-gravity field | — | Hologram field | Updraft of leaves (snow in winter) | Heat shimmer | Steam column |
-| Spring Line | Rubber band | — | — | Spider web / slime strand | Power cable / string of lights | Spider web / vine | Frayed rope | Rope lava / jungle vine |
-| **Total** | **16** | **12** | **19 kinds on 15 mechanics** | **20 obstacles, 65 looks** | **20 obstacles, 44 looks + 8 neon signs** | **19 obstacles, 41 looks + 8 birds** | **19 obstacles, 38 looks + 8 fossils** | **19 obstacles, 38 looks + 8 volcanic stones** |
+| Gap Wall | Rulers | Coral ledges / rock ledge with anemones / shipwreck planks | Station girders | Stone ledges / wooden beams / iron girders / goblin scaffolding | Neon shop signs / steel balconies | Leafy branches / fallen logs | Sandstone ledges / adobe walls | Basalt column ledges / lava crust |
+| Closing Jaws | Erasers | Giant clam / sunken hull halves | Airlock doors | Spiked crushers / spiked iron doors / battering rams / goblin barricade | Rolling shutters / subway doors | Log halves / beaver dam | Sandstone slabs / mesa edges | Grinding rock plates / obsidian slabs |
+| Static Hazards | Ink blots | Sea urchins / sea anemone / stonefish; seashells | Asteroids, black hole | Spiked iron balls / cauldrons / boulders / tombstones | Traffic cones / manhole covers / vending machines | Hornets' nests / pinecones / thistles | Barrel cactus / prickly pear / boulder with a lizard; fossils | Volcanic bomb / sulfur crystals / pumice |
+| Wall Bulge | Protractor | Brain coral / rock with anemones / sleeping whale | Moon edge, planets, battle station | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern | Satellite dish / AC unit / station clock; neon signs | Tree trunk / birch trunk / shelf fungus | Sandstone outcrop / termite mound / dune | Lava dome / basalt columns / steaming mound |
+| Bouncing Slider | Pencil | Swordfish / driftwood / broken mast | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / crescent staff / twisted staff | Hover tram / neon tube | Leafy stick / frosted stick | Flying carpet / driftwood | Charred log / lava raft |
+| Rising Projectile | Paper wad | Pufferfish / sea turtle | Rocket | Skull / jack-o'-lantern / slime ball / potion flask; magic rings | Soda can / arcade token / bouncy ball | Acorn / chestnut / apple / snowball | Coconut / gourd / beetle's ball | Lava bomb / glowing rock; volcanic stones |
+| Drifting Swarm | Sticky notes | Jellyfish / comb jelly / anglerfish | Ice chunks | Ghosts / spellbooks / will-o'-wisps / witch hats / goblins | Delivery drones / paper lanterns / umbrellas | Bees / owls / bats; Forest birds | Vultures / locusts / hawks | Cinder moths / fire beetles / ash puffs |
+| Conveyor | Paper clips | School of sardines / butterflyfish / lanternfish | Starlink train | Daggers / arrows / keys | Hover taxis / pods | Ducks / geese | Camel caravan | Rolling lava rocks / fire beetles |
+| Spinning Drifter | Set square | Starfish / brittle star / ship's wheel; legendary fish | Tumbling asteroid | Saw blade / spiked wheel / eyeball / spiked goblin shield | Vent fan / neon hubcap / vinyl record | Chestnut husk / winged seed / snowflake | Tumbleweed / seed pod | Spindle bomb / obsidian star |
+| Spinning Blades | Scissors | Crab / lobster | — | Crossed swords / spears / staffs | Drone rotors / neon tubes | Maple seeds | Palm fronds / windpump blades | Obsidian shards |
+| Sweeping Arm | Drawing compass | Anchor on a chain / giant squid tentacle | Robot arm | Fire bar / chain with a spiked ball | Crane boom / street lamp arm | Leafy branch / rope swing | Well lever with a bucket / windvane | Steam jet / lava spout |
+| Wall Piston | Cutter | Moray eel / mantis shrimp | Docking probe | Spear / trident / sword blade / goblin club; flamethrower | Fire escape ladder / neon arrow / antenna | Snake / woodpecker | Chameleon tongue / sandstone column | Lava tongue / basalt column |
+| Wall Turret | Glue tube | Submarine / pistol shrimp / shipwreck cannon | Twin-wing fighter | Dragon head / gargoyle / cannon / goblin with a slingshot | Security camera / dumpling steamer / spray can | Squirrel throwing acorns / frog spitting water | Cactus shooting needles / camel spitting | Lava vent / lava frog |
+| Charged Beam | — | Electric eel / electric ray | Laser gate | Rune stone / crystal cluster | Laser emitter / sparking neon sign | Sunbeam / frosty ray | Sun glint off a mirror rock / sand geyser | Volcanic lightning / steam jet |
+| Telegraphed Sweep | Cat paw | Kelp / octopus arm | Energy blade | Skeleton arm / tentacle / thorny vine / reaper's scythe | Traffic barrier with a STOP sign / street-sweeper robot arm | Bear paw / falling branch | Scorpion tail / pickaxe | Lava wave / toppling basalt pillar |
+| Proximity Blast | — | Naval mine / depth-charge barrel | — | Cursed rune / spore mushroom | Transformer box / fire hydrant | Puffball / wasps' nest | Cactus fruit / clay jar | Mud pot / gas pocket |
+| Push Zone | Desk fan | Ocean current / current carrying kelp | — | Cold draft / steam vent | Street steam vent / AC exhaust | Breeze carrying leaves | Sandstorm gust | Ash gust |
+| Effect Zone | — | Bubble column / warm vent water | Low-gravity field | — | Hologram field | Updraft of leaves (snow in winter) | Heat shimmer | Steam column |
+| Spring Line | Rubber band | Fishing line with bobbers / net strand with glass floats | — | Spider web / slime strand | Power cable / string of lights | Spider web / vine | Frayed rope | Rope lava / jungle vine |
+| **Total** | **16** | **19 obstacles, 46 looks + 6 shells, 5 fish** | **19 kinds on 15 mechanics** | **20 obstacles, 65 looks** | **20 obstacles, 44 looks + 8 neon signs** | **19 obstacles, 41 looks + 8 birds** | **19 obstacles, 38 looks + 8 fossils** | **19 obstacles, 38 looks + 8 volcanic stones** |
 
 ### 5.1 Paper map (16 types)
 
@@ -265,23 +267,30 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.8. For 
 
 The extra hazard next to desk fans deeper down is a small ink blot.
 
-### 5.2 Ocean map (12 types)
-Eight sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in `js/obstacles.js`). Four are new mechanics.
+### 5.2 Ocean map (19 obstacles on 19 mechanics; 12 until v123)
+Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in `js/obstacles.js`); four are mechanics the Ocean brought in (starfish, bubble column, naval mine, electric eel). Since v124 each obstacle has two or three looks sharing its hit box, in a few colours (`SEA_LOOKS`); a row of the same obstacle shares one look and colour. The first look is the original (art in `js/draw-sea.js`), the others are in `js/draw-ocean.js`. Some looks only live at some depths (`SEA_LAYERS`, by `seaLayer`: sunlit 0–150 m, twilight 150–400 m, dark 400–800 m, midnight 800–1,500 m, the abyss 1,500 m +): driftwood and the kelp-carrying current near the surface; brain coral, sardines, butterflyfish, sea turtles and fishing lines above 800 m; anemones above 1,500 m; anglerfish, warm vents and squid tentacles from 400 m; broken masts from 150 m; lanternfish and the sleeping whale from 800 m.
 
-| Sea obstacle | Behaviour | Based on | Starts at |
+| Sea obstacle | Looks | Based on | Starts at |
 |---|---|---|---|
-| Coral ledges | Coral from both walls with a gap | Rulers | 0 m |
-| Sea urchins | Static spiky balls | Ink blots | 0 m |
-| Jellyfish | Pulsing jellyfish drifting down the water | Sticky notes | 0 m |
-| Starfish | Spins while drifting, bouncing off the screen edges | New | 0 m |
-| Air bubble column | Slows the fall while inside and never hurts | New | 0 m |
-| Naval mine | On a chain. When the plane approaches it blinks and shows a dashed blast circle, then explodes so the blast lands as the plane arrives. The explosion is a cartoon burst (a spiky yellow and orange star) with speed lines and puffs of smoke | New | ~50 m |
-| Moray eel | Lunges out of a hole in the rock wall | Cutter | ~65 m |
-| Ocean current | Moving water pushes the plane sideways (no body to hit). Only appears before 700 m (since v55) | Desk fan | ~75 m |
-| Giant clam | Two shell lips that snap shut and open | Erasers | ~100 m |
-| Submarine | Fires torpedoes across; its bow light blinks just before | Glue tube | ~100 m |
-| Electric eel | Charges with a dashed preview line, then zaps a short lightning bolt out from the wall (14–22% of the width) | New | ~135 m |
-| Kelp | Seaweed frond sweeps out from the wall after a green dashed warning | Cat paw | ~135 m |
+| Coral ledges (Gap Wall) | Coral from both walls with a gap; a grey rock ledge with little anemones; the broken planks of a shipwreck with barnacles | Rulers | 0 m |
+| Sea urchins (Static Hazards) | Static spiky urchins; a stinging sea anemone; a grumpy lumpy stonefish with spines; sometimes a seashell (collectible, see section 7) | Ink blots | 0 m |
+| Jellyfish (Drifting Swarm) | Pulsing jellyfish; see-through comb jellies with rainbow combs; anglerfish with a glowing lure (400 m on) | Sticky notes | 0 m |
+| Starfish (Spinning Drifter) | Starfish; a long-armed brittle star; a ship's wheel; sometimes a legendary fish (collectible) | New | 0 m |
+| Air bubble column (Effect Zone) | Slows the fall while inside and never hurts; deeper down also warm water shimmering up from a vent | New | 0 m |
+| Swordfish (Bouncing Slider, v124) | A swordfish (it faces the way it slides); bleached driftwood with barnacles (above 400 m); a wreck's broken mast with a rag of sail (150 m on) | Pencil | 0 m |
+| Big rock (Wall Bulge, v124) | A brain coral (above 800 m); a mossy rock with an anemone and a starfish; the side of a sleeping whale (800 m on); slalom pairs deeper down | Protractor | 0 m |
+| Pufferfish (Rising Projectile, v124) | A spiky puffed-up pufferfish, or a sea turtle swimming up head first (above 800 m) | Paper wad | 0 m |
+| Fishing line (Spring Line, v124) | A fishing line between two red-and-white bobbers (above 800 m), or a strand of old net between two glass floats: the line bounces the plane, the floats hurt | Rubber band | ~30 m |
+| Naval mine (Proximity Blast) | On a chain, or an old depth-charge barrel with hazard stripes. When the plane approaches it blinks and shows a dashed blast circle, then explodes so the blast lands as the plane arrives. The explosion is a cartoon burst (a spiky yellow and orange star) with speed lines and puffs of smoke | New | ~50 m |
+| School of fish (Conveyor, v124) | A row of sardines, butterflyfish (above 800 m) or glowing lanternfish (800 m on) crossing, heads the way they swim | Paper clips | ~50 m |
+| Moray eel (Wall Piston) | Lunges out of a hole in the rock wall; or a mantis shrimp punching its club out of its burrow | Cutter | ~65 m |
+| Ocean current (Push Zone) | Moving water pushes the plane sideways (no body to hit), sometimes carrying bits of kelp near the surface. Only appears before 700 m (since v55) | Desk fan | ~75 m |
+| Crab (Spinning Blades, v124) | A crab, or a lobster, spinning with its two claws snapping open and shut; the round shell covers the hit circles behind the pivot | Scissors | ~80 m |
+| Giant clam (Closing Jaws) | Two shell lips that snap shut and open; or the two halves of a sunken ship's hull with portholes | Erasers | ~100 m |
+| Submarine (Wall Turret) | Fires torpedoes across; or a pistol shrimp snapping bubble bullets; or a shipwreck cannon firing cannonballs. The bow light (claw, touch-hole) blinks just before | Glue tube | ~100 m |
+| Electric eel (Charged Beam) | Charges with a dashed preview line, then zaps a short lightning bolt out from the wall (14–22% of the width); or an electric ray (a sea animal) whose organs glow while it charges | New | ~135 m |
+| Kelp (Telegraphed Sweep) | Seaweed frond sweeps out from the wall after a green dashed warning; or an octopus arm with suckers reaching out of a crevice | Cat paw | ~135 m |
+| Anchor (Sweeping Arm, v124) | An anchor on its chain swinging all the way round a ring bolt, or a giant squid's tentacle (400 m on) | Drawing compass | ~215 m |
 
 ### 5.3 Space map (19 kinds on 15 mechanics, since v53; 6 added in v57)
 Every Space obstacle reuses the movement and collision of a Paper or Ocean obstacle (see `SPACE_MAKERS` in `js/obstacles.js`) with new art in `js/draw-space.js`. Outlines are pale so they read on black. Space has no wind or explosions: the solar wind and the space mine were removed in v55.
@@ -624,7 +633,7 @@ airplane/
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
 ├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
-└── js/                     27 game scripts, listed in the order they load
+└── js/                     28 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
@@ -641,7 +650,8 @@ airplane/
     ├── physics.js          collision, obstacle movement, steering, per-frame update
     ├── maps.js             map definitions, page and water colours, paper background drawing
     ├── draw-paper.js       Paper obstacle art
-    ├── draw-sea.js         Ocean obstacle art
+    ├── draw-sea.js         Ocean obstacle art (the original looks)
+    ├── draw-ocean.js       Ocean obstacle art: the looks and obstacles added in v124
     ├── draw-space.js       Space obstacle art
     ├── draw-dungeon.js     Dungeon obstacle art
     ├── draw-city.js        Neon City obstacle art (and the neon signs)
@@ -669,7 +679,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | To change… | Look in |
 |---|---|
 | Speed, difficulty, controls, starting state | `js/state.js` (`baseFallSpeed`, `difficulty`, `HOLD_MS`, `reset`) |
-| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_LOOKS`, `cityPool`, `CITY_MAKERS`, `CITY_LOOKS`, `forestPool`, `FOREST_MAKERS`, `FOREST_LOOKS`, `FOREST_SEASONS`, `desertPool`, `DESERT_MAKERS`, `DESERT_LOOKS`, `DESERT_LAYERS`, `volcanoPool`, `VOLCANO_MAKERS`, `VOLCANO_LOOKS`, `VOLCANO_LAYERS`, `spawnRow`) |
+| Which obstacles spawn, when they unlock, their colours | `js/obstacles.js` (`make`, `PALETTES`, `seaPool`, `SEA_MAKERS`, `SEA_LOOKS`, `SEA_LAYERS`, `spacePool`, `SPACE_MAKERS`, `dungeonPool`, `DUNGEON_MAKERS`, `DUNGEON_LOOKS`, `cityPool`, `CITY_MAKERS`, `CITY_LOOKS`, `forestPool`, `FOREST_MAKERS`, `FOREST_LOOKS`, `FOREST_SEASONS`, `desertPool`, `DESERT_MAKERS`, `DESERT_LOOKS`, `DESERT_LAYERS`, `volcanoPool`, `VOLCANO_MAKERS`, `VOLCANO_LOOKS`, `VOLCANO_LAYERS`, `spawnRow`) |
 | How an obstacle moves or what counts as a hit | `js/physics.js` (`updateObstacle`, `computeShapes`) |
 | How an obstacle looks | `js/draw-paper.js`, `js/draw-sea.js`, `js/draw-space.js`, `js/draw-dungeon.js`, `js/draw-city.js`, `js/draw-forest.js`, `js/draw-desert.js` or `js/draw-volcano.js` (`draw*` / `paint*`) |
 | Background decorations | `js/paper-background.js` (formulas), `js/sea-background.js` (fish, specks, silhouettes), `js/space-background.js`, `js/dungeon-background.js`, `js/city-background.js`, `js/forest-background.js`, `js/desert-background.js` or `js/volcano-background.js` (scenery, specks, the opening at the start) |
@@ -708,6 +718,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `draw-city.js` | `drawCityObstacle` (picks the art for each mechanic), `NEON_ICONS`, `paintNeonSign` (also used by the Collections screen), `drawCitySlab`, `drawCityJaw`, `drawCityHazard`, `drawCityBulge`, `drawCitySlider`, `drawCityTurret`, `drawCityBarrier`, `drawHoloField`, `drawCityCable` |
 | `dungeon-background.js` | `DUNGEON_TIERS`, `spawnDungeonThing`, `wellOpeningY`, `drawDungeonDetails`, `drawDungeonParticles` (scenery joins the `FISH` table) |
 | `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
+| `draw-ocean.js` | `drawOceanLook` (draws an Ocean obstacle's added look, or returns false for the original one), `drawSeaLedge`, `drawWreckHull`, `drawSeaHazard`, `drawSeaSwarm`, `drawSeaDrifter`, `drawMantis`, `drawSeaTurret`, `drawRay`, `drawOctopusArm`, `drawBarrel`, `drawWarmVent`, `drawSchoolFish`, `drawPuffer`, `drawSeaBulge`, `drawSwordfish`, `drawFishline`, `drawAnchorChain`, `drawCrab` |
 | `render.js` | `paintPlane`, `drawPlane`, `syncPaperLayers`, `render`, `applyMap` |
 | `ui.js` | `updateHud`, `showCard`, `setXp`, `animateXp`, `start`, `pause`, `resume`, `exitRun`, `keepRunProgress`, `gameOver` |
 | `collections.js` | `COLLECTIONS`, `COLLECTION_TOTAL`, `collectionFound`, `noteFound`, `paintCollectionItem`, `renderCollections`, `openCollections` |
