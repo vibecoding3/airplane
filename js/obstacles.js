@@ -286,6 +286,9 @@ const MINERALS_LIST = ['iron', 'nickel', 'copper', 'gold', 'ice', 'amethyst'];  
 // obstacles that push the plane with wind (desk fan, ocean current) stop appearing from this depth
 const WIND_MAX_M = 700;
 const windAllowed = y => y / PX_PER_M < WIND_MAX_M;
+// Conveyors (paper clips, fish schools, satellite trains, daggers, taxis, ducks, caravans, rolling rocks) stop at this depth (v126)
+const CONVEYOR_MAX_M = 1500;
+const conveyorAllowed = y => y / PX_PER_M < CONVEYOR_MAX_M;
 
 // Space obstacles: every one reuses a Paper or Ocean obstacle's movement and collision with space art
 const SPACE_MAKERS = { girders: 'gate', asteroids: 'blots', ice: 'notes', airlock: 'erasers', probe: 'cutter',
@@ -334,11 +337,11 @@ const SPACE_COLS = {
   zap: ['#ff4a5a', '#3cff9a', '#4ab8ff'],                                     // laser beams
   protractor: ['#d8d4c8', '#c9b9a6', '#b8c4d0']                               // moons
 };
-function spacePool(d) {
+function spacePool(d, y) {
   const pool = [['girders', 3], ['asteroids', 2], ['ice', 1.2], ['tumbler', 1.2], ['lowgrav', 1], ['gps', 1 + 1.2 * d]];
   pool.push(['planet', 1.3]);
   pool.push(['rocket', 1.2]);
-  pool.push(['starlink', 1.3]);
+  if (conveyorAllowed(y)) pool.push(['starlink', 1.3]);
   pool.push(['moon', 0.9], ['iss', 1.2]);
   pool.push(['airlock', 1.2], ['probe', 1.2], ['blackhole', 1.1]);
   pool.push(['laser', 1.1], ['fighter', 1.2]);
@@ -398,7 +401,8 @@ function dungeonPool(d, y) {
   const pool = [['ledges', 3], ['spikeballs', 2], ['plank', 1 + 1.5 * d], ['rock', 1.4], ['skull', 1 + d]];
   pool.push(['web', 1.2]);
   pool.push(['ghosts', 1.3]);
-  pool.push(['saw', 1.2], ['daggers', 1.3]);
+  pool.push(['saw', 1.2]);
+  if (conveyorAllowed(y)) pool.push(['daggers', 1.3]);
   pool.push(['swords', 0.6 + 1.6 * d]);
   if (windAllowed(y)) pool.push(['draft', 1.1]);
   pool.push(['curse', 1.2]);
@@ -453,7 +457,8 @@ function cityPool(d, y) {
   const pool = [['signs', 3], ['cones', 2], ['tram', 1 + 1.5 * d], ['bulge', 1.1], ['neon', 1.3], ['cans', 1 + d], ['holo', 1]];
   pool.push(['cable', 1.2]);
   pool.push(['drones', 1.3]);
-  pool.push(['fanspin', 1.2], ['taxis', 1.3]);
+  pool.push(['fanspin', 1.2]);
+  if (conveyorAllowed(y)) pool.push(['taxis', 1.3]);
   pool.push(['camera', 1.2]);
   pool.push(['rotors', 0.6 + 1.6 * d]);
   if (windAllowed(y)) pool.push(['vent', 1.1]);
@@ -501,7 +506,8 @@ function forestPool(d, y) {
   const pool = [['branches', 3], ['nests', 2], ['twig', 1 + 1.5 * d], ['trunk', 1.4], ['acorns', 1 + d], ['updraft', 1]];
   pool.push(['vines', 1.2]);
   pool.push(['bees', 1.4]);
-  pool.push(['husk', 1.2], ['ducks', 1.3]);
+  pool.push(['husk', 1.2]);
+  if (conveyorAllowed(y)) pool.push(['ducks', 1.3]);
   pool.push(['squirrel', 1.2]);
   pool.push(['maple', 0.6 + 1.6 * d]);
   if (windAllowed(y)) pool.push(['breeze', 1.1]);
@@ -550,7 +556,8 @@ function desertPool(d, y) {
   const pool = [['sandLedges', 3], ['cacti', 2], ['carpet', 1 + 1.5 * d], ['outcrop', 1.4], ['coconuts', 1 + d], ['heat', 1]];
   pool.push(['rope', 1.2]);
   pool.push(['vultures', 1.3]);
-  pool.push(['tumbleweed', 1.3], ['caravan', 1.3]);
+  pool.push(['tumbleweed', 1.3]);
+  if (conveyorAllowed(y)) pool.push(['caravan', 1.3]);
   pool.push(['spitter', 1.2]);
   pool.push(['fronds', 0.6 + 1.6 * d]);
   if (windAllowed(y)) pool.push(['sandstorm', 1.1]);
@@ -600,7 +607,8 @@ function volcanoPool(d, y) {
   const pool = [['basaltLedges', 3], ['bombs', 2], ['raft', 1 + 1.5 * d], ['dome', 1.4], ['lavaBombs', 1.2 + d], ['steamColumn', 1]];
   pool.push(['ropeLava', 1.2]);
   pool.push(['moths', 1.3]);
-  pool.push(['spindle', 1.2], ['rollers', 1.3]);
+  pool.push(['spindle', 1.2]);
+  if (conveyorAllowed(y)) pool.push(['rollers', 1.3]);
   pool.push(['lavaVent', 1.2]);
   pool.push(['shards', 0.6 + 1.6 * d]);
   if (windAllowed(y)) pool.push(['ashGust', 1.1]);
@@ -615,7 +623,7 @@ function seaPool(d, y) {
   const pool = [['coral', 3], ['urchins', 2], ['jellies', 1.4], ['starfish', 1.4], ['bubbles', 1],
                 ['swordfish', 1 + 1.5 * d], ['bigRock', 1.4], ['puffer', 1.2 + d]];
   pool.push(['fishline', 1.2]);
-  pool.push(['school', 1.3]);
+  if (conveyorAllowed(y)) pool.push(['school', 1.3]);
   pool.push(['crab', 0.6 + 1.6 * d]);
   pool.push(['anchor', 1.3]);
   pool.push(['mine', 1.3]);
@@ -652,14 +660,14 @@ function pickPower(y) {
 
 function spawnRow(y, d) {
   if (mapId === 'sea') return spawnFromPool(y, d, seaPool(d, y));
-  if (mapId === 'space') return spawnFromPool(y, d, spacePool(d));
+  if (mapId === 'space') return spawnFromPool(y, d, spacePool(d, y));
   if (mapId === 'dungeon') return spawnFromPool(y, d, dungeonPool(d, y));
   if (mapId === 'city') return spawnFromPool(y, d, cityPool(d, y));
   if (mapId === 'forest') return spawnFromPool(y, d, forestPool(d, y));
   if (mapId === 'desert') return spawnFromPool(y, d, desertPool(d, y));
   if (mapId === 'volcano') return spawnFromPool(y, d, volcanoPool(d, y));
   const pool = [['gate', 3], ['blots', 2], ['pencil', 1 + 2 * d], ['protractor', 1.4], ['wad', 1 + d]];
-  pool.push(['clips', 1.4]);
+  if (conveyorAllowed(y)) pool.push(['clips', 1.4]);
   pool.push(['scissors', 0.6 + 1.6 * d]);
   if (windAllowed(y)) pool.push(['fan', 1.1]);
   pool.push(['erasers', 1.4]);

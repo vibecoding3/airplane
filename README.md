@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v125** (2026-10-20)
+Current version: **v126** (2026-10-20)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -216,7 +216,7 @@ The plane dives into the crater of a tropical island volcano and falls down its 
 
 ## 5. Obstacles
 
-Since v125 every obstacle can appear at any depth, from the first metres on, on every map (the player's choice); only wind (desk fan, ocean current and the like) still stops at 700 m. Depth still makes obstacles faster, bigger and more frequent. The "Started at" columns below are the depths where each obstacle first joined the pool until v124. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
+Since v125 every obstacle can appear at any depth, from the first metres on, on every map (the player's choice); only wind (desk fan, ocean current and the like) still stops at 700 m, and since v126 conveyors (paper clips, fish schools, satellite trains, flying daggers, hover taxis, ducks, camel caravans, rolling lava rocks) stop at 1,500 m (`conveyorAllowed` in `js/obstacles.js`). Depth still makes obstacles faster, bigger and more frequent. The "Started at" columns below are the depths where each obstacle first joined the pool until v124. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
 
 ### 5.0 All obstacles at a glance
 One row per mechanic (section 6), names only; the details are in 5.1–5.8. For Ocean, Dungeon, Neon City, Forest, Desert and Volcano, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.

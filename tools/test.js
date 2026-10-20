@@ -514,6 +514,22 @@ const EXPECTED = { notebook: 16, sea: 19, space: 15, dungeon: 18, city: 19, fore
   check(staff.found && staff.n === 2 && staff.headR === 11 && staff.hit && !staff.miss,
     `crescent staff head hit area: found ${staff.found}, shapes ${staff.n}, radius ${staff.headR}, head hits ${staff.hit}, beside the shaft hits ${staff.miss}`);
 
+  // conveyors (paper clips and their look-alikes on every map) stop at 1,500 m (v126)
+  const conv = await page.evaluate(() => {
+    const bad = [], before = {};
+    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest', 'desert', 'volcano']) {
+      mapId = m; applyMap(); start();
+      let early = 0;
+      for (let k = 0; k < 400; k++) { obstacles.length = 0; lastType = ''; spawnRow(1400 * PX_PER_M, 0.8); if (obstacles.some(o => o.type === 'clips')) early++; }
+      before[m] = early;
+      for (let k = 0; k < 400; k++) { obstacles.length = 0; lastType = ''; spawnRow((1500 + k) * PX_PER_M, 0.9); if (obstacles.some(o => o.type === 'clips')) bad.push(m); }
+      gameOver();
+    }
+    return { bad, before };
+  });
+  check(conv.bad.length === 0 && Object.values(conv.before).every(n => n > 0),
+    `conveyors stop at 1,500 m: rows with one at 1,400 m ${JSON.stringify(conv.before)}, from 1,500 m ${conv.bad.length}`);
+
   // drifting into an edge, then one press the other way turns the plane at once (not straight down)
   const edge = await page.evaluate(() => {
     mapId = 'notebook'; applyMap(); start();
