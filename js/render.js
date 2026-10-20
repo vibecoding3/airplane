@@ -232,6 +232,7 @@ function render() {
     if (o.forest) { drawForestObstacle(o, sy); continue; }
     if (o.desert) { drawDesertObstacle(o, sy); continue; }
     if (o.volcano) { drawVolcanoObstacle(o, sy); continue; }
+    if (o.kitchen) { drawKitchenObstacle(o, sy); continue; }
     if (o.sea && drawOceanLook(o, sy)) continue;
     if (o.paper && drawPaperLook(o, sy)) continue;   // Paper's added looks and mechanics (v129)
     if (o.space && drawSpaceExtra(o, sy)) continue;   // Space's added looks and mechanics (v129)   // the Ocean's added looks (v124); the original ones are below
@@ -343,6 +344,7 @@ function applyMap() {
   world.classList.toggle('map-forest', mapId === 'forest');
   world.classList.toggle('map-desert', mapId === 'desert');
   world.classList.toggle('map-volcano', mapId === 'volcano');
+  world.classList.toggle('map-kitchen', mapId === 'kitchen');
   best = bests[mapId];
   // swap the background decorations right away: clear them and refill from just above the screen
   formulas = []; fishes.length = 0; lastSceneryY = -1e9;

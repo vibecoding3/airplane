@@ -27,6 +27,8 @@ const COLLECTIONS = [
     items: FOSSILS.map(n => ({ id: 'fossil-' + n, name: FOSSIL_NAMES[n], fossil: n })) },
   { id: 'stones', name: 'Volcanic stones', map: 'Volcano', bg: '#5a4a44',
     items: VOLC_STONES.map(n => ({ id: 'stone-' + n, name: STONE_NAMES[n], stone: n })) },
+  { id: 'pastries', name: 'Pastries', map: 'Kitchen', bg: '#f4d8b0',
+    items: PASTRIES.map(n => ({ id: 'pastry-' + n, name: PASTRY_NAMES[n], pastry: n })) },
   { id: 'planets', name: 'Planets', map: 'Space', bg: '#141a3a',
     items: ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].map(n => ({ id: 'planet-' + n, name: n[0].toUpperCase() + n.slice(1), planet: n })) }
 ];
@@ -46,7 +48,8 @@ function collectionId(o) {
        : o.neonSign ? 'neon-' + o.neonSign
        : o.bird ? 'bird-' + o.bird
        : o.fossil ? 'fossil-' + o.fossil
-       : o.stone ? 'stone-' + o.stone : null;
+       : o.stone ? 'stone-' + o.stone
+       : o.pastry ? 'pastry-' + o.pastry : null;
 }
 
 // called for every obstacle drawn during a run (render.js)
@@ -148,6 +151,9 @@ function paintCollectionItem(canvas, item, locked, wide) {
     } else if (item.fossil) {
       const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintFossil(item.fossil);
+    } else if (item.pastry) {
+      const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintPastry(item.pastry);
     } else if (item.stone) {
       const k = Hc / 40; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintVolcStone(item.stone);
@@ -180,7 +186,7 @@ function renderCollections() {
   box.replaceChildren();
   if (collPick) {
     const d = document.createElement('div'); d.className = 'coll-detail';
-    d.style.background = collPick.set.bg; d.style.color = ['origami', 'birds', 'fossils'].includes(collPick.set.id) ? '#22356b' : '#ffffff';
+    d.style.background = collPick.set.bg; d.style.color = ['origami', 'birds', 'fossils', 'pastries'].includes(collPick.set.id) ? '#22356b' : '#ffffff';
     const c = document.createElement('canvas'); c.width = 560; c.height = collPick.item.slider || collPick.item.sword ? 140 : 240;   // staffs are long and thin
     paintCollectionItem(c, collPick.item, false, true);
     const name = document.createElement('div'); name.className = 'coll-name'; name.textContent = collPick.item.name;

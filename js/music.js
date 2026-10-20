@@ -87,6 +87,16 @@ const THEMES = {
       [[72, 1], [71, 0.5], [69, 0.5], [67, 1], [69, 1]], [[65, 1], [69, 1], [72, 2]], [[74, 1], [72, 1], [69, 1], [65, 1]], [[64, 3], [null, 1]]
     ]
   },
+  // Kitchen: a cosy, bouncy café-jazz theme in F: a plucked marimba lead over pizzicato chords and soft brushes, with a
+  // little oven-timer "ding" at the end of the loop
+  kitchen: {
+    bpm: 100, lead: 'marimba', harp: [0, 2, 1, 3, 0, 2, 1, 4], harpStep: 0.5, echo: 0.15, brushes: true, ding: true,
+    chords: ['F', 'Dm', 'Gm', 'C', 'F', 'Dm', 'Bb', 'C'],
+    melody: [
+      [[69, 0.5], [72, 0.5], [77, 1], [76, 0.5], [74, 0.5], [72, 1]], [[74, 1], [77, 0.5], [74, 0.5], [69, 2]], [[70, 0.5], [74, 0.5], [77, 1], [79, 1], [77, 1]], [[76, 1.5], [74, 0.5], [72, 2]],
+      [[69, 0.5], [72, 0.5], [77, 1], [81, 1], [79, 1]], [[77, 1], [74, 1], [69, 1], [74, 1]], [[70, 1], [74, 0.5], [77, 0.5], [79, 1], [77, 1]], [[76, 1], [79, 1], [77, 2]]
+    ]
+  },
   // Ocean: slow and dark, long echoing harp notes and a lonely low flute
   sea: {
     bpm: 64, lead: 'deep', harp: [0, 2, 3, 4], harpStep: 1, echo: 0.45,
@@ -165,7 +175,8 @@ function playBar(th, i, t0, bus) {
   // lead melody
   let s = 0;
   for (const [n, b] of th.melody[i]) {
-    if (n != null) lead(bus, th.lead, hz(th.lead === 'deep' ? n - 12 : n), t0 + s * beat, b * beat);
+    if (n != null && th.lead === 'marimba') pluck(bus, hz(n), t0 + s * beat, Math.min(1.2, b * beat * 1.4), 0.09, 0.12);   // a struck, quickly fading note
+    else if (n != null) lead(bus, th.lead, hz(th.lead === 'deep' ? n - 12 : n), t0 + s * beat, b * beat);
     s += b;
   }
   if (th.drum) { drum(bus, t0); drum(bus, t0 + 2 * beat, 0.6); }
@@ -177,6 +188,11 @@ function playBar(th, i, t0, bus) {
     for (const [b, v] of [[0, 1], [1.5, 0.6], [2, 0.75], [3, 0.9]]) drum(bus, t0 + b * beat, v);
     hiss(bus, t0 + 3.5 * beat, 0.08, 3200, 0.03);
   }
+  if (th.brushes) for (let b = 0; b < 4; b++) {  // soft brushes: a swish on every beat, a little louder on 2 and 4
+    hiss(bus, t0 + b * beat, 0.18, 3800, b % 2 ? 0.035 : 0.02);
+    if (b === 0) drum(bus, t0, 0.35);
+  }
+  if (th.ding && i === th.chords.length - 1) note(bus, 'sine', hz(96), t0 + 3 * beat, 1.2, 0.03, 0.005, 1.1);   // the oven timer
   if (th.birds) for (let b = 0; b < 4; b++) if (Math.random() < 0.3) chirp(bus, t0 + (b + Math.random() * 0.5) * beat);   // birdsong
   if (th.beat) for (let b = 0; b < 4; b++) {     // a dance beat: kick, off-beat hat, clap on 2 and 4
     drum(bus, t0 + b * beat, b % 2 ? 0.55 : 0.8);

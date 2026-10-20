@@ -651,6 +651,54 @@ function volcanoPool(d, y) {
   pool.push(['steamArm', 1]);
   return pool;
 }
+// ---------- Kitchen (v130) ----------
+// A paper plane folded from a recipe card falls down a giant cartoon kitchen. Every obstacle reuses a Paper or Ocean
+// mechanic (generator on the right) with kitchen art in draw-kitchen.js.
+const KITCHEN_MAKERS = { shelves: 'gate', drawers: 'erasers', produce: 'blots', platter: 'protractor', rollingPin: 'pencil',
+                         popcorn: 'wad', pancakes: 'notes', ants: 'clips', cutterWheel: 'starfish', shears: 'scissors', ladle: 'compass',
+                         knifeBlock: 'cutter', toaster: 'glue', tap: 'zap', spatula: 'paw', kernel: 'mine', hood: 'fan',
+                         potSteam: 'bubbles', spaghetti: 'band' };
+// the kitchen from top to bottom: the top shelf, the countertop (150 m), the stove (400 m), the sink (800 m), then inside the
+// fridge (1,500 m)
+const kitchenLayer = y => { const m = y / PX_PER_M; return m < 150 ? 0 : m < 400 ? 1 : m < 800 ? 2 : m < 1500 ? 3 : 4; };
+// Pastries collection: Static Hazards variants (among the produce), each at most once per run
+const PASTRIES = ['croissant', 'donut', 'macaron', 'cupcake', 'eclair', 'pretzel', 'cinnamonroll', 'mooncake'];
+const pastriesLeft = () => PASTRIES.filter(n => !runCollected.has('pastry-' + n));
+// each Kitchen mechanic has one to three looks sharing its hit box; some only appear in certain layers (KITCHEN_LAYERS)
+const KITCHEN_LOOKS = {
+  gate: { shelf: ['#c8915a', '#b07a48'], board: ['#d8a868', '#c89858'], fridgeshelf: ['#dff2fa'] },
+  erasers: { drawer: ['#d8a868', '#9ac0d8', '#e8d0a8'], waffle: ['#8a8f98'] },
+  blot: { pineapple: ['#f2c43a'], peppermill: ['#7a4a2a', '#2b2b2b'], icecube: ['#d8f0fa'] },
+  protractor: { cake: ['#f7c8d8', '#f4e0b0'], pizza: ['#f2c060'], melon: ['#5fae4a'] },
+  pencil: { rollingpin: ['#e0b878'], spoon: ['#c8925a'] },
+  wad: { popcorn: ['#fff6dc'], cork: ['#c8a070'] },
+  note: { pancake: ['#e8b060'], lettuce: ['#8ad060'], bubble: ['#d8f0ff'] },
+  clips: { ants: ['#3a2a20'], sausages: ['#c0603a'] },
+  starfish: { cutterwheel: ['#c9ced6'], lemon: ['#f4e04a', '#a0d050'] },
+  scissors: { shears: ['#c9ced6'], beaters: ['#d8dde4'] },
+  compass: { ladle: ['#c9ced6', '#d8743a'], timer: ['#e04a3a'] },
+  cutter: { knife: ['#d8dde4'], tongs: ['#c9ced6'] },
+  glue: { toaster: ['#e0e4ea', '#e05a4a', '#6ab0e0'], ketchup: ['#d8342a'] },
+  zap: { tap: ['#8ad0ff'], torch: ['#5ab8ff'], coldair: ['#cfefff'] },
+  paw: { spatula: ['#3a3a42', '#e05a4a'], whisk: ['#c9ced6'] },
+  mine: { kernel: ['#f4c430'], soda: ['#3fae5a', '#e05a4a'] },
+  fan: { draft: ['#ffffff'] },
+  bubbles: { steam: ['#ffffff'], chill: ['#cfefff'] },
+  band: { spaghetti: ['#f0d080'], cheese: ['#f4c840'] }
+};
+// looks tied to layers (0 top shelf, 1 countertop, 2 stove, 3 sink, 4 fridge); the rest appear everywhere
+const KITCHEN_LAYERS = { shelf: [0, 2, 3], board: [1, 2], fridgeshelf: [4], waffle: [1, 2], pineapple: [0, 1, 2], peppermill: [0, 1, 2, 3],
+                         icecube: [3, 4], cake: [0, 1], pizza: [1, 2, 3], melon: [3, 4], popcorn: [0, 1, 2, 3], pancake: [0, 1, 2],
+                         lettuce: [1, 4], bubble: [3], sausages: [2], timer: [2], toaster: [0, 1, 2], tap: [3], torch: [0, 1, 2],
+                         coldair: [4], kernel: [0, 1, 2], steam: [0, 1, 2, 3], chill: [4], cheese: [2] };
+function kitchenPool(d, y) {
+  const pool = [['shelves', 1], ['produce', 1], ['rollingPin', 1], ['platter', 1], ['popcorn', 1], ['potSteam', 1], ['spaghetti', 1],
+                ['pancakes', 1], ['cutterWheel', 1], ['toaster', 1], ['shears', 1], ['knifeBlock', 1], ['kernel', 1], ['tap', 1],
+                ['spatula', 1], ['drawers', 1], ['ladle', 1]];
+  if (conveyorAllowed(y)) pool.push(['ants', 1]);
+  if (windAllowed(y)) pool.push(['hood', 1]);
+  return pool;
+}
 function seaPool(d, y) {
   const pool = [['coral', 1], ['urchins', 1], ['jellies', 1], ['starfish', 1], ['bubbles', 1],
                 ['swordfish', 1], ['bigRock', 1], ['puffer', 1]];
@@ -698,6 +746,7 @@ function spawnRow(y, d) {
   if (mapId === 'forest') return spawnFromPool(y, d, forestPool(d, y));
   if (mapId === 'desert') return spawnFromPool(y, d, desertPool(d, y));
   if (mapId === 'volcano') return spawnFromPool(y, d, volcanoPool(d, y));
+  if (mapId === 'kitchen') return spawnFromPool(y, d, kitchenPool(d, y));
   const pool = [['gate', 1], ['blots', 1], ['pencil', 1], ['protractor', 1], ['wad', 1], ['zap', 1], ['mine', 1], ['bubbles', 1]];
   if (conveyorAllowed(y)) pool.push(['clips', 1]);
   pool.push(['scissors', 1]);
@@ -719,7 +768,7 @@ function spawnFromPool(y, d, pool) {
   for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
   lastType = type;
   const before = obstacles.length;
-  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || FOREST_MAKERS[type] || DESERT_MAKERS[type] || VOLCANO_MAKERS[type] || type](y, d) || 0;
+  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || FOREST_MAKERS[type] || DESERT_MAKERS[type] || VOLCANO_MAKERS[type] || KITCHEN_MAKERS[type] || type](y, d) || 0;
   const rowPal = {}, rowSea = {};    // obstacles of the same kind in one row share a colour
   for (let i = before; i < obstacles.length; i++) {
     const o = obstacles[i];
@@ -839,9 +888,24 @@ function spawnFromPool(y, d, pool) {
         const left = stonesLeft();
         if (left.length && Math.random() < 0.5) { o.stone = left[ri(0, left.length - 1)]; runCollected.add('stone-' + o.stone); }
       }
+    } else if (mapId === 'kitchen') {
+      o.kitchen = true;
+      o.layer = kitchenLayer(o.y);
+      const looks = KITCHEN_LOOKS[o.type];
+      if (looks && !rowSea[o.type]) {
+        const all = Object.keys(looks), fit = all.filter(l => !KITCHEN_LAYERS[l] || KITCHEN_LAYERS[l].includes(o.layer));
+        const names = fit.length ? fit : all, look = names[ri(0, names.length - 1)], cols = looks[look];
+        rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
+      }
+      if (looks) [o.look, o.kitCol] = rowSea[o.type];
+      if (o.type === 'compass') o.hh = 5;        // a ladle is a little thicker than a compass leg
+      if (o.type === 'blot') {                   // a pastry not yet seen this run (each once per run)
+        const left = pastriesLeft();
+        if (left.length && Math.random() < 0.4) { o.pastry = left[ri(0, left.length - 1)]; runCollected.add('pastry-' + o.pastry); }
+      }
     }
   }
-  if (!['gate', 'coral', 'bigRock', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon', 'branches', 'trunk', 'sandLedges', 'outcrop', 'basaltLedges', 'dome'].includes(type)) {
+  if (!['gate', 'coral', 'bigRock', 'girders', 'protractor', 'moon', 'planet', 'station', 'ledges', 'rock', 'signs', 'bulge', 'neon', 'branches', 'trunk', 'sandLedges', 'outcrop', 'basaltLedges', 'dome', 'shelves', 'platter'].includes(type)) {
     const py = y + extra + rand(95, 125), power = pickPower(py);
     if (power) pickups.push({ kind: power, x: rand(50, W - 50), y: py, r: 15, spin: rand(0, 6) });
     else if (Math.random() < 0.28) addStar(rand(40, W - 40), py);
