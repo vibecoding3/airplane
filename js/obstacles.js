@@ -762,13 +762,20 @@ function spawnRow(y, d) {
   return spawnFromPool(y, d, pool);
 }
 
+// the generator (mechanic) behind a pool entry: 'gate' for every Gap Wall, 'notes' for every Drifting Swarm, and so on
+const makerOf = type => SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || FOREST_MAKERS[type] ||
+                        DESERT_MAKERS[type] || VOLCANO_MAKERS[type] || KITCHEN_MAKERS[type] || type;
+// a wall-to-wall row (Gap Wall, Closing Jaws) never comes right after a Drifting Swarm (v131): the slow swarm could still be
+// sitting in its gap when the plane gets there
+const WALL_MAKERS = new Set(['gate', 'erasers']);
 function spawnFromPool(y, d, pool) {
-  const choices = pool.filter(p => p[0] !== lastType);   // never the same obstacle twice in a row
+  let choices = pool.filter(p => p[0] !== lastType);   // never the same obstacle twice in a row
+  if (makerOf(lastType) === 'notes') { const open = choices.filter(p => !WALL_MAKERS.has(makerOf(p[0]))); if (open.length) choices = open; }
   let r = Math.random() * choices.reduce((s, p) => s + p[1], 0), type = choices[0][0];
   for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
   lastType = type;
   const before = obstacles.length;
-  const extra = make[SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS[type] || CITY_MAKERS[type] || FOREST_MAKERS[type] || DESERT_MAKERS[type] || VOLCANO_MAKERS[type] || KITCHEN_MAKERS[type] || type](y, d) || 0;
+  const extra = make[makerOf(type)](y, d) || 0;
   const rowPal = {}, rowSea = {};    // obstacles of the same kind in one row share a colour
   for (let i = before; i < obstacles.length; i++) {
     const o = obstacles[i];

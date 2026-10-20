@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v130** (2026-10-21)
+Current version: **v131** (2026-10-21)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -233,7 +233,7 @@ A paper plane folded from a recipe card falls down a giant cartoon kitchen, from
 
 ## 5. Obstacles
 
-Since v125 every obstacle can appear at any depth, from the first metres on, on every map (the player's choice); only wind (desk fan, ocean current and the like) still stops at 700 m, and since v126 conveyors (paper clips, fish schools, satellite trains, flying daggers, hover taxis, ducks, camel caravans, rolling lava rocks) stop at 1,500 m (`conveyorAllowed` in `js/obstacles.js`). Since v127 every obstacle on a map also has the same spawn weight, so each is equally likely (the extra weights of v126 and before, such as the walls, the static hazards and the Dungeon's magic rings, are gone; see the spawn tables in `design/maps/`). Depth still makes obstacles faster, bigger and more frequent. The "Started at" columns below are the depths where each obstacle first joined the pool until v124. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
+Since v125 every obstacle can appear at any depth, from the first metres on, on every map (the player's choice); only wind (desk fan, ocean current and the like) still stops at 700 m, and since v126 conveyors (paper clips, fish schools, satellite trains, flying daggers, hover taxis, ducks, camel caravans, rolling lava rocks) stop at 1,500 m (`conveyorAllowed` in `js/obstacles.js`). Since v127 every obstacle on a map also has the same spawn weight, so each is equally likely (the extra weights of v126 and before, such as the walls, the static hazards and the Dungeon's magic rings, are gone; see the spawn tables in `design/maps/`). Since v131 a wall-to-wall row (Gap Wall or Closing Jaws: rulers, coral, girders, ledges, shutters…) never comes right after a Drifting Swarm row, because the slow swarm could still be sitting in its gap (`makerOf`, `WALL_MAKERS` in `js/obstacles.js`). Depth still makes obstacles faster, bigger and more frequent. The "Started at" columns below are the depths where each obstacle first joined the pool until v124. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
 
 ### 5.0 All obstacles at a glance
 One row per mechanic (section 6), names only; the details are in 5.1–5.9. For Paper (since v129), Ocean, Dungeon, Neon City, Forest, Desert, Volcano and Kitchen, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.

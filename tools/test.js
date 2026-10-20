@@ -556,6 +556,26 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(staff.found && staff.n === 2 && staff.headR === 11 && staff.hit && !staff.miss,
     `crescent staff head hit area: found ${staff.found}, shapes ${staff.n}, radius ${staff.headR}, head hits ${staff.hit}, beside the shaft hits ${staff.miss}`);
 
+  // a Gap Wall or Closing Jaws row never follows a Drifting Swarm row, on every map (v131)
+  const afterSwarm = await page.evaluate(() => {
+    const out = {};
+    for (const m of ['notebook', 'sea', 'space', 'dungeon', 'city', 'forest', 'desert', 'volcano', 'kitchen']) {
+      mapId = m; applyMap(); start(); lastType = '';
+      let swarms = 0, walls = 0, wallsElsewhere = 0, prev = '';
+      for (let i = 0; i < 6000; i++) {
+        obstacles.length = 0; pickups.length = 0; spawnRow(400 * PX_PER_M, 0.5);
+        const now = makerOf(lastType), wall = now === 'gate' || now === 'erasers';
+        if (prev === 'notes') { swarms++; if (wall) walls++; } else if (wall) wallsElsewhere++;
+        prev = now;
+      }
+      gameOver();
+      out[m] = { swarms, walls, wallsElsewhere };
+    }
+    return out;
+  });
+  check(Object.values(afterSwarm).every(v => v.swarms > 100 && v.walls === 0 && v.wallsElsewhere > 100),
+    'no Gap Wall or Closing Jaws right after a Drifting Swarm: ' + Object.entries(afterSwarm).map(([m, v]) => `${m} ${v.walls}/${v.swarms}`).join(', '));
+
   // conveyors (paper clips and their look-alikes on every map) stop at 1,500 m (v126)
   const conv = await page.evaluate(() => {
     const bad = [], before = {};
