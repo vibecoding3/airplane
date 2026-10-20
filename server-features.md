@@ -1,6 +1,6 @@
 # Server features: is now the time?
 
-*Written 2026-10-20, at v126. Player data is currently stored only on the device, in the browser's `localStorage` (see README section 13 and `store` in `js/core.js`).*
+*Written 2026-10-20, at v126. Player data is currently stored only on the device, in the browser's `localStorage` (see "Saved data" in README section 8b and `store` in `js/core.js`).*
 
 **Short answer:** not yet for your own server. There's one thing worth doing first, plus a cheaper middle path for when you want online features.
 
