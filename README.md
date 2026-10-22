@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v158** (2026-10-22)
+Current version: **v159** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -746,6 +746,8 @@ airplane/
 ├── style.css               all styling, including the paper and sea background layers and the start menu
 ├── depth-art.css           the background art per map layer (made by tools/depth-art.py)
 ├── img/menu-bg.svg         start-menu background picture (paper airplanes in a sunset sky)
+├── img/favicon.svg         the site icon (v159): the game's plane diving on a sky-blue circle; favicon-32.png is the PNG
+│                           fallback, apple-touch-icon.png (180 px, a full square) the phone home-screen icon
 ├── fonts/                  Kalam and Patrick Hand (woff2, Latin + Latin Extended), fonts.css and their OFL licence files
 ├── README.md               this document
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)

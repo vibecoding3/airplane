@@ -1,0 +1,7 @@
+<!-- Paper Nosedive favicon (v159): the game's paper plane diving on a sky-blue circle -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="#4a9be0"/><g transform="rotate(-30 32 34) translate(0 2)">
+  <path d="M10 12 L54 12 L32 56 Z" fill="#ffffff"/>
+  <path d="M32 12 L54 12 L32 56 Z" fill="#e3e1d6"/>
+  <path d="M24 12 L40 12 L32 25 Z" fill="#4a9be0"/>
+  <path d="M10 12 L24 12 L32 25 L40 12 L54 12 L32 56 Z M32 25 L32 55" fill="none" stroke="#22356b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</g></svg>
