@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v144** (2026-10-22)
+Current version: **v145** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -1213,7 +1213,7 @@ An anonymous log of who plays and how, kept in a free-tier Supabase project. The
 ### 19.1 Leaderboards (since v144)
 
 - **Getting in:** the start menu's Leaderboards button (next to Collections). The first time, it asks for a nickname: 3–16 characters, plain letters A–Z, numbers, spaces, dots, dashes and underscores (no accents, so no look-alike names), not starting or ending with a space. It must be unique, ignoring case ("Kite" and "kite" are one name). It is tied for good to the device's anonymous visitor id and can't be changed. Without a nickname a player sees no boards and appears on none; the game is the same either way.
-- **The boards:** Total score (every map's best depth added up, like the start menu's Total score) and one board per map, stepped through with ‹ and › arrows. Each shows the top 20 and, if lower, the player's own place after a "…", highlighted. Ties go to whoever got there first.
+- **The boards:** Total score (every map's best depth added up, like the start menu's Total score) and one board per map, stepped through with ‹ and › arrows. Each shows the top 20 and, if lower, the player's own place after a "…". Their own row is in bold (it had a yellow fill until v145, which poked out past the list's rounded corners). Ties go to whoever got there first.
 - **What gets sent:** after a run that beats the map's best on the device, that depth. When the screen opens, all the device's bests once per session, so records made offline or before joining count too. The database keeps the higher value.
 - **Security:** the visitor id works as the player's private key: it is never shown, and the boards only return nicknames. The game's public key can't read or write the tables: it can only call four database functions (`lb_claim`, `lb_me`, `lb_submit`, `lb_board`) that check what they get. Scores can't be verified, though: the game runs on the player's device, so someone who edits their saved bests can post a fake depth (capped at 100,000 m). Remove a cheater in the dashboard by deleting their row in `players` (their scores go with it).
 - **Offline:** the screen says it needs a connection; nothing else changes.

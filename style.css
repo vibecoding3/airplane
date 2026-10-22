@@ -296,7 +296,7 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
 .lb-list:empty { display: none; }
 .lb-list li { display: grid; grid-template-columns: 48px 1fr auto; gap: 6px; padding: 3px 12px; font-size: 18px; line-height: 1.35; font-variant-numeric: tabular-nums; }
 .lb-list li:nth-child(-n+3) .lb-rank { font-family: var(--display); font-weight: 700; }
-.lb-list li.me { background: #ffe9a8; font-weight: 700; }
+.lb-list li.me { font-weight: 700; }   /* your own row: bold, no fill (a fill poked out of the rounded list, v145) */
 .lb-list .lb-gap { display: block; text-align: center; opacity: .5; padding: 0; }
 .lb-nick { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .coll-sets { display: grid; gap: 10px; }
