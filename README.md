@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v153** (2026-10-22)
+Current version: **v154** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,8 +10,9 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css` and 31 plain script files in `js/` (about 12,400 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
-- **Start menu:** a regular game menu (big title, best score and star count, map tiles and Play; the "How to play" section was removed in v44) over an illustrated sky full of paper airplanes (`img/menu-bg.svg`). It is not tied to either map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth, the stars caught this run and the star total, Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
+- **Files:** `index.html`, `style.css`, `depth-art.css` and 33 plain script files in `js/` (about 12,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
+- **Start menu:** a regular game menu over an illustrated sky full of paper airplanes (`img/menu-bg.svg`): the big title, the star total and the Total score (with the player's leaderboard place, v147), the level and XP bar, the nine map tiles (each with its medals and best depth, v138), Play, and Collections and Leaderboards side by side (v144). A server status pill sits in the top-left corner (v143). The "How to play" section was removed in v44. It is not tied to any map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth and the Total score, the stars caught this run and the star total, the XP gained (with a "Level up!" badge), Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
+- **Online features** (section 19): an anonymous play log, leaderboards with a nickname and server-side XP, all in a free Supabase project. The game works fully offline without them.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
 - **Hosting:** GitHub Pages serves the repository root of the `main` branch. Every push to `main` goes live within about a minute.
@@ -29,9 +30,10 @@ One scheme for every device. A press can be a tap or click on the left or right 
 | Press the other side | Steps back: from a left drift, one press goes straight, a second press drifts right |
 | Hold a side (longer than 0.22 s) | Sharp turn; when released, the plane keeps drifting that way |
 | Hit a screen edge | The drift into that edge is cancelled (the plane falls straight), so one press the other way turns it at once |
-| P or Esc | Pause / resume |
-| Space or Enter | Start or resume from the menus; during a run, Space pauses (since v67, replacing P) |
-| Phone Back button (Android app) | One step back (since v110, `goBack` in `js/main.js`): a run pauses, the pause menu resumes, game over goes to the start menu, Collections closes. On the start menu it returns false and the app closes. The website does not use it yet; the Android app will call it |
+| Esc | Pause / resume (P no longer pauses since v67) |
+| Space or Enter | Start or resume from the menus; during a run, Space pauses |
+| Pause button (touch screens) | Pauses a run (v151): top bar, left of the sound button, on phones, tablets and the Android app only |
+| Phone Back button (Android app) | One step back (since v110, `goBack` in `js/main.js`, called from `app/native.js`): a run pauses, the pause menu resumes, game over goes to the start menu, Collections and Leaderboards close. On the start menu the app closes |
 
 There are no on-screen steering arrows (removed in v44).
 
@@ -254,13 +256,13 @@ A paper plane folded from a recipe card falls down a giant cartoon kitchen, from
 Since v125 every obstacle can appear at any depth, from the first metres on, on every map (the player's choice); only wind (desk fan, ocean current and the like) still stops at 700 m, and since v126 conveyors (paper clips, fish schools, satellite trains, flying daggers, hover taxis, ducks, camel caravans, rolling lava rocks) stop at 1,500 m (`conveyorAllowed` in `js/obstacles.js`). Since v127 every obstacle on a map also has the same spawn weight, so each is equally likely (the extra weights of v126 and before, such as the walls, the static hazards and the Dungeon's magic rings, are gone; see the spawn tables in `design/maps/`). Since v131 a wall-to-wall row (Gap Wall or Closing Jaws: rulers, coral, girders, ledges, shutters…) never comes right after a Drifting Swarm row, because the slow swarm could still be sitting in its gap (`makerOf`, `WALL_MAKERS` in `js/obstacles.js`). Depth still makes obstacles faster, bigger and more frequent. The "Started at" columns below are the depths where each obstacle first joined the pool until v124. Every obstacle picks a colour variant when it spawns, and obstacles of the same kind in one row share that colour.
 
 ### 5.0 All obstacles at a glance
-One row per mechanic (section 6), names only; the details are in 5.1–5.9. For Paper (since v129), Ocean, Dungeon, Neon City, Forest, Desert, Volcano and Kitchen, the looks of each obstacle are separated by " / ". No map uses the Telegraphed Slam.
+One row per mechanic (section 6), names only; the details are in 5.1–5.9. For Paper (since v129), Ocean, Dungeon, Neon City, Forest, Desert, Volcano and Kitchen, the looks of each obstacle are separated by " / "; collectibles follow a ";". The Ocean's sunken-city looks (400–1,500 m, v133) are not in this table: see 5.2. No map uses the Telegraphed Slam. A measured count of looks per mechanic and map, with a plan to even them out, is in `design/obstacle-balance.md`.
 
 | Mechanic | Paper | Ocean | Space | Dungeon | Neon City | Forest | Desert | Volcano | Kitchen |
 |---|---|---|---|---|---|---|---|---|---|
 | Gap Wall | Rulers / pencil case | Coral ledges / rock ledge with anemones / shipwreck planks | Station girders | Stone ledges / wooden beams / iron girders / goblin scaffolding | Neon shop signs / steel balconies / subway pipes / server racks | Leafy branches / fallen logs | Sandstone ledges / adobe walls | Basalt column ledges / lava crust | Shelf of jars / cutting board / glass fridge shelf |
 | Closing Jaws | Erasers | Giant clam / sunken hull halves | Airlock doors | Spiked crushers / spiked iron doors / battering rams / goblin barricade | Rolling shutters / subway doors / ticket gates | Log halves / beaver dam / beavers pushing logs | Sandstone slabs / mesa edges | Grinding rock plates / obsidian slabs | Drawers / waffle iron |
-| Static Hazards | Ink blots / coffee rings | Sea urchins / sea anemone / stonefish; seashells | Asteroids, black hole / wormhole | Spiked iron balls / cauldrons / boulders / tombstones | Traffic cones / manhole covers / vending machines / holographic warning sign | Hornets' nests / pinecones / thistles / glowing mushrooms | Barrel cactus / prickly pear / boulder with a lizard; fossils | Volcanic bomb / sulfur crystals / pumice | Pineapple / pepper grinder / ice cube; pastries |
+| Static Hazards | Ink blots / coffee rings | Sea urchins / sea anemone / stonefish; seashells | Asteroids, black hole / wormhole | Spiked iron balls / cauldrons / boulders / tombstones | Traffic cones / manhole covers / vending machines / holographic warning sign | Hornets' nests / pinecones / thistles / glowing mushrooms | Barrel cactus / prickly pear / boulder with a lizard; fossils | Volcanic bomb / sulfur crystals / pumice; Minecraft minerals | Pineapple / pepper grinder / ice cube; pastries |
 | Wall Bulge | Protractor | Brain coral / rock with anemones / sleeping whale | Moon edge, planets, battle station / asteroid base | Rock outcrop / giant shield / barrel end / giant jack-o'-lantern | Satellite dish / AC unit / station clock; neon signs | Tree trunk / birch trunk / shelf fungus | Sandstone outcrop / termite mound / dune | Lava dome / basalt columns / steaming mound | Round cake / pizza / half a watermelon |
 | Bouncing Slider | Pencil / pen | Swordfish / driftwood / broken mast | GPS satellite, ISS | Wooden plank / long bone / wizard staff / witch's broom / crescent staff / twisted staff | Hover tram / neon tube | Leafy stick / frosted stick | Flying carpet / driftwood / dry branch / fossil bone | Charred log / lava raft | Rolling pin / wooden spoon |
 | Rising Projectile | Paper wad / eraser crumbs | Pufferfish / sea turtle | Rocket | Skull / jack-o'-lantern / slime ball / potion flask; magic rings | Soda can / arcade token / bouncy ball | Acorn / chestnut / apple / snowball | Coconut / gourd / beetle's ball / dates / amber | Lava bomb / glowing rock; volcanic stones | Popcorn / cork |
@@ -277,7 +279,7 @@ One row per mechanic (section 6), names only; the details are in 5.1–5.9. For 
 | Push Zone | Desk fan | Ocean current / current carrying kelp | — | Cold draft / steam vent | Street steam vent / AC exhaust | Breeze carrying leaves | Sandstorm gust | Ash gust | Range-hood draft |
 | Effect Zone | Breath of air | Bubble column / warm vent water | Low-gravity field | Fountain mist | Hologram field | Updraft of leaves (snow in winter) | Heat shimmer | Steam column | Pot steam / fridge chill |
 | Spring Line | Rubber band | Fishing line with bobbers / net strand with glass floats | Tether cable | Spider web / slime strand | Power cable / string of lights | Spider web / vine | Frayed rope | Rope lava / jungle vine | Spaghetti between meatballs / melted cheese between tomatoes |
-| **Total** | **19 obstacles, 27 looks + 6 origami** | **19 obstacles, 46 looks + 6 shells, 5 fish** | **25 kinds on 17 mechanics** | **21 obstacles, 66 looks** | **20 obstacles, 50 looks + 8 neon signs** | **19 obstacles, 48 looks + 8 birds** | **19 obstacles, 43 looks + 8 fossils** | **19 obstacles, 40 looks + 8 volcanic stones** | **19 obstacles, 42 looks + 8 pastries** |
+| **Total** | **19 obstacles, 27 looks + 6 origami** | **19 obstacles, 46 looks (82 with the sunken city) + 6 shells, 8 treasures, 5 fish** | **25 kinds on 17 mechanics + 8 planets** | **21 obstacles, 66 looks + 9 rings, 6 swords** | **20 obstacles, 50 looks + 8 neon signs** | **19 obstacles, 48 looks + 8 birds** | **19 obstacles, 43 looks + 8 fossils** | **19 obstacles, 40 looks + 8 volcanic stones, 10 Minecraft minerals** | **19 obstacles, 42 looks + 8 pastries** |
 
 ### 5.1 Paper map (19 types; 16 until v128)
 
@@ -533,7 +535,7 @@ Every mechanic in section 6 except the Telegraphed Slam. Every Volcano obstacle 
 | Volcano obstacle | Looks | Based on | Started at (until v124) |
 |---|---|---|---|
 | Basalt ledges (Gap Wall) | Basalt column ledges with a six-sided end; a cooled lava crust with a glowing crack | Rulers | 0 m |
-| Bombs (Static Hazards) | Volcanic bombs with glowing cracks; yellow sulfur crystals; pale pumice full of holes | Ink blots | 0 m |
+| Bombs (Static Hazards) | Volcanic bombs with glowing cracks; yellow sulfur crystals; pale pumice full of holes; sometimes a Minecraft mineral (collectible since v148, see section 7) | Ink blots | 0 m |
 | Raft (Bouncing Slider) | A charred log with glowing embers (above 800 m); a raft of cooled lava plates with lava between | Pencil | 0 m |
 | Dome (Wall Bulge) | A lava dome with glowing cracks; the six-sided ends of basalt columns; a steaming mound; slalom pairs deeper down | Protractor | 0 m |
 | Lava bombs (Rising Projectile) | Lava bombs and red-hot rocks flung up the throat; sometimes a volcanic stone (collectible, see section 7) | Paper wad | 0 m |
@@ -654,7 +656,7 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
 - **Feedback:** "Magnet level 2!", "Shield level 3!", "Slow motion!", "Invincible!" or "Speed boost!" pops up in the power's colour, with a burst of sparks and a chime. Since v72 the message appears just under the plane and follows it as it fades, so it is easy to read (before, it stayed where the power-up was caught and scrolled up past the plane). Since v75 "Shield used!" appears there too. On dark maps every pop-up text (power-ups, shield saves, the "100 m!" milestones, medals, "New best!" and "+1 ★") gets a light outline so the coloured text stays readable (since v78; power-up messages only in v75). Using a shield shows "Shield used! N left".
 - **Stars:** stars caught in a run are added to a saved total when the run ends. The top bar shows the total during a run. Since v74 two gold stars never spawn less than 50 m apart (`STAR_GAP` in `js/state.js`), which roughly halved how many appear: about 1 every 50–100 m instead of every 25–35 m. Power-ups are not counted as stars.
 - **Experience and levels** (since v65): every metre of a run is 1 XP, added to a saved total when the run ends (on any map). The player starts at level 1; level 1 → 2 needs 300 XP and each level after needs 200 XP more than the one before (300, 500, 700, 900 …, so level 5 at 2,400 XP and level 10 at 9,900 XP). The start screen shows a yellow level badge beside a green bar and "440 / 700 XP" toward the next level. The game-over screen shows the same box with "+234 XP", the bar filling up; on a level up it fills to the end, starts over at the new level, and a green "Level up! Level N" badge appears with a rising fanfare. Change the curve in `js/state.js` (`xpNeed`). Since v146 the server keeps the XP of players who joined the leaderboards (section 19.1).
-- **Collections** (since v88): a "Collections" button (no count since v105) under Play on the start screen, and only there since v107 (it was also on the game-over screen in v89–v106 and in the pause menu in v97–v98; the game-over screen now has a Main Menu button instead) opens a screen of sets of special obstacles. An item is found the first time it appears on screen during a run (even if you then crash into it); found items are saved per device. Locked items show as black silhouettes, found ones in full colour with the game's own art. Since v152 every item has its name underneath (up to two lines), greyed while it is still locked, so players know what to look for; until v151 there were no names and tapping a found item showed it large with its name at the top of the screen. No pop-up when something is found and no reward for completing a set (player's choice). Since v122 every collectible in a run is "shiny", like a rare find in a monster-collecting game: a pulsing golden glow behind it and white four-pointed stars twinkling around it, each popping up at a new spot every time (along the staffs, on the visible half of planets and neon signs). Purely visual, the hit box doesn't change (`collectionId`, `drawShinyGlow`, `drawShinySparkles` in `js/collections.js`). Since v92 collectibles appear at most once per run: each staff and each ring design spawns once (two rings in one row get different designs), and once both staffs have appeared the Bouncing Slider only uses its other looks. Since v98 the rule is the same for every set: collectibles are obstacles with a specific variant which only appear once per run, and when all collectibles of an obstacle have appeared, the obstacle still appears with its regular variants. Once all 9 rings have appeared (usually by 700–1,000 m), ring spawns become regular Rising Projectiles (skull, jack-o'-lantern, slime ball, potion). Since v94 each set panel names its map, and the screen says "Find these in your runs to unlock them." The Collections screen says "Collectibles are obstacles that only appear once per run." (`runCollected` in `js/state.js`, `ringsLeft` in `js/obstacles.js`). Esc or Back returns to the screen it was opened from. Sets (`COLLECTIONS` in `js/collections.js`):
+- **Collections** (since v88): a "Collections" button (no count since v105) under Play on the start screen (beside Leaderboards since v144), and only there since v107 (it was also on the game-over screen in v89–v106 and in the pause menu in v97–v98; the game-over screen now has a Main Menu button instead) opens a screen of sets of special obstacles. An item is found the first time it appears on screen during a run (even if you then crash into it); found items are saved per device. Locked items show as black silhouettes, found ones in full colour with the game's own art. Since v152 every item has its name underneath (up to two lines), greyed while it is still locked, so players know what to look for; until v151 there were no names and tapping a found item showed it large with its name at the top of the screen. No pop-up when something is found and no reward for completing a set (player's choice). Since v122 every collectible in a run is "shiny", like a rare find in a monster-collecting game: a pulsing golden glow behind it and white four-pointed stars twinkling around it, each popping up at a new spot every time (along the staffs, on the visible half of planets and neon signs). Purely visual, the hit box doesn't change (`collectionId`, `drawShinyGlow`, `drawShinySparkles` in `js/collections.js`). Since v92 collectibles appear at most once per run: each staff and each ring design spawns once (two rings in one row get different designs), and once both staffs have appeared the Bouncing Slider only uses its other looks. Since v98 the rule is the same for every set: collectibles are obstacles with a specific variant which only appear once per run, and when all collectibles of an obstacle have appeared, the obstacle still appears with its regular variants. Once all 9 rings have appeared (usually by 700–1,000 m), ring spawns become regular Rising Projectiles (skull, jack-o'-lantern, slime ball, potion). Since v94 each set panel names its map, and the screen says "Find these in your runs to unlock them." The Collections screen says "Collectibles are obstacles that only appear once per run." (`runCollected` in `js/state.js`, `ringsLeft` in `js/obstacles.js`). Esc or Back returns to the screen it was opened from. Sets (`COLLECTIONS` in `js/collections.js`):
 
   | Set | Items |
   |---|---|
@@ -706,9 +708,10 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Pause / Resume | Space bar, Esc (P no longer pauses since v67); the phone Back button in the Android app; on touch screens (phones, tablets, the app) a pause button in the top bar, left of the sound button (removed in v118, back for touch screens only in v151; computers don't show it) | Also pauses automatically when the tab is hidden or the window loses focus |
 | Exit run | Pause menu, under Resume (since v71) | Ends the run and goes straight to the start menu. The run keeps what it earned, like a crash: a new best depth, its stars, and its metres as XP |
 | Map | Start screen only (since v119) | Paper / Ocean / Space / Dungeon / Neon City / Forest / Desert / Volcano / Kitchen picture tiles |
+| Leaderboards nickname | Leaderboards button on the start screen (v144) | Optional; asked for the first time the screen opens, unique, and permanent on that device (section 19.1) |
 
 ### Saved data (browser localStorage)
-`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon`, `nosedive-best-city`, `nosedive-best-forest`, `nosedive-best-desert`, `nosedive-best-volcano`, `nosedive-best-kitchen` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution). All of them are per browser and per device.
+`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon`, `nosedive-best-city`, `nosedive-best-forest`, `nosedive-best-desert`, `nosedive-best-volcano`, `nosedive-best-kitchen` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution), and for the online features (section 19): `nosedive-visitor` (the anonymous visitor id, v142), `nosedive-nick` (the leaderboard nickname, v144), `nosedive-runq` (finished runs waiting to be sent to the server, v146), `nosedive-xp-imported` (whether the device's XP was carried over to the server, v146) and `nosedive-rank` (the last known Total score place, v147). All of them are per browser and per device.
 
 ---
 
@@ -746,9 +749,11 @@ airplane/
 ├── fonts/                  Kalam and Patrick Hand (woff2, Latin + Latin Extended), fonts.css and their OFL licence files
 ├── README.md               this document
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
-├── tools/                  dev-only test, screenshot and bundle scripts (see 10.5)
+├── tools/                  dev-only test, screenshot and bundle scripts, the background-art generator and the Supabase SQL (see 10.5)
 ├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
-└── js/                     31 game scripts, listed in the order they load
+├── design/                 design notes: maps/<map>.md per map (premise, layers, obstacles, spawn tables) and obstacle-balance.md (obstacles and looks per map, v153)
+├── ref/                    reference pictures (map-icon sheets, screenshots the player shared); git ignores it, not used by the game
+└── js/                     33 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
@@ -791,7 +796,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 - The scripts are ordinary `<script src>` files, not ES modules, so they all share **one global scope**: a name declared in one file (`const`, `let` or `function`) can be used from any other file.
 - They run **in the order `index.html` lists them**. While a file is loading it may only use names from files above it; code inside functions can use names from anywhere, because it only runs once the game is going.
 - `main.js` must stay **last**: it starts the main loop.
-- Each file starts with `'use strict'` and a one-line description.
+- Each file starts with a one-line description; most also with `'use strict'` (not the background files added from v113 on, `playlog.js` or `leaderboard.js`).
 - Global names must not clash with built-in browser globals such as `top`, `window` or `location`.
 
 ### 10.3 Where to change things
@@ -811,6 +816,9 @@ There is no build step and nothing to install. To play locally, open `index.html
 | Sounds | `js/audio.js` (`sfx`) |
 | Music | `js/music.js` (`THEMES`: chords, melody and tempo per theme; `setMusic`, `duckMusic`) |
 | Frame rate, resolution, input | `js/main.js`, plus `resize` in `js/core.js` |
+| Background art per depth layer | `tools/depth-art.py` (then `python tools/depth-art.py depth-art.css`), `js/render.js` (`syncDepthArt`, `ART_BOUNDS`, `ART_BASE`, `ART_NONE`) |
+| Play log, server status pill | `js/playlog.js` (`LOG_URL`, `LOG_KEY`, `logRow`, `logRun`, `checkServer`, `setNet`), tables in `tools/supabase.sql` |
+| Leaderboards, nickname, server-side XP | `js/leaderboard.js` (`lbCall`, `lbSyncXp`, `lbRunEnded`, `renderBoard`, `lbRefreshRank`), database functions in `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql` |
 | Version label | `index.html` (`id="version"`) |
 
 ### 10.4 Key names by file
@@ -831,7 +839,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `desert-background.js` | `DESERT_TIERS`, `spawnDesertThing`, `desertStartY`, `drawDesertStart`, `drawDesertParticles` (scenery joins the `FISH` table) |
 | `draw-desert.js` | `drawDesertObstacle` (picks the art for each mechanic), `FOSSIL_NAMES`, `paintFossil` (also used by the Collections screen), `drawDesertLedge`, `drawDesertHazard`, `drawDesertCarpet`, `drawDesertTumble`, `drawDesertTongue`, `drawDesertSpitter`, `drawDesertScorpion`, `drawDesertHeat`, `drawDesertRope` |
 | `volcano-background.js` | `VOLCANO_TIERS`, `spawnVolcanoThing`, `volcanoStartY`, `drawVolcanoStart`, `drawVolcanoParticles` (scenery joins the `FISH` table) |
-| `draw-volcano.js` | `drawVolcanoObstacle` (picks the art for each mechanic), `STONE_NAMES`, `paintVolcStone` (also used by the Collections screen), `lavaGlow`, `drawVolcanoLedge`, `drawVolcanoHazard`, `drawVolcanoDome`, `drawVolcanoBomb`, `drawVolcanoVent`, `drawVolcanoLightning`, `drawVolcanoWave`, `drawVolcanoMud`, `drawVolcanoRope` |
+| `draw-volcano.js` | `drawVolcanoObstacle` (picks the art for each mechanic), `STONE_NAMES`, `paintVolcStone`, `MINERAL_NAMES`, `MINERAL_LOOKS`, `paintMineral` (also used by the Collections screen), `lavaGlow`, `drawVolcanoLedge`, `drawVolcanoHazard`, `drawVolcanoDome`, `drawVolcanoBomb`, `drawVolcanoVent`, `drawVolcanoLightning`, `drawVolcanoWave`, `drawVolcanoMud`, `drawVolcanoRope` |
 | `kitchen-background.js` | `KITCHEN_TIERS`, `spawnKitchenThing`, `kitchenStartY`, `drawKitchenStart`, `drawKitchenParticles` (scenery joins the `FISH` table) |
 | `draw-kitchen.js` | `drawKitchenObstacle` (picks the art for each mechanic), `PASTRY_NAMES`, `paintPastry` (also used by the Collections screen), `drawKitchenLedge`, `drawKitchenHazard`, `drawKitchenPlatter`, `drawKitchenTurret`, `drawKitchenBeam`, `drawKitchenSweep`, `drawKitchenBlast`, `drawKitchenNoodle` |
 | `forest-background.js` | `LEAF_COLS`, `FOREST_TIERS`, `spawnForestThing`, `forestStartY`, `drawForestStart`, `drawForestParticles` (scenery joins the `FISH` table) |
@@ -842,10 +850,12 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `draw-sea.js` | `drawCoral`, `drawClam`, `drawUrchin`, `drawJelly`, `drawMoray`, `drawZap`, `drawKelp`, `drawSub`, `drawStarfish`, `drawMine`, `drawBubbleColumn` |
 | `draw-ocean.js` | `drawOceanLook` (draws an Ocean obstacle's added look, or returns false for the original one), `drawSeaLedge`, `drawWreckHull`, `drawSeaHazard`, `drawSeaSwarm`, `drawSeaDrifter`, `drawMantis`, `drawSeaTurret`, `drawRay`, `drawOctopusArm`, `drawBarrel`, `drawWarmVent`, `drawSchoolFish`, `drawPuffer`, `drawSeaBulge`, `drawSwordfish`, `drawFishline`, `drawAnchorChain`, `drawCrab` |
 | `draw-sunken-city.js` | `drawSunkenCity` (the city looks of every Ocean mechanic), `TREASURE_NAMES`, `paintTreasure` (also used by the Collections screen) |
-| `render.js` | `paintPlane`, `drawPlane`, `syncPaperLayers`, `render`, `applyMap` |
-| `ui.js` | `updateHud`, `showCard`, `setXp`, `animateXp`, `start`, `pause`, `resume`, `exitRun`, `keepRunProgress`, `gameOver` |
+| `render.js` | `paintPlane`, `drawPlane`, `syncPaperLayers`, `syncDepthArt`, `render`, `applyMap` |
+| `ui.js` | `updateHud`, `showCard`, `setXp`, `animateXp`, `start`, `pause`, `resume`, `exitRun`, `keepRunProgress`, `gameOver`, `renderMedals` |
 | `collections.js` | `COLLECTIONS`, `COLLECTION_TOTAL`, `collectionFound`, `noteFound`, `paintCollectionItem`, `renderCollections`, `openCollections` |
-| `main.js` | `watchFrameRate`, `frameInterval`, `frame` |
+| `playlog.js` | `LOG_URL`, `LOG_KEY`, `LOG_ON`, `visitorId`, `visitId`, `newId`, `logRow`, `logRun`, `NET_TEXT`, `setNet`, `checkServer` |
+| `leaderboard.js` | `LB_MAPS`, `NICK_RULE`, `lbNick`, `lbCall`, `lbSyncBests`, `lbSyncXp`, `setServerXp`, `lbRunEnded`, `lbRefreshRank`, `openLeaderboards`, `renderBoard`, `LB_TOP10`, `playTime` |
+| `main.js` | `watchFrameRate`, `frameInterval`, `frame`, `goBack` |
 
 ### 10.5 Dev tools (`tools/`)
 
@@ -853,9 +863,11 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 | Command | What it does |
 |---|---|
-| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all nine maps to 2,500 m (or `depth`) with every obstacle type appearing, normal runs ending in game over, pause and resume, no page errors. Exits with code 1 on any problem. |
+| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all nine maps to 2,500 m (or `depth`) with every obstacle type appearing, every collection set, normal runs ending in game over, pause and resume (keys and the touch pause button), the play log staying off from disk, the server status icon, and the leaderboards against a fake server (it never writes to the real database), with no page errors. Exits with code 1 on any problem. `node tools/test.js 800` is faster: it skips the all-obstacle-types check. The Sunken treasures check fails at random now and then (it needs 4 of 8 treasures in one run) |
 | `node tools/shot.js <notebook|sea|space|dungeon|city|forest|desert|volcano|kitchen> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
 | `node tools/shot.js title [sea]` | Title screen screenshot |
+| `python tools/depth-art.py depth-art.css` | Regenerates the background art per map layer (edit the script, not the CSS) |
+| `tools/supabase.sql`, `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql` | The database setup for section 19, run once each, in that order, in the Supabase SQL Editor |
 | `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs), the bundled fonts (as data URLs) and the scripts into one page (for a single-file copy) |
 
 ---
@@ -881,35 +893,38 @@ Suggestions; only the ones marked ✅ are built. They respect the decisions reco
 | 5 | **Daily dive** | One run per day with the same obstacle sequence for everyone (seeded from the date) and its own best score. Gives a reason to come back each day. | M |
 
 ### 12.2 More things to do during a run
-- **More power-ups** next to the magnet, shield and slow motion (✅ built in v54) (rare pickups, a few seconds each): a star rush that turns the next rows into stars, or a tiny plane that fits through narrow gaps.
+- **More power-ups** (✅ partly built: slow motion in v54, the invincibility star in v59, the speed boost in v69 and the Squid debuff in v109; see section 7). Still ideas: a star rush that turns the next rows into stars, or a tiny plane that fits through narrow gaps.
 - **Breathers and rushes:** every few hundred metres, a calm stretch with only stars, followed by a short "rush" of tightly packed obstacles. Changing the pace makes runs feel less flat than a constant difficulty curve.
 - **Milestone moments** ✅ built in v48 (see section 3): a small chime and flash each 100 m (and a bigger one each 500 m), so progress feels rewarding before the run ends.
 - **Rare big star** worth 5, placed in a slightly risky spot.
 
 ### 12.3 Goals between runs
-- **Missions:** three small goals at a time, replaced when done ("Pass 3 mines in one run", "Collect 10 stars", "Reach 300 m in Ocean"). They pay stars and point players at things they would not try on their own.
+- **Missions:** three small goals at a time, replaced when done ("Pass 3 mines in one run", "Collect 10 stars", "Reach 300 m in Ocean"). They pay stars and point players at things they would not try on their own. (Worked out as daily quests in section 16, on hold.)
+- **Leaderboards** ✅ built in v144 (section 19.1): Total score, Level, Time played and per-map boards, with a nickname.
+- **Collections** ✅ built in v88 (section 7): 13 sets, 100 items.
 - **Medals per map** ✅ built in v49 (see section 3): bronze / silver / gold at 250 / 750 / 1,500 m, shown on the map tiles.
-- **A use for stars** now that the Shop is gone: for example unlocking the second map, or medals at star totals.
+- **A use for stars** now that the Shop is gone: for example unlocking maps, or medals at star totals.
 
 ### 12.4 Feel and polish
 - **Phone vibration** on crashes, close calls and mine blasts (the Vibration API, Android only; easy to switch off).
-- **A simple music loop** generated in code like the sound effects, getting a little faster with depth, with its own on/off toggle.
+- **Music** ✅ built (section 8): a theme per map and one for the menus, generated in code. Still ideas: getting a little faster with depth, and its own on/off toggle (section 15, item 5).
 - **Speed feel at depth:** faint motion streaks at the screen edges once the fall gets fast (screen-edge streaks, not a trail behind the plane).
 - **Share button** on game over (the Web Share API on phones): "I fell 1,240 m in Paper Nosedive!" with the game link.
 
 ### 12.5 New maps
 New maps should reuse the 20 mechanics in section 6 with new art (see 11). Settings that suit a falling paper plane and are not the dropped Sky dive / Skyscraper ideas:
-- **Kitchen:** falling past shelves, with knives (Wall Piston), a whisk (Spinning Blades), steam from pots (Effect Zone) and rolling oranges (Bouncing Slider).
+- **Kitchen** ✅ built in v130 (sections 4.9 and 5.9). Neon City, Forest, Desert and Volcano were built too (v113–v121).
 - **Library:** tall bookshelves as Gap Walls, a swinging reading lamp (Telegraphed Sweep), falling loose pages (Drifting Swarm) and a book cart conveyor.
 - **Space** (worked out in section 13): drifting asteroids (Static Hazards and Spinning Drifter), satellites with solar panels (Sweeping Arm), laser gates (Charged Beam) and solar wind bands (Push Zone).
 - **Dungeon** (built in v68 and v70 with 18 obstacles, see 4.4 and 5.4; brainstorm in section 14): stone ledges, pendulum blades, spear traps, fireballs and bat swarms, from a torch-lit well down to a lava-lit underworld.
 
 ### 12.6 Suggested order
-1. Best-depth line, "Crumpled by…", star paths (quick wins that change how runs feel).
-2. Close calls and milestone moments.
-3. Missions and medals.
-4. Power-ups and breathers / rushes.
-5. Daily dive, music, a third map.
+Built so far: the best-depth line, milestones, medals, more power-ups, music, collections, leaderboards and nine maps. Of what is left:
+1. Even out obstacles and looks across the maps (`design/obstacle-balance.md`, waiting for decisions).
+2. "Crumpled by…" on game over and star paths (quick wins that change how runs feel).
+3. Close calls, breathers and rushes.
+4. A share button and phone vibration.
+5. Daily dive and missions (on hold with the daily quests, section 16).
 
 ---
 
@@ -1054,12 +1069,12 @@ Left out on purpose: **Telegraphed Slam** (the rubber stamp was removed, so no f
 
 ---
 
-## 15. Recommended next changes (review at v75, not built yet)
+## 15. Recommended next changes (review at v75, notes updated at v153)
 
 A review of the whole game after v75. Nothing here goes against the player decisions in CLAUDE.md (no shop, no skins, no trail, no tutorial, three drift positions). Ordered by value.
 
 1. **Give stars and levels a purpose (the biggest gap).** Stars pile up with nothing to spend them on, and levels unlock nothing. Since v74 stars are rarer, so they feel more valuable, but they still do nothing. Two ideas that fit the rules:
-   - **Levels unlock maps:** for example Ocean at level 2, Space at level 4, Dungeon at level 6. Every run then has a goal, and new content is paced.
+   - **Levels unlock maps:** for example Ocean at level 2, Space at level 4, Dungeon at level 6. Every run then has a goal, and new content is paced. (Since v146 levels at least show on the Level leaderboard.)
    - **Stars buy a one-time "second chance" per run,** offered on the crash screen for a cost. It is a single in-run choice, not a shop.
 2. **"Crumpled by…" on the game-over screen** (note: the "Crumpled!" heading was removed in v84 because players know they crashed; if this is built, show only what hit you, for example "Fire bar · 412 m", without a crash heading), for example "Crumpled by a fire bar at 412 m". Knowing what got you makes a crash feel fair and teaches the obstacles, which matters more now that there are 60+ looks. Also a top pick in 12.1, and cheap.
 3. **Close-call rewards:** passing very close to a hazard without touching it shows "Close!" with a small sparkle, and now and then a bonus star. Rewards skilled steering, the core of the game (see 12.2).
@@ -1070,10 +1085,10 @@ A review of the whole game after v75. Nothing here goes against the player decis
 **Smaller things noticed along the way:**
 - In Space, an Earth planet obstacle can appear right after the plane leaves the real Earth; it could be blocked for the first 100 m.
 - The speed boost goes 10% past the top-speed cap (v55); it could be limited if the cap should always hold.
-- Two test checks fail at random now and then (the desk fan, which only appears before 700 m, and the power-up counts in short 800 m runs); making them reliable means a failure always means something real. ✅ The wind check is fixed in v87: when a deep run misses its wind obstacle, the test looks again in up to 6 short runs to 760 m. The short-run power-up counts can still miss.
-- Dungeon has 18 obstacle types against 12–16 on the other maps; worth a few play-throughs to see if it feels harder, and if so its obstacles could unlock a little later.
+- Some test checks fail at random now and then; making them reliable means a failure always means something real. ✅ The wind check is fixed in v87: when a deep run misses its wind obstacle, the test looks again in up to 6 short runs to 760 m. Still random: the short-run power-up counts, and since v133 the Sunken treasures check (it needs 4 of the 8 treasures in one run and often sees 1–3).
+- Obstacles and looks are uneven across the maps (from 24 looks on Space to 82 on Ocean); the counts and a plan are in `design/obstacle-balance.md`. Since v125 every obstacle can appear at any depth, so nothing unlocks later anymore.
 
-**Suggested first three:** 1 (a purpose for stars and levels), 2 ("Crumpled by…") and 4 (readability).
+**Suggested first three:** 1 (a purpose for stars and levels), 2 ("Crumpled by…") and 3 (close calls); 4 is done.
 
 ---
 
@@ -1130,9 +1145,9 @@ A planned "Daily quests" section in the main menu. The ideas below use things th
 
 ---
 
-## 17. More collection sets — ideas (not built yet)
+## 17. More collection sets — ideas
 
-Ideas for new Collections sets (see Collections in section 7). The best fit is one set per map, so every map has a reason to be played, not only the Dungeon. Like the current sets, these items would be collectibles: each appears at most once per run, and is found the first time it shows on screen.
+Ideas for new Collections sets (see Collections in section 7, which lists the 13 sets built so far). Every map now has at least one set: besides the ones marked ✅ below, Neon signs (v113), Forest birds (v114), Fossils (v120), Volcanic stones (v121), Pastries (v130), Sunken treasures (v133) and Minecraft minerals (v148/v150) were built. Like the current sets, these items would be collectibles: each appears at most once per run, and is found the first time it shows on screen.
 
 ### 17.1 Cheap: the art already exists
 
@@ -1151,9 +1166,9 @@ Ideas for new Collections sets (see Collections in section 7). The best fit is o
 
 - Built the same way as the mage staffs and the rings, for example another staff or weapon. Designs must be original: no characters, names or recognizable designs from anime, films or games (the game is headed for Google Play; see v111). Reference pictures can still go in `ref/` (which git ignores) for general inspiration, drawn in the game's cartoon style.
 
-### 17.4 Suggested next three
+### 17.4 Suggested next
 
-**Planets** (almost free), **Origami** (fits the game best) and **Seashells** (gives the Ocean a set): every map would then have at least one collection.
+The three suggested here at first (Planets, Origami, Seashells) are built. Still open: **Dungeon · Potions** (the art exists), **Space · Space probes**, and an original set to replace the Minecraft minerals before the Google Play release.
 
 ---
 
@@ -1165,6 +1180,8 @@ The same game, wrapped as an Android app with **Capacitor 8**. The website at th
 - **Portrait only** (`screenOrientation` in `app/android/app/src/main/AndroidManifest.xml`).
 - **Back button:** `app/native.js` (app only, never on the website) sends the phone's Back button to `goBack()` in `js/main.js`; on the start menu the app closes.
 - **Saves** are the app's own `localStorage`, separate from the website's.
+- **Online features** (section 19): the app is served from https://localhost, so it never sends the play log; the server status pill and the leaderboards work as on the website.
+- **Not rebuilt for now:** the last builds were before the online features; don't build or install the app until the player asks again (decision of 2026-10-20).
 
 ### 18.1 Files
 
@@ -1172,7 +1189,7 @@ The same game, wrapped as an Android app with **Capacitor 8**. The website at th
 app/
 ├── package.json            Capacitor packages (@capacitor/core, android, app; cli)
 ├── capacitor.config.json   app ID, name, web folder
-├── copy-web.js             copies index.html, style.css, js/, img/, fonts/ into app/www and adds native.js
+├── copy-web.js             copies index.html, style.css, depth-art.css, js/, img/, fonts/ into app/www and adds native.js
 ├── native.js               app-only script: the Back button
 ├── build.js                one command for the whole build (see 18.3)
 ├── www/                    the copied game (git ignores it; rebuilt every time)

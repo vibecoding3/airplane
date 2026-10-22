@@ -1,6 +1,6 @@
 # Obstacle balance across maps: status and suggestions
 
-Written at v152 (2026-10-22). Goal: every map has the same number of obstacles, each with the same number of variants (looks).
+Written at v152; moved from docs/ to design/ in v154 (2026-10-22). Goal: every map has the same number of obstacles, each with the same number of variants (looks).
 
 **How this was measured:** in the game itself (headless Chrome), every obstacle type in each map's pool was spawned 400 times at depths spread from 0 to 3,000 m, recording each look it appeared with. Collectibles are counted separately. Colour variants (the same shape in another colour) aren't counted as looks.
 
