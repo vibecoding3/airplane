@@ -65,6 +65,31 @@ Object.assign(FISH, {
     else { for (let i = 0; i < 10; i++) { const r = i % 2 ? 7 : 16, a = -Math.PI / 2 + i * Math.PI / 5; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r - 3); } ctx.closePath(); }
     neonStroke(k.c, 2.2);
   } },
+  // a red neon shop sign hanging from a rod on two chains: KEBAB with a skewer, or PIZZA with a slice (v137); text, so never mirrored
+  ncFoodSign: { w: 124, h: 70, still: true, alpha: 0.55, noFlip: true, cols: [{ t: 'KEBAB' }, { t: 'PIZZA' }], paint(k) {
+    const red = '#ff3f3f';
+    ctx.fillStyle = '#4a4f68'; ctx.fillRect(-58, -32, 116, 3);                                     // the rod
+    ctx.strokeStyle = '#4a4f68'; ctx.lineWidth = 1.5; ctx.beginPath();
+    for (const x of [-44, 44]) { ctx.moveTo(x, -29); ctx.lineTo(x, -18); }
+    ctx.stroke();
+    ctx.fillStyle = '#120f22'; ctx.beginPath(); roundRectPath(-58, -18, 116, 40, 5); ctx.fill();
+    ctx.beginPath(); roundRectPath(-54, -14, 108, 32, 4); neonStroke(red, 1.6, false);
+    ctx.beginPath();
+    if (k.t === 'KEBAB') {                                                                           // a skewer with meat and veg
+      ctx.moveTo(-46, 12); ctx.lineTo(-26, -8);
+      for (const [x, y] of [[-41, 7], [-36, 2], [-31, -3]]) { ctx.moveTo(x + 3.5, y); ctx.arc(x, y, 3.5, 0, Math.PI * 2); }
+    } else {                                                                                         // a pizza slice with pepperoni
+      ctx.moveTo(-46, -7); ctx.quadraticCurveTo(-36, -12, -26, -7); ctx.lineTo(-36, 13); ctx.closePath();
+      for (const [x, y] of [[-39, -3], [-33, -2], [-36, 4]]) { ctx.moveTo(x + 1.8, y); ctx.arc(x, y, 1.8, 0, Math.PI * 2); }
+    }
+    neonStroke(red, 1.6);
+    ctx.font = '700 20px Kalam, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255,63,63,.3)'; ctx.fillText(k.t, 12, 3);
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(255,63,63,.35)'; ctx.lineWidth = 5; ctx.strokeText(k.t, 12, 3);         // glow
+    ctx.strokeStyle = red; ctx.lineWidth = 1.8; ctx.strokeText(k.t, 12, 3);
+    ctx.strokeStyle = '#ffd0d0'; ctx.lineWidth = 0.6; ctx.strokeText(k.t, 12, 3);                   // bright core
+  } },
   ncLanterns: { w: 200, h: 60, still: true, alpha: 0.6, paint() {           // a string of paper lanterns
     ctx.strokeStyle = '#0c0b14'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-100, -22); ctx.quadraticCurveTo(0, 10, 100, -22); ctx.stroke();
     for (let i = 0; i < 5; i++) {
@@ -175,7 +200,7 @@ Object.assign(FISH, {
 });
 // which scenery can appear at each depth level (same level depths as the formulas and fish)
 const CITY_TIERS = [
-  ['ncDrone', 'ncPigeon', 'ncCat', 'ncCables', 'ncBillboard', 'ncDrone'], ['ncBillboard', 'ncLanterns', 'ncCables', 'ncRobot', 'ncKoi', 'ncDrone'],
+  ['ncDrone', 'ncPigeon', 'ncCat', 'ncCables', 'ncBillboard', 'ncFoodSign', 'ncDrone'], ['ncBillboard', 'ncLanterns', 'ncCables', 'ncFoodSign', 'ncRobot', 'ncKoi', 'ncDrone'],
   ['ncTrain', 'ncLamp', 'ncPipes', 'ncKoi', 'ncLamp'], ['ncArcade', 'ncPixHeart', 'ncPixCoin', 'ncPixStar', 'ncKoi'],
   ['ncChip', 'ncCube', 'ncServer', 'ncKoi', 'ncCube'], ['ncCube', 'ncChip', 'ncServer', 'ncKoi']
 ];
@@ -191,7 +216,7 @@ function spawnCityThing(lineY) {
   const def = FISH[kind], s = rand(0.8, 1), dir = Math.random() < 0.5 ? -1 : 1;
   const wallHung = kind === 'ncCat' || kind === 'ncLamp' || kind === 'ncPipes';
   // cats, lamps and pipes sit by a wall; the train, the blimp and the kite cross the whole screen
-  const x = wallHung ? (dir < 0 ? rand(16, 50) : rand(W - 50, W - 16)) : kind === 'ncCables' || kind === 'ncLanterns' ? W / 2 + rand(-60, 60) : rand(40, W - 40);
+  const x = wallHung ? (dir < 0 ? rand(16, 50) : rand(W - 50, W - 16)) : kind === 'ncCables' || kind === 'ncLanterns' ? W / 2 + rand(-60, 60) : kind === 'ncFoodSign' ? rand(70, W - 70) : rand(40, W - 40);
   const speed = def.still ? 0 : kind === 'ncTrain' ? rand(160, 220) : kind === 'ncAirship' || kind === 'ncKite' ? rand(12, 18)
     : kind === 'ncPigeon' || kind === 'ncDrone' ? rand(30, 55) : rand(8, 18);
   const v = def.cols ? ri(0, def.cols.length - 1) : 0;

@@ -307,7 +307,7 @@ function drawFishes() {
     if (sy < -f.ext - 20 || sy > H + f.ext + 20) continue;
     const spr = fishSprite(f.kind, f.v);
     ctx.globalAlpha = def.alpha || (f.tier >= 3 ? 0.68 : 0.55);   // background: faded so they never read as obstacles
-    blit(spr, f.x, sy, def.still ? 0 : Math.sin(f.t * 3) * (far ? 0.015 : 0.04) * f.dir, f.s * f.dir, f.s);
+    blit(spr, f.x, sy, def.still ? 0 : Math.sin(f.t * 3) * (far ? 0.015 : 0.04) * f.dir, def.noFlip ? f.s : f.s * f.dir, f.s);   // noFlip: signs with text
     if (def.lure) {                                                // the anglerfish lure pulses
       const g = sharedSprite('lureGlow', 30, 30, 15, 15, () => {
         const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, 14);

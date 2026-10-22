@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v136** (2026-10-22)
+Current version: **v137** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -172,8 +172,8 @@ A rainy city at night, cartoon and playful like the other maps. The plane drops 
 
 | Depth | Scenery |
 |---|---|
-| 0–150 m | Delivery drones, pigeons, a black cat on a ledge, sagging cables with little lights, billboards (smile, wave or star) |
-| 150–400 m | Billboards, a string of paper lanterns, cables, flying delivery robots with a parcel, holographic koi, drones |
+| 0–150 m | Delivery drones, pigeons, a black cat on a ledge, sagging cables with little lights, billboards (smile, wave or star), red neon shop signs (KEBAB with a skewer or PIZZA with a slice, v137) |
+| 150–400 m | Billboards, a string of paper lanterns, cables, red KEBAB and PIZZA neon signs, flying delivery robots with a parcel, holographic koi, drones |
 | 400–800 m | A subway train racing past far behind, caged tunnel lamps, pipes with a valve wheel, holographic koi |
 | 800–1,500 m | Arcade cabinets, floating pixel hearts, coins and stars, holographic koi |
 | 1,500 m + | Circuit chips, glowing wireframe data cubes, server racks, holographic koi |
