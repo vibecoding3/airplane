@@ -20,7 +20,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v143</div>
+    <div class="version" id="version">v144</div>
 
     <div class="hud">
       <div>
@@ -58,7 +58,32 @@
           <button class="map-tile" type="button" data-map="kitchen" aria-pressed="false"><span class="map-thumb kitchen"></span>Kitchen</button>
         </div>
         <button class="menu-btn primary" id="startBtn" type="button">Play</button>
-        <button class="menu-btn coll-open" id="collBtn" type="button">Collections</button>
+        <div class="menu-row">
+          <button class="menu-btn coll-open" id="collBtn" type="button">Collections</button>
+          <button class="menu-btn" id="lbOpen" type="button">Leaderboards</button>
+        </div>
+      </div>
+
+      <div class="menu" id="lbCard" hidden>
+        <h2 class="menu-title small">Leaderboards</h2>
+        <form class="lb-join" id="lbJoin" novalidate>
+          <p class="menu-tag">Pick a nickname to see the leaderboards and put your best depths on them.</p>
+          <input class="lb-input" id="lbNick" type="text" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Nickname" aria-label="Nickname">
+          <p class="lb-note">3–16 letters (A–Z), numbers, spaces, dots, dashes or underscores. It’s yours for good on this device and can’t be changed.</p>
+          <p class="lb-msg" id="lbJoinMsg" role="alert"></p>
+          <button class="menu-btn primary" id="lbJoinBtn" type="submit">Join</button>
+        </form>
+        <div class="lb-board" id="lbBoard" hidden>
+          <p class="lb-note">Playing as <b id="lbName"></b></p>
+          <div class="lb-pick">
+            <button class="menu-btn lb-arrow" id="lbPrev" type="button" aria-label="Previous board">‹</button>
+            <span class="lb-map" id="lbMapName" aria-live="polite">Total score</span>
+            <button class="menu-btn lb-arrow" id="lbNext" type="button" aria-label="Next board">›</button>
+          </div>
+          <ol class="lb-list" id="lbList"></ol>
+          <p class="lb-msg" id="lbMsg"></p>
+        </div>
+        <button class="menu-btn" id="lbBack" type="button">Back</button>
       </div>
 
 
@@ -122,6 +147,7 @@
 <script src="js/ui.js"></script>
 <script src="js/collections.js"></script>
 <script src="js/playlog.js"></script>
+<script src="js/leaderboard.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

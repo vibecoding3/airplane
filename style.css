@@ -276,6 +276,29 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
 
 /* Collections: a panel per set with a grid of item tiles; locked items are black silhouettes on light grey,
    found ones are drawn on dungeon stone; tapping a found one shows it large at the top */
+/* leaderboards (v144) */
+.menu-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.menu-row .menu-btn { font-size: 19px; padding-left: 6px; padding-right: 6px; }
+.lb-join, .lb-board { display: grid; gap: 10px; }
+.lb-join[hidden], .lb-board[hidden] { display: none; }
+.lb-input {
+  font: 700 24px var(--display); color: var(--ink); text-align: center; padding: 8px 12px 4px;
+  background: #ffffff; border: 3px solid var(--ink); border-radius: 14px; outline: none; width: 100%; box-sizing: border-box;
+}
+.lb-input:focus { border-color: #f28c28; }
+.lb-note { margin: 0; font-size: 15px; background: rgba(255,255,255,.85); border-radius: 12px; padding: 4px 10px; }
+.lb-msg { margin: 0; min-height: 1.2em; font-size: 16px; color: #ffffff; -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; }
+.lb-msg:empty { display: none; }
+.lb-pick { display: grid; grid-template-columns: 52px 1fr 52px; align-items: center; gap: 8px; }
+.lb-arrow { padding: 0; font-size: 30px; line-height: 1.2; }
+.lb-map { font: 700 24px var(--display); color: #ffffff; -webkit-text-stroke: 5px var(--ink); paint-order: stroke fill; }
+.lb-list { list-style: none; margin: 0; padding: 4px 0; background: rgba(255,255,255,.9); border: 2px solid var(--ink); border-radius: 16px; text-align: left; }
+.lb-list:empty { display: none; }
+.lb-list li { display: grid; grid-template-columns: 48px 1fr auto; gap: 6px; padding: 3px 12px; font-size: 18px; line-height: 1.35; font-variant-numeric: tabular-nums; }
+.lb-list li:nth-child(-n+3) .lb-rank { font-family: var(--display); font-weight: 700; }
+.lb-list li.me { background: #ffe9a8; font-weight: 700; }
+.lb-list .lb-gap { display: block; text-align: center; opacity: .5; padding: 0; }
+.lb-nick { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .coll-sets { display: grid; gap: 10px; }
 .coll-rule { margin-top: -10px; font-size: 16px; }
 .coll-set { background: rgba(255,255,255,.88); border: 2px solid var(--ink); border-radius: 16px; padding: 8px 10px 10px; text-align: left; }

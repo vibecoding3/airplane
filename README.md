@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v143** (2026-10-22)
+Current version: **v144** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -778,7 +778,8 @@ airplane/
     ├── render.js           plane, screen shake, frame drawing, map switching
     ├── ui.js               top bar, menus, start / pause / game over
     ├── collections.js      Collections: the sets, finding items during a run, the Collections screen
-    ├── playlog.js          anonymous play log: a row per visit and per run sent to Supabase (section 19)
+    ├── playlog.js          anonymous play log: a row per visit and per run sent to Supabase; the server status icon (section 19)
+    ├── leaderboard.js      leaderboards: the nickname, the boards screen, sending best depths (section 19)
     └── main.js             keyboard and touch input, main loop (loads last, starts the game)
 ```
 
@@ -1208,4 +1209,14 @@ An anonymous log of who plays and how, kept in a free-tier Supabase project. The
 - **Setup:** run `tools/supabase.sql` once in the dashboard's SQL Editor; it creates both tables, their checks and the insert-only rules. Requests are sent with `keepalive` and never awaited; if the network or an ad blocker stops them, the game carries on.
 - **Server status icon (v143):** a small pill in the top-left corner of the start menu: a cloud with a green tick and "Online" when the server answers, a crossed-out cloud and "Offline" when it can't be reached (no network, the project paused, or no answer within 6 s), faded "Checking…" before the first answer. Hovering or a screen reader gives the long form ("Servers reachable" / "Servers unreachable: everything still works offline"). It is checked with Supabase's health endpoint, which writes nothing, when the game opens, when the device goes on- or offline, and every 30 s while the start menu is up; a play-log request also updates it. Unlike the log it runs everywhere, including from disk and in the app. It only informs: every part of the game works offline (`checkServer`, `setNet` in `js/playlog.js`).
 - **Free tier limits:** 500 MB of database (each row is a few hundred bytes); a project with no requests for a week is paused by Supabase and has to be resumed from the dashboard.
+
+### 19.1 Leaderboards (since v144)
+
+- **Getting in:** the start menu's Leaderboards button (next to Collections). The first time, it asks for a nickname: 3–16 characters, plain letters A–Z, numbers, spaces, dots, dashes and underscores (no accents, so no look-alike names), not starting or ending with a space. It must be unique, ignoring case ("Kite" and "kite" are one name). It is tied for good to the device's anonymous visitor id and can't be changed. Without a nickname a player sees no boards and appears on none; the game is the same either way.
+- **The boards:** Total score (every map's best depth added up, like the start menu's Total score) and one board per map, stepped through with ‹ and › arrows. Each shows the top 20 and, if lower, the player's own place after a "…", highlighted. Ties go to whoever got there first.
+- **What gets sent:** after a run that beats the map's best on the device, that depth. When the screen opens, all the device's bests once per session, so records made offline or before joining count too. The database keeps the higher value.
+- **Security:** the visitor id works as the player's private key: it is never shown, and the boards only return nicknames. The game's public key can't read or write the tables: it can only call four database functions (`lb_claim`, `lb_me`, `lb_submit`, `lb_board`) that check what they get. Scores can't be verified, though: the game runs on the player's device, so someone who edits their saved bests can post a fake depth (capped at 100,000 m). Remove a cheater in the dashboard by deleting their row in `players` (their scores go with it).
+- **Offline:** the screen says it needs a connection; nothing else changes.
+- **Setup:** run `tools/supabase-leaderboards.sql` once in the SQL Editor (after `tools/supabase.sql`). Tables `players` (visitor id, nickname, joined) and `scores` (visitor id, map, best depth, when).
+- **Tests** use a fake server, so they never write to the real database.
 

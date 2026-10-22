@@ -4,7 +4,7 @@
 // ---------- HUD & screens ----------
 const ui = {
   depth: $('depth'), stars: $('starCount'), best: $('best'),
-  overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'), coll: $('collCard'),
+  overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'), coll: $('collCard'), lb: $('lbCard'),
   overBank: $('overBank'),
   overTitle: $('overTitle'), overBest: $('overBest'), stamp: $('recordStamp'),
   muteBtn: $('muteBtn'), hint: $('hint')
@@ -99,6 +99,7 @@ function showCard(which) {
   ui.pause.hidden = which !== 'pause';
   ui.over.hidden = which !== 'over';
   ui.coll.hidden = which !== 'coll';
+  ui.lb.hidden = which !== 'lb';
   // the start menu sits on the sky picture instead of the map
   ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
   ui.overlay.classList.toggle('dim', !!which && state !== 'title');   // pause / game over: dim the game behind
@@ -147,6 +148,7 @@ function keepRunProgress(s) {
   logRun(s, state === 'paused' ? 'exit' : 'crash');   // the anonymous play log (js/playlog.js)
   const record = s > best;
   if (record) { best = bests[mapId] = s; store.set('nosedive-best-' + mapId, String(s)); }
+  lbRunEnded(s, record);                               // a new best goes on the leaderboard (js/leaderboard.js)
   if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
   const xpBefore = xp, levelUp = levelInfo(xp + s).level > levelInfo(xp).level;
   xp += s; store.set('nosedive-xp', String(xp));

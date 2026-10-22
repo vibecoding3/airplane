@@ -6,14 +6,15 @@
 // (pausing focuses Resume), so the keyup of a Space we used is swallowed.
 let spaceUsed = false;
 window.addEventListener('keydown', e => {
+  if (e.target instanceof HTMLInputElement) { if (e.key === 'Escape') closeLeaderboards(); return; }   // typing a nickname
   const k = e.key;
   const side = keySide(k);
   if (side) { e.preventDefault(); if (!e.repeat) press(side, 'key' + side); }
-  else if (k === 'Escape') { if (!ui.coll.hidden) closeCollections(); else state === 'paused' ? resume() : pause(); }
+  else if (k === 'Escape') { if (!ui.coll.hidden) closeCollections(); else if (!ui.lb.hidden) closeLeaderboards(); else state === 'paused' ? resume() : pause(); }
   else if (k === ' ' && state === 'play') { e.preventDefault(); if (!e.repeat) { spaceUsed = true; pause(); } }
   else if ((k === ' ' || k === 'Enter') && (state === 'title' || state === 'over' || state === 'paused')) {
     if (e.repeat && k === ' ') { e.preventDefault(); return; }
-    if (!ui.coll.hidden) return;                 // the Collections screen: its own buttons handle the keys
+    if (!ui.coll.hidden || !ui.lb.hidden) return;   // Collections / Leaderboards: their own buttons handle the keys
     if (e.target instanceof HTMLButtonElement && !e.target.classList.contains('play')) return;
     e.preventDefault();
     if (k === ' ') spaceUsed = true;
@@ -35,6 +36,7 @@ function keySide(k) {
 // Returns false on the start menu, where there is nothing to go back to and the app closes.
 function goBack() {
   if (!ui.coll.hidden) { closeCollections(); return true; }
+  if (!ui.lb.hidden) { closeLeaderboards(); return true; }
   if (state === 'play') { pause(); return true; }
   if (state === 'paused') { resume(); return true; }
   if (state === 'over') { toMainMenu(); return true; }

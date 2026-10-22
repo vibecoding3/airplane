@@ -707,6 +707,43 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(!netFirst.startsWith('checking') && netOff === 'offline / Offline' && (netFirst.startsWith('offline') || netBack === 'online / Online'),
     `server status icon: ${netFirst} → network off: ${netOff} → back: ${netBack}`);
 
+  // leaderboards (v144), against a fake server so the tests never write to the real database
+  await page.evaluate(() => {
+    window.lbCalls = [];
+    window.realFetch = window.fetch;
+    window.fetch = (url, opt) => {
+      const fn = String(url).split('/rpc/')[1];
+      if (!fn) return window.realFetch(url, opt);
+      const a = JSON.parse(opt.body); lbCalls.push(fn + ' ' + (a.p_nickname || a.p_map || '') + (a.p_depth ? ' ' + a.p_depth : ''));
+      const reply = fn === 'lb_me' ? null : fn === 'lb_claim' ? (a.p_nickname.toLowerCase() === 'taken' ? 'taken' : 'ok') : fn === 'lb_submit' ? undefined
+        : [{ rank: 1, nickname: 'Ace', depth: 2400, me: false }, { rank: 2, nickname: 'Bee', depth: 900, me: false }, { rank: 31, nickname: 'Tester 1', depth: 120, me: true }];
+      return Promise.resolve(new Response(reply === undefined ? null : JSON.stringify(reply), { status: reply === undefined ? 204 : 200 }));
+    };
+    localStorage.removeItem('nosedive-nick'); lbNick = ''; lbSynced = false;
+    state = 'title'; showCard('title'); bests.sea = 321;
+  });
+  await page.click('#lbOpen'); await wait(200);
+  const lbJoinShown = await page.evaluate(() => !$('lbCard').hidden && !$('lbJoin').hidden && $('lbBoard').hidden);
+  await page.click('#lbNick'); await page.keyboard.type('ad');          // a and d steer in a run: here they must just type
+  await page.keyboard.press('Enter'); await wait(200);
+  const lbShort = await page.evaluate(() => ({ v: $('lbNick').value, msg: $('lbJoinMsg').textContent, state }));
+  await page.click('#lbNick', { clickCount: 3 }); await page.keyboard.type('taken'); await page.click('#lbJoinBtn'); await wait(200);
+  const lbTaken = await page.evaluate(() => $('lbJoinMsg').textContent);
+  await page.click('#lbNick', { clickCount: 3 }); await page.keyboard.type('Tester 1'); await page.click('#lbJoinBtn'); await wait(300);
+  const lbJoined = await page.evaluate(() => ({ nick: lbNick, saved: store.get('nosedive-nick'), board: !$('lbBoard').hidden,
+    rows: [...document.querySelectorAll('#lbList li')].map(li => li.textContent), me: !!document.querySelector('#lbList li.me'), calls: lbCalls.slice() }));
+  await page.click('#lbNext'); await wait(200);
+  const lbNextMap = await page.evaluate(() => $('lbMapName').textContent);
+  await page.keyboard.press('Escape'); await wait(100);
+  const lbClosed = await page.evaluate(() => $('lbCard').hidden && !$('titleCard').hidden);
+  const lbRun = await page.evaluate(() => { lbCalls.length = 0; bests.forest = 0; mapId = 'forest'; applyMap(); start(); dist = 77 * PX_PER_M; gameOver(); const c = lbCalls.slice();
+    window.fetch = window.realFetch; localStorage.removeItem('nosedive-nick'); lbNick = ''; delete bests.sea; return c; });
+  check(lbJoinShown && lbShort.v === 'ad' && lbShort.state === 'title' && /3–16/.test(lbShort.msg) && /taken/.test(lbTaken),
+    `leaderboards: nickname form first; typing a/d types (${lbShort.v}, ${lbShort.state}); short name refused; "${lbTaken}"`);
+  check(lbJoined.nick === 'Tester 1' && lbJoined.saved === 'Tester 1' && lbJoined.board && lbJoined.rows.length === 4 && lbJoined.me &&
+    lbJoined.calls.includes('lb_submit sea 321') && lbNextMap === 'Paper' && lbClosed && lbRun.includes('lb_submit forest 77'),
+    `leaderboards: joined as ${lbJoined.nick}, ${lbJoined.rows.length} rows (${lbJoined.rows.join(' | ')}), bests synced, next board ${lbNextMap}, Esc closes, a record run is sent (${lbRun.join(', ')})`);
+
   check(errors.length === 0, errors.length ? 'errors:\n  ' + errors.join('\n  ') : 'no page errors');
   await browser.close();
   console.log(problems.length ? `\n${problems.length} problem(s)` : '\nall good');
