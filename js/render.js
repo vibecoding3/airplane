@@ -254,6 +254,102 @@ function ringColour(hex) {
   }
   return c;
 }
+// ---------- pre-drawing a map's sprites (v140) ----------
+// During the 3-2-1 countdown, a rehearsal spawns rows of the map's obstacles from the top down to 3,000 m, plus its
+// scenery and the power-ups, and draws each once off screen, so their shared sprites are cached before the plane drops.
+// Shapes unique to one obstacle (each ink blot, coral or rock) are still made when they appear. It is a generator: the
+// countdown runs a few steps each frame. Each step puts back everything spawning changes, so the run starts untouched.
+const PREWARM_ROWS = 600, PREWARM_M = 3000, PREWARM_SCENERY = 300;   // enough rows to meet most colours and sides
+function rehearse(f) {
+  const keep = [obstacles, pickups, fishes.slice(), dist, lastType, lastPowerY, lastPowerKind, lastStarY, lastSceneryY, [...runCollected]];
+  const screen = ctx;
+  ctx = prewarmCtx;                              // whatever gets drawn lands on a tiny canvas nobody sees
+  obstacles = []; pickups = [];
+  try { f(); } catch (e) { /* a rehearsal obstacle that can't be drawn outside a real run: its sprites wait for the run */ }
+  ctx = screen;
+  [obstacles, pickups, , dist, lastType, lastPowerY, lastPowerKind, lastStarY, lastSceneryY] = keep;
+  fishes.length = 0; fishes.push(...keep[2]);
+  runCollected.clear(); for (const id of keep[9]) runCollected.add(id);
+}
+const prewarmCtx = Object.assign(document.createElement('canvas'), { width: 4, height: 4 }).getContext('2d');
+function* prewarmSteps() {
+  for (let i = 0; i < PREWARM_ROWS; i++) {
+    rehearse(() => {
+      const y = (i + 0.5) / PREWARM_ROWS * PREWARM_M * PX_PER_M;
+      dist = y - planeScreenY();
+      spawnRow(y, difficulty());
+      for (const o of obstacles.slice()) { try { drawObstacle(o, H / 2); } catch (e) { /* see rehearse */ } }
+    });
+    yield;
+  }
+  rehearse(() => {
+    for (const kind of Object.keys(POWER_RIMS)) drawPower({ kind, x: W / 2, y: 0, r: 15, spin: 0 }, H / 2);
+    drawStar({ x: W / 2, y: 0, spin: 0 }, H / 2);
+  });
+  yield;
+  // the scenery behind the obstacles (Paper's is pencilled formulas, drawn as text: nothing to cache)
+  const spawn = { sea: spawnFish, space: spawnSpaceThing, dungeon: spawnDungeonThing, city: spawnCityThing, forest: spawnForestThing,
+    desert: spawnDesertThing, volcano: spawnVolcanoThing, kitchen: spawnKitchenThing }[mapId];
+  if (!spawn) return;
+  for (let i = 0; i < PREWARM_SCENERY; i++) {
+    rehearse(() => {
+      fishes.length = 0;
+      spawn((i + 0.5) / PREWARM_SCENERY * PREWARM_M * PX_PER_M);
+      for (const f of fishes) { const n = FISH[f.kind].cols ? FISH[f.kind].cols.length : 1; for (let v = 0; v < n; v++) fishSprite(f.kind, v); }   // every variant
+    });
+    if (i % 20 === 19) yield;
+  }
+}
+
+// one obstacle in its map's art (also used to pre-draw sprites during the countdown, so no side effects here)
+function drawObstacle(o, sy) {
+  if (o.dungeon) { drawDungeonObstacle(o, sy); return; }
+  if (o.city) { drawCityObstacle(o, sy); return; }
+  if (o.forest) { drawForestObstacle(o, sy); return; }
+  if (o.desert) { drawDesertObstacle(o, sy); return; }
+  if (o.volcano) { drawVolcanoObstacle(o, sy); return; }
+  if (o.kitchen) { drawKitchenObstacle(o, sy); return; }
+  if (o.sea && drawOceanLook(o, sy)) return;
+  if (o.paper && drawPaperLook(o, sy)) return;   // Paper's added looks and mechanics (v129)
+  if (o.space && drawSpaceExtra(o, sy)) return;   // Space's added looks and mechanics (v129)   // the Ocean's added looks (v124); the original ones are below
+  switch (o.type) {
+    case 'gate': {
+      const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
+      if (o.sea) { drawCoral(-10, l, sy, l, -1, o.seaCol); drawCoral(r, W + 10, sy, r, 1, o.seaCol); break; }
+      if (o.space) { drawGirder(-10, l, sy, l, -1, o.spaceCol); drawGirder(r, W + 10, sy, r, 1, o.spaceCol); break; }
+      drawRuler(-10, l, sy, l, -1, o.pal);
+      drawRuler(r, W + 10, sy, r, 1, o.pal);
+      break;
+    }
+    case 'erasers': {
+      const l = o.cx - o.gap / 2, r = o.cx + o.gap / 2;
+      if (o.sea) { drawClam(-10, l, sy, l, -1, o.seaCol); drawClam(r, W + 10, sy, r, 1, o.seaCol); break; }
+      if (o.space) { drawAirlock(-10, l, sy, l, -1, o.spaceCol); drawAirlock(r, W + 10, sy, r, 1, o.spaceCol); break; }
+      drawEraser(-10, l, sy, l, -1, o.pal);
+      drawEraser(r, W + 10, sy, r, 1, o.pal);
+      break;
+    }
+    case 'pencil': o.space ? (o.look === 'iss' ? drawISS(o, sy) : drawGPS(o, sy)) : drawPencil(o, sy); break;
+    case 'scissors': drawScissors(o, sy); break;
+    case 'blot': o.space ? (o.look === 'blackhole' ? drawBlackHole(o, sy) : drawAsteroid(o, sy)) : o.sea ? drawUrchin(o, sy) : drawBlot(o, sy); break;
+    case 'starfish': o.space ? drawTumbler(o, sy) : drawStarfish(o, sy); break;
+    case 'zap': o.space ? drawLaser(o, sy) : drawZap(o, sy); break;
+    case 'mine': drawMine(o, sy); break;
+    case 'bubbles': o.space ? drawLowGrav(o, sy) : drawBubbleColumn(o, sy); break;
+    case 'protractor': o.space ? (o.look === 'planet' ? drawPlanetEdge(o, sy) : o.look === 'station' ? drawBattleStation(o, sy) : drawMoonEdge(o, sy)) : drawProtractor(o, sy); break;
+    case 'wad': o.space ? drawRocket(o, sy) : drawWad(o, sy); break;
+    case 'clips': for (const x of clipXs(o)) o.space ? drawStarlink(x, sy) : drawClip(x, sy, o.col); break;
+    case 'compass': o.space ? drawRobotArm(o, sy) : drawCompass(o, sy); break;
+    case 'fan': drawFan(o, sy); break;
+    case 'glue': o.space ? drawFighter(o, sy) : o.sea ? drawSub(o, sy) : drawGlue(o, sy); break;
+    case 'cutter': o.space ? drawProbe(o, sy) : o.sea ? drawMoray(o, sy) : drawCutter(o, sy); break;
+    case 'note': o.space ? drawIce(o, sy) : o.sea ? drawJelly(o, sy) : drawNote(o, sy); break;
+    case 'setsquare': drawSetSquare(o, sy); break;
+    case 'band': drawBand(o, sy); break;
+    case 'paw': o.space ? drawEnergyBlade(o, sy) : o.sea ? drawKelp(o, sy) : drawPaw(o, sy); break;
+  }
+}
+
 function render() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -268,51 +364,7 @@ function render() {
     if (sy < -120 || sy > H + 120) continue;
     noteFound(o, sy);
     if (collectionId(o)) { drawShinyGlow(o, sy); shiny.push([o, sy]); }
-    if (o.dungeon) { drawDungeonObstacle(o, sy); continue; }
-    if (o.city) { drawCityObstacle(o, sy); continue; }
-    if (o.forest) { drawForestObstacle(o, sy); continue; }
-    if (o.desert) { drawDesertObstacle(o, sy); continue; }
-    if (o.volcano) { drawVolcanoObstacle(o, sy); continue; }
-    if (o.kitchen) { drawKitchenObstacle(o, sy); continue; }
-    if (o.sea && drawOceanLook(o, sy)) continue;
-    if (o.paper && drawPaperLook(o, sy)) continue;   // Paper's added looks and mechanics (v129)
-    if (o.space && drawSpaceExtra(o, sy)) continue;   // Space's added looks and mechanics (v129)   // the Ocean's added looks (v124); the original ones are below
-    switch (o.type) {
-      case 'gate': {
-        const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
-        if (o.sea) { drawCoral(-10, l, sy, l, -1, o.seaCol); drawCoral(r, W + 10, sy, r, 1, o.seaCol); break; }
-        if (o.space) { drawGirder(-10, l, sy, l, -1, o.spaceCol); drawGirder(r, W + 10, sy, r, 1, o.spaceCol); break; }
-        drawRuler(-10, l, sy, l, -1, o.pal);
-        drawRuler(r, W + 10, sy, r, 1, o.pal);
-        break;
-      }
-      case 'erasers': {
-        const l = o.cx - o.gap / 2, r = o.cx + o.gap / 2;
-        if (o.sea) { drawClam(-10, l, sy, l, -1, o.seaCol); drawClam(r, W + 10, sy, r, 1, o.seaCol); break; }
-        if (o.space) { drawAirlock(-10, l, sy, l, -1, o.spaceCol); drawAirlock(r, W + 10, sy, r, 1, o.spaceCol); break; }
-        drawEraser(-10, l, sy, l, -1, o.pal);
-        drawEraser(r, W + 10, sy, r, 1, o.pal);
-        break;
-      }
-      case 'pencil': o.space ? (o.look === 'iss' ? drawISS(o, sy) : drawGPS(o, sy)) : drawPencil(o, sy); break;
-      case 'scissors': drawScissors(o, sy); break;
-      case 'blot': o.space ? (o.look === 'blackhole' ? drawBlackHole(o, sy) : drawAsteroid(o, sy)) : o.sea ? drawUrchin(o, sy) : drawBlot(o, sy); break;
-      case 'starfish': o.space ? drawTumbler(o, sy) : drawStarfish(o, sy); break;
-      case 'zap': o.space ? drawLaser(o, sy) : drawZap(o, sy); break;
-      case 'mine': drawMine(o, sy); break;
-      case 'bubbles': o.space ? drawLowGrav(o, sy) : drawBubbleColumn(o, sy); break;
-      case 'protractor': o.space ? (o.look === 'planet' ? drawPlanetEdge(o, sy) : o.look === 'station' ? drawBattleStation(o, sy) : drawMoonEdge(o, sy)) : drawProtractor(o, sy); break;
-      case 'wad': o.space ? drawRocket(o, sy) : drawWad(o, sy); break;
-      case 'clips': for (const x of clipXs(o)) o.space ? drawStarlink(x, sy) : drawClip(x, sy, o.col); break;
-      case 'compass': o.space ? drawRobotArm(o, sy) : drawCompass(o, sy); break;
-      case 'fan': drawFan(o, sy); break;
-      case 'glue': o.space ? drawFighter(o, sy) : o.sea ? drawSub(o, sy) : drawGlue(o, sy); break;
-      case 'cutter': o.space ? drawProbe(o, sy) : o.sea ? drawMoray(o, sy) : drawCutter(o, sy); break;
-      case 'note': o.space ? drawIce(o, sy) : o.sea ? drawJelly(o, sy) : drawNote(o, sy); break;
-      case 'setsquare': drawSetSquare(o, sy); break;
-      case 'band': drawBand(o, sy); break;
-      case 'paw': o.space ? drawEnergyBlade(o, sy) : o.sea ? drawKelp(o, sy) : drawPaw(o, sy); break;
-    }
+    drawObstacle(o, sy);
   }
   for (const [o, sy] of shiny) drawShinySparkles(o, sy);
   for (const p of pickups) p.kind ? drawPower(p, p.y - dist) : drawStar(p, p.y - dist);
@@ -371,7 +423,21 @@ function render() {
     ctx.fillStyle = `rgba(${flashCol},${(flash * 0.6).toFixed(3)})`;
     ctx.fillRect(0, 0, W, H);
   }
+  if (state === 'countdown') drawCountdown();
   syncHudPage();
+}
+
+// the 3-2-1 before a run from the start menu: each number pops in, then fades over the end of its second
+function drawCountdown() {
+  const n = Math.ceil(countdown), f = n - countdown;          // 0 → 1 through each second
+  const size = reduceMotion ? 110 : 110 * (1.3 - 0.3 * Math.min(1, f * 5));
+  ctx.save();
+  ctx.globalAlpha = f < 0.7 ? 1 : (1 - f) / 0.3;
+  ctx.font = `700 ${size.toFixed(1)}px Kalam, cursive`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round'; ctx.lineWidth = 9;
+  ctx.strokeStyle = darkPage ? COL.ink : '#ffffff'; ctx.strokeText(n, W / 2, H * 0.5);
+  ctx.fillStyle = darkPage ? '#ffffff' : COL.ink; ctx.fillText(n, W / 2, H * 0.5);
+  ctx.restore();
 }
 
 // chevrons in the bottom corners show which way the plane is drifting

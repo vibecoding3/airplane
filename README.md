@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v139** (2026-10-22)
+Current version: **v140** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -716,6 +716,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Optimization | What it does |
 |---|---|
 | Sprite cache | Rigid obstacle parts, fish, stars and plane-independent art are painted once into offscreen canvases at screen resolution (`sharedSprite` / `ownSprite`) and then copied each frame, rotated, flipped, stretched or cropped as needed. The cache is rebuilt on resize and when fonts finish loading. |
+| Sprites pre-drawn behind a 3-2-1 (v140) | Play on the start menu shows a 3, 2, 1 countdown (one second each, a tick sound per number) over the top of the map while the world waits. Meanwhile a rehearsal spawns 600 rows of the map's obstacles from 0 to 3,000 m, every power-up and 300 lines of scenery with all their colour variants, and draws each once off screen, at most 6 ms per frame, so their shared sprites are cached before the plane drops (`prewarmSteps` in `js/render.js`, `startCountdown` in `js/ui.js`). It puts back everything it changes, so the run starts untouched; it takes about 50–130 ms on a desktop and covers all but 1–10 shared sprites a run needs (mostly the start scene, which the countdown already shows). Shapes unique to one obstacle (each ink blot, coral, rock) are still drawn when they appear. Throw again starts at once: the game-over screen can't change the map, so the sprites are still cached. |
 | No drop shadows | The game has no drop shadows (removed in v29), which saves a draw per obstacle each frame. |
 | Background as browser layers | The page colour, ruled lines, margin and holes (or the rising bubbles) are CSS layers behind a transparent canvas. The compositor slides them into place each frame, so the canvas only draws formulas, fish, markers, obstacles and the plane. Screen shake moves the whole playfield with one CSS transform. |
 | No per-frame gradients | Scissor blades, glows and blasts use pre-painted sprites instead of creating gradients every frame |
