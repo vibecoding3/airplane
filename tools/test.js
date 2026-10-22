@@ -877,7 +877,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     spawnRow = realSpawnRow;
     // the second run's flight path, as a ghost in a third daily run: it draws without trouble
     const track = lastReplay.track.slice(), trackOk = track.length >= 8 && track.length % 2 === 0;
-    ghosts = [{ name: 'Ghosty', me: false, depth: 600, track }, { name: 'Your best', me: true, depth: 300, track: track.slice(0, 40) }];
+    ghosts = [{ me: false, depth: 600, step: GHOST_STEP, p: track }, { me: true, depth: 300, step: GHOST_STEP, p: track.slice(0, 40) }];
     mapId = today.map; applyMap(); const keepGhosts = ghosts; start(today); ghosts = keepGhosts;
     for (let f = 0; f < 600; f++) { simFrame(1 / 60); if (f % 20 === 0) render(); }
     const ghostPos = ghostAt(ghosts[0], 3), crashed = ghostAt(ghosts[1], 30).done > 0;
@@ -897,6 +897,31 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     `Daily dive: ${dv.distinct}/9 maps over 30 days; two runs flown differently (they ended apart: ${dv.differ}) met the same ${dv.rows} rows down to 600 m: ${dv.same}`);
   check(dv.trackOk && dv.ghostPos && dv.crashed && dv.replayOk && dv.note && dv.again,
     `Daily dive: flight path ${dv.trackOk}, ghosts drawn ${dv.ghostPos} (a finished one shows crashed ${dv.crashed}), its replay matches ${dv.replayOk}, game over says Daily dive ${dv.note}, Play again repeats it ${dv.again}`);
+  // ghosts are smooth (v162): 10 points a second on a curve, the tilt eased; close to the real path, calmer than the
+  // plane itself; an old 4-a-second path still plays at the right speed; the menu button keeps its text while loading
+  const smooth = await page.evaluate(async () => {
+    const today = dailyInfo(dayNumber()), realReset = reset; reset = () => { realReset(); plane.lives = 999; };
+    mapId = today.map; applyMap(); start(today); const truth = []; let f = 0;
+    while (state === 'play' && f < 60 * 40) { if (f % 53 === 5) press(f % 106 === 5 ? -1 : 1, 'k'); if (f % 53 === 30) release('k'); simFrame(1 / 60); truth.push([playClock, plane.x, plane.ang]); f++; }
+    const track = rec.track.slice(); pause(); exitRun(); reset = realReset;
+    const g = { step: GHOST_STEP, p: track }; let err = 0, n = 0, jump = 0, real = 0, prev = null, prevReal = null;
+    for (const [t, x, ang] of truth) {
+      const p = ghostAt(g, t); if (p.done) break; playClock = t; const a = ghostTilt(g, p);
+      err += (p.x - x) ** 2; n++;
+      if (prev !== null) jump = Math.max(jump, Math.abs(a - prev)); prev = a;
+      if (prevReal !== null) real = Math.max(real, Math.abs(ang - prevReal)); prevReal = ang;
+    }
+    const old = ghostPath([10, 0, 20, 100, 30, 200]), oldMid = ghostAt(old, 0.25).d;   // 4 a second: point 1 at 0.25 s
+    const before = $('dailyMap').textContent, realFetch = window.fetch;
+    window.fetch = () => new Promise(() => {});                                    // a server that never answers
+    $('dailyBtn').click(); const during = $('dailyMap').textContent;
+    await new Promise(r => setTimeout(r, 2700));                                     // starts without ghosts after 2.5 s
+    const started = state === 'play' && !!daily; window.fetch = realFetch;
+    pause(); exitRun();
+    return { rms: Math.sqrt(err / n), jump: jump * 180 / Math.PI, real: real * 180 / Math.PI, oldMid, before, during, started };
+  });
+  check(smooth.rms < 4 && smooth.jump <= smooth.real + 0.5 && smooth.oldMid === 100 && smooth.during === smooth.before && smooth.started,
+    `ghosts: ${smooth.rms.toFixed(2)} units off the real path, tilt changes at most ${smooth.jump.toFixed(1)}° a frame (the plane ${smooth.real.toFixed(1)}°), an old path plays at its own speed ${smooth.oldMid === 100}; the button stays "${smooth.during}" while loading, and the dive starts anyway ${smooth.started}`);
   const dsub = await page.evaluate(async () => {
     const calls = [], realFetch = window.fetch;
     window.fetch = (url, opt) => {
@@ -913,7 +938,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     for (let f = 0; f < 300; f++) simFrame(1 / 60);
     while (state === 'dying') simFrame(1 / 60);     // a crash finishes by itself
     if (state === 'play') { pause(); exitRun(); }
-    const queued = !!(lbQueue[0] && lbQueue[0].daily && lbQueue[0].daily.track.length);
+    const queued = !!(lbQueue[0] && lbQueue[0].daily && lbQueue[0].daily.track.step === GHOST_STEP && lbQueue[0].daily.track.p.length);
     await lbSyncXp();
     state = 'title'; showCard('title'); openLeaderboards(); lbMap = 'daily'; renderBoard(); await new Promise(r => setTimeout(r, 300));
     const board = { name: $('lbMapName').textContent, rows: document.querySelectorAll('#lbList li').length };

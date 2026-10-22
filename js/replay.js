@@ -12,7 +12,7 @@
 // under another number are not offered for watching, since they would no longer play back the same.
 const SIM_VERSION = 1;
 const CHECK_EVERY = 60;              // frames between checks that the replay still matches the run
-const GHOST_STEP = 0.25;             // seconds between the points of a daily dive's flight path
+const GHOST_STEP = 0.1;              // seconds between the points of a daily dive's flight path (0.25 until v161)
 let runRandom = realRandom;          // the run's own random sequence (seededRandom), used inside simFrame only
 let rec = null;                      // the recording of the run being played, or null
 let lastReplay = null;               // the finished run's recording, for the "Watch replay" button
@@ -54,7 +54,7 @@ function simFrame(dt) {
   Math.random = runRandom;
   try { for (let i = 0; i < steps; i++) update(sdt / steps); } finally { Math.random = keep; }
   if (rec && !replaying && rec.n % CHECK_EVERY === 0) rec.ck.push(runCheck());
-  // a daily dive's flight path: where the plane was, 4 times a second (only drawn by other players' ghosts)
+  // a daily dive's flight path: where the plane was, 10 times a second (only drawn by other players' ghosts)
   if (rec && rec.track && !replaying) while (playClock >= rec.nextSample) { rec.track.push(Math.round(plane.x), Math.round(dist)); rec.nextSample += GHOST_STEP; }
 }
 

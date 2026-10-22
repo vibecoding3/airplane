@@ -74,7 +74,7 @@ function lbRunEnded(depth, record) {
   if (!lbNick) return;
   const run = { id: newId(), map: mapId, depth, dur: Math.round(time) };
   if (record && lastReplay && lastReplay.depth === depth) Object.assign(run, { replay: packReplay(lastReplay), sv: lastReplay.sv, v: lastReplay.v });
-  if (daily && lastReplay && lastReplay.track && lastReplay.depth === depth) run.daily = { day: daily.day, track: lastReplay.track };
+  if (daily && lastReplay && lastReplay.track && lastReplay.depth === depth) run.daily = { day: daily.day, track: { step: GHOST_STEP, p: lastReplay.track } };
   lbQueue.push(run);
   saveQueue();
   lbSyncXp();
