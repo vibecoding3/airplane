@@ -451,7 +451,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     const bad = [];
     for (const m of Object.keys(MAPS)) {
       mapId = m; applyMap(); start(); plane.lives = 1e9;
-      for (const at of [300, 600]) {            // past the 150/200 m and 400 m edges, the next edge still below the screen
+      for (const at of [300, 600]) {            // past the 200 m and 400 m edges, the next edge still below the screen
         while (dist / PX_PER_M < at) update(1 / 60);
         syncPaperLayers();
         if (artA.style.clipPath || artB.style.clipPath) bad.push(`${m} ${at} m`);
@@ -460,6 +460,21 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     return bad;
   });
   check(artClips.length === 0, 'Depth art fills the screen after a layer edge' + (artClips.length ? ': ' + artClips.join(', ') : ''));
+  // the art changes on a dotted depth line (v161): with the 200 m change mid-screen, the art is cut exactly where the next
+  // page colour starts (the line is drawn there)
+  const artLine = await page.evaluate(() => {
+    const off = [];
+    for (const m of Object.keys(MAPS)) {
+      mapId = m; applyMap(); start();
+      dist = 200 * PX_PER_M + planeScreenY() - H / 2;        // the 200 m edge in the middle of the screen
+      syncPaperLayers();
+      const cut = Math.max(...(artA.style.clipPath.match(/[\d.]+(?=px)/g) || [NaN]).map(Number));   // the polygon's lower edge
+      const artY = cut - (dist % PAPER_REPEAT) * scale, colourY = parseFloat(pageNext.style.transform.match(/,\s*([\d.]+)px/)[1]);
+      if (!(Math.abs(artY - colourY) < 1)) off.push(`${m}: art ${artY.toFixed(1)} / line ${colourY.toFixed(1)}`);
+    }
+    return off;
+  });
+  check(artLine.length === 0, 'Depth art changes on the dotted 200 m line on every map' + (artLine.length ? ': ' + artLine.join(', ') : ''));
 
   // the Sunken treasures collection: treasures among the Ocean's city relics (400–1,500 m), each once per run, plain
   // relics once all 8 have appeared. A natural run only meets a handful of urchin rows in the city (about 3 in 10 runs

@@ -191,8 +191,9 @@ const NIGHT_FADE_M = 1450;
 // on two layers. Since v135 the art changes at a sharp edge that scrolls up the screen, like the page colour: #artA holds the
 // current layer above the edge and #artB the next one below it (clip-path). The edge reaches the plane at the boundary depth.
 // ART_BASE lists the layers where the map's own #ruling pattern is the art (or 'all' when it stays at every depth, with the
-// depth art on top of it); ART_NONE the layers with no extra art.
-const ART_BOUNDS = { city: [200, 400, 800, 1500] }, ART_BOUNDS_STD = [150, 400, 800, 1500];
+// depth art on top of it); ART_NONE the layers with no extra art. The changes are at whole hundreds of metres (since
+// v161; the first was at 150 m before, except Neon City), so each edge lands on a dotted depth line and a colour change.
+const ART_BOUNDS = [200, 400, 800, 1500];
 const ART_BASE = { notebook: 'all', sea: 'all', space: 'all', forest: 'all', dungeon: [0], city: [0], desert: [0], volcano: [2], kitchen: [2] };
 const ART_NONE = { space: [1], forest: [4] };
 let artKey = '', artClip = '';
@@ -201,7 +202,7 @@ const artClass = (k) => {
   return (base !== 'all' && base && base.includes(k)) || (none && none.includes(k)) ? '' : 'art-' + mapId + '-' + k;
 };
 function syncDepthArt(px) {
-  const bounds = ART_BOUNDS[mapId] || ART_BOUNDS_STD, edgeY = b => b * PX_PER_M + planeScreenY() - dist;
+  const bounds = ART_BOUNDS, edgeY = b => b * PX_PER_M + planeScreenY() - dist;
   let L = 0; while (L < bounds.length && edgeY(bounds[L]) <= 0) L++;   // the layer at the top of the screen
   const edge = L < bounds.length ? edgeY(bounds[L]) : Infinity;        // where the next layer starts on screen
   const split = edge < H;

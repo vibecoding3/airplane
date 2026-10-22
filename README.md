@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v160** (2026-10-22)
+Current version: **v161** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -72,15 +72,15 @@ There are no on-screen steering arrows (removed in v44).
 
 Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a notebook page; Ocean: the surface with waves and a paper boat; Space: a big ringed planet and its moon; Dungeon: a stone archway between two torches); options were drawn as sheets in `ref/map-icons/` to choose from. Neon City's tile (v113) is a night skyline with neon signs; Forest's (v114) shows autumn, summer and spring trees under a blue sky; Desert's (v120) dunes, a saguaro and a tumbleweed under the sun; Volcano's (v121) a green island volcano with a lava stream and a smoke plume; Kitchen's (v130) a toaster popping toast and a steaming pot on a counter against tiled walls. The map is chosen with nine picture tiles in three rows of three (since v130; two rows of four in v121–v129, rows of four and three in v120, two rows of three in v114–v119, one row of five in v113), **Paper**, **Ocean**, **Space**, **Dungeon**, **Neon City**, **Forest**, **Desert**, **Volcano** and **Kitchen**, on the start screen only (since v119; the game-over screen had them too until v118, so a map could be switched between runs). The choice takes effect immediately and is saved per device. In the code the Paper map's id is still `notebook`. Obstacles, background art and background decorations all depend on the map.
 
-**Background art by depth (v134).** Behind the obstacles, every map's faint background pattern changes with its five depth layers (most maps change at 150, 400, 800 and 1,500 m; Neon City at 200 m instead of 150) and changes at a sharp edge that scrolls up the screen, like the background colour, reaching the plane at the change depth (a 50 m cross-fade until v135). The patterns are drawn in code (SVG, no image files), 5–15% strength so they never hide anything, and none of them looks like an obstacle. Ocean, Space and Forest keep their bubbles, stars and trunks at every depth with the new art on top; Paper keeps its margin and punched holes.
+**Background art by depth (v134).** Behind the obstacles, every map's faint background pattern changes with its five depth layers, at 200, 400, 800 and 1,500 m (since v161, so every change lands on a dotted depth line and a colour change; the first change was at 150 m before, except on Neon City), and changes at a sharp edge that scrolls up the screen, like the background colour, reaching the plane at the change depth (a 50 m cross-fade until v135). The patterns are drawn in code (SVG, no image files), 5–15% strength so they never hide anything, and none of them looks like an obstacle. Ocean, Space and Forest keep their bubbles, stars and trunks at every depth with the new art on top; Paper keeps its margin and punched holes.
 
-| Map | 0–150 m | 150–400 m | 400–800 m | 800–1,500 m | 1,500 m + |
+| Map | 0–200 m | 200–400 m | 400–800 m | 800–1,500 m | 1,500 m + |
 |---|---|---|---|---|---|
 | Paper | Ruled lines | Graph paper | Dot grid | Music staff lines | A blueprint: white grid on blue |
 | Ocean | Sunlight ripples | Sand ripples | Ruin stone blocks | Hexagon dome glass | Bioluminescent dots |
 | Space | Thin cloud bands | (stars only) | Nebula clouds | A distant spiral galaxy | Far-away galaxies |
 | Dungeon | Stone bricks | Wooden planks | Crypt arches | Crystal cave facets | A band of carved runes |
-| Neon City (200 m) | Distant skyline | Brick walls with posters | Subway tiles with a coloured line | Arcade carpet | Circuit-board traces |
+| Neon City | Distant skyline | Brick walls with posters | Subway tiles with a coloured line | Arcade carpet | Circuit-board traces |
 | Forest | Spring blossoms | Summer leaves | Autumn leaves | Snow | (moonlit trunks) |
 | Desert | Dune ripples | Sandstone strata | Palm-leaf shadows | Shells and ferns in the rock | Amber bubbles |
 | Volcano | Jungle leaves | Ash-streaked rock | Basalt hexagons | Ribbed lava-tube rock with glowing seams | Magma cells |
