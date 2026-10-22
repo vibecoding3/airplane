@@ -192,20 +192,11 @@ function paintCollectionItem(canvas, item, locked, wide) {
   }
 }
 
-let collPick = null;                                // the found item shown large at the top, if any
+// every set as a grid of items, each with its name underneath (v152; until v151 a found item could be tapped to show
+// it large at the top). Items not found yet show a dark silhouette and their name greyed, so players know what to look for.
 function renderCollections() {
   const box = $('collSets');
   box.replaceChildren();
-  if (collPick) {
-    const d = document.createElement('div'); d.className = 'coll-detail';
-    d.style.background = collPick.set.bg; d.style.color = ['origami', 'birds', 'fossils', 'pastries'].includes(collPick.set.id) ? '#22356b' : '#ffffff';
-    const c = document.createElement('canvas'); c.width = 560; c.height = collPick.item.slider || collPick.item.sword ? 140 : 240;   // staffs are long and thin
-    paintCollectionItem(c, collPick.item, false, true);
-    const name = document.createElement('div'); name.className = 'coll-name'; name.textContent = collPick.item.name;
-    const set = document.createElement('div'); set.className = 'coll-setname'; set.textContent = collPick.set.name + ' collection';
-    d.append(c, name, set);
-    box.append(d);
-  }
   for (const set of COLLECTIONS) {
     const n = set.items.filter(it => collectionFound.has(it.id)).length;
     const sec = document.createElement('section'); sec.className = 'coll-set';
@@ -215,18 +206,19 @@ function renderCollections() {
     const grid = document.createElement('div'); grid.className = 'coll-grid';
     for (const item of set.items) {
       const found = collectionFound.has(item.id);
-      const b = document.createElement('button'); b.type = 'button';
-      b.className = 'coll-item' + (found ? '' : ' locked');
-      if (found) b.style.background = set.bg;
-      b.disabled = !found;
-      b.setAttribute('aria-label', found ? item.name : 'Not found yet');
-      b.title = found ? item.name : 'Not found yet';
-      if (collPick && collPick.item === item) b.setAttribute('aria-pressed', 'true');
+      const fig = document.createElement('figure');
+      fig.className = 'coll-item' + (found ? '' : ' locked');
+      fig.title = found ? item.name : item.name + ' (not found yet)';
+      const pic = document.createElement('div'); pic.className = 'coll-pic';
+      if (found) pic.style.background = set.bg;
       const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+      c.setAttribute('aria-hidden', 'true');
       paintCollectionItem(c, item, !found);
-      b.append(c);
-      if (found) b.addEventListener('click', () => { collPick = { set, item }; renderCollections(); });
-      grid.append(b);
+      pic.append(c);
+      const cap = document.createElement('figcaption'); cap.textContent = item.name;
+      if (!found) { const sr = document.createElement('span'); sr.className = 'sr-only'; sr.textContent = ' (not found yet)'; cap.append(sr); }
+      fig.append(pic, cap);
+      grid.append(fig);
     }
     sec.append(h, grid);
     box.append(sec);
@@ -237,7 +229,7 @@ function syncCollectionButton() {
   for (const b of document.querySelectorAll('.coll-open')) b.textContent = 'Collections';   // no count on the button (v105)
 }
 let collFrom = 'title';
-function openCollections() { collFrom = 'title'; collPick = null; renderCollections(); showCard('coll'); }
+function openCollections() { collFrom = 'title'; renderCollections(); showCard('coll'); }
 function closeCollections() { showCard(collFrom); }
 
 for (const b of document.querySelectorAll('.coll-open')) b.addEventListener('click', openCollections);
