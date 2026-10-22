@@ -119,7 +119,7 @@ A[('kitchen', 1)] = (svg(400, 250, ''.join(f'<path d="M{x} 0 V250" stroke="rgba(
 A[('kitchen', 3)] = (pat(400, 250, 50, 50, ''.join(f'<rect x="{x + 0.75}" y="{y + 0.75}" width="11" height="11" fill="rgba(60,130,200,{0.03 + 0.08 * h(x * 0.37 + y * 1.3):.2f})"/>' for x in [i * 12.5 for i in range(4)] for y in [j * 12.5 for j in range(4)])), 400, 250)
 A[('kitchen', 4)] = (svg(400, 250, ''.join(f'<path d="M0 {y} H400" stroke="rgba(255,255,255,.4)" stroke-width="2"/><path d="M0 {y + 3} H400" stroke="rgba(80,130,170,.1)" stroke-width="1.4"/>' for y in range(10, 250, 25)) + scatter(16, 400, 250, 51, lambda x, y, s, i: f'<path d="M{x - 4:.0f} {y:.0f} h8 M{x:.0f} {y - 4:.0f} v8" stroke="rgba(255,255,255,.6)" stroke-width="1.2"/>')), 400, 250)
 
-css = ['/* Depth art (v134): one faint pattern per map layer, cross-faded by syncDepthArt in render.js on the two .depth-art layers. */',
+css = ['/* Depth art (v134): one faint pattern per map layer, switched at a sharp edge by syncDepthArt in render.js on the two .depth-art layers. */',
        '.depth-art { visibility: hidden; background-repeat: repeat; }',
        '.art-notebook-0 { background-image: repeating-linear-gradient(to bottom, var(--rule) 0, var(--rule) calc(var(--u) * 1), transparent calc(var(--u) * 1), transparent calc(var(--u) * 30)); background-size: 100% calc(var(--u) * 30); }']
 for (m, k), (s, w, ht) in sorted(A.items()):
