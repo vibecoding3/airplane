@@ -20,7 +20,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v146</div>
+    <div class="version" id="version">v147</div>
 
     <div class="hud">
       <div>
@@ -44,7 +44,7 @@
         </div>
         <h1 class="menu-title">Paper<br>Nosedive</h1>
         <p class="menu-tag">How deep can your paper plane fall?</p>
-        <div class="menu-stats"><span>★ <b id="menuBank">0</b></span><span title="Your best depths on every map, added up">Total score <b id="menuRanked">0</b></span></div>
+        <div class="menu-stats"><span>★ <b id="menuBank">0</b></span><span title="Your best depths on every map, added up"><b class="menu-rank" id="menuRank" title="Your place on the Total score leaderboard" hidden></b>Total score <b id="menuRanked">0</b></span></div>
         <div class="xp" id="titleXp"></div>
         <div class="map-pick" role="group" aria-label="Choose a map">
           <button class="map-tile" type="button" data-map="notebook" aria-pressed="true"><span class="map-thumb paper"></span>Paper</button>

@@ -753,9 +753,12 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     const afterOnline = { queue: lbQueue.length, xp, server: fakeXp };
     await run('volcano', 5000, 10); await lbSyncXp();                 // impossible: 5,000 m in 10 s is refused
     const afterFake = { xp, server: fakeXp };
+    state = 'title'; rankAt = 0; showCard('title'); await new Promise(r => setTimeout(r, 300));
+    const rank = $('menuRank').hidden ? 'hidden' : $('menuRank').textContent;   // the fake board has Tester 1 at #31
     window.fetch = window.realFetch; localStorage.removeItem('nosedive-nick'); localStorage.removeItem('nosedive-runq'); localStorage.removeItem('nosedive-xp-imported');
     lbNick = ''; delete bests.sea; xp = keepXp; store.set('nosedive-xp', String(xp));
-    return { afterRun, queued, stored, afterOnline, afterFake };
+    showCard('title'); const rankGone = $('menuRank').hidden; localStorage.removeItem('nosedive-rank');
+    return { afterRun, queued, stored, afterOnline, afterFake, rank, rankGone };
   });
   check(lbJoinShown && lbShort.v === 'ad' && lbShort.state === 'title' && /3–16/.test(lbShort.msg) && /taken/.test(lbTaken),
     `leaderboards: nickname form first; typing a/d types (${lbShort.v}, ${lbShort.state}); short name refused; "${lbTaken}"`);
@@ -767,6 +770,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(lbXp.afterRun.calls.includes('lb_run forest 77') && lbXp.afterRun.xp === 1077 && lbXp.afterRun.server === 1077 &&
     lbXp.queued === 1 && lbXp.stored === 1 && lbXp.afterOnline.queue === 0 && lbXp.afterOnline.xp === 1127 && lbXp.afterFake.xp === 1127,
     `server XP: run counted (${lbXp.afterRun.xp}/${lbXp.afterRun.server}); offline run queued (${lbXp.queued}, saved ${lbXp.stored}) and sent later (${lbXp.afterOnline.xp}); impossible run refused, device back to ${lbXp.afterFake.xp}`);
+  check(lbXp.rank === '#31' && lbXp.rankGone, `start menu shows the Total score place: ${lbXp.rank}, hidden when not joined: ${lbXp.rankGone}`);
 
   check(errors.length === 0, errors.length ? 'errors:\n  ' + errors.join('\n  ') : 'no page errors');
   await browser.close();

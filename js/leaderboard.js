@@ -61,6 +61,26 @@ function lbRunEnded(depth) {
   lbQueue.push({ id: newId(), map: mapId, depth, dur: Math.round(time) });
   saveQueue();
   lbSyncXp();
+  rankAt = 0;                                     // the place may have changed: ask again on the start menu
+}
+
+// ---------- the place on the Total score board, left of Total score on the start menu (v147) ----------
+// Joined players only. Asked for (after sending what's waiting) whenever the start menu shows, at most every 30 s or
+// after a run; the last answer is kept on the device and shown meanwhile, also offline.
+let rankAt = 0;
+function showRank(r) {
+  const el = $('menuRank');
+  el.hidden = !(lbNick && r > 0);
+  el.textContent = '#' + fmt(r);
+}
+function lbRefreshRank() {
+  showRank(+store.get('nosedive-rank') || 0);
+  if (!lbNick || Date.now() - rankAt < 30000) return;
+  rankAt = Date.now();
+  Promise.all([lbSyncBests().catch(() => {}), lbSyncXp()])
+    .then(() => lbCall('lb_board', { p_map: 'total', p_visitor: visitorId }))
+    .then(rows => { const me = rows.find(r => r.me), r = me ? me.rank : 0; store.set('nosedive-rank', String(r)); showRank(r); })
+    .catch(() => { rankAt = 0; });              // offline: try again next time
 }
 window.addEventListener('online', () => lbSyncXp());
 lbSyncXp();
@@ -98,7 +118,7 @@ $('lbJoin').addEventListener('submit', e => {
     if (res === 'taken') { msg.textContent = `“${nick}” is taken. Try another one.`; return; }
     if (res === 'invalid') { msg.textContent = 'That nickname isn’t allowed. Use 3–16 letters, numbers, spaces, dots, dashes or underscores.'; return; }
     if (res === 'already') return lbCall('lb_me', { p_visitor: visitorId }).then(n => { setNick(n); openLeaderboards(); });
-    setNick(nick); lbSynced = false; openLeaderboards();      // opening syncs the bests and carries the XP over
+    setNick(nick); lbSynced = false; rankAt = 0; openLeaderboards();      // opening syncs the bests and carries the XP over
   }).catch(() => { msg.textContent = 'Can’t reach the server. Check your connection and try again.'; })
     .finally(() => { btn.disabled = false; });
 });

@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v146** (2026-10-22)
+Current version: **v147** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -1218,6 +1218,7 @@ An anonymous log of who plays and how, kept in a free-tier Supabase project. The
 - **Level board and server-side XP (v146):** the top 10 players by XP, shown as "Level N" (top 10 only, no own row). For players with a nickname the server keeps the XP, so the level can't simply be edited on the device. Each finished run goes into a queue on the device (`nosedive-runq`, kept across reloads) and is sent in order whenever there is a connection; offline runs wait and are sent later. The server (`lb_run`) checks each run before adding its depth as XP: no deeper than the plane can fall in its time (16 m/s plus 30 m; top speed is about 15.4 m/s with a boost), the seconds of all counted runs no more than the real time since the player joined (plus 10 minutes), and each run (its own id) counted once however often it is resent. A refused run's XP is taken back on the device. After a sync the device's XP becomes the server's, so the start menu shows the same level as the board. The XP a device had before joining (or before v146, for players who had already joined) is carried over once as it was (`lb_xp_start`; the player's choice, it can't be checked). Faking is still possible but has to keep a believable pace in real time; remove a cheater by deleting their `players` row. Setup: `tools/supabase-levels.sql`, run once after `tools/supabase-leaderboards.sql`.
 - **Security:** the visitor id works as the player's private key: it is never shown, and the boards only return nicknames. The game's public key can't read or write the tables: it can only call the database functions (`lb_claim`, `lb_me`, `lb_submit`, `lb_board`; since v146 also `lb_xp_start`, `lb_run`, `lb_my_xp`, `lb_levels`) that check what they get. Scores can't be verified, though: the game runs on the player's device, so someone who edits their saved bests can post a fake depth (capped at 100,000 m). Remove a cheater in the dashboard by deleting their row in `players` (their scores go with it).
 - **Offline:** the screen says it needs a connection; nothing else changes.
+- **Place on the start menu (v147):** for joined players, the start menu's Total score pill starts with their place on the Total score board in orange, for example "#1 Total score 23,061". It is asked for whenever the start menu shows (at most every 30 s, and again after a run), after sending any waiting runs and bests; the last answer is kept on the device (`nosedive-rank`) and shown meanwhile, also offline. Hidden for players without a nickname (`lbRefreshRank` in `js/leaderboard.js`).
 - **Setup:** run `tools/supabase-leaderboards.sql` once in the SQL Editor (after `tools/supabase.sql`). Tables `players` (visitor id, nickname, joined) and `scores` (visitor id, map, best depth, when).
 - **Tests** use a fake server, so they never write to the real database.
 

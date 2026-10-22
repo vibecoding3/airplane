@@ -212,6 +212,7 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
   font-variant-numeric: tabular-nums;
 }
 .menu-stats b { font-family: var(--display); }
+.menu-stats .menu-rank { margin-right: 6px; color: #d9701c; }   /* the Total score board place, joined players only (v147) */
 .menu .map-tile { background: rgba(255,255,255,.55); border: 2px solid rgba(34,53,107,.5); border-radius: 14px; }
 .menu .map-tile[aria-pressed="true"] { background: #ffffff; border: 3px solid var(--ink); }
 .menu .map-tile:hover { background: rgba(255,255,255,.8); }
