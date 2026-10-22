@@ -195,7 +195,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { found, saved, total: COLLECTION_TOTAL };
   });
-  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 90,
+  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 100,
     `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 13 sets`);
   await page.evaluate(() => { state = 'title'; showCard('title'); });
   await page.click('#collBtn'); await wait(150);
@@ -204,7 +204,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   const stillTitle = await page.evaluate(() => state);
   await page.keyboard.press('Escape'); await wait(150);
   const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
-  check(collOpen.shown && collOpen.tiles === 90 && stillTitle === 'title' && closed,
+  check(collOpen.shown && collOpen.tiles === 100 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
   // control tips in the top bar: shown for the first 200 m of a run, gone after and outside a run; no pause button
@@ -487,6 +487,23 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     return bad;
   });
   check(city.length === 0, 'Ocean sunken city: city looks only from 400 to 1,500 m, sea looks only outside' + (city.length ? ': ' + city.slice(0, 5).join(', ') : ''));
+
+  // the Minecraft ores collection (v148): ores among the Volcano's bombs, each once per run, plain bombs once all 10 have appeared
+  const ores = await page.evaluate(() => {
+    mapId = 'volcano'; applyMap(); start(); const seen = new Map();
+    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
+      plane.invuln = 1; update(1 / 60);
+      for (const o of obstacles) if (o.ore) { if (!seen.has(o.ore)) seen.set(o.ore, new Set()); seen.get(o.ore).add(o); }
+    }
+    const repeats = [...seen.values()].filter(x => x.size > 1).length, notHazard = [...seen.values()].some(x => [...x].some(o => o.type !== 'blot'));
+    runCollected.clear(); for (const n of VOLC_ORES) runCollected.add('ore-' + n);
+    const i = obstacles.length; lastType = ''; spawnFromPool(dist + 900, 0.9, [['bombs', 1]]);
+    const after = obstacles.slice(i).every(o => !o.ore) ? 'plain bombs' : 'ores';
+    gameOver();
+    return { seen: seen.size, repeats, notHazard, after };
+  });
+  check(ores.repeats === 0 && !ores.notHazard && ores.seen >= 3 && ores.after === 'plain bombs',
+    `Minecraft ores collection: ${ores.seen}/10 seen in a run to 2,500 m, repeats ${ores.repeats}, only on Static Hazards ${!ores.notHazard}, a bomb row once all 10 are found is ${ores.after}`);
 
   // the Pastries collection: pastries among the Kitchen's produce, each once per run, plain produce once all 8 have appeared
   const pastries = await page.evaluate(() => {

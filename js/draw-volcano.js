@@ -106,7 +106,50 @@ function drawVolcanoPlate(x0, x1, sy, innerX, outDir, o) {
 }
 
 // ---------- Static Hazards: volcanic bombs with glowing cracks, sulfur crystal clusters or pumice, inside the hit circle ----------
+// Minecraft ores (v148, a temporary exception to "original designs only", to be replaced before the Google Play release):
+// Static Hazard variants, each a small 3D ore block, the top lightest and the right face darkest, every face an 8×8
+// grid of stone with the mineral's spots. Drawn inside a 20-unit circle (also used by the Collections screen).
+const ORE_NAMES = { coal: 'Coal ore', iron: 'Iron ore', copper: 'Copper ore', gold: 'Gold ore', redstone: 'Redstone ore',
+                    lapis: 'Lapis lazuli ore', emerald: 'Emerald ore', diamond: 'Diamond ore', quartz: 'Nether quartz ore', debris: 'Ancient debris' };
+// stone: three tones of the block; spot: the mineral's dark and light tone
+const ORE_LOOKS = {
+  coal: { spot: ['#1c1c1c', '#3a3a3a'] }, iron: { spot: ['#c89a78', '#e8c8a8'] }, copper: { spot: ['#c86a40', '#5fb89a'] },
+  gold: { spot: ['#e8b820', '#fff07a'] }, redstone: { spot: ['#b01010', '#ff3a2a'] }, lapis: { spot: ['#1a3aa0', '#3a6ae0'] },
+  emerald: { spot: ['#10a050', '#5af08a'] }, diamond: { spot: ['#3ac8c8', '#a8fff0'] },
+  quartz: { stone: ['#6e2a2a', '#7e3434', '#5e2222'], spot: ['#d8d0c4', '#fffaf0'] },
+  debris: { stone: ['#5a3e36', '#6a4a40', '#4a322c'], spot: ['#3a2622', '#8a6a5e'] }
+};
+const ORE_STONE = ['#7f7f7f', '#8f8f8f', '#6f6f6f'];
+// where the mineral sits on each 8×8 face: 2 = light, 1 = dark ('debris' gets swirls instead of clusters)
+const ORE_SPOTS = ['........', '.12.....', '.11..2..', '.....11.', '..2.....', '.211..1.', '..1..12.', '........'];
+const DEBRIS_SPOTS = ['.111111.', '1......1', '1.2222.1', '1.2..2.1', '1.2..2.1', '1.2222.1', '1......1', '.111111.'];
+function shadeHex(hex, k) {
+  const n = parseInt(hex.slice(1), 16), f = v => Math.max(0, Math.min(255, Math.round(v * k)));
+  return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+}
+function paintOre(name) {
+  const L = ORE_LOOKS[name], stone = L.stone || ORE_STONE, spots = name === 'debris' ? DEBRIS_SPOTS : ORE_SPOTS;
+  const r = 19, a = r * Math.cos(Math.PI / 6);
+  // a face from its corner o along edges u and v (each 8 cells long), lit by k
+  const face = (ox, oy, ux, uy, vx, vy, k, flip) => {
+    ctx.save(); ctx.transform(ux / 8, uy / 8, vx / 8, vy / 8, ox, oy);
+    for (let j = 0; j < 8; j++) for (let i = 0; i < 8; i++) {
+      const s = spots[j][flip ? 7 - i : i], h = (i * 7 + j * 13 + (flip ? 5 : 0)) % 3;
+      ctx.fillStyle = shadeHex(s === '1' ? L.spot[0] : s === '2' ? L.spot[1] : stone[h], k);
+      ctx.fillRect(i, j, 1.04, 1.04);                // a hair over 1 so no seams show between cells
+    }
+    ctx.restore();
+  };
+  face(0, -r, a, r / 2, -a, r / 2, 1.18, false);     // top
+  face(-a, -r / 2, a, r / 2, 0, r, 0.92, true);       // left
+  face(0, 0, a, -r / 2, 0, r, 0.7, false);            // right
+  ctx.beginPath();
+  ctx.moveTo(0, -r); ctx.lineTo(a, -r / 2); ctx.lineTo(a, r / 2); ctx.lineTo(0, r); ctx.lineTo(-a, r / 2); ctx.lineTo(-a, -r / 2); ctx.closePath();
+  ctx.moveTo(-a, -r / 2); ctx.lineTo(0, 0); ctx.lineTo(a, -r / 2); ctx.moveTo(0, 0); ctx.lineTo(0, r);
+  volStroke(1.4);
+}
 function drawVolcanoHazard(o, sy) {
+  if (o.ore) { const k = o.r * 0.95 / 20; blit(sharedSprite('ore-' + o.ore, 46, 46, 23, 23, () => paintOre(o.ore)), o.x, sy, 0, k, k); return; }
   const col = o.volCol || '#3a302a', R = o.r * 0.88, look = o.look || 'bomb';
   blit(ownSprite(o, 'spr', R * 2 + 12, R * 2 + 12, R + 6, R + 6, () => {
     if (look === 'sulfur') {                       // yellow crystal prisms on a dark rock

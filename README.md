@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v147** (2026-10-22)
+Current version: **v148** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -669,6 +669,7 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
   | Forest birds (v114) | Eight round cartoon birds in the Forest: robin, blue jay, kingfisher, cardinal, hummingbird, goldfinch, snowy owl, magpie (Drifting Swarm variants of the bees, drawn inside their 42-unit square; save ids `bird-robin` …). Each swarm member has a 50% chance to be a bird not yet seen this run; once all 8 have appeared the swarms are plain again (`FOREST_BIRDS`, `paintForestBird`) |
   | Fossils (v120) | Eight fossils in the Desert: trilobite, ammonite, fossil fern, fossil fish, shark tooth, raptor claw, dinosaur skull, leaf in amber (no insect in amber, too close to a famous film), each on a round stone (Static Hazards variants of the cacti, scaled to their hit circle; save ids `fossil-trilobite` …). Each cactus has a 40% chance to be a fossil not yet seen this run; once all 8 have appeared the cacti are plain again (`FOSSILS`, `paintFossil`) |
   | Volcanic stones (v121) | Eight stones in the Volcano: obsidian, pumice, basalt, sulfur crystal, olivine, geode, Pele's hair, spindle bomb (Rising Projectile variants of the lava bombs, scaled to their hit circle; save ids `stone-obsidian` …). Each lava bomb has a 50% chance to be a stone not yet seen this run; once all 8 have appeared the bombs are plain again (`VOLC_STONES`, `paintVolcStone`) |
+  | Minecraft ores (v148) | Ten ore blocks in the Volcano, after Minecraft: coal, iron, copper, gold, redstone, lapis lazuli, emerald, diamond, nether quartz ore and ancient debris (save ids `ore-coal` …). Each is a small 3D block (top face lightest, right face darkest), every face an 8×8 grid of stone with the mineral's spots; nether quartz on red netherrack, ancient debris brown with rings. They are Static Hazard variants among the bombs, sulfur and pumice, scaled to the hit circle: each hazard row has a 40% chance to be an ore not yet seen this run; once all 10 have appeared the hazards are plain again (`VOLC_ORES`, `paintOre`, `ORE_NAMES` in `js/draw-volcano.js`). **A temporary exception to "original designs only" (user's decision, 2026-10-22): replace with an original set before the Google Play release, keeping the save ids or mapping them** |
   | Pastries (v130) | Eight pastries in the Kitchen: croissant, donut, macaron, cupcake, éclair, pretzel, cinnamon roll, mooncake (Static Hazards variants of the produce, scaled to their hit circle; save ids `pastry-croissant` …). Each produce item has a 40% chance to be a pastry not yet seen this run; once all 8 have appeared the produce is plain again (`PASTRIES`, `paintPastry`) |
   | Planets (v94) | The 8 Space planets, Mercury to Neptune (Wall Bulge). Each appears at most once per run; once all 8 have, planet spawns become regular moon edges (since v98; in v94 planets stopped). In the menu they are drawn whole (Saturn with its ring) on a dark-space background |
 
@@ -773,7 +774,7 @@ airplane/
     ├── draw-city.js        Neon City obstacle art (and the neon signs)
     ├── draw-forest.js      Forest obstacle art (and the Forest birds)
     ├── draw-desert.js      Desert obstacle art (and the Fossils)
-    ├── draw-volcano.js     Volcano obstacle art (and the Volcanic stones)
+    ├── draw-volcano.js     Volcano obstacle art (and the Volcanic stones and Minecraft ores)
     ├── draw-kitchen.js     Kitchen obstacle art (and the Pastries)
     ├── render.js           plane, screen shake, frame drawing, map switching
     ├── ui.js               top bar, menus, start / pause / game over

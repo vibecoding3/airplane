@@ -645,6 +645,9 @@ const volcanoLayer = y => { const m = y / PX_PER_M; return m < 150 ? 0 : m < 400
 // Volcanic stones collection: Rising Projectile variants (among the lava bombs), each at most once per run
 const VOLC_STONES = ['obsidian', 'pumice', 'basalt', 'sulfur', 'olivine', 'geode', 'peleshair', 'spindlebomb'];
 const stonesLeft = () => VOLC_STONES.filter(n => !runCollected.has('stone-' + n));
+// Minecraft ores collection (v148): Static Hazard variants (among the bombs, sulfur and pumice), each at most once per run
+const VOLC_ORES = ['coal', 'iron', 'copper', 'gold', 'redstone', 'lapis', 'emerald', 'diamond', 'quartz', 'debris'];
+const oresLeft = () => VOLC_ORES.filter(n => !runCollected.has('ore-' + n));
 // each Volcano mechanic has one to three looks sharing its hit box; some only appear in certain layers (VOLCANO_LAYERS)
 const VOLCANO_LOOKS = {
   gate: { basalt: ['#3a3a42', '#46464e'], crust: ['#2a2420'] },
@@ -933,6 +936,10 @@ function spawnFromPool(y, d, pool) {
       if (o.type === 'wad') {                    // a volcanic stone not yet seen this run (each once per run)
         const left = stonesLeft();
         if (left.length && Math.random() < 0.5) { o.stone = left[ri(0, left.length - 1)]; runCollected.add('stone-' + o.stone); }
+      }
+      if (o.type === 'blot') {                   // a Minecraft ore not yet seen this run (each once per run)
+        const left = oresLeft();
+        if (left.length && Math.random() < 0.4) { o.ore = left[ri(0, left.length - 1)]; runCollected.add('ore-' + o.ore); }
       }
     } else if (mapId === 'kitchen') {
       o.kitchen = true;

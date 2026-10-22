@@ -29,6 +29,8 @@ const COLLECTIONS = [
     items: FOSSILS.map(n => ({ id: 'fossil-' + n, name: FOSSIL_NAMES[n], fossil: n })) },
   { id: 'stones', name: 'Volcanic stones', map: 'Volcano', bg: '#5a4a44',
     items: VOLC_STONES.map(n => ({ id: 'stone-' + n, name: STONE_NAMES[n], stone: n })) },
+  { id: 'ores', name: 'Minecraft ores', map: 'Volcano', bg: '#5a4a44',
+    items: VOLC_ORES.map(n => ({ id: 'ore-' + n, name: ORE_NAMES[n], ore: n })) },
   { id: 'pastries', name: 'Pastries', map: 'Kitchen', bg: '#f4d8b0',
     items: PASTRIES.map(n => ({ id: 'pastry-' + n, name: PASTRY_NAMES[n], pastry: n })) },
   { id: 'planets', name: 'Planets', map: 'Space', bg: '#141a3a',
@@ -51,6 +53,7 @@ function collectionId(o) {
        : o.bird ? 'bird-' + o.bird
        : o.fossil ? 'fossil-' + o.fossil
        : o.stone ? 'stone-' + o.stone
+       : o.ore ? 'ore-' + o.ore
        : o.pastry ? 'pastry-' + o.pastry
        : o.treasure ? 'treasure-' + o.treasure : null;
 }
@@ -160,6 +163,9 @@ function paintCollectionItem(canvas, item, locked, wide) {
     } else if (item.pastry) {
       const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintPastry(item.pastry);
+    } else if (item.ore) {
+      const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintOre(item.ore);
     } else if (item.stone) {
       const k = Hc / 40; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintVolcStone(item.stone);

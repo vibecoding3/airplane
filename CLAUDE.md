@@ -35,7 +35,7 @@ Capacitor 8 wrapper around the game in the repo root; README section 18 has the 
 - Map selection is only on the main menu (decided v119): no map tiles on the game-over screen.
 - Daily quests are on hold (decided 2026-10-19): don't build or start the quest system until the player asks; README section 16 keeps the ideas.
 - No Sky dive / Skyscraper / single-journey map — dropped for good. New maps reuse the 20 mechanics in README section 6 with new art.
-- Original designs only (decided 2026-10-19, v111, for the Google Play release): no names, characters or recognizable designs from anime, films, games or other brands. The former Frieren and Rings of Power sets are now "Mage staffs" and "Enchanted rings". Never change a collection item's save id (e.g. `staff-frieren`): players' found items are stored under it.
+- Original designs only (decided 2026-10-19, v111, for the Google Play release): no names, characters or recognizable designs from anime, films, games or other brands. The former Frieren and Rings of Power sets are now "Mage staffs" and "Enchanted rings". Never change a collection item's save id (e.g. `staff-frieren`): players' found items are stored under it. **Temporary exception (user's decision, 2026-10-22):** the Volcano's "Minecraft ores" collection (v148, `ore-*` ids) is based on Minecraft on purpose; it must be replaced with original designs before the Google Play release.
 
 ## Style
 Talk to the user in short, plain language: what changed, what was verified, what wasn't.
