@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v142** (2026-10-22)
+Current version: **v143** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -1206,5 +1206,6 @@ An anonymous log of who plays and how, kept in a free-tier Supabase project. The
 - **Only the website logs:** rows are sent only from http(s) pages that aren't localhost, so opening `index.html` from disk, the dev tools and tests, and the Android app (served from https://localhost) never log.
 - **Safety:** the game holds only the project URL and the public anon / publishable key (`LOG_URL`, `LOG_KEY` in `js/playlog.js`). Row-level security lets that key add rows and nothing else: it can't read, change or delete them, and the tables check every field's type and length. Read the log in the Supabase dashboard (Table Editor). The service_role / secret key must never go in the game.
 - **Setup:** run `tools/supabase.sql` once in the dashboard's SQL Editor; it creates both tables, their checks and the insert-only rules. Requests are sent with `keepalive` and never awaited; if the network or an ad blocker stops them, the game carries on.
+- **Server status icon (v143):** a small pill in the top-left corner of the start menu: a cloud with a green tick and "Online" when the server answers, a crossed-out cloud and "Offline" when it can't be reached (no network, the project paused, or no answer within 6 s), faded "Checking…" before the first answer. Hovering or a screen reader gives the long form ("Servers reachable" / "Servers unreachable: everything still works offline"). It is checked with Supabase's health endpoint, which writes nothing, when the game opens, when the device goes on- or offline, and every 30 s while the start menu is up; a play-log request also updates it. Unlike the log it runs everywhere, including from disk and in the app. It only informs: every part of the game works offline (`checkServer`, `setNet` in `js/playlog.js`).
 - **Free tier limits:** 500 MB of database (each row is a few hundred bytes); a project with no requests for a week is paused by Supabase and has to be resumed from the dashboard.
 

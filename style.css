@@ -192,6 +192,20 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
   margin: -4px 0 0; font-size: 20px; color: #ffffff;
   -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill;
 }
+/* server status on the start menu (v143): top-left corner; the game never depends on it */
+.net {
+  position: absolute; top: max(10px, env(safe-area-inset-top, 0px)); left: 10px; z-index: 1;
+  display: flex; align-items: center; gap: 5px; padding: 2px 10px 1px 6px;
+  background: rgba(255,255,255,.85); border: 2px solid var(--ink); border-radius: 999px;
+  font-size: 14px; line-height: 1.3; color: var(--ink); pointer-events: auto; cursor: default;
+}
+.net svg { width: 20px; height: 20px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.net .net-cloud { stroke: var(--ink); fill: #ffffff; }
+.net .net-check { stroke: #23964a; stroke-width: 2.4; }
+.net .net-slash { stroke: #d9443a; stroke-width: 2.4; }
+.net:not([data-state="online"]) .net-check, .net:not([data-state="offline"]) .net-slash { display: none; }
+.net[data-state="checking"] { opacity: .6; }
+.net[data-state="offline"] .net-cloud { fill: #e4e7ee; }
 .menu-stats { display: flex; justify-content: center; gap: 8px; font-size: 18px; }
 .menu-stats span {
   background: rgba(255,255,255,.85); border: 2px solid var(--ink); border-radius: 999px; padding: 2px 14px 0;

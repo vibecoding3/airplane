@@ -697,6 +697,16 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(!plog.on && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(plog.id) && plog.kept,
     `play log off from disk, visitor id ${plog.id} kept: on ${plog.on}`);
 
+  // the server status icon (v143): settles to online or offline, turns offline when the network goes, back when it returns
+  const netNow = () => page.evaluate(() => $('netStatus').dataset.state + ' / ' + $('netStatus').textContent.trim());
+  const netFirst = await netNow();
+  await page.setOfflineMode(true); await wait(300);
+  const netOff = await netNow();
+  await page.setOfflineMode(false); await wait(3000);
+  const netBack = await netNow();
+  check(!netFirst.startsWith('checking') && netOff === 'offline / Offline' && (netFirst.startsWith('offline') || netBack === 'online / Online'),
+    `server status icon: ${netFirst} → network off: ${netOff} → back: ${netBack}`);
+
   check(errors.length === 0, errors.length ? 'errors:\n  ' + errors.join('\n  ') : 'no page errors');
   await browser.close();
   console.log(problems.length ? `\n${problems.length} problem(s)` : '\nall good');

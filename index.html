@@ -20,7 +20,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v142</div>
+    <div class="version" id="version">v143</div>
 
     <div class="hud">
       <div>
@@ -38,6 +38,10 @@
 
     <div class="overlay" id="overlay">
       <div class="menu" id="titleCard">
+        <div class="net" id="netStatus" role="status" data-state="checking" title="Checking the server…">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="net-cloud" d="M7 18.5h10.2a4.1 4.1 0 0 0 .5-8.2A5.6 5.6 0 0 0 6.9 9.2a4.6 4.6 0 0 0 .1 9.3z"/><path class="net-check" d="M9.3 14l2.1 2.1 3.8-4.4"/><path class="net-slash" d="M4 4l16 16"/></svg>
+          <span class="net-text">Checking…</span>
+        </div>
         <h1 class="menu-title">Paper<br>Nosedive</h1>
         <p class="menu-tag">How deep can your paper plane fall?</p>
         <div class="menu-stats"><span>★ <b id="menuBank">0</b></span><span title="Your best depths on every map, added up">Total score <b id="menuRanked">0</b></span></div>
