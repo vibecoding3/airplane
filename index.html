@@ -23,7 +23,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v159</div>
+    <div class="version" id="version">v160</div>
 
     <div class="hud">
       <div>
@@ -67,7 +67,10 @@
           <button class="map-tile" type="button" data-map="volcano" aria-pressed="false"><span class="map-thumb volcano"></span>Volcano</button>
           <button class="map-tile" type="button" data-map="kitchen" aria-pressed="false"><span class="map-thumb kitchen"></span>Kitchen</button>
         </div>
-        <button class="menu-btn primary" id="startBtn" type="button">Play</button>
+        <div class="menu-play">
+          <button class="menu-btn primary" id="startBtn" type="button">Play</button>
+          <button class="menu-btn daily" id="dailyBtn" type="button"><span>Daily dive</span><small id="dailyMap">Paper</small></button>
+        </div>
         <div class="menu-row">
           <button class="menu-btn coll-open" id="collBtn" type="button">Collections</button>
           <button class="menu-btn" id="lbOpen" type="button">Leaderboards</button>
@@ -117,6 +120,7 @@
         <span class="menu-record" id="recordStamp" hidden>New best!</span>
         <div class="menu-stats"><span id="overBest">Best 0 m</span><span id="overRanked">Total score 0</span></div>
         <p class="menu-note" id="overBank"></p>
+        <p class="menu-note daily-note" id="overDaily" hidden></p>
         <div class="xp" id="overXp"></div>
         <span class="menu-record" id="levelStamp" hidden>Level up!</span>
         <button class="menu-btn primary" id="againBtn" type="button">Play again</button>
@@ -160,6 +164,7 @@
 <script src="js/playlog.js"></script>
 <script src="js/leaderboard.js"></script>
 <script src="js/replay.js"></script>
+<script src="js/daily.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

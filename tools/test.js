@@ -840,6 +840,76 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     lbRep.back.end.dist === lbRep.live.dist && lbRep.back.end.x === lbRep.live.x && lbRep.back.lb && lbRep.back.state === 'title' && lbRep.back.map === 'forest',
     `leaderboard replays: record run queued with its replay ${lbRep.queued}, sent as ${lbRep.order}, a non-record run has a replay ${lbRep.second}, ▶ on the board ${lbRep.btn}; watched from the board: ${JSON.stringify(lbRep.back)} vs the run ${JSON.stringify(lbRep.live)}`);
 
+  // the Daily dive (v160): one map per day (it changes from day to day); the same course for everyone, whatever they
+  // pick up or however they fly; a flight path for the ghosts; ghosts draw; its replay matches; Play again repeats it;
+  // a joined player's daily run reaches the Daily board after the run is counted
+  const dv = await page.evaluate(async () => {
+    const days = Array.from({ length: 30 }, (_, i) => dailyInfo(20000 + i).map);
+    const today = dailyInfo(dayNumber());
+    const realReset = reset; reset = () => { realReset(); plane.lives = 999; };
+    const realSpawnRow = spawnRow, rows = [];
+    spawnRow = (y, d) => { const k = obstacles.length, extra = realSpawnRow(y, d);
+      rows.push(Math.round(y) + ':' + obstacles.slice(k).map(o => [o.type, o.look || '', Math.round(o.x || 0), Math.round(o.y)].join(',')).join(';')); return extra; };
+    const play = (steer) => {
+      rows.length = 0; mapId = today.map; applyMap(); start(today); let f = 0;
+      while (state === 'play' && score() < 600 && f < 60 * 120) { steer(f); simFrame(1 / 60); f++; }
+      const at = { dist: dist.toFixed(3), x: plane.x.toFixed(3) }, course = rows.filter(r => +r.split(':')[0] < 600 * PX_PER_M).join('|');
+      pause(); exitRun();
+      return { at, course, n: rows.length };
+    };
+    const a = play(f => { if (f % 61 === 3) press(-1, 'kA'); if (f % 61 === 40) release('kA'); });
+    const b = play(f => { if (f % 37 === 9) press(1, 'kB'); if (f % 37 === 20) release('kB'); if (f % 150 === 70) press(-1, 'kC'); if (f % 150 === 99) release('kC'); });
+    spawnRow = realSpawnRow;
+    // the second run's flight path, as a ghost in a third daily run: it draws without trouble
+    const track = lastReplay.track.slice(), trackOk = track.length >= 8 && track.length % 2 === 0;
+    ghosts = [{ name: 'Ghosty', me: false, depth: 600, track }, { name: 'Your best', me: true, depth: 300, track: track.slice(0, 40) }];
+    mapId = today.map; applyMap(); const keepGhosts = ghosts; start(today); ghosts = keepGhosts;
+    for (let f = 0; f < 600; f++) { simFrame(1 / 60); if (f % 20 === 0) render(); }
+    const ghostPos = ghostAt(ghosts[0], 3), crashed = ghostAt(ghosts[1], 30).done > 0;
+    // its replay ends where the run did (the course comes from the day, not from the run)
+    const live = { dist: dist.toFixed(3), x: plane.x.toFixed(3) };
+    pause(); exitRun(); state = 'over';
+    watchReplay(); let g = 0, end = null;
+    while (replaying && g < 100000) { end = { dist: dist.toFixed(3), x: plane.x.toFixed(3) }; replayStep(); g++; }
+    reset = realReset;
+    // game over says it was the daily dive, and Play again starts it again
+    start(today); dist = 50 * PX_PER_M; gameOver();
+    const note = !$('overDaily').hidden && $('overDaily').textContent.startsWith('Daily dive · ' + MAPS[today.map].name);
+    return { distinct: new Set(days).size, same: a.course === b.course && a.course.length > 0, rows: a.n, differ: a.at.x !== b.at.x,
+      trackOk, ghostPos: !!ghostPos && ghostPos.x > 0, crashed, replayOk: !!end && end.dist === live.dist && end.x === live.x, note, again: lastRunDaily };
+  });
+  check(dv.distinct >= 6 && dv.same && dv.rows > 40 && dv.differ,
+    `Daily dive: ${dv.distinct}/9 maps over 30 days; two runs flown differently (they ended apart: ${dv.differ}) met the same ${dv.rows} rows down to 600 m: ${dv.same}`);
+  check(dv.trackOk && dv.ghostPos && dv.crashed && dv.replayOk && dv.note && dv.again,
+    `Daily dive: flight path ${dv.trackOk}, ghosts drawn ${dv.ghostPos} (a finished one shows crashed ${dv.crashed}), its replay matches ${dv.replayOk}, game over says Daily dive ${dv.note}, Play again repeats it ${dv.again}`);
+  const dsub = await page.evaluate(async () => {
+    const calls = [], realFetch = window.fetch;
+    window.fetch = (url, opt) => {
+      const fn = String(url).split('/rpc/')[1];
+      if (!fn) return realFetch(url, opt);
+      const a = JSON.parse(opt.body); calls.push(fn + (a.p_day ? ' ' + a.p_day : ''));
+      const reply = fn === 'lb_run' ? 500 : fn === 'lb_my_xp' ? 500 : fn === 'lb_daily_submit' ? 'ok' : fn === 'lb_daily_board' ? [{ rank: 1, nickname: 'Tester 1', depth: 77, me: true }] : null;
+      return Promise.resolve(new Response(reply === null ? null : JSON.stringify(reply), { status: reply === null ? 204 : 200 }));
+    };
+    const keep = { nick: lbNick, xp, imp: store.get('nosedive-xp-imported') };
+    lbNick = 'Tester 1'; store.set('nosedive-xp-imported', visitorId); lbQueue.length = 0;
+    const today = dailyInfo(dayNumber());
+    mapId = today.map; applyMap(); start(today);
+    for (let f = 0; f < 300; f++) simFrame(1 / 60);
+    while (state === 'dying') simFrame(1 / 60);     // a crash finishes by itself
+    if (state === 'play') { pause(); exitRun(); }
+    const queued = !!(lbQueue[0] && lbQueue[0].daily && lbQueue[0].daily.track.length);
+    await lbSyncXp();
+    state = 'title'; showCard('title'); openLeaderboards(); lbMap = 'daily'; renderBoard(); await new Promise(r => setTimeout(r, 300));
+    const board = { name: $('lbMapName').textContent, rows: document.querySelectorAll('#lbList li').length };
+    window.fetch = realFetch; lbNick = keep.nick; xp = keep.xp; lbMap = 'total'; lbQueue.length = 0; saveQueue();
+    if (keep.imp) store.set('nosedive-xp-imported', keep.imp); else localStorage.removeItem('nosedive-xp-imported');
+    localStorage.removeItem('nosedive-daily'); showCard('title');
+    return { queued, order: calls.filter(c => /lb_run|lb_daily_submit/.test(c)).join(','), day: today.day, board, button: $('dailyMap').textContent };
+  });
+  check(dsub.queued && dsub.order === `lb_run,lb_daily_submit ${dsub.day}` && dsub.board.rows === 1 && dsub.board.name.startsWith('Daily · ') && dsub.button.length > 0,
+    `Daily dive online: queued with its path ${dsub.queued}, sent as ${dsub.order}, board "${dsub.board.name}" with ${dsub.board.rows} row, menu button "${dsub.button}"`);
+
   // the anonymous play log (v142): never sends from file:// (tests, dev), and has a stored random visitor id
   const plog = await page.evaluate(() => ({ on: LOG_ON, id: visitorId, kept: store.get('nosedive-visitor') === visitorId }));
   check(!plog.on && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(plog.id) && plog.kept,

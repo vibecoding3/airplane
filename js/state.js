@@ -5,6 +5,7 @@
 let state = 'title';          // title | play | paused | dying | over
 let plane, obstacles, pickups, particles, floaters;
 let dist, speed, time, nextRowY, stars, shake, overTimer;
+let daily = null, dailyRow = 0;    // the Daily dive being played or replayed ({ n, day, map, seed }, js/daily.js) and its rows so far
 // best depth per map (the medals depend on it); `best` is the current map's, set by applyMap
 const bests = { notebook: +store.get('nosedive-best-notebook') || 0, sea: +store.get('nosedive-best-sea') || 0,
                 space: +store.get('nosedive-best-space') || 0, dungeon: +store.get('nosedive-best-dungeon') || 0,
@@ -95,7 +96,7 @@ const score = () => Math.floor(dist / PX_PER_M);   // stars are a collected tota
 function reset() {
   plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, slowmo: 0, star: 0, boost: 0, ink: 0, inkSplats: [], invuln: 0, bubbled: 0 };
   obstacles = []; pickups = []; particles = []; floaters = [];
-  dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0; playClock = 0;
+  dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0; playClock = 0; dailyRow = 0;
   nextRowY = H + 140; lastPowerY = 0; lastPowerKind = ''; lastStarY = -1e9; runCollected.clear(); passedBest = false; lastMilestone = 0; flash = 0; medalsAnnounced.clear();
   formulas = []; nextFormulaY = 60; usedFormulas.clear(); fishes.length = 0; lastSceneryY = -1e9;
 }

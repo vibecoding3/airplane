@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v159** (2026-10-22)
+Current version: **v160** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,8 +10,8 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css`, `depth-art.css` and 34 plain script files in `js/` (about 12,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
-- **Start menu:** a regular game menu over an illustrated sky full of paper airplanes (`img/menu-bg.svg`): the big title, the star total and the Total score (with the player's leaderboard place, v147), the level and XP bar, the nine map tiles (each with its medals and best depth, v138), Play, and Collections and Leaderboards side by side (v144). A server status pill sits in the top-left corner (v143). The "How to play" section was removed in v44. It is not tied to any map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth and the Total score, the stars caught this run and the star total, the XP gained (with a "Level up!" badge), Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
+- **Files:** `index.html`, `style.css`, `depth-art.css` and 35 plain script files in `js/` (about 12,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
+- **Start menu:** a regular game menu over an illustrated sky full of paper airplanes (`img/menu-bg.svg`): the big title, the star total and the Total score (with the player's leaderboard place, v147), the level and XP bar, the nine map tiles (each with its medals and best depth, v138), Play with the Daily dive beside it (v160), and Collections and Leaderboards side by side (v144). A server status pill sits in the top-left corner (v143). The "How to play" section was removed in v44. It is not tied to any map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth and the Total score, the stars caught this run and the star total, the XP gained (with a "Level up!" badge), Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
 - **Online features** (section 19): an anonymous play log, leaderboards with a nickname and server-side XP, all in a free Supabase project. The game works fully offline without them.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
 - **Runs on:** desktop browsers and phones, in portrait.
@@ -711,7 +711,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Leaderboards nickname | Leaderboards button on the start screen (v144) | Optional; asked for the first time the screen opens, unique, and permanent on that device (section 19.1) |
 
 ### Saved data (browser localStorage)
-`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon`, `nosedive-best-city`, `nosedive-best-forest`, `nosedive-best-desert`, `nosedive-best-volcano`, `nosedive-best-kitchen` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution), and for the online features (section 19): `nosedive-visitor` (the anonymous visitor id, v142), `nosedive-nick` (the leaderboard nickname, v144), `nosedive-runq` (finished runs waiting to be sent to the server, v146), `nosedive-xp-imported` (whether the device's XP was carried over to the server, v146) and `nosedive-rank` (the last known Total score place, v147). Replays are kept in memory only (the last run), not in localStorage. All of them are per browser and per device.
+`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon`, `nosedive-best-city`, `nosedive-best-forest`, `nosedive-best-desert`, `nosedive-best-volcano`, `nosedive-best-kitchen` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution), and for the online features (section 19): `nosedive-visitor` (the anonymous visitor id, v142), `nosedive-nick` (the leaderboard nickname, v144), `nosedive-runq` (finished runs waiting to be sent to the server, v146), `nosedive-xp-imported` (whether the device's XP was carried over to the server, v146) and `nosedive-rank` (the last known Total score place, v147), `nosedive-daily` (the day and the player's best Daily dive of it, v160). Replays are kept in memory only (the last run), not in localStorage. All of them are per browser and per device.
 
 ---
 
@@ -755,7 +755,7 @@ airplane/
 ├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
 ├── design/                 design notes: maps/<map>.md per map (premise, layers, obstacles, spawn tables) and obstacle-balance.md (obstacles and looks per map, v153)
 ├── ref/                    reference pictures (map-icon sheets, screenshots the player shared); git ignores it, not used by the game
-└── js/                     34 game scripts, listed in the order they load
+└── js/                     35 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
@@ -789,6 +789,7 @@ airplane/
     ├── playlog.js          anonymous play log: a row per visit and per run sent to Supabase; the server status icon (section 19)
     ├── leaderboard.js      leaderboards: the nickname, the boards screen, sending best depths (section 19)
     ├── replay.js           replays: recording each run, the shared frame step, watching, packing for the leaderboards (section 19.2)
+    ├── daily.js            the Daily dive: the day's map and course seed, its button, the ghosts (section 19.3)
     └── main.js             keyboard and touch input, main loop (loads last, starts the game)
 ```
 
@@ -823,6 +824,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | Play log, server status pill | `js/playlog.js` (`LOG_URL`, `LOG_KEY`, `logRow`, `logRun`, `checkServer`, `setNet`), tables in `tools/supabase.sql` |
 | Leaderboards, nickname, server-side XP | `js/leaderboard.js` (`lbCall`, `lbSyncXp`, `lbRunEnded`, `renderBoard`, `lbWatch`, `lbRefreshRank`), database functions in `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql`, `tools/supabase-board-replays.sql` |
 | Replays | `js/replay.js` (`SIM_VERSION`, `simFrame`, `watchReplay`, `replayStep`), section 19.2 |
+| Daily dive, ghosts | `js/daily.js`, `spawnDailyRows` in `js/obstacles.js`, `tools/supabase-daily.sql`, section 19.3 |
 | Version label | `index.html` (`id="version"`) |
 
 ### 10.4 Key names by file
@@ -860,6 +862,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `playlog.js` | `LOG_URL`, `LOG_KEY`, `LOG_ON`, `visitorId`, `visitId`, `newId`, `logRow`, `logRun`, `NET_TEXT`, `setNet`, `checkServer` |
 | `leaderboard.js` | `LB_MAPS`, `NICK_RULE`, `lbNick`, `lbCall`, `lbSyncBests`, `lbSyncXp`, `setServerXp`, `lbRunEnded`, `lbRefreshRank`, `openLeaderboards`, `renderBoard`, `lbWatch`, `LB_TOP10`, `playTime` |
 | `replay.js` | `SIM_VERSION`, `simFrame` (one frame of a run, live or replayed), `startRecording`, `recInput`, `finishRecording`, `packReplay` / `unpackReplay`, `watchReplay`, `replayStep`, `endReplay`, `runCheck`, `lastReplay`, `replaying` |
+| `daily.js` | `dayNumber`, `dayKey`, `dailyMapOf`, `dailyInfo`, `startDaily`, `syncDailyButton`, `dailyRunEnded`, `ghosts`, `ghostAt`, `drawGhosts`, `lastRunDaily` |
 | `main.js` | `watchFrameRate`, `frameInterval`, `frame`, `goBack` |
 
 ### 10.5 Dev tools (`tools/`)
@@ -873,7 +876,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 | `node tools/shot.js title [sea]` | Title screen screenshot |
 | `node tools/obstacle-sheets.js [map]` | One picture sheet per map (or just `map`) in `tools/out/obstacles/<map>.png`: every obstacle look, drawn by the game on its map's background colour and labelled with its mechanic, look name, type and the depth it was seen at, five across in the order of the mechanic catalogue. Each look is played forward for about 3 s and pictured at the moment it shows most (a proximity blast before it goes off). Collectibles are left out (v156) |
 | `python tools/depth-art.py depth-art.css` | Regenerates the background art per map layer (edit the script, not the CSS) |
-| `tools/supabase.sql`, `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql`, `tools/supabase-board-replays.sql` | The database setup for section 19, run once each, in that order, in the Supabase SQL Editor |
+| `tools/supabase.sql`, `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql`, `tools/supabase-board-replays.sql`, `tools/supabase-daily.sql` | The database setup for section 19, run once each, in that order, in the Supabase SQL Editor |
 | `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs), the bundled fonts (as data URLs) and the scripts into one page (for a single-file copy) |
 
 ---
@@ -1257,3 +1260,14 @@ An anonymous log of who plays and how, kept in a free-tier Supabase project. The
 - **Simulation version:** `SIM_VERSION` in `js/replay.js` names the gameplay code a replay needs. It goes up with any change to what `update` does (obstacles, spawning, physics, power-ups); board replays recorded under another number lose their ▶ (the run stays on the board). The game version (`vN`) is stored too, for reference. Replays may also drift between very different browsers (tiny floating-point differences); the check value catches that. On a screen of another shape than the recording's, the replay uses the recorded world height, so the bottom of the view may be cut off or obstacles may appear a little above the bottom edge.
 - **Rules for future changes** (or replays break): gameplay code (anything `update` runs) must not read the wall clock (`performance.now`, `Date`) or use `realRandom`; per-run state must be reset in `reset()` / `start()`; a new kind of player input must go through `press` / `release` or be recorded with `recInput`; and any change to gameplay means `SIM_VERSION + 1`.
 - **Setup:** `tools/supabase-board-replays.sql`, run once after `tools/supabase-levels.sql`. It replaces the replays table, makes counted runs remember their map and depth, updates `lb_run` and `lb_board` (which now returns each row's replay id and simulation version) and adds `lb_save_replay` and `lb_get_replay`.
+
+### 19.3 Daily dive and ghosts (since v160)
+
+- **The button:** **Daily dive** sits next to Play on the start menu and shows the day's map (and the player's best of the day once they have one). Unlimited tries; the day's best counts. Play again (and Space / Enter) on its game-over screen starts the daily dive again; the game-over screen says "Daily dive · <map> · best today N m". Afterwards the start menu goes back to the map the player had picked.
+- **The same dive for everyone:** every UTC day has one map and one obstacle course, both worked out from the day number: the map with a small hash that the database repeats (`dailyMapOf` in `js/daily.js`, `daily_map()` in SQL), and each obstacle row from its own random numbers made from the day and the row's number, at a difficulty set by the row's depth (`spawnDailyRows` in `js/obstacles.js`). So what a player picks up or how they fly never changes the course; only the power-ups and stars on a row can differ, since those depend on what the plane already has. Checked in `tools/test.js`: two runs flown differently meet the same rows.
+- **A normal run otherwise:** XP, stars, the map's best, collections and the map board's replay all count as usual. Daily runs replay exactly too (the recording says which day it was).
+- **The Daily dive board:** in the Leaderboards, left of Total score: today's top 20 and the player's place. Joined players only, like the other boards.
+- **Ghosts (daily dive only):** each daily run records its flight path, the plane's x and depth 4 times a second (`GHOST_STEP`), about 8 KB for 3 minutes. Pressing Daily dive first loads today's ghosts (at most 2.5 s; offline it starts without them): the day's top 3 other players and the player's own best ("Your best"). They fly alongside as faint planes with their names, where they were at the same moment of their run, and crumple where they crashed. A ghost off the screen shows as a small "▼ name" (ahead) or "▲ name" (behind) tag at the edge. Not shown in replays or after the player's own crash (`drawGhosts` in `js/daily.js`).
+- **Server:** a joined player's daily run carries its path in the run queue; once `lb_run` has counted the run, `lb_daily_submit` stores it if it is the player's deepest of that day, after checking the run (same id, map and depth), the day (today, or yesterday for a run sent late) and that the map is that day's map. Days older than 7 are deleted. `lb_daily_board` and `lb_daily_ghosts` read it. Setup: `tools/supabase-daily.sql`, after `tools/supabase-board-replays.sql`.
+- **Not the daily quests:** the daily quests (section 16) are still on hold; the Daily dive was asked for separately (2026-10-22).
+

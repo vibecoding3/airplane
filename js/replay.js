@@ -12,6 +12,7 @@
 // under another number are not offered for watching, since they would no longer play back the same.
 const SIM_VERSION = 1;
 const CHECK_EVERY = 60;              // frames between checks that the replay still matches the run
+const GHOST_STEP = 0.25;             // seconds between the points of a daily dive's flight path
 let runRandom = realRandom;          // the run's own random sequence (seededRandom), used inside simFrame only
 let rec = null;                      // the recording of the run being played, or null
 let lastReplay = null;               // the finished run's recording, for the "Watch replay" button
@@ -32,6 +33,7 @@ function startRecording() {
   const seed = Math.floor(realRandom() * 4294967296);
   runRandom = seededRandom(seed);
   rec = { sv: SIM_VERSION, v: ($('version').textContent.match(/v\d+/) || ['v?'])[0], map: mapId, seed, H, n: 0, dts: [], ev: [], ck: [] };
+  if (daily) Object.assign(rec, { daily: daily.n, track: [], nextSample: 0 });   // a Daily dive: its day, and its flight path for the ghosts
 }
 
 // one frame of a run, for live play and replays alike: the time step is rounded to whole milliseconds so it can be
@@ -52,6 +54,8 @@ function simFrame(dt) {
   Math.random = runRandom;
   try { for (let i = 0; i < steps; i++) update(sdt / steps); } finally { Math.random = keep; }
   if (rec && !replaying && rec.n % CHECK_EVERY === 0) rec.ck.push(runCheck());
+  // a daily dive's flight path: where the plane was, 4 times a second (only drawn by other players' ghosts)
+  if (rec && rec.track && !replaying) while (playClock >= rec.nextSample) { rec.track.push(Math.round(plane.x), Math.round(dist)); rec.nextSample += GHOST_STEP; }
 }
 
 // the run is over (crash or Exit run, from keepRunProgress): keep it for the button (and a leaderboard run's upload)
@@ -63,20 +67,21 @@ function finishRecording(depth, ended) {
   lastReplay = r.n ? r : null;
 }
 // a recording as stored on the server: frame steps as one character each, milliseconds from '0' (about 1 KB per 15 s)
-const packReplay = r => ({ seed: r.seed, H: r.H, dts: String.fromCharCode(...r.dts.map(ms => 48 + ms)), ev: r.ev, ck: r.ck, stars: r.stars, ended: r.ended });
+const packReplay = r => ({ seed: r.seed, H: r.H, dts: String.fromCharCode(...r.dts.map(ms => 48 + ms)), ev: r.ev, ck: r.ck, stars: r.stars, ended: r.ended, daily: r.daily });
 function unpackReplay(map, depth, data) {
   const dts = [...data.dts].map(c => c.charCodeAt(0) - 48);
-  return { sv: SIM_VERSION, map, depth, seed: data.seed, H: data.H, n: dts.length, dts, ev: data.ev, ck: data.ck, stars: data.stars, ended: data.ended };
+  return { sv: SIM_VERSION, map, depth, seed: data.seed, H: data.H, n: dts.length, dts, ev: data.ev, ck: data.ck, stars: data.stars, ended: data.ended, daily: data.daily };
 }
 
 // ---------- watching ----------
 // a replay, from the game-over screen (the run just played) or the leaderboards (someone's best); it returns there
-let replayFrom = 'over', replayKeepMap = '';
+let replayFrom = 'over', replayKeepMap = '', replayKeepDaily = null;
 function watchReplay(r = lastReplay, from = 'over') {
   if (!r || replaying || (from === 'over' && state !== 'over')) return;
   replaying = r; rFrame = 0; rEvent = 0; rCheck = 0; rH = r.H; rSpeed = 1;
-  replayFrom = from; replayKeepMap = mapId;
+  replayFrom = from; replayKeepMap = mapId; replayKeepDaily = daily;
   if (mapId !== r.map) { mapId = r.map; applyMap(); }
+  daily = r.daily != null ? dailyInfo(r.daily) : null;   // a daily dive replays on that day's course
   reset();
   lastType = '';
   runRandom = seededRandom(r.seed);
@@ -116,6 +121,7 @@ function endReplay(why) {
   $('replayBar').hidden = true;
   setMusic('title');
   if (mapId !== replayKeepMap) { mapId = replayKeepMap; applyMap(); }   // the map the player had picked
+  daily = replayKeepDaily;
   if (replayFrom === 'lb') { reset(); state = 'title'; showCard('lb'); }
   else { state = 'over'; showCard('over'); }
   if (why !== 'drift') return;

@@ -324,6 +324,7 @@ function render() {
     ctx.beginPath(); ctx.arc(plane.x, py, magnetRange(), 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
   }
+  drawGhosts();                                   // the Daily dive's ghosts (js/daily.js)
   if (plane.alive) drawPlane(plane.x, py, plane.ang);
   else drawCrumple(plane.x, py);
 

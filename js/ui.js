@@ -93,6 +93,11 @@ function animateXp(box, before, gain) {
     setXp(box, b, gain);
   }, 650);
 }
+// the map the player picked on the start menu (a daily dive switches to the day's map for its run)
+function restorePickedMap() {
+  const picked = store.get('nosedive-map');
+  if (MAPS[picked] && picked !== mapId && !replaying) { mapId = picked; applyMap(); }
+}
 function showCard(which) {
   ui.overlay.hidden = !which;
   ui.title.hidden = which !== 'title';
@@ -103,7 +108,7 @@ function showCard(which) {
   // the start menu sits on the sky picture instead of the map
   ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
   ui.overlay.classList.toggle('dim', !!which && state !== 'title');   // pause / game over: dim the game behind
-  if (which === 'title') { lbRefreshRank(); $('menuBank').textContent = fmt(bank); $('menuRanked').textContent = fmt(rankedScore()); setXp($('titleXp'), levelInfo(xp), 0, true); syncCollectionButton(); }
+  if (which === 'title') { restorePickedMap(); syncDailyButton(); lbRefreshRank(); $('menuBank').textContent = fmt(bank); $('menuRanked').textContent = fmt(rankedScore()); setXp($('titleXp'), levelInfo(xp), 0, true); syncCollectionButton(); }
   if (which === 'title' || which === 'over') { renderMedals(); syncCollectionButton(); }
   const btn = which && ui[which].querySelector('.play, .primary');
   if (btn) btn.focus({ preventScroll: true });
@@ -123,7 +128,10 @@ function setMuteLabel() {
 }
 setMuteLabel();
 
-function start() {
+function start(d = null) {
+  daily = d;                        // a Daily dive ({ n, day, map, seed }, js/daily.js) or a normal run
+  lastRunDaily = !!d;               // Play again repeats the same kind of run
+  if (!d) ghosts = [];
   reset();
   lastType = '';                    // the first row may be any type (and a replay starts the same way)
   state = 'play';
@@ -155,6 +163,7 @@ function keepRunProgress(s) {
   const xpBefore = xp, levelUp = levelInfo(xp + s).level > levelInfo(xp).level;
   xp += s; store.set('nosedive-xp', String(xp));
   finishRecording(s, state === 'paused' ? 'exit' : 'crash');   // its replay (js/replay.js)
+  dailyRunEnded(s);                                    // a daily dive's best of the day (js/daily.js)
   lbRunEnded(s, record);                               // queued for the server's XP and boards (js/leaderboard.js), after its XP is in
   return { record, xpBefore, levelUp };
 }
@@ -191,6 +200,8 @@ function gameOver() {
   $('levelStamp').hidden = !levelUp;
   if (levelUp) { $('levelStamp').textContent = 'Level up! Level ' + levelInfo(xp).level; setTimeout(sfx.levelup, 500); }
   syncReplayButton();
+  $('overDaily').hidden = !daily;
+  if (daily) $('overDaily').textContent = `Daily dive · ${MAPS[daily.map].name} · best today ${fmt(dailyBest())} m`;
   showCard('over');
   animateXp($('overXp'), xpBefore, s);
 }
@@ -198,8 +209,8 @@ function gameOver() {
 for (const b of document.querySelectorAll('[data-map]')) {
   b.addEventListener('click', () => { ui.overBest.textContent = 'Best ' + fmt(best) + ' m'; });
 }
-$('startBtn').addEventListener('click', start);
-$('againBtn').addEventListener('click', start);
+$('startBtn').addEventListener('click', () => start());
+$('againBtn').addEventListener('click', () => (lastRunDaily ? startDaily() : start()));   // Play again repeats a daily dive
 $('resumeBtn').addEventListener('click', resume);
 $('exitBtn').addEventListener('click', exitRun);
 $('overMenuBtn').addEventListener('click', toMainMenu);

@@ -289,6 +289,12 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
    found ones are drawn on dungeon stone; tapping a found one shows it large at the top */
 /* leaderboards (v144) */
 .menu-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* Play and the Daily dive side by side (v160) */
+.menu-play { display: grid; grid-template-columns: 1.55fr 1fr; gap: 8px; }
+.menu-btn.daily { display: grid; align-content: center; gap: 0; padding: 4px 6px 2px; background: #ffe9a8; line-height: 1.05; }
+.menu-btn.daily span { font-size: 21px; }
+.menu-btn.daily small { font-family: var(--body); font-weight: 400; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.daily-note { font-size: 16px; color: #ffe9a8; }
 .menu-row .menu-btn { font-size: 19px; padding-left: 6px; padding-right: 6px; }
 .lb-join, .lb-board { display: grid; gap: 10px; }
 .lb-join[hidden], .lb-board[hidden] { display: none; }

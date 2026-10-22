@@ -9,7 +9,7 @@
 // replay get a ▶ button to watch it. Everything goes through database functions (tools/supabase-leaderboards.sql,
 // tools/supabase-levels.sql, tools/supabase-board-replays.sql, README sections 19.1 and 19.2). Offline the screen just
 // says so: the game itself never needs it.
-const LB_MAPS = ['total', 'level', 'time', ...Object.keys(MAPS)];
+const LB_MAPS = ['daily', 'total', 'level', 'time', ...Object.keys(MAPS)];   // 'daily': today's dive (v160), left of Total
 const NICK_RULE = /^[A-Za-z0-9_.-][A-Za-z0-9_. -]{1,14}[A-Za-z0-9_.-]$/;    // the same rule as the database
 let lbNick = store.get('nosedive-nick') || '', lbMap = 'total', lbSynced = false, lbLoad = 0;
 
@@ -52,6 +52,11 @@ function lbSyncXp() {
           await lbCall('lb_save_replay', { p_visitor: visitorId, p_run: r.id, p_map: r.map, p_depth: r.depth, p_sv: r.sv, p_version: r.v, p_data: r.replay });
         } catch (e) { if (!/ 4\d\d$/.test(e.message)) throw e; }   // refused (too big, say): drop it; offline: try again later
       }
+      if (serverXp !== null && r.daily) {           // a counted daily dive: the Daily board and the ghosts
+        try {
+          await lbCall('lb_daily_submit', { p_visitor: visitorId, p_run: r.id, p_day: r.daily.day, p_map: r.map, p_depth: r.depth, p_track: r.daily.track });
+        } catch (e) { if (!/ 4\d\d$/.test(e.message)) throw e; }
+      }
       lbQueue.shift(); saveQueue();                 // counted, already counted, or refused (-1): done with it
     }
     if (serverXp === null) serverXp = await lbCall('lb_my_xp', { p_visitor: visitorId });
@@ -69,6 +74,7 @@ function lbRunEnded(depth, record) {
   if (!lbNick) return;
   const run = { id: newId(), map: mapId, depth, dur: Math.round(time) };
   if (record && lastReplay && lastReplay.depth === depth) Object.assign(run, { replay: packReplay(lastReplay), sv: lastReplay.sv, v: lastReplay.v });
+  if (daily && lastReplay && lastReplay.track && lastReplay.depth === depth) run.daily = { day: daily.day, track: lastReplay.track };
   lbQueue.push(run);
   saveQueue();
   lbSyncXp();
@@ -143,14 +149,16 @@ function lbStep(dir) {
   renderBoard();
 }
 function renderBoard() {
-  const top10 = LB_TOP10[lbMap];
-  $('lbMapName').textContent = lbMap === 'total' ? 'Total score' : top10 ? top10[1] : MAPS[lbMap].name;
+  const top10 = LB_TOP10[lbMap], today = dailyInfo(dayNumber());
+  $('lbMapName').textContent = lbMap === 'total' ? 'Total score' : lbMap === 'daily' ? `Daily · ${MAPS[today.map].name}` : top10 ? top10[1] : MAPS[lbMap].name;
   const list = $('lbList'), msg = $('lbMsg'), load = ++lbLoad;
   list.replaceChildren(); msg.textContent = 'Loading…';
-  lbCall(top10 ? top10[0] : 'lb_board', top10 ? { p_visitor: visitorId } : { p_map: lbMap, p_visitor: visitorId }).then(rows => {
+  const call = lbMap === 'daily' ? lbCall('lb_daily_board', { p_day: today.day, p_visitor: visitorId })
+    : lbCall(top10 ? top10[0] : 'lb_board', top10 ? { p_visitor: visitorId } : { p_map: lbMap, p_visitor: visitorId });
+  call.then(rows => {
     if (load !== lbLoad) return;                     // an older request answering after a newer one
     list.classList.toggle('with-play', !!MAPS[lbMap]);
-    msg.textContent = rows.length ? '' : 'No one on this board yet. Play a run and be the first!';
+    msg.textContent = rows.length ? '' : lbMap === 'daily' ? 'No one has dived today yet. Be the first!' : 'No one on this board yet. Play a run and be the first!';
     let prev = 0;
     for (const r of rows) {
       if (r.rank > prev + 1 && prev) { const gap = document.createElement('li'); gap.className = 'lb-gap'; gap.textContent = '…'; list.append(gap); }

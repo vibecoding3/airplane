@@ -968,9 +968,25 @@ function spawnFromPool(y, d, pool) {
 }
 
 function spawnRows() {
+  if (daily) { spawnDailyRows(); return; }
   const d = difficulty();
   while (nextRowY < dist + H + 80) {
     const extra = spawnRow(nextRowY, d);
     nextRowY += lerp(300, 185, d) + rand(0, 70) + extra;
+  }
+}
+// the Daily dive (v160): each row comes from its own random numbers, made from the day and the row's number, at a
+// difficulty set by the row's own depth, and its gap is drawn first, so the course is the same for everyone whatever
+// they pick up or however they fly (only the power-ups and stars on a row can differ: they depend on the plane)
+function spawnDailyRows() {
+  while (nextRowY < dist + H + 80) {
+    const keep = Math.random;
+    Math.random = seededRandom((daily.seed ^ Math.imul(dailyRow + 1, 0x9E3779B1)) >>> 0);
+    try {
+      const y = nextRowY, d = 1 - Math.exp(-y / PX_PER_M / 600);
+      const gap = lerp(300, 185, d) + rand(0, 70);
+      nextRowY = y + gap + spawnRow(y, d);
+    } finally { Math.random = keep; }
+    dailyRow++;
   }
 }

@@ -18,7 +18,7 @@ window.addEventListener('keydown', e => {
     if (e.target instanceof HTMLButtonElement && !e.target.classList.contains('play')) return;
     e.preventDefault();
     if (k === ' ') spaceUsed = true;
-    state === 'paused' ? resume() : start();
+    state === 'paused' ? resume() : state === 'over' && lastRunDaily ? startDaily() : start();
   }
 });
 window.addEventListener('keyup', e => {
