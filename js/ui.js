@@ -129,31 +129,6 @@ function start() {
   sfx.throw();
   setMusic(mapId);
 }
-// Play from the start menu (v140): a 3-2-1 countdown over the top of the map first, while the map's sprites are
-// pre-drawn (prewarmSteps in render.js) so the run doesn't stutter the first time each obstacle appears.
-// Throw again skips it: the game-over screen can't change the map, so its sprites are still cached.
-const COUNTDOWN_S = 3, PREWARM_MS = 6;       // pre-drawing gets at most 6 ms of each countdown frame
-let countdown = 0, prewarm = null;
-function startCountdown() {
-  reset();
-  state = 'countdown'; countdown = COUNTDOWN_S;
-  clearControls();
-  showCard(null);
-  setMusic(mapId);
-  prewarm = prewarmSteps();
-  sfx.tick();
-}
-function updateCountdown(dt) {
-  const t0 = performance.now();
-  while (prewarm && performance.now() - t0 < PREWARM_MS) if (prewarm.next().done) prewarm = null;
-  const shown = Math.ceil(countdown);
-  countdown -= dt;
-  if (countdown > 0) { if (Math.ceil(countdown) < shown) sfx.tick(); return; }
-  while (prewarm && !prewarm.next().done);     // a slow phone finishes the last steps now
-  prewarm = null;
-  state = 'play';
-  sfx.throw();
-}
 function pause() {
   if (state !== 'play') return;
   state = 'paused';
@@ -213,7 +188,7 @@ function gameOver() {
 for (const b of document.querySelectorAll('[data-map]')) {
   b.addEventListener('click', () => { ui.overBest.textContent = 'Best ' + fmt(best) + ' m'; });
 }
-$('startBtn').addEventListener('click', startCountdown);
+$('startBtn').addEventListener('click', start);
 $('againBtn').addEventListener('click', start);
 $('resumeBtn').addEventListener('click', resume);
 $('exitBtn').addEventListener('click', exitRun);

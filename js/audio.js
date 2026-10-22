@@ -53,7 +53,6 @@ function crunch() {
 }
 const sfx = {
   throw: () => tone(520, 180, 0.35, 'triangle', 0.07),
-  tick: () => tone(660, 660, 0.09, 'triangle', 0.07),           // each number of the 3-2-1 countdown
   star: () => { tone(880, 1320, 0.12, 'sine', 0.1); tone(1320, 1760, 0.15, 'sine', 0.08, 0.08); },
   crash: () => { crunch(); tone(220, 60, 0.4, 'sawtooth', 0.04); },
   save: () => { crunch(); tone(330, 990, 0.35, 'triangle', 0.1); },

@@ -692,16 +692,6 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(exited.state === 'title' && exited.title && exited.xp - xpBeforeExit === 120 && exited.dist < 120 * 30,   // 30 units per metre
     `Exit run: back to the ${exited.state} screen (card shown ${exited.title}), +${exited.xp - xpBeforeExit} XP kept`);
 
-  // Play from the start menu: a 3-2-1 countdown that pre-draws the map's sprites and leaves the run untouched (v140)
-  await page.evaluate(() => { mapId = 'city'; applyMap(); invalidateSprites(); });
-  await page.click('#startBtn'); await wait(1200);
-  const mid = await page.evaluate(() => ({ state, n: Math.ceil(countdown), dist, obstacles: obstacles.length, pickups: pickups.length, collected: runCollected.size }));
-  await wait(2400);
-  const go = await page.evaluate(() => ({ state, cached: spriteCache.size, prewarm: !!prewarm }));
-  check(mid.state === 'countdown' && mid.n === 2 && mid.dist === 0 && mid.obstacles === 0 && mid.pickups === 0 && mid.collected === 0,
-    `Play shows a countdown with the world waiting: ${mid.state} ${mid.n}, depth ${mid.dist}, ${mid.obstacles} obstacles, ${mid.pickups} pickups, ${mid.collected} collected`);
-  check(go.state === 'play' && !go.prewarm && go.cached >= 40, `after 3-2-1 the run starts with the sprites pre-drawn: ${go.state}, ${go.cached} cached`);
-
   check(errors.length === 0, errors.length ? 'errors:\n  ' + errors.join('\n  ') : 'no page errors');
   await browser.close();
   console.log(problems.length ? `\n${problems.length} problem(s)` : '\nall good');

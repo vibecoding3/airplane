@@ -282,7 +282,6 @@ function update(dt) {
     return;
   }
   if (state === 'paused') return;
-  if (state === 'countdown') { updateCountdown(dt); return; }   // the world waits for the 3-2-1
 
   if (state === 'dying') {
     speed *= Math.exp(-5 * dt);

@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- game state ----------
-let state = 'title';          // title | countdown | play | paused | dying | over
+let state = 'title';          // title | play | paused | dying | over
 let plane, obstacles, pickups, particles, floaters;
 let dist, speed, time, nextRowY, stars, shake, overTimer;
 // best depth per map (the medals depend on it); `best` is the current map's, set by applyMap

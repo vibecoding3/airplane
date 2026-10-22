@@ -17,7 +17,7 @@ window.addEventListener('keydown', e => {
     if (e.target instanceof HTMLButtonElement && !e.target.classList.contains('play')) return;
     e.preventDefault();
     if (k === ' ') spaceUsed = true;
-    state === 'paused' ? resume() : state === 'title' ? startCountdown() : start();
+    state === 'paused' ? resume() : start();
   }
 });
 window.addEventListener('keyup', e => {
@@ -96,7 +96,7 @@ function countFrame(now) {
 // pause screen at 4 fps.
 let nextDraw = 0;
 function frameInterval() {
-  if (state === 'play' || state === 'dying' || state === 'countdown') return 1000 / 60;
+  if (state === 'play' || state === 'dying') return 1000 / 60;
   return state === 'paused' ? 250 : 1000 / 30;
 }
 
