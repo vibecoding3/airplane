@@ -738,7 +738,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
       const reply = fn === 'lb_me' ? null : fn === 'lb_claim' ? (a.p_nickname.toLowerCase() === 'taken' ? 'taken' : 'ok') : fn === 'lb_submit' ? undefined
         : fn === 'lb_xp_start' ? (fakeXp += a.p_xp) : fn === 'lb_my_xp' ? fakeXp
         : fn === 'lb_run' ? (a.p_depth > a.p_duration * 16 + 30 ? -1 : (fakeXp += a.p_depth))
-        : fn === 'lb_levels' ? Array.from({ length: 10 }, (_, i) => ({ rank: i + 1, nickname: 'P' + i, depth: 20000 - i * 1500, me: false })) : board;
+        : fn === 'lb_levels' ? Array.from({ length: 10 }, (_, i) => ({ rank: i + 1, nickname: 'P' + i, depth: 20000 - i * 1500, me: false }))
+        : fn === 'lb_time' ? [{ rank: 1, nickname: 'Long', depth: 45000, me: false }, { rank: 2, nickname: 'Short', depth: 2520, me: false }] : board;
       return Promise.resolve(new Response(reply === undefined ? null : JSON.stringify(reply), { status: reply === undefined ? 204 : 200 }));
     };
     localStorage.removeItem('nosedive-nick'); localStorage.removeItem('nosedive-xp-imported'); localStorage.removeItem('nosedive-runq');
@@ -757,6 +758,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     rows: [...document.querySelectorAll('#lbList li')].map(li => li.textContent), me: !!document.querySelector('#lbList li.me'), calls: lbCalls.slice() }));
   await page.click('#lbNext'); await wait(200);
   const lbLevel = await page.evaluate(() => ({ name: $('lbMapName').textContent, rows: [...document.querySelectorAll('#lbList li')].map(li => li.textContent) }));
+  await page.click('#lbNext'); await wait(200);
+  const lbTime = await page.evaluate(() => ({ name: $('lbMapName').textContent, rows: [...document.querySelectorAll('#lbList li')].map(li => li.textContent), msg: $('lbMsg').textContent }));
   await page.keyboard.press('Escape'); await wait(100);
   const lbClosed = await page.evaluate(() => $('lbCard').hidden && !$('titleCard').hidden);
   const lbXp = await page.evaluate(async () => {
@@ -784,6 +787,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     `leaderboards: joined as ${lbJoined.nick}, ${lbJoined.rows.length} rows (${lbJoined.rows.join(' | ')}), bests synced, XP carried over (${lbJoined.calls.filter(c => c.startsWith('lb_xp')).join(', ')}), Esc closes`);
   check(lbLevel.name === 'Level' && lbLevel.rows.length === 10 && lbLevel.rows[0] === '#1P0Level 14',
     `Level board: ${lbLevel.name}, ${lbLevel.rows.length} rows, first ${lbLevel.rows[0]}`);
+  check(lbTime.name === 'Time played' && lbTime.rows.join(' | ') === '#1Long12 h 30 min | #2Short42 min' && lbTime.msg === '',
+    `Time played board: ${lbTime.name}: ${lbTime.rows.join(' | ')}`);
   check(lbXp.afterRun.calls.includes('lb_run forest 77') && lbXp.afterRun.xp === 1077 && lbXp.afterRun.server === 1077 &&
     lbXp.queued === 1 && lbXp.stored === 1 && lbXp.afterOnline.queue === 0 && lbXp.afterOnline.xp === 1127 && lbXp.afterFake.xp === 1127,
     `server XP: run counted (${lbXp.afterRun.xp}/${lbXp.afterRun.server}); offline run queued (${lbXp.queued}, saved ${lbXp.stored}) and sent later (${lbXp.afterOnline.xp}); impossible run refused, device back to ${lbXp.afterFake.xp}`);

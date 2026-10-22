@@ -1,12 +1,12 @@
 // Paper Nosedive — leaderboards (v144). To see them a player picks a unique nickname, tied for good to their anonymous
 // visitor id (js/playlog.js), which works as their private key: it is never shown, the boards only list nicknames.
 // Boards: the total score (all maps' bests added up) and one per map, top 20 plus the player's own row, and the Level
-// board, top 10 by XP (v146). On opening the screen all the device's bests are sent once, so records made before
+// board, top 10 by XP (v146), and the Time played board, top 10 by the seconds of counted runs (v149). On opening the screen all the device's bests are sent once, so records made before
 // joining count too. Since v146 the server keeps the XP of players with a nickname: every finished run is queued on
 // the device and sent in order whenever there is a connection; the server checks and adds it, and the menu then shows
 // the server's XP. Everything goes through database functions (tools/supabase-leaderboards.sql and
 // tools/supabase-levels.sql, README section 19.1). Offline the screen just says so: the game itself never needs it.
-const LB_MAPS = ['total', 'level', ...Object.keys(MAPS)];
+const LB_MAPS = ['total', 'level', 'time', ...Object.keys(MAPS)];
 const NICK_RULE = /^[A-Za-z0-9_.-][A-Za-z0-9_. -]{1,14}[A-Za-z0-9_.-]$/;    // the same rule as the database
 let lbNick = store.get('nosedive-nick') || '', lbMap = 'total', lbSynced = false, lbLoad = 0;
 
@@ -123,17 +123,20 @@ $('lbJoin').addEventListener('submit', e => {
     .finally(() => { btn.disabled = false; });
 });
 
-// the board on show: arrows step through Total score, Level and the nine maps
+// the board on show: arrows step through Total score, Level, Time played and the nine maps
+const LB_TOP10 = { level: ['lb_levels', 'Level'], time: ['lb_time', 'Time played'] };   // top 10 only, no own row
+// seconds as "42 min" or "12 h 30 min"
+const playTime = s => { const m = Math.floor(s / 60), h = Math.floor(m / 60); return h ? `${fmt(h)} h ${m % 60} min` : `${m} min`; };
 function lbStep(dir) {
   lbMap = LB_MAPS[(LB_MAPS.indexOf(lbMap) + dir + LB_MAPS.length) % LB_MAPS.length];
   renderBoard();
 }
 function renderBoard() {
-  const level = lbMap === 'level';                   // the Level board: top 10 by XP, no own row
-  $('lbMapName').textContent = lbMap === 'total' ? 'Total score' : level ? 'Level' : MAPS[lbMap].name;
+  const top10 = LB_TOP10[lbMap];
+  $('lbMapName').textContent = lbMap === 'total' ? 'Total score' : top10 ? top10[1] : MAPS[lbMap].name;
   const list = $('lbList'), msg = $('lbMsg'), load = ++lbLoad;
   list.replaceChildren(); msg.textContent = 'Loading…';
-  lbCall(level ? 'lb_levels' : 'lb_board', level ? { p_visitor: visitorId } : { p_map: lbMap, p_visitor: visitorId }).then(rows => {
+  lbCall(top10 ? top10[0] : 'lb_board', top10 ? { p_visitor: visitorId } : { p_map: lbMap, p_visitor: visitorId }).then(rows => {
     if (load !== lbLoad) return;                     // an older request answering after a newer one
     msg.textContent = rows.length ? '' : 'No one on this board yet. Play a run and be the first!';
     let prev = 0;
@@ -141,13 +144,13 @@ function renderBoard() {
       if (r.rank > prev + 1 && prev) { const gap = document.createElement('li'); gap.className = 'lb-gap'; gap.textContent = '…'; list.append(gap); }
       const li = document.createElement('li');
       if (r.me) li.className = 'me';
-      for (const [cls, text] of [['lb-rank', '#' + r.rank], ['lb-nick', r.nickname], ['lb-depth', level ? 'Level ' + levelInfo(r.depth).level : fmt(r.depth) + (lbMap === 'total' ? '' : ' m')]]) {
+      for (const [cls, text] of [['lb-rank', '#' + r.rank], ['lb-nick', r.nickname], ['lb-depth', lbMap === 'level' ? 'Level ' + levelInfo(r.depth).level : lbMap === 'time' ? playTime(r.depth) : fmt(r.depth) + (lbMap === 'total' ? '' : ' m')]]) {
         const s = document.createElement('span'); s.className = cls; s.textContent = text; li.append(s);
       }
       list.append(li);
       prev = r.rank;
     }
-    if (!level && !rows.some(r => r.me)) msg.textContent += (msg.textContent ? ' ' : '') + 'You’re not on this board yet.';
+    if (!top10 && !rows.some(r => r.me)) msg.textContent += (msg.textContent ? ' ' : '') + 'You’re not on this board yet.';
   }).catch(() => { if (load === lbLoad) msg.textContent = 'Can’t reach the server. The leaderboards need an internet connection; the game works offline.'; });
 }
 
