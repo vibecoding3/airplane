@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v141** (2026-10-22)
+Current version: **v142** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -778,6 +778,7 @@ airplane/
     ├── render.js           plane, screen shake, frame drawing, map switching
     ├── ui.js               top bar, menus, start / pause / game over
     ├── collections.js      Collections: the sets, finding items during a run, the Collections screen
+    ├── playlog.js          anonymous play log: a row per visit and per run sent to Supabase (section 19)
     └── main.js             keyboard and touch input, main loop (loads last, starts the game)
 ```
 
@@ -1194,3 +1195,16 @@ No Android Studio needed. Installed in `%LOCALAPPDATA%\Android` (no admin rights
 | `node app/build.js --install` | Also installs it on the phone connected over USB (Developer options → USB debugging on) |
 
 The first build downloads Gradle and its libraries (a few minutes); later builds take seconds.
+
+## 19. Play log (Supabase, since v142)
+
+An anonymous log of who plays and how, kept in a free-tier Supabase project. There is no sign-in and play never depends on it.
+
+- **Who:** each browser gets a random id the first time it opens the game (`nosedive-visitor` in localStorage). The same device keeps the same id until its site data is cleared. No names, emails or IP addresses are stored by the game.
+- **`visits` table:** one row per page load: the visitor id, the time (set by the database), the game version, touch or mouse, the browser's user agent, language, screen size and pixel ratio, and the referring page.
+- **`runs` table:** one row per finished run, a crash or Exit run from the pause menu: the visit and visitor ids, the time, the map id, the depth in metres, the stars caught, the seconds played and how it ended (`crash` / `exit`). Sent from `keepRunProgress` in `js/ui.js`.
+- **Only the website logs:** rows are sent only from http(s) pages that aren't localhost, so opening `index.html` from disk, the dev tools and tests, and the Android app (served from https://localhost) never log.
+- **Safety:** the game holds only the project URL and the public anon / publishable key (`LOG_URL`, `LOG_KEY` in `js/playlog.js`). Row-level security lets that key add rows and nothing else: it can't read, change or delete them, and the tables check every field's type and length. Read the log in the Supabase dashboard (Table Editor). The service_role / secret key must never go in the game.
+- **Setup:** run `tools/supabase.sql` once in the dashboard's SQL Editor; it creates both tables, their checks and the insert-only rules. Requests are sent with `keepalive` and never awaited; if the network or an ad blocker stops them, the game carries on.
+- **Free tier limits:** 500 MB of database (each row is a few hundred bytes); a project with no requests for a week is paused by Supabase and has to be resumed from the dashboard.
+

@@ -692,6 +692,11 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(exited.state === 'title' && exited.title && exited.xp - xpBeforeExit === 120 && exited.dist < 120 * 30,   // 30 units per metre
     `Exit run: back to the ${exited.state} screen (card shown ${exited.title}), +${exited.xp - xpBeforeExit} XP kept`);
 
+  // the anonymous play log (v142): never sends from file:// (tests, dev), and has a stored random visitor id
+  const plog = await page.evaluate(() => ({ on: LOG_ON, id: visitorId, kept: store.get('nosedive-visitor') === visitorId }));
+  check(!plog.on && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(plog.id) && plog.kept,
+    `play log off from disk, visitor id ${plog.id} kept: on ${plog.on}`);
+
   check(errors.length === 0, errors.length ? 'errors:\n  ' + errors.join('\n  ') : 'no page errors');
   await browser.close();
   console.log(problems.length ? `\n${problems.length} problem(s)` : '\nall good');

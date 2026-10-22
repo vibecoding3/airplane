@@ -144,6 +144,7 @@ function resume() {
 }
 // a finished run keeps what it earned: a new best depth, its stars, and its metres as experience
 function keepRunProgress(s) {
+  logRun(s, state === 'paused' ? 'exit' : 'crash');   // the anonymous play log (js/playlog.js)
   const record = s > best;
   if (record) { best = bests[mapId] = s; store.set('nosedive-best-' + mapId, String(s)); }
   if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
