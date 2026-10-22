@@ -446,6 +446,21 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   });
   check(vlayers.length === 0, 'Volcano looks follow the layers' + (vlayers.length ? ': ' + vlayers.slice(0, 5).join(', ') : ''));
 
+  // depth art: once a layer edge has scrolled off the top, the new layer fills the whole screen (no clip left over, v139)
+  const artClips = await page.evaluate(() => {
+    const bad = [];
+    for (const m of Object.keys(MAPS)) {
+      mapId = m; applyMap(); start(); plane.lives = 1e9;
+      for (const at of [300, 600]) {            // past the 150/200 m and 400 m edges, the next edge still below the screen
+        while (dist / PX_PER_M < at) update(1 / 60);
+        syncPaperLayers();
+        if (artA.style.clipPath || artB.style.clipPath) bad.push(`${m} ${at} m`);
+      }
+    }
+    return bad;
+  });
+  check(artClips.length === 0, 'Depth art fills the screen after a layer edge' + (artClips.length ? ': ' + artClips.join(', ') : ''));
+
   // the Sunken treasures collection: treasures among the Ocean's city relics (400–1,500 m), each once per run
   const treasures = await page.evaluate(() => {
     mapId = 'sea'; applyMap(); start(); const seen = new Map(); let outside = 0;

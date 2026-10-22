@@ -217,7 +217,7 @@ function syncDepthArt(px) {
     };
     show(artA, L); show(artB, split ? L + 1 : 99);
     ruling.style.opacity = rulingA || (split && rulingB) ? 1 : 0;
-    artClip = '';
+    artClip = null;                                       // the layers changed: always redo the clip (clearing it too)
   }
   // the layers are scrolled up by dist % PAPER_REPEAT, so the edge sits that much lower inside them
   const cut = split ? px(edge + dist % PAPER_REPEAT) + 'px' : '';

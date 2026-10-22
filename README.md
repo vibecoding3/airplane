@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v138** (2026-10-22)
+Current version: **v139** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
