@@ -61,14 +61,12 @@ let darkPage = false;
 const START_SCENES = { notebook: () => paperStartY(), sea: () => seaStartY(), space: () => earthLimbY(), dungeon: () => wellOpeningY(), city: () => cityStartY(), forest: () => forestStartY(), desert: () => desertStartY(), volcano: () => volcanoStartY(), kitchen: () => kitchenStartY() };
 const DARK_SCENES = new Set(['space', 'dungeon', 'city']);   // starting scenes the HUD needs light text over
 let hudPage = '';
-function syncHudPage() {         // the HUD's fade matches the page colour behind it
-  // no fade while the map's starting scene (notebook top, sea surface, Earth, well opening, rooftop, treetops, mesa, crater, cupboard) is in view, so it
-  // isn't painted over; the text stays dark over the light paper and sky, light over Earth and the well
+function syncHudPage() {         // the HUD has no background (v135): its text turns light over dark pages
+  // while the map's starting scene is in view the text stays dark over the light paper and sky, light over Earth and the well
   const scene = START_SCENES[mapId]() > -150;
   const c = scene ? 'transparent' : pageColor(pageIndexAt(dist + 40));
   if (c === hudPage) return;
   hudPage = c;
-  wrap.style.setProperty('--page', c);
   darkPage = scene ? DARK_SCENES.has(mapId) : c.startsWith('#') && isDark(c);
   wrap.classList.toggle('dark-page', darkPage);
 }

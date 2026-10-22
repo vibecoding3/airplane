@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v134** (2026-10-21)
+Current version: **v135** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -38,6 +38,8 @@ There are no on-screen steering arrows (removed in v44).
 ---
 
 **Control tips** (since v91): for the first 200 m of a run (100 m until v117), a tip shows in the top bar (bold 17 px since v108, was 13 px) to the left of the sound button, changing every 3 seconds and fading out over the last 10 m. Keyboards: "← → or A D to steer", "Space to pause". Phones and tablets (coarse pointer): "Tap left or right to steer" only (the "Hold for a sharp turn" tip was removed in v95, "Tap ⏸ to pause" in v96) (`HINTS` in `js/ui.js`). The separate "How to play" section stays removed (v44).
+
+**No top-bar background** (since v135): the top bar sits straight on the playfield with no colour fade behind it; its text turns light over dark pages.
 
 ## 3. Core rules
 
@@ -86,7 +88,7 @@ The patterns live in `depth-art.css` (made by `python tools/depth-art.py depth-a
 
 ### 4.1 Paper
 - **Background:** ruled notebook paper with a red margin and punched holes.
-- **The start** (since v71): the plane sets off from the top of the notebook page: a wooden desk with a pencil and an eraser above the page edge, the spiral binding across the top, and a handwritten header ("Name: Paper plane", "Date: today"). It slides up out of view within the first ~35 m, like the Earth in Space; formulas are only drawn below the header while it shows, and the top bar has no background fade.
+- **The start** (since v71): the plane sets off from the top of the notebook page: a wooden desk with a pencil and an eraser above the page edge, the spiral binding across the top, and a handwritten header ("Name: Paper plane", "Date: today"). It slides up out of view within the first ~35 m, like the Earth in Space; formulas are only drawn below the header while it shows.
 - **Page colour:** plain paper for the first 100 m, then pastel red, orange, yellow, green, blue, indigo and violet, changing every 100 m and repeating. A pencilled dashed line labelled "100 m", "200 m"… marks each change.
 - **Background decoration:** pencilled maths and science formulas, faded so they read as background.
   - 264 formulas in 6 difficulty levels (levels start at 0, 150, 400, 800, 1,500 and 2,500 m). The topics are arithmetic, fractions and algebra, geometry and trigonometry, calculus, series and linear algebra, statistics and probability, number theory, physics, engineering and astronomy.
@@ -96,7 +98,7 @@ The patterns live in `depth-art.css` (made by `python tools/depth-art.py depth-a
 
 ### 4.2 Ocean (called "Deep sea" until v78; the internal id is still `sea`)
 - **Water colour:** light turquoise at the surface, darkening every 100 m down to near-black navy by about 1,000 m, then staying there.
-- **The start** (since v71): the plane dives in from the surface: sky with clouds above, waves with a line of foam, a paper boat bobbing on the water off to one side, and sunlit shallows with ripples of light below. It slides up out of view within the first ~35 m; fish are only drawn below the water line while it shows, and the top bar has no background fade.
+- **The start** (since v71): the plane dives in from the surface: sky with clouds above, waves with a line of foam, a paper boat bobbing on the water off to one side, and sunlit shallows with ripples of light below. It slides up out of view within the first ~35 m; fish are only drawn below the water line while it shows.
 - **Background:** bubbles rising past the plane (no side walls; they were removed in v31). What else you see changes with depth:
 
 | Depth | Background |
@@ -131,7 +133,7 @@ The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fi
 The plane is thrown out of orbit and falls away from Earth into deeper and stranger space. Cartoon and playful in tone.
 - **Background colour:** deep blue sky at the start, turning to black by about 300 m, then faintly tinted nebula darks (purple, teal), near-black below 1,000 m.
 - **Stars:** a field of small stars of a few sizes slides past (one CSS layer, like the sea bubbles).
-- **Earth** (since v64): the plane starts just below the Earth, a big curved cap across the top of the first screen with ocean, dark green and brown continents, thin cloud streaks, a glowing atmosphere edge and a pale-blue haze below it. As the plane falls away the Earth slides up and shrinks a little, gone by about 35 m. The top bar has no background fade while the Earth is in view, so it does not cover it.
+- **Earth** (since v64): the plane starts just below the Earth, a big curved cap across the top of the first screen with ocean, dark green and brown continents, thin cloud streaks, a glowing atmosphere edge and a pale-blue haze below it. As the plane falls away the Earth slides up and shrinks a little, gone by about 35 m.
 - **Background scenery** (faded, never collides):
 
 | Depth | Scenery |
@@ -146,7 +148,7 @@ The plane is thrown out of orbit and falls away from Earth into deeper and stran
 ### 4.4 Dungeon (since v68)
 The plane is dropped down a deep, ancient dungeon well and falls past torch-lit stone, into caverns, then down to a lava-lit underworld. Cartoon and playful: friendly skeletons, not gore. (The brainstorm is in section 14.)
 - **Walls:** stone bricks (rows of 37.5 units, one CSS layer like the sea bubbles; since v79 every mortar line is the same thickness, before that every fourth row was half as thick because it sat on the tile edge) over a colour that changes every 100 m: grey stone in the well, warm torch-lit browns, cold blue-purple caverns from about 400 m, then deep reds of the underworld below 800 m.
-- **The well opening:** at the start, a disc of blue sky with a cloud sits in the stone ring above the plane, with a rope and bucket hanging below the rim and a soft beam of daylight falling down the shaft. It slides up out of view within the first ~35 m (like the Earth in Space); the top bar has no background fade while it is in view.
+- **The well opening:** at the start, a disc of blue sky with a cloud sits in the stone ring above the plane, with a rope and bucket hanging below the rim and a soft beam of daylight falling down the shaft. It slides up out of view within the first ~35 m (like the Earth in Space).
 - **Drifting specks:** dust motes in the torchlight (100–400 m), water drips falling (400–1,000 m), then embers rising and flickering.
 - **Background scenery** (faded, never collides):
 
@@ -163,7 +165,7 @@ The plane is dropped down a deep, ancient dungeon well and falls past torch-lit 
 A rainy city at night, cartoon and playful like the other maps. The plane drops off a rooftop and falls through the layers of the city: the rooftops, the streets, the subway, an underground arcade and finally the data core. It is not a Skyscraper map (that idea was dropped for good): the plane falls through the city, not down one building. Obstacles are dark metal with bright neon tubes, lit windows and warning lights.
 - **Background colour:** night blue at the rooftops, purple streets from 200 m, the teal subway from 400 m, the magenta-black arcade from 800 m, then the near-black green of the data core from 1,500 m (`CITY` in `js/maps.js`).
 - **Background layer:** faint distant buildings with a few lit windows (one CSS layer, like the sea bubbles).
-- **The start:** a night sky with the moon and stars, two rows of skyline with lit windows and neon signs, and the rooftop the plane drops from: a water tank on legs, an antenna with a blinking red light, a pink "OPEN" neon sign that flickers now and then, and a cyan neon strip along the edge. It slides up out of view within the first ~35 m, like the Earth in Space; the top bar has no background fade while it shows.
+- **The start:** a night sky with the moon and stars, two rows of skyline with lit windows and neon signs, and the rooftop the plane drops from: a water tank on legs, an antenna with a blinking red light, a pink "OPEN" neon sign that flickers now and then, and a cyan neon strip along the edge. It slides up out of view within the first ~35 m, like the Earth in Space.
 - **Depth markers:** the dashed "100 m", "200 m"… lines glow in a different neon colour every 100 m (pink, cyan, lime, orange, violet).
 - **Drifting specks:** rain streaks over the rooftops and streets (0–400 m), sparks falling from the subway wires (400–800 m), neon pixels twinkling in the arcade (800–1,500 m), then data packets racing up in the data core.
 - **Background scenery** (faded, never collides):
@@ -181,7 +183,7 @@ A rainy city at night, cartoon and playful like the other maps. The plane drops 
 The plane sets off from a bird's nest at the top of an endless forest and falls down through the seasons: spring, summer, autumn, winter, then night. Cartoon and playful, nature only (the Dungeon already has the magic, the glowing mushrooms and the caverns). Obstacles are wood, leaves, nuts and animals with a dark brown outline; their leaves follow the season they are in (fresh green, deep green, orange, snow, dark green at night).
 - **Background colour by season:** spring greens (0–150 m), summer greens (150–400 m), autumn oranges (400–800 m), winter blue-greys (800–1,500 m), then a dark teal night (1,500 m +) (`FOREST` in `js/maps.js`; `forestSeason` in `js/obstacles.js` gives the season of a depth).
 - **Background layer** (since v116; faint, evenly spaced trunks before): tree trunks at two depths, pale thin ones far away and darker, wider ones nearer with bark grooves and knots, plus leafy branches reaching out between them. All faint silhouettes in one CSS layer (like the sea bubbles), 750 units tall so it does not repeat often. At night the same picture, pale and moonlit, fades in over it so it still shows: since v117 it fades in gradually from 1,450 to 1,550 m (in v116 it switched all at once) (a `::after` layer whose opacity is `--night`, set in `syncPaperLayers`).
-- **The start:** blue sky with the sun and clouds over two rows of tree crowns, and the top branch with a nest of two blue eggs and a sleepy owl that blinks now and then. It slides up out of view within the first ~35 m; the top bar has no background fade while it shows.
+- **The start:** blue sky with the sun and clouds over two rows of tree crowns, and the top branch with a nest of two blue eggs and a sleepy owl that blinks now and then. It slides up out of view within the first ~35 m.
 - **Drifting specks by season:** blossom petals, floating pollen, falling autumn leaves, snow, then twinkling fireflies. All faint, so they never hide an obstacle.
 - **Background scenery** (faded, never collides):
 
@@ -198,7 +200,7 @@ The plane sets off from a bird's nest at the top of an endless forest and falls 
 The plane sets off from the top of a sunny mesa and falls into a deep canyon, down through the rock layers: the deeper, the older the rock, ending in a glowing amber layer. Cartoon and playful; desert life and geology only (no giant sandworm and no copy of a cartoon roadrunner).
 - **Background colour by layer:** dune sand (0–150 m), canyon sandstone oranges (150–400 m), the cool teal-green oasis seep (400–800 m), grey-brown fossil beds (800–1,500 m), then golden amber (1,500 m +) (`DESERT` in `js/maps.js`; `desertLayer` in `js/obstacles.js` gives the layer of a depth).
 - **Background layer:** faint wind ripples in the sand and scattered pebbles (one CSS layer, like the sea bubbles).
-- **The start:** blue sky with the sun, dunes far away, a little hot-air balloon and heat shimmer, and the flat orange top of a mesa with layered sides, a saguaro with a pink flower, and a lizard sunning on a rock that flicks its tongue now and then. It slides up out of view within the first ~35 m; the top bar has no background fade while it shows.
+- **The start:** blue sky with the sun, dunes far away, a little hot-air balloon and heat shimmer, and the flat orange top of a mesa with layered sides, a saguaro with a pink flower, and a lizard sunning on a rock that flicks its tongue now and then. It slides up out of view within the first ~35 m.
 - **Drifting specks by layer:** sand grains blowing sideways, rock dust falling, water drips seeping through the rock, pale bits of shell, then glowing amber motes rising. All faint, so they never hide an obstacle.
 - **Background scenery** (faded, never collides):
 
