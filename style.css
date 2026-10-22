@@ -258,6 +258,7 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
 .medal.bronze.on { background: #cd7f32; }
 .medal.silver.on { background: #c9d1da; }
 .medal.gold.on { background: #ffd23f; }
+.map-best { font-family: var(--body); font-weight: 400; font-size: 13px; line-height: 1; font-variant-numeric: tabular-nums; }   /* the map's best depth, under the medals */
 
 /* Collections: a panel per set with a grid of item tiles; locked items are black silhouettes on light grey,
    found ones are drawn on dungeon stone; tapping a found one shows it large at the top */
