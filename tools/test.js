@@ -707,19 +707,25 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(!netFirst.startsWith('checking') && netOff === 'offline / Offline' && (netFirst.startsWith('offline') || netBack === 'online / Online'),
     `server status icon: ${netFirst} → network off: ${netOff} → back: ${netBack}`);
 
-  // leaderboards (v144), against a fake server so the tests never write to the real database
+  // leaderboards (v144) and server-side XP (v146), against a fake server so the tests never write to the real database
   await page.evaluate(() => {
-    window.lbCalls = [];
+    window.lbCalls = []; window.fakeXp = 0; window.fakeDown = false;
     window.realFetch = window.fetch;
     window.fetch = (url, opt) => {
       const fn = String(url).split('/rpc/')[1];
       if (!fn) return window.realFetch(url, opt);
-      const a = JSON.parse(opt.body); lbCalls.push(fn + ' ' + (a.p_nickname || a.p_map || '') + (a.p_depth ? ' ' + a.p_depth : ''));
+      if (fakeDown) return Promise.reject(new TypeError('Failed to fetch'));
+      const a = JSON.parse(opt.body);
+      lbCalls.push(fn + ' ' + (a.p_nickname || a.p_map || '') + (a.p_depth ? ' ' + a.p_depth : '') + (a.p_xp !== undefined ? a.p_xp : ''));
+      const board = [{ rank: 1, nickname: 'Ace', depth: 2400, me: false }, { rank: 2, nickname: 'Bee', depth: 900, me: false }, { rank: 31, nickname: 'Tester 1', depth: 120, me: true }];
       const reply = fn === 'lb_me' ? null : fn === 'lb_claim' ? (a.p_nickname.toLowerCase() === 'taken' ? 'taken' : 'ok') : fn === 'lb_submit' ? undefined
-        : [{ rank: 1, nickname: 'Ace', depth: 2400, me: false }, { rank: 2, nickname: 'Bee', depth: 900, me: false }, { rank: 31, nickname: 'Tester 1', depth: 120, me: true }];
+        : fn === 'lb_xp_start' ? (fakeXp += a.p_xp) : fn === 'lb_my_xp' ? fakeXp
+        : fn === 'lb_run' ? (a.p_depth > a.p_duration * 16 + 30 ? -1 : (fakeXp += a.p_depth))
+        : fn === 'lb_levels' ? Array.from({ length: 10 }, (_, i) => ({ rank: i + 1, nickname: 'P' + i, depth: 20000 - i * 1500, me: false })) : board;
       return Promise.resolve(new Response(reply === undefined ? null : JSON.stringify(reply), { status: reply === undefined ? 204 : 200 }));
     };
-    localStorage.removeItem('nosedive-nick'); lbNick = ''; lbSynced = false;
+    localStorage.removeItem('nosedive-nick'); localStorage.removeItem('nosedive-xp-imported'); localStorage.removeItem('nosedive-runq');
+    lbNick = ''; lbSynced = false; lbQueue.length = 0; window.keepXp = xp; xp = 1000;
     state = 'title'; showCard('title'); bests.sea = 321;
   });
   await page.click('#lbOpen'); await wait(200);
@@ -729,20 +735,38 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   const lbShort = await page.evaluate(() => ({ v: $('lbNick').value, msg: $('lbJoinMsg').textContent, state }));
   await page.click('#lbNick', { clickCount: 3 }); await page.keyboard.type('taken'); await page.click('#lbJoinBtn'); await wait(200);
   const lbTaken = await page.evaluate(() => $('lbJoinMsg').textContent);
-  await page.click('#lbNick', { clickCount: 3 }); await page.keyboard.type('Tester 1'); await page.click('#lbJoinBtn'); await wait(300);
+  await page.click('#lbNick', { clickCount: 3 }); await page.keyboard.type('Tester 1'); await page.click('#lbJoinBtn'); await wait(400);
   const lbJoined = await page.evaluate(() => ({ nick: lbNick, saved: store.get('nosedive-nick'), board: !$('lbBoard').hidden,
     rows: [...document.querySelectorAll('#lbList li')].map(li => li.textContent), me: !!document.querySelector('#lbList li.me'), calls: lbCalls.slice() }));
   await page.click('#lbNext'); await wait(200);
-  const lbNextMap = await page.evaluate(() => $('lbMapName').textContent);
+  const lbLevel = await page.evaluate(() => ({ name: $('lbMapName').textContent, rows: [...document.querySelectorAll('#lbList li')].map(li => li.textContent) }));
   await page.keyboard.press('Escape'); await wait(100);
   const lbClosed = await page.evaluate(() => $('lbCard').hidden && !$('titleCard').hidden);
-  const lbRun = await page.evaluate(() => { lbCalls.length = 0; bests.forest = 0; mapId = 'forest'; applyMap(); start(); dist = 77 * PX_PER_M; gameOver(); const c = lbCalls.slice();
-    window.fetch = window.realFetch; localStorage.removeItem('nosedive-nick'); lbNick = ''; delete bests.sea; return c; });
+  const lbXp = await page.evaluate(async () => {
+    const run = (m, depth, secs) => { bests[m] = 0; mapId = m; applyMap(); start(); time = secs; dist = depth * PX_PER_M; gameOver(); return lbSyncXp(); };
+    lbCalls.length = 0;
+    await run('forest', 77, 10); await lbSyncXp();
+    const afterRun = { calls: lbCalls.slice(), xp, server: fakeXp };
+    fakeDown = true; await run('desert', 50, 10);                   // offline: the run waits in the queue
+    const queued = lbQueue.length, stored = JSON.parse(store.get('nosedive-runq')).length;
+    fakeDown = false; await lbSyncXp();
+    const afterOnline = { queue: lbQueue.length, xp, server: fakeXp };
+    await run('volcano', 5000, 10); await lbSyncXp();                 // impossible: 5,000 m in 10 s is refused
+    const afterFake = { xp, server: fakeXp };
+    window.fetch = window.realFetch; localStorage.removeItem('nosedive-nick'); localStorage.removeItem('nosedive-runq'); localStorage.removeItem('nosedive-xp-imported');
+    lbNick = ''; delete bests.sea; xp = keepXp; store.set('nosedive-xp', String(xp));
+    return { afterRun, queued, stored, afterOnline, afterFake };
+  });
   check(lbJoinShown && lbShort.v === 'ad' && lbShort.state === 'title' && /3–16/.test(lbShort.msg) && /taken/.test(lbTaken),
     `leaderboards: nickname form first; typing a/d types (${lbShort.v}, ${lbShort.state}); short name refused; "${lbTaken}"`);
   check(lbJoined.nick === 'Tester 1' && lbJoined.saved === 'Tester 1' && lbJoined.board && lbJoined.rows.length === 4 && lbJoined.me &&
-    lbJoined.calls.includes('lb_submit sea 321') && lbNextMap === 'Paper' && lbClosed && lbRun.includes('lb_submit forest 77'),
-    `leaderboards: joined as ${lbJoined.nick}, ${lbJoined.rows.length} rows (${lbJoined.rows.join(' | ')}), bests synced, next board ${lbNextMap}, Esc closes, a record run is sent (${lbRun.join(', ')})`);
+    lbJoined.calls.includes('lb_submit sea 321') && lbJoined.calls.includes('lb_xp_start 1000') && lbClosed,
+    `leaderboards: joined as ${lbJoined.nick}, ${lbJoined.rows.length} rows (${lbJoined.rows.join(' | ')}), bests synced, XP carried over (${lbJoined.calls.filter(c => c.startsWith('lb_xp')).join(', ')}), Esc closes`);
+  check(lbLevel.name === 'Level' && lbLevel.rows.length === 10 && lbLevel.rows[0] === '#1P0Level 14',
+    `Level board: ${lbLevel.name}, ${lbLevel.rows.length} rows, first ${lbLevel.rows[0]}`);
+  check(lbXp.afterRun.calls.includes('lb_run forest 77') && lbXp.afterRun.xp === 1077 && lbXp.afterRun.server === 1077 &&
+    lbXp.queued === 1 && lbXp.stored === 1 && lbXp.afterOnline.queue === 0 && lbXp.afterOnline.xp === 1127 && lbXp.afterFake.xp === 1127,
+    `server XP: run counted (${lbXp.afterRun.xp}/${lbXp.afterRun.server}); offline run queued (${lbXp.queued}, saved ${lbXp.stored}) and sent later (${lbXp.afterOnline.xp}); impossible run refused, device back to ${lbXp.afterFake.xp}`);
 
   check(errors.length === 0, errors.length ? 'errors:\n  ' + errors.join('\n  ') : 'no page errors');
   await browser.close();

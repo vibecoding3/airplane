@@ -148,10 +148,10 @@ function keepRunProgress(s) {
   logRun(s, state === 'paused' ? 'exit' : 'crash');   // the anonymous play log (js/playlog.js)
   const record = s > best;
   if (record) { best = bests[mapId] = s; store.set('nosedive-best-' + mapId, String(s)); }
-  lbRunEnded(s, record);                               // a new best goes on the leaderboard (js/leaderboard.js)
   if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
   const xpBefore = xp, levelUp = levelInfo(xp + s).level > levelInfo(xp).level;
   xp += s; store.set('nosedive-xp', String(xp));
+  lbRunEnded(s);                                       // queued for the server's XP and boards (js/leaderboard.js), after its XP is in
   return { record, xpBefore, levelUp };
 }
 // leaving a run from the pause menu: it keeps its progress like a crash, then goes straight to the start menu
