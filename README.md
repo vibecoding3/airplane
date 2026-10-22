@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v155** (2026-10-22)
+Current version: **v156** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -866,6 +866,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 | `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all nine maps to 2,500 m (or `depth`) with every obstacle type appearing, every collection set, normal runs ending in game over, pause and resume (keys and the touch pause button), the play log staying off from disk, the server status icon, and the leaderboards against a fake server (it never writes to the real database), with no page errors. Exits with code 1 on any problem. `node tools/test.js 800` is faster: it skips the all-obstacle-types check. |
 | `node tools/shot.js <notebook|sea|space|dungeon|city|forest|desert|volcano|kitchen> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
 | `node tools/shot.js title [sea]` | Title screen screenshot |
+| `node tools/obstacle-sheets.js [map]` | One picture sheet per map (or just `map`) in `tools/out/obstacles/<map>.png`: every obstacle look, drawn by the game on its map's background colour and labelled with its mechanic, look name, type and the depth it was seen at, five across in the order of the mechanic catalogue. Each look is played forward for about 3 s and pictured at the moment it shows most (a proximity blast before it goes off). Collectibles are left out (v156) |
 | `python tools/depth-art.py depth-art.css` | Regenerates the background art per map layer (edit the script, not the CSS) |
 | `tools/supabase.sql`, `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql` | The database setup for section 19, run once each, in that order, in the Supabase SQL Editor |
 | `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs), the bundled fonts (as data URLs) and the scripts into one page (for a single-file copy) |
