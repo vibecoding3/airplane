@@ -193,7 +193,7 @@ function playBar(th, i, t0, bus) {
     if (b === 0) drum(bus, t0, 0.35);
   }
   if (th.ding && i === th.chords.length - 1) note(bus, 'sine', hz(96), t0 + 3 * beat, 1.2, 0.03, 0.005, 1.1);   // the oven timer
-  if (th.birds) for (let b = 0; b < 4; b++) if (Math.random() < 0.3) chirp(bus, t0 + (b + Math.random() * 0.5) * beat);   // birdsong
+  if (th.birds) for (let b = 0; b < 4; b++) if (realRandom() < 0.3) chirp(bus, t0 + (b + realRandom() * 0.5) * beat);   // birdsong
   if (th.beat) for (let b = 0; b < 4; b++) {     // a dance beat: kick, off-beat hat, clap on 2 and 4
     drum(bus, t0 + b * beat, b % 2 ? 0.55 : 0.8);
     hiss(bus, t0 + (b + 0.5) * beat, 0.05, 7000, 0.035);
@@ -257,7 +257,7 @@ function hiss(bus, t, dur, freq, vol) {
   if (!hissBuf) {
     hissBuf = a.createBuffer(1, Math.floor(a.sampleRate * 0.2), a.sampleRate);
     const d = hissBuf.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    for (let i = 0; i < d.length; i++) d[i] = realRandom() * 2 - 1;
   }
   const src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
   src.buffer = hissBuf; f.type = freq > 4000 ? 'highpass' : 'bandpass'; f.frequency.value = freq;
@@ -267,7 +267,7 @@ function hiss(bus, t, dur, freq, vol) {
 }
 // a little bird call: two quick rising whistles (Forest theme)
 function chirp(bus, t) {
-  const a = actx, f = 2400 + Math.random() * 1200;
+  const a = actx, f = 2400 + realRandom() * 1200;
   for (const k of [0, 0.09]) {
     const osc = a.createOscillator(), g = a.createGain();
     osc.type = 'sine'; osc.frequency.setValueAtTime(f, t + k); osc.frequency.exponentialRampToValueAtTime(f * 1.35, t + k + 0.06);

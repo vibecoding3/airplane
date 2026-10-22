@@ -24,7 +24,7 @@ function crunchNoise(a) {
   const data = noiseBuf.getChannelData(0);
   for (let i = 0; i < len; i++) {
     const env = Math.pow(1 - i / len, 2);
-    data[i] = (Math.random() * 2 - 1) * env * (Math.random() < 0.3 ? 1 : 0.4);
+    data[i] = (realRandom() * 2 - 1) * env * (realRandom() < 0.3 ? 1 : 0.4);
   }
   return noiseBuf;
 }

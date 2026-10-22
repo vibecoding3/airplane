@@ -246,7 +246,7 @@ function updateObstacle(o, dt) {
 function steer(dt) {
   let target = 0;
   const maxV = maxSideSpeed();
-  if (holdSide && performance.now() - holdStart > HOLD_MS) {
+  if (holdSide && (playClock - holdStart) * 1000 > HOLD_MS) {
     drift = holdSide;
     target = holdSide * maxV;
     plane.vx += (target - plane.vx) * Math.min(1, 9 * dt);

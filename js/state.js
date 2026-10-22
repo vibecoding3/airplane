@@ -63,15 +63,19 @@ let lastMilestone = 0, flash = 0, flashCol = '';   // 100 m milestones and their
 // holding past HOLD_MS steers hard and leaves the plane drifting that way.
 const HOLD_MS = 220;
 let drift = 0, holdSide = 0, holdSource = null, holdStart = 0;
+let playClock = 0;                // seconds of the run so far, frame by frame (the hold timer uses it so replays match)
 
 function press(side, source) {
-  if (state !== 'play') return;
+  if (state !== 'play' || !inputAllowed()) return;
+  recInput('p', side, source);
   holdSide = side;
   holdSource = source;
-  holdStart = performance.now();
+  holdStart = playClock;
   drift = clamp(drift + side, -1, 1);
 }
 function release(source) {
+  if (!inputAllowed()) return;
+  recInput('r', 0, source);
   if (source !== holdSource) return;
   holdSide = 0;
   holdSource = null;
@@ -91,7 +95,7 @@ const score = () => Math.floor(dist / PX_PER_M);   // stars are a collected tota
 function reset() {
   plane = { x: W / 2, vx: 0, ang: 0, alive: true, lives: 0, magnet: 0, slowmo: 0, star: 0, boost: 0, ink: 0, inkSplats: [], invuln: 0, bubbled: 0 };
   obstacles = []; pickups = []; particles = []; floaters = [];
-  dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0;
+  dist = 0; speed = 150; time = 0; stars = 0; shake = 0; overTimer = 0; playClock = 0;
   nextRowY = H + 140; lastPowerY = 0; lastPowerKind = ''; lastStarY = -1e9; runCollected.clear(); passedBest = false; lastMilestone = 0; flash = 0; medalsAnnounced.clear();
   formulas = []; nextFormulaY = 60; usedFormulas.clear(); fishes.length = 0; lastSceneryY = -1e9;
 }

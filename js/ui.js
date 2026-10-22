@@ -18,7 +18,7 @@ const HINTS = TOUCH ? ['Tap left or right to steer']
 const HINT_UNTIL_M = 200;                // since v118 (was 100 m)
 let hintText = null, hintFade = false;
 function syncHint() {
-  const m = score(), on = state === 'play' && m < HINT_UNTIL_M;
+  const m = score(), on = state === 'play' && m < HINT_UNTIL_M && !replaying;   // no steering tips while watching a replay
   const text = on ? HINTS[Math.floor(time / 3) % HINTS.length] : '';
   if (text !== hintText) { hintText = text; ui.hint.textContent = text; ui.hint.hidden = !text; }
   const fade = on && m >= HINT_UNTIL_M - 10;
@@ -125,8 +125,10 @@ setMuteLabel();
 
 function start() {
   reset();
+  lastType = '';                    // the first row may be any type (and a replay starts the same way)
   state = 'play';
   clearControls();
+  startRecording();
   showCard(null);
   sfx.throw();
   setMusic(mapId);
@@ -140,7 +142,7 @@ function pause() {
 function resume() {
   if (state !== 'paused') return;
   state = 'play';
-  holdSide = 0; holdSource = null;   // a key released while paused never sent its keyup here
+  if (!replaying) { holdSide = 0; holdSource = null; recInput('u'); }   // a key released while paused never sent its keyup here
   showCard(null);
   duckMusic(false);
 }
@@ -153,11 +155,13 @@ function keepRunProgress(s) {
   const xpBefore = xp, levelUp = levelInfo(xp + s).level > levelInfo(xp).level;
   xp += s; store.set('nosedive-xp', String(xp));
   lbRunEnded(s);                                       // queued for the server's XP and boards (js/leaderboard.js), after its XP is in
+  finishRecording(s, state === 'paused' ? 'exit' : 'crash');   // its replay (js/replay.js)
   return { record, xpBefore, levelUp };
 }
 // leaving a run from the pause menu: it keeps its progress like a crash, then goes straight to the start menu
 function exitRun() {
   if (state !== 'paused') return;
+  if (replaying) { endReplay(''); return; }          // Exit run while watching just stops the replay
   keepRunProgress(score());
   reset();
   clearControls();
@@ -174,6 +178,7 @@ function toMainMenu() {
   showCard('title');
 }
 function gameOver() {
+  if (replaying) { endReplay(''); return; }          // the replayed run ended: back to the real game-over screen
   state = 'over';
   setMusic('title');
   const s = score();
@@ -185,6 +190,7 @@ function gameOver() {
   ui.overBank.textContent = (stars ? '★ +' + stars + ' this run · ' : '') + '★ ' + fmt(bank) + ' in total';
   $('levelStamp').hidden = !levelUp;
   if (levelUp) { $('levelStamp').textContent = 'Level up! Level ' + levelInfo(xp).level; setTimeout(sfx.levelup, 500); }
+  syncReplayButton();
   showCard('over');
   animateXp($('overXp'), xpBefore, s);
 }

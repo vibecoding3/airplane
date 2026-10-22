@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v156** (2026-10-22)
+Current version: **v157** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,7 +10,7 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css`, `depth-art.css` and 33 plain script files in `js/` (about 12,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
+- **Files:** `index.html`, `style.css`, `depth-art.css` and 34 plain script files in `js/` (about 12,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
 - **Start menu:** a regular game menu over an illustrated sky full of paper airplanes (`img/menu-bg.svg`): the big title, the star total and the Total score (with the player's leaderboard place, v147), the level and XP bar, the nine map tiles (each with its medals and best depth, v138), Play, and Collections and Leaderboards side by side (v144). A server status pill sits in the top-left corner (v143). The "How to play" section was removed in v44. It is not tied to any map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth and the Total score, the stars caught this run and the star total, the XP gained (with a "Level up!" badge), Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
 - **Online features** (section 19): an anonymous play log, leaderboards with a nickname and server-side XP, all in a free Supabase project. The game works fully offline without them.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
@@ -711,7 +711,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Leaderboards nickname | Leaderboards button on the start screen (v144) | Optional; asked for the first time the screen opens, unique, and permanent on that device (section 19.1) |
 
 ### Saved data (browser localStorage)
-`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon`, `nosedive-best-city`, `nosedive-best-forest`, `nosedive-best-desert`, `nosedive-best-volcano`, `nosedive-best-kitchen` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution), and for the online features (section 19): `nosedive-visitor` (the anonymous visitor id, v142), `nosedive-nick` (the leaderboard nickname, v144), `nosedive-runq` (finished runs waiting to be sent to the server, v146), `nosedive-xp-imported` (whether the device's XP was carried over to the server, v146) and `nosedive-rank` (the last known Total score place, v147). All of them are per browser and per device.
+`nosedive-best-notebook`, `nosedive-best-sea`, `nosedive-best-space`, `nosedive-best-dungeon`, `nosedive-best-city`, `nosedive-best-forest`, `nosedive-best-desert`, `nosedive-best-volcano`, `nosedive-best-kitchen` (best depth per map), `nosedive-bank`, `nosedive-xp` (total experience), `nosedive-collection` (ids of the collection items found), `nosedive-map`, `nosedive-muted`, `nosedive-res` (remembered render resolution), and for the online features (section 19): `nosedive-visitor` (the anonymous visitor id, v142), `nosedive-nick` (the leaderboard nickname, v144), `nosedive-runq` (finished runs waiting to be sent to the server, v146), `nosedive-xp-imported` (whether the device's XP was carried over to the server, v146) and `nosedive-rank` (the last known Total score place, v147). Replays are kept in memory only (the last run), not in localStorage. All of them are per browser and per device.
 
 ---
 
@@ -753,7 +753,7 @@ airplane/
 ├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
 ├── design/                 design notes: maps/<map>.md per map (premise, layers, obstacles, spawn tables) and obstacle-balance.md (obstacles and looks per map, v153)
 ├── ref/                    reference pictures (map-icon sheets, screenshots the player shared); git ignores it, not used by the game
-└── js/                     33 game scripts, listed in the order they load
+└── js/                     34 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
@@ -786,6 +786,7 @@ airplane/
     ├── collections.js      Collections: the sets, finding items during a run, the Collections screen
     ├── playlog.js          anonymous play log: a row per visit and per run sent to Supabase; the server status icon (section 19)
     ├── leaderboard.js      leaderboards: the nickname, the boards screen, sending best depths (section 19)
+    ├── replay.js           replays: recording each run, the shared frame step, watching, sending to Supabase (section 19.2)
     └── main.js             keyboard and touch input, main loop (loads last, starts the game)
 ```
 
@@ -855,6 +856,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `collections.js` | `COLLECTIONS`, `COLLECTION_TOTAL`, `collectionFound`, `noteFound`, `paintCollectionItem`, `renderCollections`, `openCollections` |
 | `playlog.js` | `LOG_URL`, `LOG_KEY`, `LOG_ON`, `visitorId`, `visitId`, `newId`, `logRow`, `logRun`, `NET_TEXT`, `setNet`, `checkServer` |
 | `leaderboard.js` | `LB_MAPS`, `NICK_RULE`, `lbNick`, `lbCall`, `lbSyncBests`, `lbSyncXp`, `setServerXp`, `lbRunEnded`, `lbRefreshRank`, `openLeaderboards`, `renderBoard`, `LB_TOP10`, `playTime` |
+| `replay.js` | `simFrame` (one frame of a run, live or replayed), `startRecording`, `recInput`, `finishRecording`, `watchReplay`, `replayStep`, `endReplay`, `runCheck`, `lastReplay`, `replaying` |
 | `main.js` | `watchFrameRate`, `frameInterval`, `frame`, `goBack` |
 
 ### 10.5 Dev tools (`tools/`)
@@ -868,7 +870,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 | `node tools/shot.js title [sea]` | Title screen screenshot |
 | `node tools/obstacle-sheets.js [map]` | One picture sheet per map (or just `map`) in `tools/out/obstacles/<map>.png`: every obstacle look, drawn by the game on its map's background colour and labelled with its mechanic, look name, type and the depth it was seen at, five across in the order of the mechanic catalogue. Each look is played forward for about 3 s and pictured at the moment it shows most (a proximity blast before it goes off). Collectibles are left out (v156) |
 | `python tools/depth-art.py depth-art.css` | Regenerates the background art per map layer (edit the script, not the CSS) |
-| `tools/supabase.sql`, `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql` | The database setup for section 19, run once each, in that order, in the Supabase SQL Editor |
+| `tools/supabase.sql`, `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql`, `tools/supabase-replays.sql` | The database setup for section 19, run once each, in that order, in the Supabase SQL Editor |
 | `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs), the bundled fonts (as data URLs) and the scripts into one page (for a single-file copy) |
 
 ---
@@ -1241,4 +1243,12 @@ An anonymous log of who plays and how, kept in a free-tier Supabase project. The
 - **Place on the start menu (v147):** for joined players, the start menu's Total score pill starts with their place on the Total score board in orange, for example "#1 Total score 23,061". It is asked for whenever the start menu shows (at most every 30 s, and again after a run), after sending any waiting runs and bests; the last answer is kept on the device (`nosedive-rank`) and shown meanwhile, also offline. Hidden for players without a nickname (`lbRefreshRank` in `js/leaderboard.js`).
 - **Setup:** run `tools/supabase-leaderboards.sql` once in the SQL Editor (after `tools/supabase.sql`). Tables `players` (visitor id, nickname, joined) and `scores` (visitor id, map, best depth, when).
 - **Tests** use a fake server, so they never write to the real database.
+
+### 19.2 Replays (since v157)
+
+- **Watching:** after every run the game-over screen has a **Watch replay** button (under Play again). It plays the run just finished from memory, so it also works offline. A bar near the bottom shows "▶ Replay", a speed button (1×, 2×, 4×) and **Exit replay**; Space / Esc pause as in a run, and the phone's Back button exits. When the replayed run ends, the real game-over screen comes back unchanged. Watching changes nothing: no XP, stars, bests, collections, play log or leaderboard entries.
+- **How it works:** a run is recorded as its random seed, the world height, every frame's time step and every steering input with its frame number; watching runs the same game code again with the same numbers, so it plays back exactly (checked over 1,200 m runs on three maps in `tools/test.js`). To make that possible: during a run's updates `Math.random` is the run's own seeded generator (`seededRandom` in `js/core.js`, swapped in by `simFrame` in `js/replay.js`), while sound and music keep the real one (`realRandom`) so muting never changes a run; frame steps are rounded to whole milliseconds; the hold-for-a-sharp-turn timer counts the run's own clock (`playClock` in `js/state.js`) instead of the wall clock; and a run always starts with no remembered "last obstacle type". A check value every 60 frames stops a replay with "Replay stopped: it no longer matches the run" if it ever drifts.
+- **Stored in Supabase:** every finished run on the website (not from disk or the app, like the play log) sends a row to `replays`: the visitor and visit ids, game version, map, depth, frame count and the recording (about 1 KB per 15 s of play). The public key can only add rows. Each new row also deletes up to 200 replays older than 30 days, never a player's best run on a map. Setup: `tools/supabase-replays.sql`.
+- **Versions:** a replay only plays back exactly on the game version it was recorded with (stored as `version`); any change to obstacles, spawning or physics changes how a recording plays. Replays may also drift between very different browsers (tiny floating-point differences); the check value catches that. Watching others' replays (for example from the leaderboards) isn't built yet; the stored rows are ready for it.
+- **Rules for future changes** (or replays break): gameplay code (anything `update` runs) must not read the wall clock (`performance.now`, `Date`) or use `realRandom`; per-run state must be reset in `reset()` / `start()`; and a new kind of player input must go through `press` / `release` or be recorded with `recInput`.
 

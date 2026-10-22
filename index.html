@@ -20,7 +20,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v156</div>
+    <div class="version" id="version">v157</div>
 
     <div class="hud">
       <div>
@@ -35,6 +35,12 @@
         </div>
         <div><span id="starCount">★ 0</span> · best <span id="best">0</span> m</div>
       </div>
+    </div>
+
+    <div class="replay-bar" id="replayBar" hidden>
+      <span class="replay-tag">▶ Replay</span>
+      <button class="menu-btn" id="replaySpeed" type="button" aria-label="Replay speed">1×</button>
+      <button class="menu-btn" id="replayExit" type="button">Exit replay</button>
     </div>
 
     <div class="overlay" id="overlay">
@@ -111,6 +117,7 @@
         <div class="xp" id="overXp"></div>
         <span class="menu-record" id="levelStamp" hidden>Level up!</span>
         <button class="menu-btn primary" id="againBtn" type="button">Play again</button>
+        <button class="menu-btn" id="replayBtn" type="button" hidden>Watch replay</button>
         <button class="menu-btn" id="overMenuBtn" type="button">Main Menu</button>
       </div>
     </div>
@@ -149,6 +156,7 @@
 <script src="js/collections.js"></script>
 <script src="js/playlog.js"></script>
 <script src="js/leaderboard.js"></script>
+<script src="js/replay.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

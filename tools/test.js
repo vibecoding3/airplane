@@ -725,6 +725,63 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(exited.state === 'title' && exited.title && exited.xp - xpBeforeExit === 120 && exited.dist < 120 * 30,   // 30 units per metre
     `Exit run: back to the ${exited.state} screen (card shown ${exited.title}), +${exited.xp - xpBeforeExit} XP kept`);
 
+  // replays (v157): a run played through the real frame step with steering and uneven frames, then watched, must end
+  // exactly where it did; watching leaves progress alone; the button and the bar work
+  const replayRuns = [];
+  for (const m of ['notebook', 'dungeon', 'kitchen']) {
+    replayRuns.push(await page.evaluate((m) => {
+      mapId = m; applyMap(); state = 'title'; showCard('title');
+      // plenty of shields for a long run: set inside reset, so the replay starts with them too
+      const realReset = reset; reset = () => { realReset(); plane.lives = 999; };
+      start();
+      let f = 0;
+      while ((state === 'play' || state === 'dying') && f < 60 * 300 && score() < 1200) {
+        if (f % 97 === 11) press(f % 194 === 11 ? -1 : 1, 'keyT');           // a press, a hold, a release, both ways
+        if (f % 97 === 50) release('keyT');
+        if (f % 211 === 100) press(1, 'keyU');
+        if (f % 211 === 104) release('keyU');
+        simFrame(f % 7 === 0 ? 1 / 45 : f % 13 === 0 ? 1 / 30 : 1 / 60);    // uneven frames, like a real device
+        f++;
+      }
+      const at = { depth: score(), dist: dist.toFixed(3), x: plane.x.toFixed(3), stars };   // before Exit run resets it
+      if (state === 'play') { pause(); exitRun(); }
+      const live = { ...at, frames: lastReplay ? lastReplay.n : 0, inputs: lastReplay ? lastReplay.ev.length : 0 };
+      const progress = JSON.stringify([xp, bank, bests[m], [...collectionFound].length]);
+      state = 'over';
+      watchReplay();
+      let g = 0;
+      while (replaying && g < 200000) { replayStep(); g++; }
+      reset = realReset;
+      const drift = floaters.some(fl => /no longer matches/.test(fl.text));
+      const back = { dist: dist.toFixed(3), x: plane.x.toFixed(3), stars, state };
+      return { m, live, back, drift, same: progress === JSON.stringify([xp, bank, bests[m], [...collectionFound].length]) };
+    }, m));
+  }
+  for (const r of replayRuns) {
+    check(r.live.frames > 100 && r.live.inputs > 4 && !r.drift && r.back.dist === r.live.dist && r.back.x === r.live.x && r.back.stars === r.live.stars && r.back.state === 'over' && r.same,
+      `replay on ${r.m}: run of ${r.live.frames} frames, ${r.live.inputs} inputs, ${r.live.depth} m ended at ${r.live.dist}/${r.live.x}; the replay ended at ${r.back.dist}/${r.back.x}, stars ${r.back.stars}/${r.live.stars}, drift ${r.drift}, progress unchanged ${r.same}`);
+  }
+  await page.evaluate(() => { gameOver(); });   // (a guard: no replay running, this is just the real game-over screen again)
+  const replayUi = await page.evaluate(async () => {
+    const shown = !$('replayBtn').hidden;
+    $('replayBtn').click();
+    const bar = !$('replayBar').hidden && state === 'play';
+    for (let i = 0; i < 30; i++) replayStep();
+    $('replaySpeed').click(); const speed = $('replaySpeed').textContent;
+    $('replayExit').click();
+    return { shown, bar, speed, back: state === 'over' && !$('overCard').hidden && $('replayBar').hidden };
+  });
+  // a damaged recording stops with a message instead of showing a different run
+  const replayDrift = await page.evaluate(() => {
+    const keep = lastReplay.dts.slice(); lastReplay.dts[40] += 25; lastReplay.dts[41] += 25;
+    state = 'over'; watchReplay(); let g = 0; while (replaying && g < 200000) { replayStep(); g++; }
+    lastReplay.dts = keep;
+    return floaters.some(fl => /no longer matches/.test(fl.text)) && state === 'over';
+  });
+  check(replayDrift, `a replay that drifts from its run stops with a message: ${replayDrift}`);
+  check(replayUi.shown && replayUi.bar && replayUi.speed === '2×' && replayUi.back,
+    `Watch replay button: shown ${replayUi.shown}, plays with the bar ${replayUi.bar}, speed ${replayUi.speed}, Exit replay goes back ${replayUi.back}`);
+
   // the anonymous play log (v142): never sends from file:// (tests, dev), and has a stored random visitor id
   const plog = await page.evaluate(() => ({ on: LOG_ON, id: visitorId, kept: store.get('nosedive-visitor') === visitorId }));
   check(!plog.on && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(plog.id) && plog.kept,

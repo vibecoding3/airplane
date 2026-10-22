@@ -112,6 +112,15 @@ body {
 #wrap.dark-page .hud { color: #e4f3fb; }
 #wrap.dark-page .hud button { color: #e4f3fb; border-color: #e4f3fb; }
 #wrap.dark-page .version { color: #e4f3fb; }
+/* while watching a replay (v157): a bar near the bottom; taps elsewhere do nothing */
+.replay-bar {
+  position: absolute; left: 50%; bottom: max(34px, calc(env(safe-area-inset-bottom, 0px) + 28px)); transform: translateX(-50%); z-index: 2;
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 14px;
+  background: rgba(255,255,255,.92); border: 2px solid var(--ink); border-radius: 999px; white-space: nowrap;
+}
+.replay-bar[hidden] { display: none; }
+.replay-tag { font: 700 18px var(--display); color: #c4302b; }
+.replay-bar .menu-btn { font-size: 16px; padding: 4px 12px 2px; border-width: 2px; border-bottom-width: 4px; border-radius: 12px; }
 /* map picker: nine picture tiles in three rows of three, on the start screen */
 .map-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .map-tile {

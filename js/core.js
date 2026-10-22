@@ -12,6 +12,18 @@ const COL = {
 // the plane's paper: light/dark are the two wing faces (swapped when banking), keel is the centre fold
 const PLANE = { light: '#ffffff', dark: '#e9e7dd', keel: '#d6d3c6', line: COL.ink };
 const $ = id => document.getElementById(id);
+// Replays (v157) run each game on its own seeded random sequence: during a run's updates Math.random is swapped for it
+// (simFrame in replay.js). Sound and music keep the real one, so muting never changes a run.
+const realRandom = Math.random;
+function seededRandom(seed) {                     // mulberry32: small, fast, and the same on every browser
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), a | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;

@@ -36,6 +36,7 @@ function keySide(k) {
 // Returns false on the start menu, where there is nothing to go back to and the app closes.
 function goBack() {
   if (!ui.coll.hidden) { closeCollections(); return true; }
+  if (replaying) { endReplay(''); return true; }
   if (!ui.lb.hidden) { closeLeaderboards(); return true; }
   if (state === 'play') { pause(); return true; }
   if (state === 'paused') { resume(); return true; }
@@ -113,10 +114,10 @@ function frame(now) {
   last = now;
   watchFrameRate(real);
   countFrame(now);
-  // at high speed, split the frame so the plane can't skip through thin obstacles
-  const sdt = dt * timeScale();                 // slow motion runs the world at half speed
-  const steps = state === 'play' ? Math.max(1, Math.ceil(speed * sdt / 10)) : 1;
-  for (let i = 0; i < steps; i++) update(sdt / steps);
+  if (replaying && (state === 'play' || state === 'dying')) {    // watching: the recorded frames, 1×, 2× or 4×
+    for (let i = 0; i < rSpeed && replaying && state !== 'paused'; i++) replayStep();
+  } else if (state === 'play' || state === 'dying') simFrame(dt); // a run (recorded for its replay, js/replay.js)
+  else update(dt);
   if (state !== 'title') render();   // the start menu's picture covers the playfield, so skip drawing it
   updateHud();
   requestAnimationFrame(frame);
