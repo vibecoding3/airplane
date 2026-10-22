@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v157** (2026-10-22)
+Current version: **v158** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -786,7 +786,7 @@ airplane/
     ├── collections.js      Collections: the sets, finding items during a run, the Collections screen
     ├── playlog.js          anonymous play log: a row per visit and per run sent to Supabase; the server status icon (section 19)
     ├── leaderboard.js      leaderboards: the nickname, the boards screen, sending best depths (section 19)
-    ├── replay.js           replays: recording each run, the shared frame step, watching, sending to Supabase (section 19.2)
+    ├── replay.js           replays: recording each run, the shared frame step, watching, packing for the leaderboards (section 19.2)
     └── main.js             keyboard and touch input, main loop (loads last, starts the game)
 ```
 
@@ -819,7 +819,8 @@ There is no build step and nothing to install. To play locally, open `index.html
 | Frame rate, resolution, input | `js/main.js`, plus `resize` in `js/core.js` |
 | Background art per depth layer | `tools/depth-art.py` (then `python tools/depth-art.py depth-art.css`), `js/render.js` (`syncDepthArt`, `ART_BOUNDS`, `ART_BASE`, `ART_NONE`) |
 | Play log, server status pill | `js/playlog.js` (`LOG_URL`, `LOG_KEY`, `logRow`, `logRun`, `checkServer`, `setNet`), tables in `tools/supabase.sql` |
-| Leaderboards, nickname, server-side XP | `js/leaderboard.js` (`lbCall`, `lbSyncXp`, `lbRunEnded`, `renderBoard`, `lbRefreshRank`), database functions in `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql` |
+| Leaderboards, nickname, server-side XP | `js/leaderboard.js` (`lbCall`, `lbSyncXp`, `lbRunEnded`, `renderBoard`, `lbWatch`, `lbRefreshRank`), database functions in `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql`, `tools/supabase-board-replays.sql` |
+| Replays | `js/replay.js` (`SIM_VERSION`, `simFrame`, `watchReplay`, `replayStep`), section 19.2 |
 | Version label | `index.html` (`id="version"`) |
 
 ### 10.4 Key names by file
@@ -855,8 +856,8 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `ui.js` | `updateHud`, `showCard`, `setXp`, `animateXp`, `start`, `pause`, `resume`, `exitRun`, `keepRunProgress`, `gameOver`, `renderMedals` |
 | `collections.js` | `COLLECTIONS`, `COLLECTION_TOTAL`, `collectionFound`, `noteFound`, `paintCollectionItem`, `renderCollections`, `openCollections` |
 | `playlog.js` | `LOG_URL`, `LOG_KEY`, `LOG_ON`, `visitorId`, `visitId`, `newId`, `logRow`, `logRun`, `NET_TEXT`, `setNet`, `checkServer` |
-| `leaderboard.js` | `LB_MAPS`, `NICK_RULE`, `lbNick`, `lbCall`, `lbSyncBests`, `lbSyncXp`, `setServerXp`, `lbRunEnded`, `lbRefreshRank`, `openLeaderboards`, `renderBoard`, `LB_TOP10`, `playTime` |
-| `replay.js` | `simFrame` (one frame of a run, live or replayed), `startRecording`, `recInput`, `finishRecording`, `watchReplay`, `replayStep`, `endReplay`, `runCheck`, `lastReplay`, `replaying` |
+| `leaderboard.js` | `LB_MAPS`, `NICK_RULE`, `lbNick`, `lbCall`, `lbSyncBests`, `lbSyncXp`, `setServerXp`, `lbRunEnded`, `lbRefreshRank`, `openLeaderboards`, `renderBoard`, `lbWatch`, `LB_TOP10`, `playTime` |
+| `replay.js` | `SIM_VERSION`, `simFrame` (one frame of a run, live or replayed), `startRecording`, `recInput`, `finishRecording`, `packReplay` / `unpackReplay`, `watchReplay`, `replayStep`, `endReplay`, `runCheck`, `lastReplay`, `replaying` |
 | `main.js` | `watchFrameRate`, `frameInterval`, `frame`, `goBack` |
 
 ### 10.5 Dev tools (`tools/`)
@@ -870,7 +871,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 | `node tools/shot.js title [sea]` | Title screen screenshot |
 | `node tools/obstacle-sheets.js [map]` | One picture sheet per map (or just `map`) in `tools/out/obstacles/<map>.png`: every obstacle look, drawn by the game on its map's background colour and labelled with its mechanic, look name, type and the depth it was seen at, five across in the order of the mechanic catalogue. Each look is played forward for about 3 s and pictured at the moment it shows most (a proximity blast before it goes off). Collectibles are left out (v156) |
 | `python tools/depth-art.py depth-art.css` | Regenerates the background art per map layer (edit the script, not the CSS) |
-| `tools/supabase.sql`, `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql`, `tools/supabase-replays.sql` | The database setup for section 19, run once each, in that order, in the Supabase SQL Editor |
+| `tools/supabase.sql`, `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql`, `tools/supabase-board-replays.sql` | The database setup for section 19, run once each, in that order, in the Supabase SQL Editor |
 | `node tools/bundle.js [out.html]` | Inlines `style.css` (with `img/` pictures as data URLs), the bundled fonts (as data URLs) and the scripts into one page (for a single-file copy) |
 
 ---
@@ -1244,11 +1245,13 @@ An anonymous log of who plays and how, kept in a free-tier Supabase project. The
 - **Setup:** run `tools/supabase-leaderboards.sql` once in the SQL Editor (after `tools/supabase.sql`). Tables `players` (visitor id, nickname, joined) and `scores` (visitor id, map, best depth, when).
 - **Tests** use a fake server, so they never write to the real database.
 
-### 19.2 Replays (since v157)
+### 19.2 Replays (since v157; leaderboard replays since v158)
 
-- **Watching:** after every run the game-over screen has a **Watch replay** button (under Play again). It plays the run just finished from memory, so it also works offline. A bar near the bottom shows "▶ Replay", a speed button (1×, 2×, 4×) and **Exit replay**; Space / Esc pause as in a run, and the phone's Back button exits. When the replayed run ends, the real game-over screen comes back unchanged. Watching changes nothing: no XP, stars, bests, collections, play log or leaderboard entries.
-- **How it works:** a run is recorded as its random seed, the world height, every frame's time step and every steering input with its frame number; watching runs the same game code again with the same numbers, so it plays back exactly (checked over 1,200 m runs on three maps in `tools/test.js`). To make that possible: during a run's updates `Math.random` is the run's own seeded generator (`seededRandom` in `js/core.js`, swapped in by `simFrame` in `js/replay.js`), while sound and music keep the real one (`realRandom`) so muting never changes a run; frame steps are rounded to whole milliseconds; the hold-for-a-sharp-turn timer counts the run's own clock (`playClock` in `js/state.js`) instead of the wall clock; and a run always starts with no remembered "last obstacle type". A check value every 60 frames stops a replay with "Replay stopped: it no longer matches the run" if it ever drifts.
-- **Stored in Supabase:** every finished run on the website (not from disk or the app, like the play log) sends a row to `replays`: the visitor and visit ids, game version, map, depth, frame count and the recording (about 1 KB per 15 s of play). The public key can only add rows. Each new row also deletes up to 200 replays older than 30 days, never a player's best run on a map. Setup: `tools/supabase-replays.sql`.
-- **Versions:** a replay only plays back exactly on the game version it was recorded with (stored as `version`); any change to obstacles, spawning or physics changes how a recording plays. Replays may also drift between very different browsers (tiny floating-point differences); the check value catches that. Watching others' replays (for example from the leaderboards) isn't built yet; the stored rows are ready for it.
-- **Rules for future changes** (or replays break): gameplay code (anything `update` runs) must not read the wall clock (`performance.now`, `Date`) or use `realRandom`; per-run state must be reset in `reset()` / `start()`; and a new kind of player input must go through `press` / `release` or be recorded with `recInput`.
-
+- **Watching your last run:** after every run the game-over screen has a **Watch replay** button (under Play again). It plays the run just finished from memory, so it also works offline. A bar near the bottom shows "▶ Replay", a speed button (1×, 2×, 4×) and **Exit replay**; Space / Esc pause as in a run, and the phone's Back button exits. When the replay ends, the screen it was started from comes back unchanged.
+- **Watching from the leaderboards (v158):** on the map boards (not Total score, Level or Time played) a row whose run has a replay gets a red ▶ at the end. It downloads that replay and plays it on its map; afterwards the leaderboards come back, with the player's own map still selected. Rows without a replay (bests from before v158, or synced from the device without a recording) have no button.
+- **What is stored (v158):** only leaderboard runs. When a joined player finishes a run that beats that map's best on their device, the run goes into the device's queue with its replay (`nosedive-runq`, so offline records upload later). Once the server has counted the run (`lb_run`), the game sends the replay (`lb_save_replay`); the server checks it against that counted run (same run id, map and depth) and keeps **one replay per player and map**: a deeper run replaces the stored one, which is deleted. Players without a nickname store nothing. (In v157 every run's replay was stored, with a 30-day cleanup; `tools/supabase-board-replays.sql` drops that table.)
+- **Watching changes nothing:** no XP, stars, bests, collections, play log or leaderboard entries.
+- **How it works:** a run is recorded as its random seed, the world height, every frame's time step and every steering input with its frame number; watching runs the same game code again with the same numbers, so it plays back exactly (checked over 1,200 m runs on three maps, and through the leaderboard round trip, in `tools/test.js`). To make that possible: during a run's updates `Math.random` is the run's own seeded generator (`seededRandom` in `js/core.js`, swapped in by `simFrame` in `js/replay.js`), while sound and music keep the real one (`realRandom`) so muting never changes a run; frame steps are rounded to whole milliseconds; the hold-for-a-sharp-turn timer counts the run's own clock (`playClock` in `js/state.js`); and a run always starts with no remembered "last obstacle type". A check value every 60 frames stops a replay with "Replay stopped: it no longer matches the run" if it ever drifts. Stored replays take about 1 KB per 15 s of play (one character per frame).
+- **Simulation version:** `SIM_VERSION` in `js/replay.js` names the gameplay code a replay needs. It goes up with any change to what `update` does (obstacles, spawning, physics, power-ups); board replays recorded under another number lose their ▶ (the run stays on the board). The game version (`vN`) is stored too, for reference. Replays may also drift between very different browsers (tiny floating-point differences); the check value catches that. On a screen of another shape than the recording's, the replay uses the recorded world height, so the bottom of the view may be cut off or obstacles may appear a little above the bottom edge.
+- **Rules for future changes** (or replays break): gameplay code (anything `update` runs) must not read the wall clock (`performance.now`, `Date`) or use `realRandom`; per-run state must be reset in `reset()` / `start()`; a new kind of player input must go through `press` / `release` or be recorded with `recInput`; and any change to gameplay means `SIM_VERSION + 1`.
+- **Setup:** `tools/supabase-board-replays.sql`, run once after `tools/supabase-levels.sql`. It replaces the replays table, makes counted runs remember their map and depth, updates `lb_run` and `lb_board` (which now returns each row's replay id and simulation version) and adds `lb_save_replay` and `lb_get_replay`.

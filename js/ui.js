@@ -154,8 +154,8 @@ function keepRunProgress(s) {
   if (stars) { bank += stars; store.set('nosedive-bank', String(bank)); }
   const xpBefore = xp, levelUp = levelInfo(xp + s).level > levelInfo(xp).level;
   xp += s; store.set('nosedive-xp', String(xp));
-  lbRunEnded(s);                                       // queued for the server's XP and boards (js/leaderboard.js), after its XP is in
   finishRecording(s, state === 'paused' ? 'exit' : 'crash');   // its replay (js/replay.js)
+  lbRunEnded(s, record);                               // queued for the server's XP and boards (js/leaderboard.js), after its XP is in
   return { record, xpBefore, levelUp };
 }
 // leaving a run from the pause menu: it keeps its progress like a crash, then goes straight to the start menu

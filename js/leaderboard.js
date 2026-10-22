@@ -4,8 +4,11 @@
 // board, top 10 by XP (v146), and the Time played board, top 10 by the seconds of counted runs (v149). On opening the screen all the device's bests are sent once, so records made before
 // joining count too. Since v146 the server keeps the XP of players with a nickname: every finished run is queued on
 // the device and sent in order whenever there is a connection; the server checks and adds it, and the menu then shows
-// the server's XP. Everything goes through database functions (tools/supabase-leaderboards.sql and
-// tools/supabase-levels.sql, README section 19.1). Offline the screen just says so: the game itself never needs it.
+// the server's XP. Since v158 a run that beats the map's best on the device carries its replay in the queue; once the
+// server has counted the run the replay goes up too (one per player and map, the best), and map-board rows with a
+// replay get a ▶ button to watch it. Everything goes through database functions (tools/supabase-leaderboards.sql,
+// tools/supabase-levels.sql, tools/supabase-board-replays.sql, README sections 19.1 and 19.2). Offline the screen just
+// says so: the game itself never needs it.
 const LB_MAPS = ['total', 'level', 'time', ...Object.keys(MAPS)];
 const NICK_RULE = /^[A-Za-z0-9_.-][A-Za-z0-9_. -]{1,14}[A-Za-z0-9_.-]$/;    // the same rule as the database
 let lbNick = store.get('nosedive-nick') || '', lbMap = 'total', lbSynced = false, lbLoad = 0;
@@ -43,8 +46,13 @@ function lbSyncXp() {
     while (lbQueue.length) {
       const r = lbQueue[0];
       serverXp = await lbCall('lb_run', { p_visitor: visitorId, p_run: r.id, p_map: r.map, p_depth: r.depth, p_duration: r.dur });
-      lbQueue.shift(); saveQueue();                 // counted, already counted, or refused (-1): done with it
       if (serverXp === -1) serverXp = null;
+      else if (r.replay) {                          // a counted record run: its replay goes up (a retry is harmless)
+        try {
+          await lbCall('lb_save_replay', { p_visitor: visitorId, p_run: r.id, p_map: r.map, p_depth: r.depth, p_sv: r.sv, p_version: r.v, p_data: r.replay });
+        } catch (e) { if (!/ 4\d\d$/.test(e.message)) throw e; }   // refused (too big, say): drop it; offline: try again later
+      }
+      lbQueue.shift(); saveQueue();                 // counted, already counted, or refused (-1): done with it
     }
     if (serverXp === null) serverXp = await lbCall('lb_my_xp', { p_visitor: visitorId });
     if (typeof serverXp === 'number' && serverXp >= 0 && !lbQueue.length) setServerXp(serverXp);
@@ -55,10 +63,13 @@ function setServerXp(v) {
   xp = v; store.set('nosedive-xp', String(v));
   if (state === 'title' && !ui.title.hidden) setXp($('titleXp'), levelInfo(xp), 0, true);
 }
-// after a run (from keepRunProgress): queue it for the server, which adds its XP and counts it as a best on its map
-function lbRunEnded(depth) {
+// after a run (from keepRunProgress): queue it for the server, which adds its XP and counts it as a best on its map;
+// a new best on the device takes its replay along (lastReplay, just finished)
+function lbRunEnded(depth, record) {
   if (!lbNick) return;
-  lbQueue.push({ id: newId(), map: mapId, depth, dur: Math.round(time) });
+  const run = { id: newId(), map: mapId, depth, dur: Math.round(time) };
+  if (record && lastReplay && lastReplay.depth === depth) Object.assign(run, { replay: packReplay(lastReplay), sv: lastReplay.sv, v: lastReplay.v });
+  lbQueue.push(run);
   saveQueue();
   lbSyncXp();
   rankAt = 0;                                     // the place may have changed: ask again on the start menu
@@ -138,6 +149,7 @@ function renderBoard() {
   list.replaceChildren(); msg.textContent = 'Loading…';
   lbCall(top10 ? top10[0] : 'lb_board', top10 ? { p_visitor: visitorId } : { p_map: lbMap, p_visitor: visitorId }).then(rows => {
     if (load !== lbLoad) return;                     // an older request answering after a newer one
+    list.classList.toggle('with-play', !!MAPS[lbMap]);
     msg.textContent = rows.length ? '' : 'No one on this board yet. Play a run and be the first!';
     let prev = 0;
     for (const r of rows) {
@@ -147,11 +159,33 @@ function renderBoard() {
       for (const [cls, text] of [['lb-rank', '#' + r.rank], ['lb-nick', r.nickname], ['lb-depth', lbMap === 'level' ? 'Level ' + levelInfo(r.depth).level : lbMap === 'time' ? playTime(r.depth) : fmt(r.depth) + (lbMap === 'total' ? '' : ' m')]]) {
         const s = document.createElement('span'); s.className = cls; s.textContent = text; li.append(s);
       }
+      if (MAPS[lbMap]) {                              // map boards: watch the run behind the row, if it has a replay
+        const cell = document.createElement('span'); cell.className = 'lb-play';
+        if (r.replay && r.replay_sv === SIM_VERSION) {
+          const b = document.createElement('button'); b.type = 'button'; b.className = 'lb-play-btn'; b.textContent = '▶';
+          b.title = `Watch ${r.nickname}'s ${fmt(r.depth)} m run`; b.setAttribute('aria-label', b.title);
+          b.addEventListener('click', () => lbWatch(r.replay, b));
+          cell.append(b);
+        }
+        li.append(cell);
+      }
       list.append(li);
       prev = r.rank;
     }
     if (!top10 && !rows.some(r => r.me)) msg.textContent += (msg.textContent ? ' ' : '') + 'You’re not on this board yet.';
   }).catch(() => { if (load === lbLoad) msg.textContent = 'Can’t reach the server. The leaderboards need an internet connection; the game works offline.'; });
+}
+
+// download a board replay and watch it; the board comes back afterwards
+function lbWatch(id, btn) {
+  btn.disabled = true; $('lbMsg').textContent = 'Loading the replay…';
+  lbCall('lb_get_replay', { p_id: id }).then(rows => {
+    const row = rows && rows[0];
+    if (!row || row.sv !== SIM_VERSION) { $('lbMsg').textContent = 'That replay is no longer available.'; return; }
+    $('lbMsg').textContent = '';
+    watchReplay(unpackReplay(row.map, row.depth, row.data), 'lb');
+  }).catch(() => { $('lbMsg').textContent = 'Can’t reach the server to load that replay.'; })
+    .finally(() => { btn.disabled = false; });
 }
 
 $('lbOpen').addEventListener('click', openLeaderboards);

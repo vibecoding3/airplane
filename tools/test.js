@@ -782,6 +782,64 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(replayUi.shown && replayUi.bar && replayUi.speed === '2×' && replayUi.back,
     `Watch replay button: shown ${replayUi.shown}, plays with the bar ${replayUi.bar}, speed ${replayUi.speed}, Exit replay goes back ${replayUi.back}`);
 
+  // leaderboard replays (v158), against a fake server: a joined player's record run takes its replay along, uploaded
+  // after the run is counted; the map board offers ▶ on that row; watching it from the board ends where the run did
+  // and comes back to the board with the player's own map; a run that is no record uploads nothing
+  const lbRep = await page.evaluate(async () => {
+    const calls = [], stored = {};
+    const realFetch = window.fetch;
+    window.fetch = (url, opt) => {
+      const fn = String(url).split('/rpc/')[1];
+      if (!fn) return realFetch(url, opt);
+      const a = JSON.parse(opt.body); calls.push(fn);
+      let reply = null;
+      if (fn === 'lb_run') reply = 1000;
+      else if (fn === 'lb_my_xp') reply = 1000;
+      else if (fn === 'lb_save_replay') { stored[a.p_map] = { depth: a.p_depth, sv: a.p_sv, data: a.p_data }; reply = 'ok'; }
+      else if (fn === 'lb_board') reply = stored[a.p_map] ? [{ rank: 1, nickname: 'Tester 1', depth: stored[a.p_map].depth, me: true, replay: 'rep-' + a.p_map, replay_sv: stored[a.p_map].sv }] : [];
+      else if (fn === 'lb_get_replay') { const m = a.p_id.slice(4); reply = [{ map: m, depth: stored[m].depth, sv: stored[m].sv, nickname: 'Tester 1', data: JSON.parse(JSON.stringify(stored[m].data)) }]; }
+      return Promise.resolve(new Response(reply === null ? null : JSON.stringify(reply), { status: reply === null ? 204 : 200 }));
+    };
+    const keep = { nick: lbNick, map: mapId, best: bests.sea, xp, imported: store.get('nosedive-xp-imported') };
+    lbNick = 'Tester 1'; store.set('nosedive-xp-imported', visitorId); lbQueue.length = 0;
+    // a record run on Ocean, played through the real frame step (shields set inside reset, so the replay has them too)
+    mapId = 'forest'; applyMap(); const myMap = mapId;
+    mapId = 'sea'; applyMap(); bests.sea = 0; best = 0;
+    const realReset = reset; reset = () => { realReset(); plane.lives = 999; };
+    start(); let f = 0;
+    while (state === 'play' && score() < 300 && f < 60 * 120) { if (f % 97 === 11) press(f % 194 === 11 ? -1 : 1, 'keyT'); if (f % 97 === 50) release('keyT'); simFrame(1 / 60); f++; }
+    const live = { dist: dist.toFixed(3), x: plane.x.toFixed(3), depth: score() };
+    pause(); exitRun();
+    const queued = !!(lbQueue[0] && lbQueue[0].replay);
+    await lbSyncXp();
+    const order = calls.filter(c => c === 'lb_run' || c === 'lb_save_replay').join(',');
+    // a second, shorter run is no record: no replay with it
+    start(); for (let i = 0; i < 120; i++) simFrame(1 / 60); pause(); exitRun();
+    const second = lbQueue.length ? !!lbQueue[0].replay : 'sent';
+    await lbSyncXp();
+    reset = realReset;
+    // the board and its ▶
+    mapId = myMap; applyMap(); state = 'title'; showCard('title');
+    openLeaderboards(); lbMap = 'sea'; renderBoard(); await new Promise(r => setTimeout(r, 300));
+    const btn = document.querySelector('#lbList .lb-play-btn');
+    let back = null;
+    if (btn) {
+      reset = () => { realReset(); plane.lives = 999; };       // the replay starts as the run did
+      btn.click(); await new Promise(r => setTimeout(r, 300));
+      const playing = !!replaying && mapId === 'sea';
+      let g = 0, end = null; while (replaying && g < 100000) { end = { dist: dist.toFixed(3), x: plane.x.toFixed(3) }; replayStep(); g++; }
+      reset = realReset;
+      back = { playing, end, lb: !$('lbCard').hidden, state, map: mapId };
+    }
+    window.fetch = realFetch; lbNick = keep.nick; bests.sea = keep.best; xp = keep.xp; lbQueue.length = 0; saveQueue(); lbMap = 'total';
+    if (keep.imported) store.set('nosedive-xp-imported', keep.imported); else localStorage.removeItem('nosedive-xp-imported');
+    mapId = keep.map; applyMap(); showCard('title');
+    return { live, queued, order, second, btn: !!btn, back };
+  });
+  check(lbRep.queued && lbRep.order === 'lb_run,lb_save_replay' && lbRep.second === false && lbRep.btn && lbRep.back && lbRep.back.playing &&
+    lbRep.back.end.dist === lbRep.live.dist && lbRep.back.end.x === lbRep.live.x && lbRep.back.lb && lbRep.back.state === 'title' && lbRep.back.map === 'forest',
+    `leaderboard replays: record run queued with its replay ${lbRep.queued}, sent as ${lbRep.order}, a non-record run has a replay ${lbRep.second}, ▶ on the board ${lbRep.btn}; watched from the board: ${JSON.stringify(lbRep.back)} vs the run ${JSON.stringify(lbRep.live)}`);
+
   // the anonymous play log (v142): never sends from file:// (tests, dev), and has a stored random visitor id
   const plog = await page.evaluate(() => ({ on: LOG_ON, id: visitorId, kept: store.get('nosedive-visitor') === visitorId }));
   check(!plog.on && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(plog.id) && plog.kept,

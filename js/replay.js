@@ -1,11 +1,16 @@
 // Paper Nosedive — replays (v157). A run is recorded as its random seed, the world height, every frame's time step and
 // every steering input (with the frame it came on); watching it runs the same game code again with the same numbers,
-// so it plays back exactly. That only holds on the game version it was recorded with, so the version is stored too.
-// Every finished run's replay is sent to Supabase (website only, like the play log; tools/supabase-replays.sql,
-// README section 19.2); the "Watch replay" button on the game-over screen plays the run just finished from memory,
-// so it works offline. Watching changes nothing: no progress, log, leaderboard or collection is touched.
+// so it plays back exactly as long as the gameplay code is the same: SIM_VERSION says which gameplay code a replay
+// needs. The "Watch replay" button on the game-over screen plays the run just finished from memory (works offline).
+// Since v158 a replay is kept on the server only for leaderboard runs: a joined player's new best on a map goes up
+// with that run (js/leaderboard.js), one per player and map, and anyone can watch it from the map boards
+// (tools/supabase-board-replays.sql, README section 19.2). Watching changes nothing: no progress, log, leaderboard or
+// collection is touched.
 'use strict';
 
+// Bump SIM_VERSION with any change to what `update` does (obstacles, spawning, physics, power-ups): replays recorded
+// under another number are not offered for watching, since they would no longer play back the same.
+const SIM_VERSION = 1;
 const CHECK_EVERY = 60;              // frames between checks that the replay still matches the run
 let runRandom = realRandom;          // the run's own random sequence (seededRandom), used inside simFrame only
 let rec = null;                      // the recording of the run being played, or null
@@ -26,7 +31,7 @@ function recInput(kind, side, source) {
 function startRecording() {
   const seed = Math.floor(realRandom() * 4294967296);
   runRandom = seededRandom(seed);
-  rec = { v: ($('version').textContent.match(/v\d+/) || ['v?'])[0], map: mapId, seed, H, n: 0, dts: [], ev: [], ck: [] };
+  rec = { sv: SIM_VERSION, v: ($('version').textContent.match(/v\d+/) || ['v?'])[0], map: mapId, seed, H, n: 0, dts: [], ev: [], ck: [] };
 }
 
 // one frame of a run, for live play and replays alike: the time step is rounded to whole milliseconds so it can be
@@ -49,25 +54,28 @@ function simFrame(dt) {
   if (rec && !replaying && rec.n % CHECK_EVERY === 0) rec.ck.push(runCheck());
 }
 
-// the run is over (crash or Exit run, from keepRunProgress): keep it for the button and send it to the server
+// the run is over (crash or Exit run, from keepRunProgress): keep it for the button (and a leaderboard run's upload)
 function finishRecording(depth, ended) {
   if (!rec || replaying) return;
   const r = rec; rec = null;
   r.depth = depth; r.ended = ended; r.stars = stars;
   delete r.lastH;
-  if (!r.n) { lastReplay = null; return; }
-  lastReplay = r;
-  // frame steps as one character each: milliseconds from '0' (a 3-minute run is about 11 KB)
-  const dts = String.fromCharCode(...r.dts.map(ms => 48 + ms));
-  const data = { seed: r.seed, H: r.H, dts, ev: r.ev, ck: r.ck, stars: r.stars, ended };
-  logRow('replays', { id: newId(), visit_id: visitId, visitor_id: visitorId, version: r.v, map: r.map, depth, frames: r.n, data });
+  lastReplay = r.n ? r : null;
+}
+// a recording as stored on the server: frame steps as one character each, milliseconds from '0' (about 1 KB per 15 s)
+const packReplay = r => ({ seed: r.seed, H: r.H, dts: String.fromCharCode(...r.dts.map(ms => 48 + ms)), ev: r.ev, ck: r.ck, stars: r.stars, ended: r.ended });
+function unpackReplay(map, depth, data) {
+  const dts = [...data.dts].map(c => c.charCodeAt(0) - 48);
+  return { sv: SIM_VERSION, map, depth, seed: data.seed, H: data.H, n: dts.length, dts, ev: data.ev, ck: data.ck, stars: data.stars, ended: data.ended };
 }
 
 // ---------- watching ----------
-function watchReplay() {
-  const r = lastReplay;
-  if (!r || state !== 'over') return;
+// a replay, from the game-over screen (the run just played) or the leaderboards (someone's best); it returns there
+let replayFrom = 'over', replayKeepMap = '';
+function watchReplay(r = lastReplay, from = 'over') {
+  if (!r || replaying || (from === 'over' && state !== 'over')) return;
   replaying = r; rFrame = 0; rEvent = 0; rCheck = 0; rH = r.H; rSpeed = 1;
+  replayFrom = from; replayKeepMap = mapId;
   if (mapId !== r.map) { mapId = r.map; applyMap(); }
   reset();
   lastType = '';
@@ -99,22 +107,25 @@ function replayStep() {
   rFrame++;
   if (replaying && rFrame % CHECK_EVERY === 0 && r.ck[rCheck++] !== runCheck()) endReplay('drift');
 }
-// the replay is over: back to the game-over screen as it was (the sim's own game over lands here too)
+// the replay is over: back to where it was started, as it was (the sim's own game over lands here too)
 function endReplay(why) {
   if (!replaying) return;
   replaying = null; applyingReplay = false;
-  state = 'over';
   clearControls();
   resize();                                        // this window's own height again
   $('replayBar').hidden = true;
   setMusic('title');
-  showCard('over');
-  if (why === 'drift') floaters.push({ x: W / 2, y: dist + H * 0.4, life: 2.5, size: 20, col: '#c4302b', text: 'Replay stopped: it no longer matches the run' });
+  if (mapId !== replayKeepMap) { mapId = replayKeepMap; applyMap(); }   // the map the player had picked
+  if (replayFrom === 'lb') { reset(); state = 'title'; showCard('lb'); }
+  else { state = 'over'; showCard('over'); }
+  if (why !== 'drift') return;
+  if (replayFrom === 'lb') $('lbMsg').textContent = 'That replay stopped: it no longer matches its run.';
+  else floaters.push({ x: W / 2, y: dist + H * 0.4, life: 2.5, size: 20, col: '#c4302b', text: 'Replay stopped: it no longer matches the run' });
 }
 function syncReplayButton() {
   $('replayBtn').hidden = !lastReplay;
 }
 
-$('replayBtn').addEventListener('click', watchReplay);
+$('replayBtn').addEventListener('click', () => watchReplay());
 $('replayExit').addEventListener('click', () => endReplay(''));
 $('replaySpeed').addEventListener('click', () => { rSpeed = rSpeed === 1 ? 2 : rSpeed === 2 ? 4 : 1; $('replaySpeed').textContent = rSpeed + '×'; });
