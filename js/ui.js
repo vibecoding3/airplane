@@ -7,7 +7,7 @@ const ui = {
   overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'), coll: $('collCard'), lb: $('lbCard'),
   overBank: $('overBank'),
   overTitle: $('overTitle'), overBest: $('overBest'), stamp: $('recordStamp'),
-  muteBtn: $('muteBtn'), hint: $('hint')
+  muteBtn: $('muteBtn'), pauseBtn: $('pauseBtn'), hint: $('hint')
 };
 let hudDepth = -1, hudStars = -1, hudBest = -1;
 // control tips for the first 100 m of a run, left of the sound button: one at a time, changing every 3 seconds,
@@ -113,7 +113,8 @@ const svg = body => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" str
 const SPEAKER = '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="none"/>';
 const ICONS = {
   sound: svg(SPEAKER + '<path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/>'),
-  muted: svg(SPEAKER + '<path d="M16 9.5l5 5M21 9.5l-5 5"/>')
+  muted: svg(SPEAKER + '<path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
+  pause: svg('<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>')
 };
 function setMuteLabel() {
   ui.muteBtn.innerHTML = muted ? ICONS.muted : ICONS.sound;
@@ -197,6 +198,10 @@ $('resumeBtn').addEventListener('click', resume);
 $('exitBtn').addEventListener('click', exitRun);
 $('overMenuBtn').addEventListener('click', toMainMenu);
 
+// the pause button (v151; removed in v118): touch screens only, where there is no Space or Esc key (CSS hides it on
+// computers). While paused the pause card covers it and Resume takes over.
+ui.pauseBtn.innerHTML = ICONS.pause;
+ui.pauseBtn.addEventListener('click', pause);
 ui.muteBtn.addEventListener('click', () => {
   muted = !muted;
   store.set('nosedive-muted', muted ? '1' : '0');

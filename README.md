@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v150** (2026-10-22)
+Current version: **v151** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -703,7 +703,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Setting | Where | Notes |
 |---|---|---|
 | Sound on/off | Top bar (speaker icon, crossed out when muted) | Mutes sound effects and music together. Both are generated in code (Web Audio), with no audio files |
-| Pause / Resume | Space bar, Esc (P no longer pauses since v67); the phone Back button in the Android app. The top bar's pause button was removed in v118 | Also pauses automatically when the tab is hidden or the window loses focus |
+| Pause / Resume | Space bar, Esc (P no longer pauses since v67); the phone Back button in the Android app; on touch screens (phones, tablets, the app) a pause button in the top bar, left of the sound button (removed in v118, back for touch screens only in v151; computers don't show it) | Also pauses automatically when the tab is hidden or the window loses focus |
 | Exit run | Pause menu, under Resume (since v71) | Ends the run and goes straight to the start menu. The run keeps what it earned, like a crash: a new best depth, its stars, and its metres as XP |
 | Map | Start screen only (since v119) | Paper / Ocean / Space / Dungeon / Neon City / Forest / Desert / Volcano / Kitchen picture tiles |
 

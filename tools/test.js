@@ -216,9 +216,9 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     dist = 220 * PX_PER_M; update(1 / 60); updateHud();
     const past = $('hint').hidden;
     gameOver(); updateHud();
-    return { atStart, still, past, after: $('hint').hidden, button: !!document.getElementById('pauseBtn') };
+    return { atStart, still, past, after: $('hint').hidden };
   });
-  check(hint.atStart && hint.still && hint.past && hint.after && !hint.button, `control tips: shown at the start ${hint.atStart}, still at 150 m ${hint.still}, hidden past 200 m ${hint.past}, hidden after the run ${hint.after}; no pause button in the top bar ${!hint.button}`);
+  check(hint.atStart && hint.still && hint.past && hint.after, `control tips: shown at the start ${hint.atStart}, still at 150 m ${hint.still}, hidden past 200 m ${hint.past}, hidden after the run ${hint.after}`);
 
   // collectibles appear at most once per run; once all 9 rings have appeared, rings leave the pool
   const once = await page.evaluate(() => {
@@ -699,6 +699,12 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   const resumed2 = await page.evaluate(() => state);
   check(paused === 'paused' && resumed === 'play' && paused2 === 'paused' && resumed2 === 'play',
     `pause with Space, resume by button and by Space: ${paused}/${resumed}/${paused2}/${resumed2}`);
+  // the pause button (v151): shown on touch screens (the test page is a phone), a tap pauses
+  const pauseBtnShown = await page.evaluate(() => getComputedStyle($('pauseBtn')).display !== 'none' && $('pauseBtn').getBoundingClientRect().width > 0);
+  await page.tap('#pauseBtn'); await wait(150);
+  const tapPaused = await page.evaluate(() => state);
+  await page.click('#resumeBtn'); await wait(150);
+  check(pauseBtnShown && tapPaused === 'paused' && await page.evaluate(() => state) === 'play', `pause button on a phone: shown ${pauseBtnShown}, a tap gives ${tapPaused}`);
 
   // the pause menu's Exit run button: back to the start menu, keeping the run's metres as XP
   await page.evaluate(() => { dist = 120 * PX_PER_M; });
