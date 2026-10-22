@@ -106,50 +106,64 @@ function drawVolcanoPlate(x0, x1, sy, innerX, outDir, o) {
 }
 
 // ---------- Static Hazards: volcanic bombs with glowing cracks, sulfur crystal clusters or pumice, inside the hit circle ----------
-// Minecraft ores (v148, a temporary exception to "original designs only", to be replaced before the Google Play release):
-// Static Hazard variants, each a small 3D ore block, the top lightest and the right face darkest, every face an 8×8
-// grid of stone with the mineral's spots. Drawn inside a 20-unit circle (also used by the Collections screen).
-const ORE_NAMES = { coal: 'Coal ore', iron: 'Iron ore', copper: 'Copper ore', gold: 'Gold ore', redstone: 'Redstone ore',
-                    lapis: 'Lapis lazuli ore', emerald: 'Emerald ore', diamond: 'Diamond ore', quartz: 'Nether quartz ore', debris: 'Ancient debris' };
-// stone: three tones of the block; spot: the mineral's dark and light tone
-const ORE_LOOKS = {
-  coal: { spot: ['#1c1c1c', '#3a3a3a'] }, iron: { spot: ['#c89a78', '#e8c8a8'] }, copper: { spot: ['#c86a40', '#5fb89a'] },
-  gold: { spot: ['#e8b820', '#fff07a'] }, redstone: { spot: ['#b01010', '#ff3a2a'] }, lapis: { spot: ['#1a3aa0', '#3a6ae0'] },
-  emerald: { spot: ['#10a050', '#5af08a'] }, diamond: { spot: ['#3ac8c8', '#a8fff0'] },
-  quartz: { stone: ['#6e2a2a', '#7e3434', '#5e2222'], spot: ['#d8d0c4', '#fffaf0'] },
-  debris: { stone: ['#5a3e36', '#6a4a40', '#4a322c'], spot: ['#3a2622', '#8a6a5e'] }
+// Minecraft minerals (v150; ores until v149; a temporary exception to "original designs only", to be replaced before
+// the Google Play release): Static Hazard variants, each the item its ore smelts or breaks into, drawn as a 16×16 pixel
+// icon with a dark outline (k) and five tones from highlight (e) to darkest (a). Drawn inside a 20-unit circle (also
+// used by the Collections screen). The save ids stay `ore-*`, so items found as ores stay found.
+const MINERAL_NAMES = { coal: 'Coal', iron: 'Iron ingot', copper: 'Copper ingot', gold: 'Gold ingot', redstone: 'Redstone dust',
+                        lapis: 'Lapis lazuli', emerald: 'Emerald', diamond: 'Diamond', quartz: 'Nether quartz', debris: 'Netherite scrap' };
+// a diagonal bar, bottom left to top right (it fills the hit circle better than a flat one)
+const INGOT = ['................', '................', '..........kkk...', '........kkeedk..',
+               '......kkeeddddk.', '....kkeedddddck.', '..kkeedddddddck.', '.keedddddddccbk.',
+               '.kddddddddccbbk.', '.kcdddddccbbbk..', '.kccdddccbbbk...', '.kcccdccbbk.....',
+               '.kbcccbbk.......', '..kkbbk.........', '....kk..........', '................'];
+const LUMP = ['................', '................', '................', '......kkk.......',
+              '....kkbcbkk.....', '...kbccddcbk....', '..kbcdeedccbk...', '..kccdedcccbbk..',
+              '.kbcccdccccbbk..', '.kbccccccccbak..', '.kbbccccccbbak..', '..kbbbccbbbak...',
+              '...kkabbbaak....', '.....kkkkkk.....', '................', '................'];
+const MINERAL_LOOKS = {
+  coal: { rows: LUMP, pal: { e: '#6a6a6a', d: '#484848', c: '#2e2e2e', b: '#1e1e1e', a: '#101010', k: '#000000' } },
+  iron: { rows: INGOT, pal: { e: '#ffffff', d: '#e8e8e8', c: '#c8c8c8', b: '#a0a0a0', a: '#6e6e6e' } },
+  copper: { rows: INGOT, pal: { e: '#ffd0b0', d: '#ec8c5c', c: '#c8643a', b: '#9a4a2a', a: '#5e2e18' } },
+  gold: { rows: INGOT, pal: { e: '#fffbd0', d: '#fde34a', c: '#f0c020', b: '#d09010', a: '#8a5a00' } },
+  redstone: { rows: ['................', '................', '................', '................',
+                     '.......kk.......', '......kddk......', '.....kdeddk.k...', '...k.kdddcdkdk..',
+                     '..kdkkcdccccdk..', '.kdeddcccccbbck.', '.kcdcccbccbbbbk.', '..kkkkkkkkkkkk..',
+                     '................', '................', '................', '................'],
+              pal: { e: '#ff9a8a', d: '#ff2a1a', c: '#d00000', b: '#900000', a: '#500000' } },
+  lapis: { rows: ['................', '................', '................', '......kkkk......',
+                  '.....kddcck.....', '....kdeddccbk...', '...kddddcccbbk..', '..kdedcccecbbk..',
+                  '..kddcccccbbak..', '...kcccecbbbak..', '...kcccbbbbak...', '....kbbbbaak....',
+                  '.....kkkkkk.....', '................', '................', '................'],
+           pal: { e: '#a8c8ff', d: '#4a7ae8', c: '#2a50c0', b: '#1a3490', a: '#0e1e5a' } },
+  emerald: { rows: ['................', '......kkkk......', '.....kdeedk.....', '....kddeeddk....',
+                    '...kcddeeddck...', '...kcddddddck...', '...kccddddcck...', '...kccddddcck...',
+                    '...kccddddcck...', '...kccddddcck...', '...kccddddcck...', '...kbccddccbk...',
+                    '...kbbccccbbk...', '....kbbccbbk....', '.....kabbak.....', '......kkkk......'],
+             pal: { e: '#d8ffe4', d: '#3ae08a', c: '#18b060', b: '#0a7a40', a: '#044a24' } },
+  diamond: { rows: ['................', '................', '................', '....kkkkkkkk....',
+                    '...keeddddcck...', '..keedddddccbk..', '.keddddddddccbbk', '.kbbbbbbbbbbbbak',
+                    '..kdddddddccbk..', '...kddddddcbk...', '....kddddcbk....', '.....kdddbk.....',
+                    '......kdbk......', '.......kk.......', '................', '................'],
+             pal: { e: '#ffffff', d: '#8af5f0', c: '#4ad8d8', b: '#2aa8b0', a: '#1a7080' } },
+  quartz: { rows: ['................', '................', '........kk......', '.......kedk.....',
+                   '...k...kedk.....', '..kek..kddk..k..', '..kdk..kddk.kek.', '..kdk..kdck.kdk.',
+                   '..kdck.kdck.kdk.', '..kdck.kdck.kdck', '.kdckkkdcckkdck.', '.krrrrrrrrrrrrk.',
+                   '.kRrrRrrrRrrRrk.', '..kkkkkkkkkkkk..', '................', '................'],
+            pal: { e: '#ffffff', d: '#ece4da', c: '#c8bcae', b: '#a89888', r: '#8a3030', R: '#6a2222' } },
+  debris: { rows: LUMP, pal: { e: '#9a8078', d: '#6e564e', c: '#523e38', b: '#3c2c28', a: '#261c1a', k: '#120c0a' } }
 };
-const ORE_STONE = ['#7f7f7f', '#8f8f8f', '#6f6f6f'];
-// where the mineral sits on each 8×8 face: 2 = light, 1 = dark ('debris' gets swirls instead of clusters)
-const ORE_SPOTS = ['........', '.12.....', '.11..2..', '.....11.', '..2.....', '.211..1.', '..1..12.', '........'];
-const DEBRIS_SPOTS = ['.111111.', '1......1', '1.2222.1', '1.2..2.1', '1.2..2.1', '1.2222.1', '1......1', '.111111.'];
-function shadeHex(hex, k) {
-  const n = parseInt(hex.slice(1), 16), f = v => Math.max(0, Math.min(255, Math.round(v * k)));
-  return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
-}
-function paintOre(name) {
-  const L = ORE_LOOKS[name], stone = L.stone || ORE_STONE, spots = name === 'debris' ? DEBRIS_SPOTS : ORE_SPOTS;
-  const r = 19, a = r * Math.cos(Math.PI / 6);
-  // a face from its corner o along edges u and v (each 8 cells long), lit by k
-  const face = (ox, oy, ux, uy, vx, vy, k, flip) => {
-    ctx.save(); ctx.transform(ux / 8, uy / 8, vx / 8, vy / 8, ox, oy);
-    for (let j = 0; j < 8; j++) for (let i = 0; i < 8; i++) {
-      const s = spots[j][flip ? 7 - i : i], h = (i * 7 + j * 13 + (flip ? 5 : 0)) % 3;
-      ctx.fillStyle = shadeHex(s === '1' ? L.spot[0] : s === '2' ? L.spot[1] : stone[h], k);
-      ctx.fillRect(i, j, 1.04, 1.04);                // a hair over 1 so no seams show between cells
-    }
-    ctx.restore();
-  };
-  face(0, -r, a, r / 2, -a, r / 2, 1.18, false);     // top
-  face(-a, -r / 2, a, r / 2, 0, r, 0.92, true);       // left
-  face(0, 0, a, -r / 2, 0, r, 0.7, false);            // right
-  ctx.beginPath();
-  ctx.moveTo(0, -r); ctx.lineTo(a, -r / 2); ctx.lineTo(a, r / 2); ctx.lineTo(0, r); ctx.lineTo(-a, r / 2); ctx.lineTo(-a, -r / 2); ctx.closePath();
-  ctx.moveTo(-a, -r / 2); ctx.lineTo(0, 0); ctx.lineTo(a, -r / 2); ctx.moveTo(0, 0); ctx.lineTo(0, r);
-  volStroke(1.4);
+function paintMineral(name) {
+  const { rows, pal } = MINERAL_LOOKS[name], cell = 40 / 16;
+  for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) {
+    const ch = rows[j][i];
+    if (ch === '.') continue;
+    ctx.fillStyle = pal[ch] || (ch === 'k' ? VOL_LINE : '#ff00ff');
+    ctx.fillRect(-20 + i * cell, -20 + j * cell, cell + 0.05, cell + 0.05);   // a hair over one cell: no seams
+  }
 }
 function drawVolcanoHazard(o, sy) {
-  if (o.ore) { const k = o.r * 0.95 / 20; blit(sharedSprite('ore-' + o.ore, 46, 46, 23, 23, () => paintOre(o.ore)), o.x, sy, 0, k, k); return; }
+  if (o.mineral) { const k = o.r * 0.95 / 20; blit(sharedSprite('mineral-' + o.mineral, 44, 44, 22, 22, () => paintMineral(o.mineral)), o.x, sy, 0, k, k); return; }
   const col = o.volCol || '#3a302a', R = o.r * 0.88, look = o.look || 'bomb';
   blit(ownSprite(o, 'spr', R * 2 + 12, R * 2 + 12, R + 6, R + 6, () => {
     if (look === 'sulfur') {                       // yellow crystal prisms on a dark rock

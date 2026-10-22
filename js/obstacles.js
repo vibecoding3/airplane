@@ -645,9 +645,10 @@ const volcanoLayer = y => { const m = y / PX_PER_M; return m < 150 ? 0 : m < 400
 // Volcanic stones collection: Rising Projectile variants (among the lava bombs), each at most once per run
 const VOLC_STONES = ['obsidian', 'pumice', 'basalt', 'sulfur', 'olivine', 'geode', 'peleshair', 'spindlebomb'];
 const stonesLeft = () => VOLC_STONES.filter(n => !runCollected.has('stone-' + n));
-// Minecraft ores collection (v148): Static Hazard variants (among the bombs, sulfur and pumice), each at most once per run
-const VOLC_ORES = ['coal', 'iron', 'copper', 'gold', 'redstone', 'lapis', 'emerald', 'diamond', 'quartz', 'debris'];
-const oresLeft = () => VOLC_ORES.filter(n => !runCollected.has('ore-' + n));
+// Minecraft minerals collection (v150; ores in v148–v149): Static Hazard variants (among the bombs, sulfur and pumice),
+// each at most once per run. The save ids are still `ore-<name>`, so items found as ores stay found.
+const VOLC_MINERALS = ['coal', 'iron', 'copper', 'gold', 'redstone', 'lapis', 'emerald', 'diamond', 'quartz', 'debris'];
+const mineralsLeft = () => VOLC_MINERALS.filter(n => !runCollected.has('ore-' + n));
 // each Volcano mechanic has one to three looks sharing its hit box; some only appear in certain layers (VOLCANO_LAYERS)
 const VOLCANO_LOOKS = {
   gate: { basalt: ['#3a3a42', '#46464e'], crust: ['#2a2420'] },
@@ -937,9 +938,9 @@ function spawnFromPool(y, d, pool) {
         const left = stonesLeft();
         if (left.length && Math.random() < 0.5) { o.stone = left[ri(0, left.length - 1)]; runCollected.add('stone-' + o.stone); }
       }
-      if (o.type === 'blot') {                   // a Minecraft ore not yet seen this run (each once per run)
-        const left = oresLeft();
-        if (left.length && Math.random() < 0.4) { o.ore = left[ri(0, left.length - 1)]; runCollected.add('ore-' + o.ore); }
+      if (o.type === 'blot') {                   // a Minecraft mineral not yet seen this run (each once per run)
+        const left = mineralsLeft();
+        if (left.length && Math.random() < 0.4) { o.mineral = left[ri(0, left.length - 1)]; runCollected.add('ore-' + o.mineral); }
       }
     } else if (mapId === 'kitchen') {
       o.kitchen = true;
