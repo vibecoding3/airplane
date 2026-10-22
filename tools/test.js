@@ -461,18 +461,28 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   });
   check(artClips.length === 0, 'Depth art fills the screen after a layer edge' + (artClips.length ? ': ' + artClips.join(', ') : ''));
 
-  // the Sunken treasures collection: treasures among the Ocean's city relics (400–1,500 m), each once per run
+  // the Sunken treasures collection: treasures among the Ocean's city relics (400–1,500 m), each once per run, plain
+  // relics once all 8 have appeared. A natural run only meets a handful of urchin rows in the city (about 3 in 10 runs
+  // see fewer than 4 treasures), so the rows are spawned directly: 300 urchin rows from 0 to 2,500 m in one run.
   const treasures = await page.evaluate(() => {
-    mapId = 'sea'; applyMap(); start(); const seen = new Map(); let outside = 0;
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
-      for (const o of obstacles) if (o.treasure) { if (!seen.has(o.treasure)) seen.set(o.treasure, new Set()); seen.get(o.treasure).add(o); if (o.layer !== 2 && o.layer !== 3) outside++; }
+    mapId = 'sea'; applyMap(); start(); const seen = new Map(); let outside = 0, allAt = 0, afterAll = 0;
+    for (let i = 0; i < 300; i++) {
+      const md = (i + 0.5) / 300 * 2500, k = obstacles.length;
+      lastType = ''; spawnFromPool(md * PX_PER_M, 1 - Math.exp(-md / 600), [['urchins', 1]]);
+      for (const o of obstacles.slice(k)) {
+        if (!o.treasure) continue;
+        if (!seen.has(o.treasure)) seen.set(o.treasure, new Set()); seen.get(o.treasure).add(o);
+        if (o.layer !== 2 && o.layer !== 3) outside++;
+        if (allAt) afterAll++;
+      }
+      if (seen.size === 8 && !allAt) allAt = md;
+      obstacles.length = 0;
     }
     gameOver();
-    return { seen: seen.size, repeats: [...seen.values()].filter(x => x.size > 1).length, outside };
+    return { seen: seen.size, repeats: [...seen.values()].filter(x => x.size > 1).length, outside, allAt: Math.round(allAt), afterAll };
   });
-  check(treasures.repeats === 0 && treasures.seen >= 4 && treasures.outside === 0,
-    `Sunken treasures collection: ${treasures.seen}/8 seen in a run to 2,500 m, repeats ${treasures.repeats}, outside the city ${treasures.outside}`);
+  check(treasures.seen === 8 && treasures.repeats === 0 && treasures.outside === 0 && treasures.afterAll === 0,
+    `Sunken treasures collection: ${treasures.seen}/8 seen in 300 urchin rows (all by ${treasures.allAt} m), repeats ${treasures.repeats}, outside the city ${treasures.outside}, treasures after all 8 ${treasures.afterAll}`);
 
   // the Ocean's sunken city: from 400 to 1,500 m every look is a city look, and no city look appears outside it
   const city = await page.evaluate(() => {

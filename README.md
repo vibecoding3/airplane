@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v154** (2026-10-22)
+Current version: **v155** (2026-10-22)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -863,7 +863,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 | Command | What it does |
 |---|---|
-| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all nine maps to 2,500 m (or `depth`) with every obstacle type appearing, every collection set, normal runs ending in game over, pause and resume (keys and the touch pause button), the play log staying off from disk, the server status icon, and the leaderboards against a fake server (it never writes to the real database), with no page errors. Exits with code 1 on any problem. `node tools/test.js 800` is faster: it skips the all-obstacle-types check. The Sunken treasures check fails at random now and then (it needs 4 of 8 treasures in one run) |
+| `node tools/test.js [depth]` | Loads the game in headless Chrome and checks: title screen, menus, deep runs on all nine maps to 2,500 m (or `depth`) with every obstacle type appearing, every collection set, normal runs ending in game over, pause and resume (keys and the touch pause button), the play log staying off from disk, the server status icon, and the leaderboards against a fake server (it never writes to the real database), with no page errors. Exits with code 1 on any problem. `node tools/test.js 800` is faster: it skips the all-obstacle-types check. |
 | `node tools/shot.js <notebook|sea|space|dungeon|city|forest|desert|volcano|kitchen> <depth…>` | Phone-size (412×860) gameplay screenshots at those depths |
 | `node tools/shot.js title [sea]` | Title screen screenshot |
 | `python tools/depth-art.py depth-art.css` | Regenerates the background art per map layer (edit the script, not the CSS) |
@@ -1085,7 +1085,7 @@ A review of the whole game after v75. Nothing here goes against the player decis
 **Smaller things noticed along the way:**
 - In Space, an Earth planet obstacle can appear right after the plane leaves the real Earth; it could be blocked for the first 100 m.
 - The speed boost goes 10% past the top-speed cap (v55); it could be limited if the cap should always hold.
-- Some test checks fail at random now and then; making them reliable means a failure always means something real. ✅ The wind check is fixed in v87: when a deep run misses its wind obstacle, the test looks again in up to 6 short runs to 760 m. Still random: the short-run power-up counts, and since v133 the Sunken treasures check (it needs 4 of the 8 treasures in one run and often sees 1–3).
+- Some test checks fail at random now and then; making them reliable means a failure always means something real. ✅ The wind check is fixed in v87: when a deep run misses its wind obstacle, the test looks again in up to 6 short runs to 760 m. Still random: the short-run power-up counts. ✅ The Sunken treasures check (random since v133: it needed 4 of the 8 treasures in one natural run, which about 3 runs in 10 missed) is fixed in v155: it spawns 300 urchin rows directly and expects all 8.
 - Obstacles and looks are uneven across the maps (from 24 looks on Space to 82 on Ocean); the counts and a plan are in `design/obstacle-balance.md`. Since v125 every obstacle can appear at any depth, so nothing unlocks later anymore.
 
 **Suggested first three:** 1 (a purpose for stars and levels), 2 ("Crumpled by…") and 3 (close calls); 4 is done.
