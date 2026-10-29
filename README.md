@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v167** (2026-10-29)
+Current version: **v168** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -86,6 +86,20 @@ Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a n
 | Volcano | Jungle leaves | Ash-streaked rock | Basalt hexagons | Ribbed lava-tube rock with glowing seams | Magma cells |
 | Kitchen | Flower wallpaper | Wood grain | Checkered tiles | Blue mosaic | A ridged fridge wall with frost |
 
+**Region names** (Ocean v166, every map v168): every 100 m depth marker shows its depth above the line and, below it, the name of the region the plane is falling into, both centred (the depth was on the right until v167). The regions are the background-art layers above (`REGIONS` in `js/maps.js`):
+
+| Map | 0–200 m | 200–400 m | 400–800 m | 800–1,500 m | 1,500 m + |
+|---|---|---|---|---|---|
+| Paper | Notebook page | Graph paper | Dot grid | Sheet music | Blueprint |
+| Ocean | Sunlit reef | Twilight zone | Sunken ruins | Dome city | The abyss |
+| Space | Low orbit | Moon orbit | The planets | Deep space | Far galaxies |
+| Dungeon | The well | Torch halls | The crypt | Crystal caves | The underworld |
+| Neon City | Rooftops | The streets | The subway | The arcade | The data core |
+| Forest | Spring | Summer | Autumn | Winter | Night |
+| Desert | The dunes | The canyon | The oasis | Fossil beds | Amber |
+| Volcano | Jungle slope | Ash cloud | The crater | Lava tubes | Magma chamber |
+| Kitchen | Top shelf | The countertop | The stove | The sink | The fridge |
+
 The patterns live in `depth-art.css` (made by `python tools/depth-art.py depth-art.css`); `syncDepthArt` in `js/render.js` picks them and clips them at the edge on two layers (`#artA` above it, `#artB` below it) under the map's own `#ruling` layer (`ART_BASE`, `ART_NONE`, `ART_BOUNDS`).
 
 ### 4.1 Paper
@@ -113,7 +127,7 @@ The patterns live in `depth-art.css` (made by `python tools/depth-art.py depth-a
 | 600 m + | Now and then, a faded shipwreck resting in the dark |
 
   The specks are placed by a hash of the page position, so nothing is stored per speck. Whales and wrecks are kept at least about 30 m apart, so two never share the screen.
-- **Region names** (v166, Ocean only): under every 100 m depth marker, a smaller label names the region below it (since v167 both the depth and the region are centred on the line; other maps keep the depth on the right): Sunlit reef (0–200 m), Twilight zone (200–400 m), Sunken ruins (400–800 m), Dome city (800–1,500 m), The abyss (1,500 m +), the same layers as the background art (`SEA_REGIONS` in `js/maps.js`).
+- **Region names** (v166): under every 100 m depth marker, the region below it, centred on the line with the depth (see the region table in section 4).
 - **Readability:** on dark water, the top bar and the depth markers switch to light colours.
 - **Background decoration:** fish instead of formulas. They are faded, never collide with the plane, swim slowly sideways, and get more dangerous with depth:
 

@@ -135,8 +135,19 @@ function drawBestLine() {
   ctx.restore();
 }
 
-// Ocean only (v166): under each depth marker, the name of the region below it, one per depth-art layer (ART_BOUNDS)
-const SEA_REGIONS = ['Sunlit reef', 'Twilight zone', 'Sunken ruins', 'Dome city', 'The abyss'];
+// under each depth marker, the name of the region below it, one per depth-art layer (ART_BOUNDS): the Ocean since v166,
+// every map since v168
+const REGIONS = {
+  notebook: ['Notebook page', 'Graph paper', 'Dot grid', 'Sheet music', 'Blueprint'],
+  sea: ['Sunlit reef', 'Twilight zone', 'Sunken ruins', 'Dome city', 'The abyss'],
+  space: ['Low orbit', 'Moon orbit', 'The planets', 'Deep space', 'Far galaxies'],
+  dungeon: ['The well', 'Torch halls', 'The crypt', 'Crystal caves', 'The underworld'],
+  city: ['Rooftops', 'The streets', 'The subway', 'The arcade', 'The data core'],
+  forest: ['Spring', 'Summer', 'Autumn', 'Winter', 'Night'],
+  desert: ['The dunes', 'The canyon', 'The oasis', 'Fossil beds', 'Amber'],
+  volcano: ['Jungle slope', 'Ash cloud', 'The crater', 'Lava tubes', 'Magma chamber'],
+  kitchen: ['Top shelf', 'The countertop', 'The stove', 'The sink', 'The fridge']
+};
 function drawDepthMarkers() {
   for (let k = Math.max(1, pageIndexAt(dist - 20) + 1), y; (y = pageTop(k) - dist) < H + 20; k++) {
     const col = mapId === 'city' ? NEON_MARKS[(k - 1) % NEON_MARKS.length] : isDark(pageColor(k)) ? '#d8eefa' : COL.graphite;
@@ -144,13 +155,10 @@ function drawDepthMarkers() {
     ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.3; ctx.setLineDash([8, 6]);
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     ctx.setLineDash([]);
-    const sea = mapId === 'sea', x = sea ? W / 2 : W - 10;   // the Ocean centres its depth and region (v167)
-    ctx.fillStyle = col; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = sea ? 'center' : 'right';
-    ctx.fillText(fmt(k * PAGE_M) + ' m', x, y - 6);
-    if (sea) {
-      ctx.font = '700 13px Kalam, cursive';
-      ctx.fillText(SEA_REGIONS[ART_BOUNDS.filter(b => b <= k * PAGE_M).length], x, y + 16);
-    }
+    ctx.fillStyle = col; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = 'center';   // centred since v167 (right before)
+    ctx.fillText(fmt(k * PAGE_M) + ' m', W / 2, y - 6);
+    ctx.font = '700 13px Kalam, cursive';
+    ctx.fillText(REGIONS[mapId][ART_BOUNDS.filter(b => b <= k * PAGE_M).length], W / 2, y + 16);
     ctx.restore();
   }
 }
