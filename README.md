@@ -769,7 +769,7 @@ airplane/
 ├── CLAUDE.md               short working notes for Claude Code (loaded automatically)
 ├── tools/                  dev-only test, screenshot and bundle scripts, the background-art generator and the Supabase SQL (see 10.5)
 ├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
-├── design/                 design notes: maps/<map>.md per map (premise, layers, obstacles, spawn tables) and obstacle-balance.md (obstacles and looks per map, v153)
+├── design/                 design notes: maps/<map>.md per map (premise, layers, obstacles, spawn tables) and obstacle-balance.md (obstacles and looks per map, v153), regions.md (the Regions design proposal)
 ├── ref/                    reference pictures (map-icon sheets, screenshots the player shared); git ignores it, not used by the game
 └── js/                     35 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
@@ -900,6 +900,8 @@ Not used by the game; for testing during development. Set up once with `cd tools
 ## 11. Direction
 
 **Nine maps: Paper, Ocean, Space, Dungeon, Neon City, Forest, Desert, Volcano and Kitchen,** each chosen from the main menu. Any new map should be built from the mechanics in section 6, with new art.
+
+**Regions** (proposal, 2026-10-29, not built): every map as a journey through regions, each with one theme for its colours, background, scenery and obstacle skins, all changing on the same depth line. See `design/regions.md`.
 
 ---
 
