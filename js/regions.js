@@ -35,9 +35,9 @@ const MAP_REGIONS = {
                scissors: ['hermitcrab'] } },
     { id: 'ruins', name: 'Sunken ruins', from: 400, art: 'art-sea-2', music: 'seaRuins', specks: 'snow', collections: ['treasures'],
       scenery: ['lion', 'barracuda', 'tuna', 'ucArch', 'ucTowers'],
-      // one design per obstacle (v183), with Atlantis
+      // one design per obstacle (v183), with Atlantis and, since v184, one of Nemo's divers with his rifle
       skins: { gate: ['columns'], blot: ['amphora'], note: ['lantern'], erasers: ['templedoors'],
-               cutter: ['trident'], paw: ['statuearm'], glue: ['fishfountain'], starfish: ['calendar'],
+               cutter: ['trident'], paw: ['statuearm'], glue: ['riflediver'], starfish: ['calendar'],
                zap: ['glyph'], mine: ['bubblemine'], bubbles: ['templevent'], fan: ['pump'], clips: ['scrolls'],
                wad: ['lanternfloat'], protractor: ['atlantis'], pencil: ['beam'], band: ['mooring'],
                compass: ['bronzestaff'], scissors: ['millwheel'] } },

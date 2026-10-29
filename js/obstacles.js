@@ -274,7 +274,7 @@ const SEA_LOOKS = {
   erasers: { clam: ['#e9d3c4', '#f2c6c2', '#d8c8e8', '#cfe3d0'], wreckhull: ['#7a5a3a', '#6a4e36'], gulper: ['#6a5a88', '#5a6a88', '#885a7a'], giantoyster: ['#a8a090', '#9a9488'] },
   cutter: { moray: ['#5f7f3a', '#6b8e23', '#4a6b3a'], mantis: ['#3fb07a', '#e05a8a', '#3a9ad8'], viperfish: ['#6a8098', '#7a6a98', '#6a988a'], harpoon: ['#a8743e', '#8a5a32', '#c89a5a'] },
   paw: { kelp: ['#3f8f4f', '#2f7a5a', '#5a9a3a'], octopus: ['#d9534a', '#b05ac0', '#e08a3a'], kraken: ['#8a2a4a', '#6a2a6a'], wreckboom: ['#8a6a4a'] },
-  glue: { sub: ['#e0a21a', '#7f8fa1', '#c0392b', '#3a66c4'], shrimp: ['#ff7a5a', '#f0a040'], cannon: ['#4a4a52'], glowshrimp: ['#b03a4a', '#b05a3a', '#8a3ab0'], riflediver: ['#7a8a6a', '#6a7a8a'] },
+  glue: { sub: ['#e0a21a', '#7f8fa1', '#c0392b', '#3a66c4'], shrimp: ['#ff7a5a', '#f0a040'], cannon: ['#4a4a52'], glowshrimp: ['#b03a4a', '#b05a3a', '#8a3ab0'] },
   starfish: { starfish: ['#f28c28', '#e0503a', '#c75b9b', '#f2c84b', '#8a4fc2'], brittlestar: ['#c75b9b', '#e0503a', '#8a4fc2'], wheel: ['#8a5a32'], ammonite: ['#d8b890', '#c8a0a0'] },
   zap: { eel: [''], ray: ['#c9a868', '#8a9aa8'], lure: ['#4a3a58', '#3a4a58', '#5a4a3a'], searchlight: ['#c8a050'], wire: ['#b87333'] },
   mine: { navalmine: [''], barrel: ['#5a6a4a', '#7a4a3a'], glowpuff: ['#9fffd0', '#9fd8ff'], powderkeg: ['#8a5a32'] },
@@ -307,7 +307,8 @@ const SEA_CITY_LOOKS = {
   scissors: { millwheel: ['#a8805a', '#8a6a4a', '#b8986a'], fanprop: ['#c9ced6', '#c8a050', '#8aa0b8'], bronzeblades: ['#b8864a'], gearblades: ['#c8a050'] },
   compass: { clockhand: ['#2a2a30'], crane: ['#ffc24a', '#e0503a', '#8aa0b8'], bronzestaff: ['#b8864a', '#c8a050', '#9a7040'] },
   cutter: { trident: ['#e0c060', '#c8a050', '#d8d0c0'], gangplank: ['#a8805a'], serpent: ['#b8b0a0'], piston: ['#c8a050', '#b8864a', '#c9ced6'] },
-  glue: { fishfountain: ['#c8c0b0', '#d8c8a8', '#b8bcc0'], domecannon: ['#8aa0b8', '#c8a050', '#7a9088'], urnspout: ['#c89a5a'], steamspout: ['#c8a050'] },
+  glue: { riflediver: ['#7a8a6a', '#6a7a8a', '#8a7a5a'],   // Nemo's diver walking the ruins of Atlantis (v184; in the twilight zone v174–v182)
+          fishfountain: ['#c8c0b0', '#d8c8a8', '#b8bcc0'], domecannon: ['#8aa0b8', '#c8a050', '#7a9088'], urnspout: ['#c89a5a'], steamspout: ['#c8a050'] },
   zap: { glyph: ['#7fffd0', '#9fd8ff', '#ffd07a'], cable: ['#ffe060'], crystal: ['#7fe8c0'], tesla: ['#ffc24a', '#9fe0ff', '#ffa0c0'] },
   paw: { statuearm: ['#c8c0b0', '#d8c8a8', '#b8bcc0'], claw: ['#ffc24a'], stonetail: ['#c8c0b0'], robotarm: ['#c8a050', '#8aa0b8', '#d86a5a'] },
   mine: { bubblemine: ['#9fe0ff', '#b8f0d8', '#ffd8a0'], valve: ['#e04a3a', '#3a8ad8', '#f4c430'], sealedjar: ['#c8784a'], boiler: ['#8aa0b8'] },

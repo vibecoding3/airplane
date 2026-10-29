@@ -10,12 +10,12 @@
 
 // Bump SIM_VERSION with any change to what `update` does (obstacles, spawning, physics, power-ups): replays recorded
 // under another number are not offered for watching, since they would no longer play back the same.
-const SIM_VERSION = 11;              // 2: v165, no obstacle repeat within 3 rows; 3: v169, Ocean regions start at 200 m;
+const SIM_VERSION = 12;              // 2: v165, no obstacle repeat within 3 rows; 3: v169, Ocean regions start at 200 m;
                                      // 4: v171, the Ocean's regions loop every 2,500 m; 5: v173, a collection set per Ocean region;
                                      // 6: v174, the Ocean's region looks (reef / twilight split, the abyss's own, Verne's);
                                      // 7: v175, the Ocean's regions no longer loop; 8: v179, second looks in the Ocean's middle regions;
                                      // 9: v181, no giant squid in the abyss scenery; 10: v182, five layouts for a pair of Proximity Blasts;
-                                     // 11: v183, one Ocean design per obstacle per region
+                                     // 11: v183, one Ocean design per obstacle per region; 12: v184, the rifle diver replaces the fish fountain
 const CHECK_EVERY = 60;              // frames between checks that the replay still matches the run
 const GHOST_STEP = 0.1;              // seconds between the points of a daily dive's flight path (0.25 until v161)
 let runRandom = realRandom;          // the run's own random sequence (seededRandom), used inside simFrame only
