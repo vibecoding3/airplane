@@ -186,8 +186,8 @@ const FISH = {
 };
 // species that are also Ocean obstacles (school, butterflyfish, puffer, turtle, octopus, ray, swordfish, anglerfish,
 // lanternfish in v124; jellyfish and moray eel in v128) are not in the scenery, so a background fish never looks like one that hurts
-// the fish of each level: each Ocean region's scenery (MAP_REGIONS.sea in js/regions.js, since v170), then the deepest fish
-const FISH_TIERS = [...MAP_REGIONS.sea.map(r => r.scenery), SEA_DEEP_FISH.scenery];
+// the fish of each level: each Ocean region's scenery (MAP_REGIONS.sea in js/regions.js, since v170)
+const FISH_TIERS = MAP_REGIONS.sea.map(r => r.scenery);
 let lastSceneryY = -1e9;
 // far-away scenery: very faded silhouettes that appear now and then (never collide)
 FISH.whale = { w: 300, h: 110, alpha: 0.2, paint() {
@@ -234,15 +234,17 @@ FISH.wreck = { w: 300, h: 140, alpha: 0.22, still: true, paint() {
 } };
 function spawnFish(lineY) {
   const m = (lineY - planeScreenY()) / PX_PER_M;   // measured like the depth lines (pageTop)
-  // the fish level: the region's (on the region lines since v169; FORMULA_DEPTHS, with 150 m, before), the deepest from 2,500 m
-  let tier = m >= SEA_DEEP_FISH.from ? FISH_TIERS.length - 1 : regionIndexAtM('sea', m);
+  // the fish level: the region's (on the region lines since v169; FORMULA_DEPTHS, with 150 m, before); dm is the depth
+  // inside the dive, so every dive has the same fish and silhouettes (v171)
+  let tier = regionIndexAtM('sea', m);
+  const dm = diveDepth('sea', m);
   if (tier > 0 && Math.random() < 0.2) tier--;                   // the odd smaller fish keeps it varied
   let kind = FISH_TIERS[tier][ri(0, FISH_TIERS[tier].length - 1)];
   if (kind.startsWith('uc')) { if (lineY - lastSceneryY < 600) kind = FISH_TIERS[tier][0]; else lastSceneryY = lineY; }   // city silhouettes keep apart
   // rare far-away scenery, never two close together (at least ~30 m apart)
   if (lineY - lastSceneryY > 900) {
-    if (m >= 100 && m < 800 && Math.random() < 0.12) kind = 'whale';     // a whale passing far away
-    else if (m >= 600 && Math.random() < 0.08) kind = 'wreck';          // a sunken ship in the gloom
+    if (dm >= 100 && dm < 800 && Math.random() < 0.12) kind = 'whale';     // a whale passing far away
+    else if (dm >= 600 && Math.random() < 0.08) kind = 'wreck';          // a sunken ship in the gloom
     if (kind === 'whale' || kind === 'wreck') lastSceneryY = lineY;
   }
   const def = FISH[kind], K = fishK(kind), s = rand(0.75, 1), dir = Math.random() < 0.5 ? -1 : 1;

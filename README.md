@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v170** (2026-10-29)
+Current version: **v171** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -113,7 +113,8 @@ The patterns live in `depth-art.css` (made by `python tools/depth-art.py depth-a
   - Formulas are tilted at random, never more than 45°, and some are underlined.
 
 ### 4.2 Ocean (called "Deep sea" until v78; the internal id is still `sea`)
-- **Water colour:** light turquoise at the surface, darkening every 100 m down to near-black navy by about 1,000 m, then staying there.
+- **Water colour:** light turquoise at the surface, darkening every 100 m down to near-black navy by about 1,000 m, then staying there until the dive ends at 2,500 m; each new dive starts light again (v171).
+- **Dives** (v171): the Ocean's five regions loop every 2,500 m. The abyss ends in a trench and the plane falls into another sea: from 2,500 m the sunlit reef, the twilight zone, the ruins, the dome city and the abyss come again with the same looks, fish, specks, background art, colours and collections, and the line at 2,500 m, 5,000 m… reads "Sunlit reef · Dive 2", "· Dive 3"… Difficulty keeps growing with the real depth, and wind (until 700 m) and conveyors (until 1,500 m) still go by the real depth, so a second reef has no current and no school of fish (`REGION_DIVE`, `diveDepth` in `js/regions.js`).
 - **The start** (since v71): the plane dives in from the surface: sky with clouds above, waves with a line of foam, a paper boat bobbing on the water off to one side, and sunlit shallows with ripples of light below. It slides up out of view within the first ~35 m; fish are only drawn below the water line while it shows.
 - **Background:** bubbles rising past the plane (no side walls; they were removed in v31). What else you see changes with depth:
 
@@ -139,8 +140,8 @@ Since v169 the specks, the fish levels and the obstacle looks change on the Ocea
 | 200–400 m | Angelfish, parrotfish |
 | 400–800 m | Lionfish, barracuda, tuna; far behind, the ruins of the sunken city (towers with a few lit windows, broken arches) |
 | 800–1,500 m | Reef shark, hammerhead shark, ocean sunfish; far behind, the glowing dome city (domes with lit windows, chimneys trailing bubbles, towers) |
-| 1,500–2,500 m | Great white shark, giant squid, oarfish |
-| 2,500 m + | Viperfish, gulper eel, hatchetfish |
+| 1,500–2,500 m (the abyss) | Great white shark, giant squid, oarfish, viperfish, gulper eel, hatchetfish (the last three only from 2,500 m until v170) |
+| From 2,500 m | The next dive: the same fish again, from the reef down |
 
 Since v124 the scenery leaves out the species that became obstacles (the school of fish, butterflyfish, pufferfish, sea turtle, octopus, stingray, swordfish, anglerfish and lanternfish; since v128 also the jellyfish and moray eel), so a harmless background fish never looks like one that hurts.
 
@@ -855,7 +856,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `audio.js` | `sfx`, `tone`, `muted`, `audioEngine` |
 | `music.js` | `THEMES`, `CH` (chords), `setMusic`, `duckMusic`, `syncMusicVolume`, `playBar` |
 | `paper-background.js` | `FORMULA_TIERS`, `pickFormula`, `spawnFormula`, `updateFormulas` |
-| `regions.js` | `MAP_REGIONS`, `SEA_DEEP_FISH`, `hasRegions`, `regionIndexAtM`, `regionIndexAt`, `regionAt` |
+| `regions.js` | `MAP_REGIONS`, `REGION_DIVE`, `hasRegions`, `diveDepth`, `diveAtM`, `regionIndexAtM`, `regionIndexAt`, `regionAt`, `regionEndM` |
 | `sea-background.js` | `FISH`, `FISH_TIERS`, `spawnFish`, `drawFishes`, `drawSeaParticles` |
 | `state.js` | `state`, `plane`, `obstacles`, `dist`, `speed`, `POWER_MAX`, `MAGNET_RANGES`, `press` / `release`, `depthM`, `difficulty`, `baseFallSpeed`, `reset`, `xp`, `xpNeed`, `levelInfo` |
 | `obstacles.js` | `make` (generators), `PALETTES`, `DUNGEON_LOOKS`, `SEA_MAKERS`, `seaPool`, `spawnRow`, `spawnFromPool`, `spawnRows` |

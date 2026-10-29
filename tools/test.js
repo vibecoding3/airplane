@@ -514,7 +514,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(city.length === 0, 'Ocean sunken city: city looks only from 400 to 1,500 m, sea looks only outside' + (city.length ? ': ' + city.slice(0, 5).join(', ') : ''));
 
   // the Ocean's regions table (js/regions.js, design/regions.md): lines on whole hundreds, every obstacle has skins in every
-  // region and they exist, no scenery fish is an obstacle look, and the line names, looks and specks follow the table
+  // region and they exist, no scenery fish is an obstacle look, spawned looks follow the table, and the regions loop
   const regions = await page.evaluate(() => {
     const bad = [], list = MAP_REGIONS.sea, looks = new Set(Object.values(SEA_LOOKS).flatMap(Object.keys));
     list.forEach((r, i) => {
@@ -527,7 +527,11 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
       for (const f of r.scenery) if (looks.has(f) || !FISH[f]) bad.push(r.id + ' scenery ' + f);
     });
     mapId = 'sea'; applyMap(); start();
-    for (const r of list) for (const m of [r.from + 1, r.from + 99]) {
+    // the regions loop: the second dive (from 2,500 m) has the same regions, looks and water colours as the first
+    const dive = REGION_DIVE.sea;
+    for (const k of [0, 1, 2, 5, 10, 15]) if (MAPS.sea.colour(k) !== MAPS.sea.colour(k + dive / 100)) bad.push('colour of band ' + k);
+    if (regionIndexAtM('sea', dive + 1) !== 0 || diveAtM('sea', dive + 1) !== 2) bad.push('2,501 m is not the reef of dive 2');
+    for (const r of list) for (const m of [r.from + 1, r.from + 99, dive + r.from + 1, dive + r.from + 99]) {
       if (regionIndexAtM('sea', m) !== list.indexOf(r)) bad.push(m + ' m is not ' + r.id);
       obstacles.length = 0; lastType = ''; spawnRow(m * PX_PER_M + planeScreenY(), 0.5);
       for (const o of obstacles) if (o.look && !(r.skins[o.type] || []).includes(o.look)) bad.push(o.look + '@' + m);

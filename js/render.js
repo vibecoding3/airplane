@@ -203,13 +203,20 @@ const artClass = (k) => {
   return (base !== 'all' && base && base.includes(k)) || (none && none.includes(k)) ? '' : 'art-' + mapId + '-' + k;
 };
 function syncDepthArt(px) {
-  const bounds = hasRegions(mapId) ? MAP_REGIONS[mapId].slice(1).map(r => r.from) : ART_BOUNDS, edgeY = b => b * PX_PER_M + planeScreenY() - dist;
-  let L = 0; while (L < bounds.length && edgeY(bounds[L]) <= 0) L++;   // the layer at the top of the screen
-  const edge = L < bounds.length ? edgeY(bounds[L]) : Infinity;        // where the next layer starts on screen
+  const edgeY = b => b * PX_PER_M + planeScreenY() - dist;
+  let L = 0, next, edge;
+  if (hasRegions(mapId)) {                                // regions loop, so the next one after the last is the first (v171)
+    const top = (dist - planeScreenY()) / PX_PER_M;       // the depth at the top of the screen, measured like the lines
+    L = regionIndexAtM(mapId, top); next = (L + 1) % MAP_REGIONS[mapId].length; edge = edgeY(regionEndM(mapId, top));
+  } else {
+    const bounds = ART_BOUNDS;
+    while (L < bounds.length && edgeY(bounds[L]) <= 0) L++;   // the layer at the top of the screen
+    next = L + 1; edge = L < bounds.length ? edgeY(bounds[L]) : Infinity;   // where the next layer starts on screen
+  }
   const split = edge < H;
   const key = mapId + L + ':' + split;
   const base = ART_BASE[mapId];   // the map's own pattern: always, or only in its layers
-  const rulingA = base === 'all' || base.includes(L), rulingB = base === 'all' || base.includes(L + 1);
+  const rulingA = base === 'all' || base.includes(L), rulingB = base === 'all' || base.includes(next);
   if (key !== artKey) {
     artKey = key;
     const show = (el, k) => {
@@ -217,7 +224,7 @@ function syncDepthArt(px) {
       el.className = 'depth-art ' + cls;
       el.style.visibility = cls ? 'visible' : 'hidden';
     };
-    show(artA, L); show(artB, split ? L + 1 : 99);
+    show(artA, L); show(artB, split ? next : 99);
     ruling.style.opacity = rulingA || (split && rulingB) ? 1 : 0;
     artClip = null;                                       // the layers changed: always redo the clip (clearing it too)
   }
