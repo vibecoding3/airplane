@@ -903,7 +903,7 @@ Not used by the game; for testing during development. Set up once with `cd tools
 
 **Nine maps: Paper, Ocean, Space, Dungeon, Neon City, Forest, Desert, Volcano and Kitchen,** each chosen from the main menu. Any new map should be built from the mechanics in section 6, with new art.
 
-**Regions** (proposal, 2026-10-29, not built): every map as a journey through regions, each with one theme for its colours, background, scenery and obstacle skins, all changing on the same depth line. See `design/regions.md`.
+**Regions** (proposal, 2026-10-29; Ocean only for now, its lines aligned in v169): every map as a journey through regions, each with one theme for its colours, background, scenery, obstacle skins, music (faded across the line) and its own collection set, all changing on the same depth line; the regions loop forever, one pass being a dive. See `design/regions.md`.
 
 ---
 
