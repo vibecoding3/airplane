@@ -263,6 +263,15 @@ function fishSprite(kind, v = 0) {
   const def = FISH[kind], K = fishK(kind);
   return sharedSprite('fish' + kind + v, def.w * K, def.h * K, def.w * K / 2, def.h * K / 2, () => { ctx.scale(K, K); def.paint(def.cols && def.cols[v]); });
 }
+// a fish as one flat shape in a tint of the water behind it: lighter than dark water, darker than light water (v181)
+const mixHex = (a, b, t) => '#' + [1, 3, 5].map(i => Math.round(parseInt(a.slice(i, i + 2), 16) * (1 - t) + parseInt(b.slice(i, i + 2), 16) * t).toString(16).padStart(2, '0')).join('');
+function fishSilhouette(kind, v, water) {
+  const tint = isDark(water) ? mixHex(water, '#cfe4f2', 0.45) : mixHex(water, '#14385a', 0.45), base = fishSprite(kind, v);
+  return sharedSprite('fishSil' + kind + v + tint, base.w, base.h, base.ox, base.oy, () => {
+    ctx.drawImage(base.c, -base.ox, -base.oy, base.w, base.h);
+    ctx.globalCompositeOperation = 'source-in'; ctx.fillStyle = tint; ctx.fillRect(-base.ox, -base.oy, base.w, base.h);
+  });
+}
 // drifting specks that change with the Ocean's regions (each region's `specks`, since v169; 100, 400 and 1,000 m before):
 // none on the sunlit reef, plankton in the twilight zone, marine snow in the ruins and the dome city, then twinkling
 // bioluminescence in the abyss. Each speck goes by its own depth, so the change is sharp on the line.
@@ -286,11 +295,12 @@ function drawSeaParticles() {
         ctx.globalAlpha = 0.55; ctx.fillStyle = '#eef6fb';
         const s = 1 + hs * 2; ctx.fillRect(x, y, s, s);
       } else {                                   // bioluminescence, twinkling
-        const tw = 0.5 + 0.5 * Math.sin(t * (1.5 + hs * 2) + i * 1.7), r = 1.4 + hs * 1.2;
+        // small and soft (v181; bigger and brighter before), so they never look like the glowing obstacles, which have outlines
+        const tw = 0.5 + 0.5 * Math.sin(t * (1.5 + hs * 2) + i * 1.7), r = 0.9 + hs * 0.7;
         ctx.fillStyle = hs > 0.5 ? '#7fe3ff' : '#9dffb8';
-        ctx.globalAlpha = (0.25 + 0.6 * tw) * 0.25;
-        ctx.beginPath(); ctx.arc(x, y, r * 3, 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = 0.25 + 0.6 * tw;
+        ctx.globalAlpha = (0.2 + 0.4 * tw) * 0.2;
+        ctx.beginPath(); ctx.arc(x, y, r * 2.4, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 0.2 + 0.4 * tw;
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
       }
     }
@@ -306,16 +316,18 @@ function drawFishes() {
     if (!!def.alpha !== far) continue;
     const sy = f.y - dist + (def.still ? 0 : Math.sin(f.t * 1.6) * 2.5);
     if (sy < -f.ext - 20 || sy > H + f.ext + 20) continue;
-    const spr = fishSprite(f.kind, f.v);
-    ctx.globalAlpha = def.alpha || (f.tier >= 3 ? 0.68 : 0.55);   // background: faded so they never read as obstacles
-    blit(spr, f.x, sy, def.still ? 0 : Math.sin(f.t * 3) * (far ? 0.015 : 0.04) * f.dir, def.noFlip ? f.s : f.s * f.dir, f.s);   // noFlip: signs with text
+    // background fish are soft silhouettes in a tint of the water, with no ink outline, so only obstacles have outlines
+    // (v181; until v180 they were drawn like obstacles at 55–68%, and the reef fish 35% larger). The far scenery keeps its art.
+    const spr = far ? fishSprite(f.kind, f.v) : fishSilhouette(f.kind, f.v, pageColor(pageIndexAt(f.y))), k = far ? 1 : 1 / fishK(f.kind);
+    ctx.globalAlpha = def.alpha || 0.5;
+    blit(spr, f.x, sy, def.still ? 0 : Math.sin(f.t * 3) * (far ? 0.015 : 0.04) * f.dir, (def.noFlip ? f.s : f.s * f.dir) * k, f.s * k);   // noFlip: signs with text
     if (def.lure) {                                                // the anglerfish lure pulses
       const g = sharedSprite('lureGlow', 30, 30, 15, 15, () => {
         const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, 14);
         gr.addColorStop(0, 'rgba(255,250,190,.95)'); gr.addColorStop(1, 'rgba(255,250,190,0)');
         ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
       });
-      ctx.globalAlpha = 0.55 + 0.35 * Math.sin(f.t * 4);
+      ctx.globalAlpha = 0.3 + 0.2 * Math.sin(f.t * 4);
       const k = f.s * (1 + 0.15 * Math.sin(f.t * 4));
       blit(g, f.x + def.lure[0] * f.s * f.dir, sy + def.lure[1] * f.s, 0, k, k);
     }

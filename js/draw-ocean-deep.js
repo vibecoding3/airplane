@@ -308,7 +308,7 @@ function drawGlowPuff(o, sy) {
   blit(sharedSprite('gpuff' + col, 40, 40, 20, 20, () => {
     const g = ctx.createRadialGradient(0, 0, 2, 0, 0, 18); g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, col); g.addColorStop(1, hexA(col, 0));
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = hexA(col, 0.9); ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI * 2); ctx.fill(); inkStroke(1.6);   // a solid outlined core (v181)
     ctx.fillStyle = 'rgba(255,255,255,.8)'; for (let i = 0; i < 6; i++) { const a = i * 1.05; ctx.beginPath(); ctx.arc(Math.cos(a) * 7, Math.sin(a) * 7, 1.2, 0, Math.PI * 2); ctx.fill(); }
   }), o.x, sy, 0, swell, swell);
   if (blink && Math.floor(o.t * 12) % 2 === 0) { ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.beginPath(); ctx.arc(o.x, sy, 5, 0, Math.PI * 2); ctx.fill(); }

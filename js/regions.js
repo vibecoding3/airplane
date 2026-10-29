@@ -47,7 +47,7 @@ const MAP_REGIONS = {
                compass: ['clockhand', 'crane'], scissors: ['fanprop', 'gearblades'] } },
     { id: 'abyss', name: 'The abyss', from: 1500, art: 'art-sea-4', music: 'seaAbyss', specks: 'bio', collections: ['abysslights'],
       // the oarfish, viperfish and gulper eel became obstacles in v174, so they left the scenery (v171–v173 they swam here)
-      scenery: ['white', 'squid', 'hatchet'],
+      scenery: ['white', 'hatchet'],   // the giant squid left in v181: its tentacle and the kraken are obstacles here
       // its own deep looks since v174 (it reused the reef's before; art in draw-ocean-deep.js), plus the Nautilus, its
       // searchlight and the kraken from Twenty Thousand Leagues
       skins: { gate: ['glasssponge'], blot: ['glowurchin'], note: ['anglerfish'],

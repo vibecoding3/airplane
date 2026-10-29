@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v180** (2026-10-29)
+Current version: **v181** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -140,11 +140,11 @@ Since v169 the specks, the fish levels and the obstacle looks change on the Ocea
 | 200–400 m | Angelfish, parrotfish |
 | 400–800 m | Lionfish, barracuda, tuna; far behind, the ruins of the sunken city (towers with a few lit windows, broken arches) |
 | 800–1,500 m | Reef shark, hammerhead shark, ocean sunfish; far behind, the glowing dome city (domes with lit windows, chimneys trailing bubbles, towers) |
-| 1,500–2,500 m (the abyss) | Great white shark, giant squid, hatchetfish (also the oarfish, viperfish and gulper eel in v171–v173, before they became abyss obstacles in v174) |
+| 1,500–2,500 m (the abyss) | Great white shark, hatchetfish (the giant squid until v180) (also the oarfish, viperfish and gulper eel in v171–v173, before they became abyss obstacles in v174) |
 
 Since v124 the scenery leaves out the species that became obstacles (the school of fish, butterflyfish, pufferfish, sea turtle, octopus, stingray, swordfish, anglerfish and lanternfish; since v128 also the jellyfish and moray eel), so a harmless background fish never looks like one that hurts.
 
-The shallow reef fish are drawn 35% larger so they read well on a phone. Deep fish have pale outlines so they show against dark water. About 20% of the time a fish from the level above appears, for variety.
+**Background or obstacle** (v181): the background fish are flat silhouettes in a tint of the water behind them (lighter than dark water, darker than light water), with no outline, at 50%, and the reef fish at normal size (`fishSilhouette` in `js/sea-background.js`); only obstacles have dark ink outlines. Until v180 the background fish were drawn like obstacles (outlined, coloured, 55–68%, the reef fish 35% larger), and players couldn't always tell them apart. The far-off whales, wrecks and city silhouettes keep their art. The abyss's glowing specks are smaller and softer, the puffball of light has a solid outlined core, and the giant squid left the abyss scenery (its tentacle and the kraken are obstacles there). About 20% of the time a fish from the level above appears, for variety.
 
 **Colour variants:** most species come in 2–4 colour schemes, picked at random when each fish appears (17 species since v128; 19 in v124–v127, 28 before). For example: clownfish in orange, maroon, dark-banded or golden; tangs in blue, yellow or purple; angelfish and parrotfish in several colours. Background fish never collide with the plane.
 
