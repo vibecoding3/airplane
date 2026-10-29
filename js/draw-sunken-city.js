@@ -11,12 +11,12 @@ function drawSunkenCity(o, sy) {
   switch (o.type) {
     case 'gate': {
       const l = o.gx - o.gapW / 2, r = o.gx + o.gapW / 2;
-      drawSunkLedge(-10, l, sy, l, -1, look); drawSunkLedge(r, W + 10, sy, r, 1, look);
+      drawSunkLedge(-10, l, sy, l, -1, look, o.seaCol); drawSunkLedge(r, W + 10, sy, r, 1, look, o.seaCol);
       break;
     }
     case 'erasers': {
       const l = o.cx - o.gap / 2, r = o.cx + o.gap / 2;
-      drawSunkDoor(-10, l, sy, l, -1, look); drawSunkDoor(r, W + 10, sy, r, 1, look);
+      drawSunkDoor(-10, l, sy, l, -1, look, o.seaCol); drawSunkDoor(r, W + 10, sy, r, 1, look, o.seaCol);
       break;
     }
     case 'blot': drawSunkRelic(o, sy); break;
@@ -40,11 +40,11 @@ function drawSunkenCity(o, sy) {
 }
 
 // ---------- Gap Wall: fallen marble columns (ruins), or a glass tube walkway with warm lights (domes), 22 thick ----------
-function drawSunkLedge(x0, x1, sy, innerX, outDir, look) {
+function drawSunkLedge(x0, x1, sy, innerX, outDir, look, col) {   // col: its colour variant (v185; fixed before)
   if (x1 - x0 < 1) return;
   ctx.save();
   if (look === 'tubewalk') {
-    ctx.beginPath(); roundRectPath(x0, sy - 11, x1 - x0, 22, 11); ctx.fillStyle = UC_GLASS; ctx.fill();
+    ctx.beginPath(); roundRectPath(x0, sy - 11, x1 - x0, 22, 11); ctx.fillStyle = col ? hexA(col, 0.6) : UC_GLASS; ctx.fill();
     ctx.save(); ctx.clip();
     ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fillRect(x0, sy - 8, x1 - x0, 3);
     ctx.fillStyle = UC_BRASS; for (let x = innerX + outDir * 18; outDir > 0 ? x < x1 : x > x0; x += outDir * 40) ctx.fillRect(x - 2.5, sy - 11, 5, 22);   // brass rings
@@ -52,25 +52,25 @@ function drawSunkLedge(x0, x1, sy, innerX, outDir, look) {
     ctx.restore();
     ctx.beginPath(); roundRectPath(x0, sy - 11, x1 - x0, 22, 11); inkStroke(1.5);
   } else {                                         // a column lying on its side: fluted shaft, a capital at the gap
-    ctx.beginPath(); ctx.rect(x0, sy - 9, x1 - x0, 18); ctx.fillStyle = UC_STONE; ctx.fill();
+    ctx.beginPath(); ctx.rect(x0, sy - 9, x1 - x0, 18); ctx.fillStyle = col || UC_STONE; ctx.fill();
     ctx.save(); ctx.clip();
     ctx.strokeStyle = 'rgba(120,110,90,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); for (const y of [-5, 0, 5]) { ctx.moveTo(x0, sy + y); ctx.lineTo(x1, sy + y); } ctx.stroke();
     ctx.fillStyle = 'rgba(80,160,110,.45)'; for (let x = innerX + outDir * 30; outDir > 0 ? x < x1 : x > x0; x += outDir * 47) { ctx.beginPath(); ctx.ellipse(x, sy - 7, 9, 3, 0, 0, Math.PI * 2); ctx.fill(); }   // moss
     ctx.restore();
     ctx.beginPath(); ctx.rect(x0, sy - 9, x1 - x0, 18); inkStroke(1.4);
     const cx = outDir > 0 ? innerX : innerX - 12;  // the capital: a wider block with scrolls
-    ctx.fillStyle = UC_STONE; ctx.beginPath(); ctx.rect(cx, sy - 11, 12, 22); ctx.fill(); inkStroke(1.4);
+    ctx.fillStyle = col || UC_STONE; ctx.beginPath(); ctx.rect(cx, sy - 11, 12, 22); ctx.fill(); inkStroke(1.4);
     ctx.strokeStyle = UC_STONE_DARK; ctx.lineWidth = 1.4; for (const y of [-6, 6]) { ctx.beginPath(); ctx.arc(cx + 6, sy + y, 3, 0, Math.PI * 1.6); ctx.stroke(); }
   }
   ctx.restore();
 }
 
 // ---------- Closing Jaws: carved stone temple doors (ruins), or round-windowed dome hatches (domes), 28 thick ----------
-function drawSunkDoor(x0, x1, sy, innerX, outDir, look) {
+function drawSunkDoor(x0, x1, sy, innerX, outDir, look, col) {   // col: its colour variant (v185; fixed before)
   if (x1 - x0 < 1) return;
   const hatch = look === 'hatch';
   ctx.save();
-  ctx.beginPath(); ctx.rect(x0, sy - 14, x1 - x0, 28); ctx.fillStyle = hatch ? '#8aa0b8' : '#c8b898'; ctx.fill();
+  ctx.beginPath(); ctx.rect(x0, sy - 14, x1 - x0, 28); ctx.fillStyle = col || (hatch ? '#8aa0b8' : '#c8b898'); ctx.fill();
   ctx.save(); ctx.clip();
   if (hatch) {
     ctx.fillStyle = '#ffc24a'; ctx.fillRect(outDir > 0 ? innerX : innerX - 5, sy - 14, 5, 28);           // a warning stripe on the closing edge
@@ -327,9 +327,9 @@ function drawSunkPod(x, sy, dir, look, col = '#ffc24a') {
 
 // ---------- Spinning Drifter: a stone calendar wheel (ruins) or a giant gold coin (both), filling a 20-unit circle ----------
 function drawSunkDisc(o, sy) {
-  const coin = o.look === 'coin';
-  blit(sharedSprite('ucdisc' + o.look, 46, 46, 23, 23, () => {
-    ctx.fillStyle = coin ? '#f4c430' : UC_STONE; ctx.beginPath(); ctx.arc(0, 0, 19.5, 0, Math.PI * 2); ctx.fill(); inkStroke(1.4);
+  const coin = o.look === 'coin', col = o.seaCol;
+  blit(sharedSprite('ucdisc' + o.look + col, 46, 46, 23, 23, () => {
+    ctx.fillStyle = coin ? '#f4c430' : col || UC_STONE; ctx.beginPath(); ctx.arc(0, 0, 19.5, 0, Math.PI * 2); ctx.fill(); inkStroke(1.4);
     if (coin) {
       ctx.strokeStyle = '#c8902a'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.stroke();
       ctx.fillStyle = '#c8902a'; ctx.beginPath(); ctx.moveTo(0, -9); ctx.lineTo(8, 6); ctx.lineTo(-8, 6); ctx.closePath(); ctx.fill();

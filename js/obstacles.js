@@ -295,15 +295,15 @@ const seaLayer = y => regionIndexAt('sea', y);
 // The sunken city (v133) takes over the dark and midnight layers: ruins and temples from 400 m, the glowing dome city from
 // 800 m to 1,500 m (art in draw-sunken-city.js). Its looks only live there, and the sea's own looks only above and below it.
 const SEA_CITY_LOOKS = {
-  gate: { columns: ['#e8e0d0', '#d8c8a8', '#c8ccd0'], tubewalk: ['#9fe0ff', '#b8f0d8', '#ffd8a0'], carvedbeam: ['#d8d0c0'], girder: ['#c8a050'] },
-  erasers: { templedoors: ['#c8b898', '#b8a888', '#d0c0a0'], hatch: ['#8aa0b8', '#a0a8b0', '#7a9088'], goldgate: ['#a89c88'], bulkhead: ['#8aa0b8'] },
+  gate: { columns: ['#ece4d4', '#e0a878', '#a8b8c8', '#d8a8b0'], tubewalk: ['#9fe0ff', '#a8f0b8', '#ffc888', '#d0b0ff'], carvedbeam: ['#d8d0c0'], girder: ['#c8a050'] },
+  erasers: { templedoors: ['#c8b898', '#c8885a', '#8aa0a8', '#b8d0a0'], hatch: ['#8aa0b8', '#a0a8b0', '#7a9088'], goldgate: ['#a89c88'], bulkhead: ['#8aa0b8'] },
   blot: { amphora: ['#d0784a', '#c89a5a'], orb: ['#7fe8ff', '#ffd07a'], idol: ['#c8c0b0'], gauge: ['#c8a050'] },
   protractor: { stoneface: ['#c8c0b0'], domehouse: ['#9fe0ff', '#b8f0d8', '#ffd8a0'], atlantis: ['#c8bfa8', '#d8c8a8', '#b8bcc0'], clocktower: ['#c8a050'] },   // Atlantis (v174, from Twenty Thousand Leagues)
-  pencil: { oar: ['#c8a070'], tramcar: ['#ffc24a', '#7fd0ff'], beam: ['#d8d0c0', '#c8b898', '#b8c0c8'], minisub: ['#c8a050'] },
+  pencil: { oar: ['#c8a070'], tramcar: ['#ffc24a', '#7fd0ff'], beam: ['#e8e0cc', '#d89868', '#9aaab8', '#c8a0b0'], minisub: ['#c8a050'] },
   wad: { lanternfloat: ['#ffb04a', '#ff8a5a', '#ffd04a'], capsule: ['#c9ced6', '#c8a050', '#9fb8d0'], flask: ['#c8784a'], divebot: ['#c8a050'] },
   note: { lantern: ['#ff8a5a', '#ffd04a'], mailpod: ['#7fe8ff'], tablet: ['#d8d0c0'], bulb: ['#ffd07a', '#9fe0ff', '#ffa0c0'] },
   clips: { msgcapsules: ['#d8c090'], trampods: ['#ffc24a', '#7fd0ff'], scrolls: [''], bubblecars: ['#c8a050', '#8aa0b8', '#d86a5a'] },
-  starfish: { calendar: ['#c8c0b0', '#d8c8a8', '#b8bcc0'], coin: ['#f4c430'], gear: ['#c8a050', '#b8864a', '#c9ced6'] },
+  starfish: { calendar: ['#d8d0c0', '#e0a070', '#a0b0c0', '#d4b860'], coin: ['#f4c430'], gear: ['#c8a050', '#b8864a', '#c9ced6'] },
   scissors: { millwheel: ['#a8805a', '#8a6a4a', '#b8986a'], fanprop: ['#c9ced6', '#c8a050', '#8aa0b8'], bronzeblades: ['#b8864a'], gearblades: ['#c8a050'] },
   compass: { clockhand: ['#2a2a30'], crane: ['#ffc24a', '#e0503a', '#8aa0b8'], bronzestaff: ['#b8864a', '#c8a050', '#9a7040'] },
   cutter: { trident: ['#e0c060', '#c8a050', '#d8d0c0'], gangplank: ['#a8805a'], serpent: ['#b8b0a0'], piston: ['#c8a050', '#b8864a', '#c9ced6'] },
