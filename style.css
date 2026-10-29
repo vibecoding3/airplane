@@ -333,6 +333,11 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
   background: #c4302b; border: 2px solid var(--ink); border-radius: 8px; }
 .lb-play-btn:disabled { opacity: .5; cursor: default; }
 .coll-sets { display: grid; gap: 10px; }
+.coll-pick { grid-template-columns: 44px 1fr auto 1fr 44px; gap: 6px; }
+/* the maps the arrows lead to, small and faded beside the current one (v177); tapping one steps there too */
+.coll-side { font: 700 15px var(--display); line-height: 1.1; color: #ffffff; -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; opacity: .55; cursor: pointer; overflow-wrap: anywhere; }
+#collPrevName { text-align: right; }
+#collNextName { text-align: left; }
 .coll-count { margin: -2px 0 0; font-size: 17px; font-variant-numeric: tabular-nums; }   /* the map's items found (v176) */
 .coll-rule { margin-top: -10px; font-size: 16px; }
 .coll-set { background: rgba(255,255,255,.88); border: 2px solid var(--ink); border-radius: 16px; padding: 8px 10px 10px; text-align: left; }

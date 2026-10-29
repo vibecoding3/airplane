@@ -23,7 +23,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v176</div>
+    <div class="version" id="version">v177</div>
 
     <div class="hud">
       <div>
@@ -104,9 +104,11 @@
         <h2 class="menu-title small">Collections</h2>
         <p class="menu-tag">Find these in your runs to unlock them.</p>
         <p class="menu-tag coll-rule">Collectibles are obstacles that only appear once per run.</p>
-        <div class="lb-pick">
+        <div class="lb-pick coll-pick">
           <button class="menu-btn lb-arrow" id="collPrev" type="button" aria-label="Previous map">‹</button>
+          <span class="coll-side" id="collPrevName" aria-hidden="true"></span>
           <span class="lb-map" id="collMapName" aria-live="polite">Paper</span>
+          <span class="coll-side" id="collNextName" aria-hidden="true"></span>
           <button class="menu-btn lb-arrow" id="collNext" type="button" aria-label="Next map">›</button>
         </div>
         <p class="coll-count" id="collCount"></p>

@@ -221,7 +221,9 @@ function collStep(dir) {
 function renderCollections() {
   const box = $('collSets'), sets = COLLECTIONS.filter(set => collMapOf(set) === collMap);
   const items = sets.flatMap(set => set.items), got = items.filter(it => collectionFound.has(it.id)).length;
+  const at = COLL_MAPS.indexOf(collMap), near = d => MAPS[COLL_MAPS[(at + d + COLL_MAPS.length) % COLL_MAPS.length]].name;
   $('collMapName').textContent = MAPS[collMap].name;
+  $('collPrevName').textContent = near(-1); $('collNextName').textContent = near(1);   // where the arrows lead (v177)
   $('collCount').textContent = `${got} / ${items.length} found`;
   box.replaceChildren();
   for (const set of sets) {
@@ -268,4 +270,6 @@ for (const b of document.querySelectorAll('.coll-open')) b.addEventListener('cli
 $('collBack').addEventListener('click', closeCollections);
 $('collPrev').addEventListener('click', () => collStep(-1));
 $('collNext').addEventListener('click', () => collStep(1));
+$('collPrevName').addEventListener('click', () => collStep(-1));
+$('collNextName').addEventListener('click', () => collStep(1));
 syncCollectionButton();
