@@ -125,10 +125,18 @@ function planeCircles() {
 }
 
 // ---------- update ----------
+// an obstacle the player can see: only those make sounds
+const onScreen = o => o.y - dist > -20 && o.y - dist < H + 20;
 function updateObstacle(o, dt) {
   switch (o.type) {
     case 'gate': o.gx = o.base + Math.sin(time * o.freq + o.ph) * o.amp; break;
-    case 'erasers': o.gap = lerp(o.gapMin, o.gapMax, 0.5 + 0.5 * Math.sin(time * o.freq + o.ph)); break;
+    case 'erasers': {
+      o.gap = lerp(o.gapMin, o.gapMax, 0.5 + 0.5 * Math.sin(time * o.freq + o.ph));
+      const shut = o.gap < o.gapMin + 4;          // the jaws meet: a clack, on screen only (sound only)
+      if (shut && !o.shut && onScreen(o)) sfx.clack();
+      o.shut = shut;
+      break;
+    }
     case 'pencil': {
       o.x += o.vx * dt;
       const ext = o.len / 2 * Math.abs(Math.cos(o.a));
@@ -191,6 +199,7 @@ function updateObstacle(o, dt) {
           o.timer = o.every;
           o.squeeze = 1;
           o.blobs.push({ x: wallX(o) + inward(o) * 78, r: rand(7, 10), wob: rand(0, 6) });
+          if (onScreen(o)) sfx.fire();
         }
       }
       o.squeeze = Math.max(0, o.squeeze - 4 * dt);
@@ -202,6 +211,8 @@ function updateObstacle(o, dt) {
       const p = (o.t % o.period) / o.period;   // snap out fast, hold, slide back slowly
       const f = p < 0.15 ? 1 - (1 - p / 0.15) ** 2 : p < 0.45 ? 1 : 1 - (p - 0.45) / 0.55;
       o.ext = o.maxExt * f;
+      if (p < 0.15 && !o.lunged && onScreen(o)) sfx.lunge();   // snapping out (sound only)
+      o.lunged = p < 0.45;
       break;
     }
     case 'setsquare':
@@ -247,6 +258,7 @@ function steer(dt) {
   let target = 0;
   const maxV = maxSideSpeed();
   if (holdSide && (playClock - holdStart) * 1000 > HOLD_MS) {
+    if (!sharpPlayed) { sharpPlayed = true; sfx.sharp(); }
     drift = holdSide;
     target = holdSide * maxV;
     plane.vx += (target - plane.vx) * Math.min(1, 9 * dt);
@@ -259,12 +271,19 @@ function steer(dt) {
   // desk fans push the plane while it is inside their wind band (not during the invincibility star)
   const py = dist + planeScreenY();
   for (const o of obstacles) {
-    if (o.type === 'fan' && plane.star <= 0 && Math.abs(o.y - py) < o.band / 2) plane.vx += -o.side * o.force * dt;
+    if (o.type !== 'fan') continue;
+    const inside = plane.star <= 0 && Math.abs(o.y - py) < o.band / 2;
+    if (inside && !o.inside) sfx.wind();       // sound only: o.inside never changes the run
+    o.inside = inside;
+    if (inside) plane.vx += -o.side * o.force * dt;
   }
   plane.x += plane.vx * dt;
   // hitting an edge cancels the drift into it, so one press the other way turns the plane at once
   if (plane.x < 16) { plane.x = 16; plane.vx = Math.max(0, plane.vx); if (drift < 0) drift = 0; }
   if (plane.x > W - 16) { plane.x = W - 16; plane.vx = Math.min(0, plane.vx); if (drift > 0) drift = 0; }
+  const atWall = plane.x <= 16 ? -1 : plane.x >= W - 16 ? 1 : 0;
+  if (atWall && atWall !== wallSide) sfx.bump();   // a soft bump on reaching the page edge
+  wallSide = atWall;
 }
 
 function update(dt) {
@@ -307,16 +326,18 @@ function update(dt) {
   plane.bubbled = Math.max(0, plane.bubbled - dt);
   if (plane.star > 0) {                                     // invincibility star: real seconds, rainbow sparkles
     plane.star = Math.max(0, plane.star - dt / timeScale());
+    if (plane.star === 0) sfx.fade();
     if (Math.random() < dt * 30) {
       const s = spark(plane.x + rand(-14, 14), dist + planeScreenY() + rand(-14, 14));
       s.col = `hsl(${Math.floor(rand(0, 360))},90%,65%)`; s.vy -= 60; particles.push(s);
     }
   }
-  if (plane.slowmo > 0) plane.slowmo = Math.max(0, plane.slowmo - dt / SLOWMO_SCALE);   // real seconds
-  if (plane.boost > 0) plane.boost = Math.max(0, plane.boost - dt / timeScale());       // real seconds
+  if (plane.slowmo > 0 && (plane.slowmo = Math.max(0, plane.slowmo - dt / SLOWMO_SCALE)) === 0) sfx.fade();   // real seconds
+  if (plane.boost > 0 && (plane.boost = Math.max(0, plane.boost - dt / timeScale())) === 0) sfx.fade();       // real seconds
   if (plane.ink > 0) plane.ink = Math.max(0, plane.ink - dt / timeScale());             // real seconds
   for (const o of obstacles) {
     if (o.type !== 'bubbles' || plane.star > 0 || Math.abs(plane.x - o.x) > o.w / 2 || Math.abs(dist + planeScreenY() - o.y) > o.h / 2) continue;
+    if (plane.bubbled <= 0) sfx.bubbles();     // into the bubbles
     plane.bubbled = 0.3;
     if (Math.random() < dt * 12) {             // bubbles fizzing around the plane
       particles.push({ kind: 'spark', col: 'rgba(235,250,255,.9)', x: plane.x + rand(-10, 10), y: dist + planeScreenY() + rand(-6, 10),
@@ -451,7 +472,8 @@ function collectPower(p) {
   }
   const col = POWER_RIMS[p.kind];
   for (let k = 0; k < 12; k++) { const s = spark(p.x, p.y); s.col = col; particles.push(s); }
-  p.kind === 'slowmo' ? sfx.slowmo() : p.kind === 'superstar' ? sfx.superstar() : p.kind === 'boost' ? sfx.boost() : p.kind === 'squid' ? sfx.ink() : sfx.power();
+  p.kind === 'slowmo' ? sfx.slowmo() : p.kind === 'superstar' ? sfx.superstar() : p.kind === 'boost' ? sfx.boost() : p.kind === 'squid' ? sfx.ink()
+    : p.kind === 'magnet' ? sfx.magnet() : sfx.shield();
 }
 
 // the squid's ink: 3–4 big blobs in screen space, below the plane (where obstacles come from), never on the plane;

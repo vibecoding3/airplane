@@ -145,6 +145,7 @@ const LB_TOP10 = { level: ['lb_levels', 'Level'], time: ['lb_time', 'Time played
 // seconds as "42 min" or "12 h 30 min"
 const playTime = s => { const m = Math.floor(s / 60), h = Math.floor(m / 60); return h ? `${fmt(h)} h ${m % 60} min` : `${m} min`; };
 function lbStep(dir) {
+  sfx.page();
   lbMap = LB_MAPS[(LB_MAPS.indexOf(lbMap) + dir + LB_MAPS.length) % LB_MAPS.length];
   renderBoard();
 }

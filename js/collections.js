@@ -72,6 +72,7 @@ function noteFound(o, sy) {
   if (!id || collectionFound.has(id)) return;
   collectionFound.add(id);
   store.set('nosedive-collection', JSON.stringify([...collectionFound]));
+  sfx.found();                                      // a new item for the collection (v178)
 }
 
 // Shiny collectibles: every collection item in a run gets a soft golden glow behind it and white star twinkles
@@ -212,6 +213,7 @@ const collRegionOf = set => set.map.split(' · ')[1] || '';
 const COLL_MAPS = Object.keys(MAPS).filter(m => COLLECTIONS.some(set => collMapOf(set) === m));
 let collMap = COLL_MAPS[0];
 function collStep(dir) {
+  sfx.page();
   collMap = COLL_MAPS[(COLL_MAPS.indexOf(collMap) + dir + COLL_MAPS.length) % COLL_MAPS.length];
   renderCollections();
 }

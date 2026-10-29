@@ -150,6 +150,7 @@ function pause() {
   state = 'paused';
   showCard('pause');
   duckMusic(true);
+  sfx.pause();
 }
 function resume() {
   if (state !== 'paused') return;
@@ -157,6 +158,7 @@ function resume() {
   if (!replaying) { holdSide = 0; holdSource = null; recInput('u'); }   // a key released while paused never sent its keyup here
   showCard(null);
   duckMusic(false);
+  sfx.resume();
 }
 // a finished run keeps what it earned: a new best depth, its stars, and its metres as experience
 function keepRunProgress(s) {
@@ -222,6 +224,12 @@ $('overMenuBtn').addEventListener('click', toMainMenu);
 // the pause button (v151; removed in v118): touch screens only, where there is no Space or Esc key (CSS hides it on
 // computers). While paused the pause card covers it and Resume takes over.
 ui.pauseBtn.innerHTML = ICONS.pause;
+// a soft click for every menu button (v178); the arrows turn a page (in collStep / lbStep), pause and resume and the
+// sound button have their own sounds
+document.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (b && !b.classList.contains('lb-arrow') && !['muteBtn', 'pauseBtn', 'resumeBtn'].includes(b.id)) sfx.click();
+});
 ui.pauseBtn.addEventListener('click', pause);
 // the full-screen button (v163): computers, start menu only; Esc also leaves full screen (the browser's own key)
 function setFullLabel() {

@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v177** (2026-10-29)
+Current version: **v178** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -728,6 +728,39 @@ Background music is composed and played in code (`js/music.js`), in the style of
 - Themes cross-fade when they change. Pausing lowers the music to 30%; hiding the tab silences it.
 - **Region music** (v172, the Ocean only): when the plane crosses a region line, the old theme fades out while the next region's theme fades in from its first bar, both over 4 seconds (`REGION_FADE`, `runTheme`, `syncRegionMusic` in `js/music.js`; each region's `music` in `js/regions.js`). Replays and daily dives follow it too. Menu and game-over changes keep the quick fade.
 - The music sits below the sound effects (peaks about 0.08 against about 0.10 for a star chime).
+
+### 8a. Sound effects
+
+All generated in code (`sfx` in `js/audio.js`, Web Audio, no sound files): short tones, and since v178 soft "swishes" of filtered noise (`swish`). The sound button mutes them with the music.
+
+| Sound | When |
+|---|---|
+| Throw (a falling whistle) | A run or a replay starts |
+| Steer (a paper flick, v178) | Every press left or right |
+| Sharp turn (a swish and a rising note, v178) | Once per hold, when the hold becomes a sharp turn |
+| Bump (v178) | The plane reaches a page edge |
+| Star chime | A gold star is caught |
+| Power-up | Magnet (a buzzing rise, v178), shield (a bright rise, v178), slow motion, invincibility star, speed boost, squid ink: each its own |
+| Power-up ends (three falling notes, v178) | The invincibility star, slow motion or the speed boost runs out |
+| Shield save | A shield takes a hit |
+| Crash | The plane is hit |
+| Twang | A spring line bounces the plane |
+| Bubbles (v178) | The plane enters an Effect Zone (bubbles, steam…) |
+| Wind (v178) | The plane enters a Push Zone's wind band |
+| Zap | A Charged Beam fires (on screen) |
+| Boom | A Proximity Blast goes off (on screen) |
+| Swipe | A Telegraphed Sweep swings (on screen) |
+| Shot (v178) | A Wall Turret fires (on screen) |
+| Lunge (v178) | A Wall Piston snaps out (on screen) |
+| Clack (v178) | Closing Jaws meet (on screen) |
+| Found (a sparkling run of high notes, v178) | A collection item is seen for the first time ever |
+| Milestone, new best | Every 100 m; passing the record depth |
+| Level up | The XP level goes up on the game-over screen |
+| Click (v178) | Any menu button |
+| Page turn (v178) | The ‹ › arrows on the Collections and Leaderboards screens (and ← → in Collections) |
+| Pause / resume (v178) | The run pauses (also when the tab loses focus) and resumes |
+
+Obstacle sounds only play for obstacles on screen, and each v178 sound waits a moment before it can play again (`ready`, by the audio clock), so a busy screen never becomes a din. Sounds never touch the run's clock or random numbers, so replays stay exact.
 - Each theme is 8 bars; notes are scheduled half a second ahead of the audio clock, so the game loop is not involved.
 
 ## 8b. Settings
