@@ -205,17 +205,31 @@ function paintCollectionItem(canvas, item, locked, wide) {
   }
 }
 
-// every set as a grid of items, each with its name underneath (v152; until v151 a found item could be tapped to show
-// it large at the top). Items not found yet show a dark silhouette and their name greyed, so players know what to look for.
+// the map a set belongs to (its `map` is "Ocean" or "Ocean · Sunlit reef"), and the region shown beside its name
+const collMapOf = set => Object.keys(MAPS).find(k => MAPS[k].name === set.map.split(' · ')[0]);
+const collRegionOf = set => set.map.split(' · ')[1] || '';
+// the screen shows one map's sets at a time; the arrows step through the maps, like the leaderboards (v176)
+const COLL_MAPS = Object.keys(MAPS).filter(m => COLLECTIONS.some(set => collMapOf(set) === m));
+let collMap = COLL_MAPS[0];
+function collStep(dir) {
+  collMap = COLL_MAPS[(COLL_MAPS.indexOf(collMap) + dir + COLL_MAPS.length) % COLL_MAPS.length];
+  renderCollections();
+}
+// every set of the map on show as a grid of items, each with its name underneath (v152; until v151 a found item could be
+// tapped to show it large at the top). Items not found yet show a dark silhouette and their name greyed, so players know
+// what to look for.
 function renderCollections() {
-  const box = $('collSets');
+  const box = $('collSets'), sets = COLLECTIONS.filter(set => collMapOf(set) === collMap);
+  const items = sets.flatMap(set => set.items), got = items.filter(it => collectionFound.has(it.id)).length;
+  $('collMapName').textContent = MAPS[collMap].name;
+  $('collCount').textContent = `${got} / ${items.length} found`;
   box.replaceChildren();
-  for (const set of COLLECTIONS) {
+  for (const set of sets) {
     const n = set.items.filter(it => collectionFound.has(it.id)).length;
     const sec = document.createElement('section'); sec.className = 'coll-set';
     const h = document.createElement('h3');
     h.innerHTML = `<span></span><small></small><b>${n} / ${set.items.length}</b>`;
-    h.children[0].textContent = set.name; h.children[1].textContent = set.map;
+    h.children[0].textContent = set.name; h.children[1].textContent = collRegionOf(set);   // the map is in the picker above
     const grid = document.createElement('div'); grid.className = 'coll-grid';
     for (const item of set.items) {
       const found = collectionFound.has(item.id);
@@ -242,9 +256,16 @@ function syncCollectionButton() {
   for (const b of document.querySelectorAll('.coll-open')) b.textContent = 'Collections';   // no count on the button (v105)
 }
 let collFrom = 'title';
-function openCollections() { collFrom = 'title'; renderCollections(); showCard('coll'); }
+function openCollections() {                       // opens on the map picked on the start menu
+  collFrom = 'title';
+  const picked = store.get('nosedive-map');
+  collMap = COLL_MAPS.includes(picked) ? picked : COLL_MAPS.includes(mapId) ? mapId : COLL_MAPS[0];
+  renderCollections(); showCard('coll');
+}
 function closeCollections() { showCard(collFrom); }
 
 for (const b of document.querySelectorAll('.coll-open')) b.addEventListener('click', openCollections);
 $('collBack').addEventListener('click', closeCollections);
+$('collPrev').addEventListener('click', () => collStep(-1));
+$('collNext').addEventListener('click', () => collStep(1));
 syncCollectionButton();

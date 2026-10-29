@@ -9,6 +9,7 @@ window.addEventListener('keydown', e => {
   if (e.target instanceof HTMLInputElement) { if (e.key === 'Escape') closeLeaderboards(); return; }   // typing a nickname
   const k = e.key;
   const side = keySide(k);
+  if (side && !ui.coll.hidden) { e.preventDefault(); if (!e.repeat) collStep(side); return; }   // ← → step through the maps' collections
   if (side) { e.preventDefault(); if (!e.repeat) press(side, 'key' + side); }
   else if (k === 'Escape') { if (!ui.coll.hidden) closeCollections(); else if (!ui.lb.hidden) closeLeaderboards(); else state === 'paused' ? resume() : pause(); }
   else if (k === ' ' && state === 'play') { e.preventDefault(); if (!e.repeat) { spaceUsed = true; pause(); } }

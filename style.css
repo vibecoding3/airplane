@@ -333,6 +333,7 @@ button:focus-visible { outline: 3px solid #e07b39; outline-offset: 3px; }
   background: #c4302b; border: 2px solid var(--ink); border-radius: 8px; }
 .lb-play-btn:disabled { opacity: .5; cursor: default; }
 .coll-sets { display: grid; gap: 10px; }
+.coll-count { margin: -2px 0 0; font-size: 17px; font-variant-numeric: tabular-nums; }   /* the map's items found (v176) */
 .coll-rule { margin-top: -10px; font-size: 16px; }
 .coll-set { background: rgba(255,255,255,.88); border: 2px solid var(--ink); border-radius: 16px; padding: 8px 10px 10px; text-align: left; }
 .coll-set h3 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 6px; font-family: var(--display); font-size: 20px; }

@@ -199,13 +199,24 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 15 sets`);
   await page.evaluate(() => { state = 'title'; showCard('title'); });
   await page.click('#collBtn'); await wait(150);
-  const collOpen = await page.evaluate(() => ({ shown: !$('collCard').hidden, tiles: document.querySelectorAll('.coll-item').length }));
+  // one map's sets at a time (v176): the arrows go round every map once, each page showing only that map's sets
+  const collOpen = await page.evaluate(() => {
+    const pages = []; let tiles = 0, wrong = 0;
+    for (let i = 0; i < COLL_MAPS.length; i++) {
+      const names = [...document.querySelectorAll('.coll-set h3 span')].map(e => e.textContent);
+      wrong += COLLECTIONS.filter(s => names.includes(s.name) && collMapOf(s) !== collMap).length;
+      tiles += document.querySelectorAll('.coll-item').length;
+      pages.push($('collMapName').textContent + ' ' + names.length);
+      $('collNext').click();
+    }
+    return { shown: !$('collCard').hidden, tiles, wrong, back: collMap === COLL_MAPS[0] || pages.length, pages: pages.join(', ') };
+  });
   await page.keyboard.press(' '); await wait(150);                 // Space must not start a run from here
   const stillTitle = await page.evaluate(() => state);
   await page.keyboard.press('Escape'); await wait(150);
   const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
-  check(collOpen.shown && collOpen.tiles === 116 && stillTitle === 'title' && closed,
-    `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
+  check(collOpen.shown && collOpen.tiles === 116 && collOpen.wrong === 0 && stillTitle === 'title' && closed,
+    `Collections menu: one map per page (${collOpen.pages}), ${collOpen.tiles} tiles in all, other maps' sets shown ${collOpen.wrong}, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
   // control tips in the top bar: shown for the first 200 m of a run, gone after and outside a run; no pause button
   const hint = await page.evaluate(() => {
