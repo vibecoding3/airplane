@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v173** (2026-10-29)
+Current version: **v174** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,7 +10,7 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css`, `depth-art.css` and 36 plain script files in `js/` (about 12,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
+- **Files:** `index.html`, `style.css`, `depth-art.css` and 37 plain script files in `js/` (about 12,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
 - **Start menu:** a regular game menu over an illustrated sky full of paper airplanes (`img/menu-bg.svg`): the big title, the star total and the Total score (with the player's leaderboard place, v147), the level and XP bar, the nine map tiles (each with its medals and best depth, v138), Play with the Daily dive beside it (v160), and Collections and Leaderboards side by side (v144). A server status pill sits in the top-left corner (v143). The "How to play" section was removed in v44. It is not tied to any map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth and the Total score, the stars caught this run and the star total, the XP gained (with a "Level up!" badge), Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
 - **Online features** (section 19): an anonymous play log, leaderboards with a nickname and server-side XP, all in a free Supabase project. The game works fully offline without them.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
@@ -140,7 +140,7 @@ Since v169 the specks, the fish levels and the obstacle looks change on the Ocea
 | 200–400 m | Angelfish, parrotfish |
 | 400–800 m | Lionfish, barracuda, tuna; far behind, the ruins of the sunken city (towers with a few lit windows, broken arches) |
 | 800–1,500 m | Reef shark, hammerhead shark, ocean sunfish; far behind, the glowing dome city (domes with lit windows, chimneys trailing bubbles, towers) |
-| 1,500–2,500 m (the abyss) | Great white shark, giant squid, oarfish, viperfish, gulper eel, hatchetfish (the last three only from 2,500 m until v170) |
+| 1,500–2,500 m (the abyss) | Great white shark, giant squid, hatchetfish (also the oarfish, viperfish and gulper eel in v171–v173, before they became abyss obstacles in v174) |
 | From 2,500 m | The next dive: the same fish again, from the reef down |
 
 Since v124 the scenery leaves out the species that became obstacles (the school of fish, butterflyfish, pufferfish, sea turtle, octopus, stingray, swordfish, anglerfish and lanternfish; since v128 also the jellyfish and moray eel), so a harmless background fish never looks like one that hurts.
@@ -354,6 +354,10 @@ Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reus
 | Anchor (Sweeping Arm, v124) | An anchor on its chain swinging all the way round a ring bolt, or a giant squid's tentacle (400 m on) | Drawing compass | ~215 m |
 
 **The sunken city (v133).** From 400 to 1,500 m the Ocean becomes a sunken city: every obstacle takes a city look there, and the sea looks above keep to the reef (0–400 m) and the abyss (1,500 m +); nothing was deleted (`SEA_CITY_LOOKS`, `SEA_CITY` in `js/obstacles.js`, art in `js/draw-sunken-city.js`). Ruins and temples first (400–800 m: pale stone, gold, carved symbols that glow), then the dome city (800–1,500 m: glass, brass, warm windows). Original designs only: no famous sunken city, no merfolk.
+
+**Region looks** (v174, `design/regions.md` step 6; each region's `skins` in `js/regions.js`). The sunlit reef and the twilight zone no longer share their looks: bright life on the reef (coral, anemones, the clam, the moray, the electric ray, the pistol shrimp, kelp, the starfish, the naval mine, the crab, the fishing line), wrecks and darker animals in the twilight (wreck planks, the stonefish, the wreck hull, the mantis shrimp, the octopus arm, the cannon and the submarine, the brittle star and ship's wheel, the electric eel, the depth-charge barrel, the lobster, the net strand, the broken mast). The abyss has its own looks instead of reusing the reef's (art in `js/draw-ocean-deep.js`): glass-sponge ledges, a gulper eel's jaws, glowing deep-sea urchins, an oarfish, a glowing jellyfish bell rising, an ammonite, a deep-sea spider crab, a viperfish lunging, a glowing shrimp spitting light, an anglerfish's lure flashing a beam, a puffball of light that bursts, and a glowing tentacle between two glowing bulbs (the sleeping whale, the anglerfish swarm, the squid tentacle, the warm vent and the lanternfish stay). The oarfish, viperfish and gulper eel left the abyss scenery.
+
+**Twenty Thousand Leagues Under the Sea** (v174, the user's request; Jules Verne's 1870 novel is public domain, and the looks are drawn from the book, not from any film): the Nautilus, a cigar-shaped iron submarine with a ram, a lit wheelhouse and a lantern (Bouncing Slider, twilight zone and abyss); Ned Land's harpoon thrust from the rock, its rope paying out (Wall Piston, twilight); one of Captain Nemo's divers in a brass helmet with an electric rifle (Wall Turret, twilight); the giant pearl oyster of Ceylon with its great pearl (Closing Jaws, twilight); the Maelstrom's whirlpools (Push Zone, twilight, so before 700 m); Nemo's divers sinking in brass helmets and lead boots (Drifting Swarm, the reef); the ruins of Atlantis (Wall Bulge, the sunken ruins); the kraken, a giant squid's arm with a huge eye watching from the crevice (Telegraphed Sweep, the abyss); and the Nautilus's brass searchlight (Charged Beam, the abyss).
 
 | Obstacle | Ruins and temples (400–800 m) | Dome city (800–1,500 m) |
 |---|---|---|
@@ -783,7 +787,7 @@ airplane/
 ├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
 ├── design/                 design notes: maps/<map>.md per map (premise, layers, obstacles, spawn tables) and obstacle-balance.md (obstacles and looks per map, v153), regions.md (the Regions design proposal)
 ├── ref/                    reference pictures (map-icon sheets, screenshots the player shared); git ignores it, not used by the game
-└── js/                     36 game scripts, listed in the order they load
+└── js/                     37 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
     ├── regions.js          map regions (design/regions.md): the Ocean's region table, regionAt (v170)
     ├── audio.js            sound effects
@@ -805,6 +809,7 @@ airplane/
     ├── draw-sea.js         Ocean obstacle art (the original looks)
     ├── draw-ocean.js       Ocean obstacle art: the looks and obstacles added in v124
     ├── draw-sunken-city.js Ocean obstacle art: the sunken city from 400 to 1,500 m (and the Sunken treasures)
+    ├── draw-ocean-deep.js  Ocean obstacle art: the abyss's own looks and the Twenty Thousand Leagues looks (v174)
     ├── draw-space.js       Space obstacle art
     ├── draw-dungeon.js     Dungeon obstacle art
     ├── draw-city.js        Neon City obstacle art (and the neon signs)

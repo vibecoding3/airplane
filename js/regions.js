@@ -15,23 +15,26 @@ const MAP_REGIONS = {
   sea: [
     { id: 'reef', name: 'Sunlit reef', from: 0, art: 'art-sea-0', music: 'seaReef', specks: 'none', collections: ['shells'],
       scenery: ['clown', 'tang', 'seahorse'],
-      skins: { gate: ['coral', 'rockledge', 'wreck'], blot: ['urchin', 'anemone', 'stonefish'], note: ['jelly', 'combjelly'],
-               erasers: ['clam', 'wreckhull'], cutter: ['moray', 'mantis'], paw: ['kelp', 'octopus'], glue: ['sub', 'shrimp', 'cannon'],
-               starfish: ['starfish', 'brittlestar', 'wheel'], zap: ['eel', 'ray'], mine: ['navalmine', 'barrel'], bubbles: ['bubbles'],
+      // bright life (v174: the reef and the twilight zone split the looks they shared); Nemo's divers walk the reef
+      skins: { gate: ['coral', 'rockledge'], blot: ['urchin', 'anemone'], note: ['jelly', 'combjelly', 'diver'],
+               erasers: ['clam'], cutter: ['moray'], paw: ['kelp'], glue: ['shrimp'],
+               starfish: ['starfish'], zap: ['ray'], mine: ['navalmine'], bubbles: ['bubbles'],
                fan: ['current', 'drift'], clips: ['sardines', 'butterfly'], wad: ['puffer', 'turtle'], protractor: ['braincoral', 'rock'],
-               pencil: ['swordfish', 'driftwood'], band: ['fishline', 'netline'], compass: ['anchor'], scissors: ['crab', 'lobster'] } },
+               pencil: ['swordfish', 'driftwood'], band: ['fishline'], compass: ['anchor'], scissors: ['crab'] } },
     { id: 'twilight', name: 'Twilight zone', from: 200, art: 'art-sea-1', music: 'sea', specks: 'plankton', collections: ['fish'],
       scenery: ['angel', 'parrot'],
-      skins: { gate: ['coral', 'rockledge', 'wreck'], blot: ['urchin', 'anemone', 'stonefish'], note: ['jelly', 'combjelly'],
-               erasers: ['clam', 'wreckhull'], cutter: ['moray', 'mantis'], paw: ['kelp', 'octopus'], glue: ['sub', 'shrimp', 'cannon'],
-               starfish: ['starfish', 'brittlestar', 'wheel'], zap: ['eel', 'ray'], mine: ['navalmine', 'barrel'], bubbles: ['bubbles'],
-               fan: ['current', 'drift'], clips: ['sardines', 'butterfly'], wad: ['puffer', 'turtle'], protractor: ['braincoral', 'rock'],
-               pencil: ['swordfish', 'driftwood', 'mast'], band: ['fishline', 'netline'], compass: ['anchor'], scissors: ['crab', 'lobster'] } },
+      // wrecks and darker animals, and Twenty Thousand Leagues (v174): the Nautilus, Ned Land's harpoon, the giant pearl
+      // oyster, a diver's electric rifle and the Maelstrom
+      skins: { gate: ['wreck', 'rockledge'], blot: ['stonefish', 'urchin'], note: ['combjelly'],
+               erasers: ['wreckhull', 'giantoyster'], cutter: ['mantis', 'harpoon'], paw: ['octopus'], glue: ['cannon', 'sub', 'riflediver'],
+               starfish: ['brittlestar', 'wheel'], zap: ['eel'], mine: ['barrel'], bubbles: ['bubbles'],
+               fan: ['current', 'maelstrom'], clips: ['sardines'], wad: ['puffer'], protractor: ['rock'],
+               pencil: ['mast', 'swordfish', 'nautilus'], band: ['netline'], compass: ['anchor'], scissors: ['lobster'] } },
     { id: 'ruins', name: 'Sunken ruins', from: 400, art: 'art-sea-2', music: 'seaRuins', specks: 'snow', collections: ['treasures'],
       scenery: ['lion', 'barracuda', 'tuna', 'ucArch', 'ucTowers'],
       skins: { gate: ['columns'], blot: ['amphora'], note: ['lantern'], erasers: ['templedoors'], cutter: ['trident'], paw: ['statuearm'],
                glue: ['fishfountain'], starfish: ['calendar', 'coin'], zap: ['glyph'], mine: ['bubblemine'], bubbles: ['elevator'],
-               fan: ['pump'], clips: ['msgcapsules'], wad: ['lanternfloat'], protractor: ['stoneface'], pencil: ['oar'], band: ['mooring'],
+               fan: ['pump'], clips: ['msgcapsules'], wad: ['lanternfloat'], protractor: ['stoneface', 'atlantis'], pencil: ['oar'], band: ['mooring'],
                compass: ['clockhand'], scissors: ['millwheel'] } },
     { id: 'dome', name: 'Dome city', from: 800, art: 'art-sea-3', music: 'seaDome', specks: 'snow', collections: ['inventions'],
       scenery: ['reefshark', 'hammer', 'sunfish', 'ucDomes', 'ucChimney', 'ucTowers'],
@@ -40,12 +43,15 @@ const MAP_REGIONS = {
                clips: ['trampods'], wad: ['capsule'], protractor: ['domehouse'], pencil: ['tramcar'], band: ['glowcable'],
                compass: ['clockhand', 'crane'], scissors: ['fanprop'] } },
     { id: 'abyss', name: 'The abyss', from: 1500, art: 'art-sea-4', music: 'seaAbyss', specks: 'bio', collections: ['abysslights'],
-      scenery: ['white', 'squid', 'oarfish', 'viper', 'gulper', 'hatchet'],   // the deepest fish too since v171 (2,500 m + before)
-      skins: { gate: ['coral', 'rockledge', 'wreck'], blot: ['urchin', 'stonefish'], note: ['jelly', 'combjelly', 'anglerfish'],
-               erasers: ['clam', 'wreckhull'], cutter: ['moray', 'mantis'], paw: ['kelp', 'octopus'], glue: ['sub', 'shrimp', 'cannon'],
-               starfish: ['starfish', 'brittlestar', 'wheel'], zap: ['eel', 'ray'], mine: ['navalmine', 'barrel'], bubbles: ['bubbles', 'vent'],
-               fan: ['current'], clips: ['lanternfish'], wad: ['puffer'], protractor: ['rock', 'whale'], pencil: ['swordfish', 'mast'],
-               band: ['netline'], compass: ['anchor', 'tentacle'], scissors: ['crab', 'lobster'] } }
+      // the oarfish, viperfish and gulper eel became obstacles in v174, so they left the scenery (v171–v173 they swam here)
+      scenery: ['white', 'squid', 'hatchet'],
+      // its own deep looks since v174 (it reused the reef's before; art in draw-ocean-deep.js), plus the Nautilus, its
+      // searchlight and the kraken from Twenty Thousand Leagues
+      skins: { gate: ['glasssponge'], blot: ['glowurchin'], note: ['anglerfish'],
+               erasers: ['gulper'], cutter: ['viperfish'], paw: ['kraken'], glue: ['glowshrimp'],
+               starfish: ['ammonite'], zap: ['lure', 'searchlight'], mine: ['glowpuff'], bubbles: ['vent'],
+               fan: ['current'], clips: ['lanternfish'], wad: ['glowbell'], protractor: ['whale'], pencil: ['oarfish', 'nautilus'],
+               band: ['glowtentacle'], compass: ['tentacle'], scissors: ['spidercrab'] } }
   ]
 };
 // metres in one dive: after the last region the first one starts again (the Ocean: the abyss ends in a trench, and the

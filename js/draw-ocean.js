@@ -8,6 +8,7 @@
 function drawOceanLook(o, sy) {
   const look = o.look;
   if (o.abyssLight) { drawAbyssLight(o, sy); return true; }                  // the Abyss lights collection (v173)
+  if (DEEP_LOOKS.has(look) && drawDeepLook(o, sy)) return true;               // the abyss's and the Verne looks (v174)
   if (o.treasure || (SEA_CITY.has(look) && !o.shell && !o.fish)) { drawSunkenCity(o, sy); return true; }   // the sunken city (v133)
   switch (o.type) {
     case 'gate': {
