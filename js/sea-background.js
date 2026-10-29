@@ -186,11 +186,8 @@ const FISH = {
 };
 // species that are also Ocean obstacles (school, butterflyfish, puffer, turtle, octopus, ray, swordfish, anglerfish,
 // lanternfish in v124; jellyfish and moray eel in v128) are not in the scenery, so a background fish never looks like one that hurts
-const FISH_TIERS = [
-  ['clown', 'tang', 'seahorse'], ['angel', 'parrot'],
-  ['lion', 'barracuda', 'tuna', 'ucArch', 'ucTowers'], ['reefshark', 'hammer', 'sunfish', 'ucDomes', 'ucChimney', 'ucTowers'],
-  ['white', 'squid', 'oarfish'], ['viper', 'gulper', 'hatchet']
-];
+// the fish of each level: each Ocean region's scenery (MAP_REGIONS.sea in js/regions.js, since v170), then the deepest fish
+const FISH_TIERS = [...MAP_REGIONS.sea.map(r => r.scenery), SEA_DEEP_FISH.scenery];
 let lastSceneryY = -1e9;
 // far-away scenery: very faded silhouettes that appear now and then (never collide)
 FISH.whale = { w: 300, h: 110, alpha: 0.2, paint() {
@@ -235,12 +232,10 @@ FISH.wreck = { w: 300, h: 140, alpha: 0.22, still: true, paint() {
   ctx.fillStyle = 'rgba(120,170,200,.45)';
   for (const x of [-90, -60, -30, 0, 30, 60]) { ctx.beginPath(); ctx.arc(x, 10, 4, 0, Math.PI * 2); ctx.fill(); }                   // portholes
 } };
-// metres where each fish level starts: the Ocean's regions (since v169; FORMULA_DEPTHS, with 150 m, before)
-const SEA_FISH_DEPTHS = [0, 200, 400, 800, 1500, 2500];
 function spawnFish(lineY) {
   const m = (lineY - planeScreenY()) / PX_PER_M;   // measured like the depth lines (pageTop)
-  let tier = 0;
-  for (let i = 1; i < SEA_FISH_DEPTHS.length; i++) if (m >= SEA_FISH_DEPTHS[i]) tier = i;
+  // the fish level: the region's (on the region lines since v169; FORMULA_DEPTHS, with 150 m, before), the deepest from 2,500 m
+  let tier = m >= SEA_DEEP_FISH.from ? FISH_TIERS.length - 1 : regionIndexAtM('sea', m);
   if (tier > 0 && Math.random() < 0.2) tier--;                   // the odd smaller fish keeps it varied
   let kind = FISH_TIERS[tier][ri(0, FISH_TIERS[tier].length - 1)];
   if (kind.startsWith('uc')) { if (lineY - lastSceneryY < 600) kind = FISH_TIERS[tier][0]; else lastSceneryY = lineY; }   // city silhouettes keep apart
@@ -266,25 +261,24 @@ function fishSprite(kind, v = 0) {
   const def = FISH[kind], K = fishK(kind);
   return sharedSprite('fish' + kind + v, def.w * K, def.h * K, def.w * K / 2, def.h * K / 2, () => { ctx.scale(K, K); def.paint(def.cols && def.cols[v]); });
 }
-// drifting specks that change with the Ocean's regions (since v169; 100, 400 and 1,000 m before): none on the sunlit
-// reef, plankton in the twilight zone (200–400 m), marine snow in the ruins and the dome city (400–1,500 m), then
-// twinkling bioluminescence in the abyss. Each speck goes by its own depth, so the change is sharp on the line.
+// drifting specks that change with the Ocean's regions (each region's `specks`, since v169; 100, 400 and 1,000 m before):
+// none on the sunlit reef, plankton in the twilight zone, marine snow in the ruins and the dome city, then twinkling
+// bioluminescence in the abyss. Each speck goes by its own depth, so the change is sharp on the line.
 // Positions come from a hash of the page chunk, so nothing is stored.
 const hash = n => { const s = Math.sin(n * 127.1) * 43758.5453; return s - Math.floor(s); };
 function drawSeaParticles() {
   const CH = 300, N = 14, t = titleTime + time;
   ctx.save();
   for (let c = Math.floor((dist - 20) / CH); c * CH < dist + H + 20; c++) {
-    if (((c + 1) * CH - planeScreenY()) / PX_PER_M < 200) continue;   // the clear sunlit reef has no specks
     for (let i = 0; i < N; i++) {
       const hx = hash(c * 97 + i * 13.1), hy = hash(c * 53 + i * 7.7), hs = hash(c * 11 + i * 3.3);
       let x = hx * W, y = c * CH + hy * CH - dist;
-      const m = (c * CH + hy * CH - planeScreenY()) / PX_PER_M;   // measured like the depth lines (pageTop)
-      if (m < 200) continue;
-      if (m < 400) {                             // plankton
+      const kind = MAP_REGIONS.sea[regionIndexAt('sea', c * CH + hy * CH)].specks;
+      if (kind === 'none') continue;
+      if (kind === 'plankton') {                             // plankton
         ctx.globalAlpha = 0.35; ctx.fillStyle = '#c8f0c0';
         const s = 1.2 + hs * 1.4; ctx.fillRect(x, y, s, s);
-      } else if (m < 1500) {                     // marine snow, sinking slowly
+      } else if (kind === 'snow') {              // marine snow, sinking slowly
         y = c * CH + ((hy * CH + t * (6 + hs * 8)) % CH) - dist;
         x += Math.sin(t * 0.6 + i) * 4;
         ctx.globalAlpha = 0.55; ctx.fillStyle = '#eef6fb';

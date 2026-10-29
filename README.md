@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v169** (2026-10-29)
+Current version: **v170** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -10,7 +10,7 @@ Repository: https://github.com/vibecoding3/airplane
 
 Paper Nosedive is a 2D browser game. A paper airplane is always falling; the player steers it left and right to dodge obstacles and survive as deep as possible. The score is the depth reached, in metres.
 
-- **Files:** `index.html`, `style.css`, `depth-art.css` and 35 plain script files in `js/` (about 12,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
+- **Files:** `index.html`, `style.css`, `depth-art.css` and 36 plain script files in `js/` (about 12,800 lines in all). No build step and no dependencies. The two fonts (Kalam and Patrick Hand, SIL Open Font License) are bundled in `fonts/` since v110, so the game looks right offline and in an app; before, they loaded from Google Fonts. See section 10 for the file structure.
 - **Start menu:** a regular game menu over an illustrated sky full of paper airplanes (`img/menu-bg.svg`): the big title, the star total and the Total score (with the player's leaderboard place, v147), the level and XP bar, the nine map tiles (each with its medals and best depth, v138), Play with the Daily dive beside it (v160), and Collections and Leaderboards side by side (v144). A server status pill sits in the top-left corner (v143). The "How to play" section was removed in v44. It is not tied to any map; the game itself is not drawn behind it. The pause and game-over screens use the same menu style over the dimmed game: game over shows the depth in big numbers, a "New best!" badge, the best depth and the Total score, the stars caught this run and the star total, the XP gained (with a "Level up!" badge), Play again and (since v107) a Main Menu button back to the start menu (the run time was removed in v45). There is no Shop (removed in v46).
 - **Online features** (section 19): an anonymous play log, leaderboards with a nickname and server-side XP, all in a free Supabase project. The game works fully offline without them.
 - **Rendering:** HTML canvas 2D, plus a few CSS layers for the background.
@@ -86,7 +86,7 @@ Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a n
 | Volcano | Jungle leaves | Ash-streaked rock | Basalt hexagons | Ribbed lava-tube rock with glowing seams | Magma cells |
 | Kitchen | Flower wallpaper | Wood grain | Checkered tiles | Blue mosaic | A ridged fridge wall with frost |
 
-**Region names** (Ocean v166, every map v168): every 100 m depth marker shows its depth above the line and, below it, the name of the region the plane is falling into, both centred (the depth was on the right until v167). The regions are the background-art layers above (`REGIONS` in `js/maps.js`):
+**Region names** (Ocean v166, every map v168): every 100 m depth marker shows its depth above the line and, below it, the name of the region the plane is falling into, both centred (the depth was on the right until v167). The regions are the background-art layers above (`REGIONS` in `js/maps.js`; the Ocean's are in `MAP_REGIONS` in `js/regions.js` since v170):
 
 | Map | 0–200 m | 200–400 m | 400–800 m | 800–1,500 m | 1,500 m + |
 |---|---|---|---|---|---|
@@ -328,7 +328,7 @@ The extra hazard next to desk fans deeper down is a small ink blot.
 **Looks (v129):** five obstacles got a second look, picked for a whole row (`PAPER_LOOKS` in `js/obstacles.js`, art at the end of `js/draw-paper.js`): a zipped pencil case for the rulers, a coffee-cup ring stain for the ink blots (only a look: nothing gets soggy), a ballpoint pen for the pencil, a ball of eraser crumbs for the paper wad, and lined index cards for the sticky notes (origami still appear among them).
 
 ### 5.2 Ocean map (19 obstacles on 19 mechanics; 12 until v123)
-Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in `js/obstacles.js`); four are mechanics the Ocean brought in (starfish, bubble column, naval mine, electric eel). Since v124 each obstacle has two or three looks sharing its hit box, in a few colours (`SEA_LOOKS`); a row of the same obstacle shares one look and colour. The first look is the original (art in `js/draw-sea.js`), the others are in `js/draw-ocean.js`. Some looks only live at some depths (`SEA_LAYERS`, by `seaLayer`: sunlit 0–200 m (0–150 m until v168), twilight 200–400 m, dark 400–800 m, midnight 800–1,500 m, the abyss 1,500 m +): driftwood and the kelp-carrying current near the surface; brain coral, sardines, butterflyfish, sea turtles and fishing lines above 800 m; anemones above 1,500 m; anglerfish, warm vents and squid tentacles from 400 m; broken masts from 200 m; lanternfish and the sleeping whale from 800 m.
+Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in `js/obstacles.js`); four are mechanics the Ocean brought in (starfish, bubble column, naval mine, electric eel). Since v124 each obstacle has two or three looks sharing its hit box, in a few colours (`SEA_LOOKS`); a row of the same obstacle shares one look and colour. The first look is the original (art in `js/draw-sea.js`), the others are in `js/draw-ocean.js`. Some looks only live at some depths (by region since v170: `MAP_REGIONS.sea` in `js/regions.js`, `SEA_LAYERS` before; sunlit 0–200 m (0–150 m until v168), twilight 200–400 m, dark 400–800 m, midnight 800–1,500 m, the abyss 1,500 m +): driftwood and the kelp-carrying current near the surface; brain coral, sardines, butterflyfish, sea turtles and fishing lines above 800 m; anemones above 1,500 m; anglerfish, warm vents and squid tentacles from 400 m; broken masts from 200 m; lanternfish and the sleeping whale from 800 m.
 
 | Sea obstacle | Looks | Based on | Started at (until v124) |
 |---|---|---|---|
@@ -773,8 +773,9 @@ airplane/
 ├── app/                    the Android app: Capacitor wrapper and build script (see section 18)
 ├── design/                 design notes: maps/<map>.md per map (premise, layers, obstacles, spawn tables) and obstacle-balance.md (obstacles and looks per map, v153), regions.md (the Regions design proposal)
 ├── ref/                    reference pictures (map-icon sheets, screenshots the player shared); git ignores it, not used by the game
-└── js/                     35 game scripts, listed in the order they load
+└── js/                     36 game scripts, listed in the order they load
     ├── core.js             constants, helpers, saved settings, screen sizing, sprite cache
+    ├── regions.js          map regions (design/regions.md): the Ocean's region table, regionAt (v170)
     ├── audio.js            sound effects
     ├── music.js            background music for the menus and each map
     ├── paper-background.js Paper map: pencil formulas by depth
@@ -838,7 +839,8 @@ There is no build step and nothing to install. To play locally, open `index.html
 | Sounds | `js/audio.js` (`sfx`) |
 | Music | `js/music.js` (`THEMES`: chords, melody and tempo per theme; `setMusic`, `duckMusic`) |
 | Frame rate, resolution, input | `js/main.js`, plus `resize` in `js/core.js` |
-| Background art per depth layer | `tools/depth-art.py` (then `python tools/depth-art.py depth-art.css`), `js/render.js` (`syncDepthArt`, `ART_BOUNDS`, `ART_BASE`, `ART_NONE`) |
+| Background art per depth layer | `tools/depth-art.py` (then `python tools/depth-art.py depth-art.css`), `js/render.js` (`syncDepthArt`, `ART_BOUNDS`, `ART_BASE`, `ART_NONE`); for the Ocean, each region's `art` in `js/regions.js` |
+| Ocean regions (names, lines, looks per region, background fish, specks, which collections live where) | `js/regions.js` (`MAP_REGIONS.sea`); colours of each look stay in `SEA_LOOKS` / `SEA_CITY_LOOKS` in `js/obstacles.js` |
 | Play log, server status pill | `js/playlog.js` (`LOG_URL`, `LOG_KEY`, `logRow`, `logRun`, `checkServer`, `setNet`), tables in `tools/supabase.sql` |
 | Leaderboards, nickname, server-side XP | `js/leaderboard.js` (`lbCall`, `lbSyncXp`, `lbRunEnded`, `renderBoard`, `lbWatch`, `lbRefreshRank`), database functions in `tools/supabase-leaderboards.sql`, `tools/supabase-levels.sql`, `tools/supabase-time.sql`, `tools/supabase-board-replays.sql` |
 | Replays | `js/replay.js` (`SIM_VERSION`, `simFrame`, `watchReplay`, `replayStep`), section 19.2 |
@@ -853,6 +855,7 @@ There is no build step and nothing to install. To play locally, open `index.html
 | `audio.js` | `sfx`, `tone`, `muted`, `audioEngine` |
 | `music.js` | `THEMES`, `CH` (chords), `setMusic`, `duckMusic`, `syncMusicVolume`, `playBar` |
 | `paper-background.js` | `FORMULA_TIERS`, `pickFormula`, `spawnFormula`, `updateFormulas` |
+| `regions.js` | `MAP_REGIONS`, `SEA_DEEP_FISH`, `hasRegions`, `regionIndexAtM`, `regionIndexAt`, `regionAt` |
 | `sea-background.js` | `FISH`, `FISH_TIERS`, `spawnFish`, `drawFishes`, `drawSeaParticles` |
 | `state.js` | `state`, `plane`, `obstacles`, `dist`, `speed`, `POWER_MAX`, `MAGNET_RANGES`, `press` / `release`, `depthM`, `difficulty`, `baseFallSpeed`, `reset`, `xp`, `xpNeed`, `levelInfo` |
 | `obstacles.js` | `make` (generators), `PALETTES`, `DUNGEON_LOOKS`, `SEA_MAKERS`, `seaPool`, `spawnRow`, `spawnFromPool`, `spawnRows` |

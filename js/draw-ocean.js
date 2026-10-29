@@ -7,7 +7,7 @@
 // sea. Every drawing stays inside the mechanic's hit shape. Returns false for an original look, so render.js draws it.
 function drawOceanLook(o, sy) {
   const look = o.look;
-  if (o.treasure || (SEA_CITY[look] && !o.shell && !o.fish)) { drawSunkenCity(o, sy); return true; }   // the sunken city (v133)
+  if (o.treasure || (SEA_CITY.has(look) && !o.shell && !o.fish)) { drawSunkenCity(o, sy); return true; }   // the sunken city (v133)
   switch (o.type) {
     case 'gate': {
       if (look === 'coral') return false;

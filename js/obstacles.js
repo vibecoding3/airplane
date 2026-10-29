@@ -281,14 +281,10 @@ const SEA_LOOKS = {
   compass: { anchor: ['#5a5f68'], tentacle: ['#c0392b', '#a04ab0'] },
   scissors: { crab: ['#e0503a', '#f08a3a'], lobster: ['#b02a2a', '#3a5aa8'] }
 };
-// the sea gets darker as you sink: sunlit (0–200 m), twilight (200–400 m), dark (400–800 m), midnight (800–1,500 m),
-// the abyss (1,500 m +); some looks only live at some depths. These are the Ocean's regions (design/regions.md): since
-// v169 the first change is at 200 m (150 m before), on the same line as the background art and the region name: depth
-// lines sit planeScreenY() below k × 100 m in world units (pageTop), so the depth is measured from there
-const seaLayer = y => { const m = (y - planeScreenY()) / PX_PER_M; return m < 200 ? 0 : m < 400 ? 1 : m < 800 ? 2 : m < 1500 ? 3 : 4; };
-const SEA_LAYERS = { anglerfish: [2, 3, 4], vent: [2, 3, 4], whale: [3, 4], lanternfish: [3, 4], mast: [1, 2, 3, 4], tentacle: [2, 3, 4],
-                     braincoral: [0, 1, 2], driftwood: [0, 1], butterfly: [0, 1, 2], sardines: [0, 1, 2], turtle: [0, 1, 2],
-                     fishline: [0, 1, 2], anemone: [0, 1, 2, 3], drift: [0, 1] };
+// the sea gets darker as you sink, through its regions: the sunlit reef (0–200 m), the twilight zone (200–400 m), the
+// sunken ruins (400–800 m), the dome city (800–1,500 m) and the abyss (1,500 m +). Which looks live in which region is
+// in MAP_REGIONS.sea (js/regions.js, since v170; SEA_LAYERS and SEA_CITY here before). o.layer is the region's index.
+const seaLayer = y => regionIndexAt('sea', y);
 // The sunken city (v133) takes over the dark and midnight layers: ruins and temples from 400 m, the glowing dome city from
 // 800 m to 1,500 m (art in draw-sunken-city.js). Its looks only live there, and the sea's own looks only above and below it.
 const SEA_CITY_LOOKS = {
@@ -312,14 +308,9 @@ const SEA_CITY_LOOKS = {
   bubbles: { elevator: [''] },
   band: { mooring: ['#c9a66b'], glowcable: ['#7fe8ff'] }
 };
-const SEA_CITY = { columns: [2], tubewalk: [3], templedoors: [2], hatch: [3], amphora: [2], orb: [3], stoneface: [2], domehouse: [3],
-                   oar: [2], tramcar: [3], lanternfloat: [2], capsule: [3], lantern: [2], mailpod: [3], msgcapsules: [2], trampods: [3],
-                   calendar: [2], coin: [2, 3], millwheel: [2], fanprop: [3], clockhand: [2, 3], crane: [3], trident: [2], gangplank: [3],
-                   fishfountain: [2], domecannon: [3], glyph: [2], cable: [3], statuearm: [2], claw: [3], bubblemine: [2], valve: [3],
-                   pump: [2, 3], elevator: [2, 3], mooring: [2], glowcable: [3] };
-for (const [type, looks] of Object.entries(SEA_LOOKS)) for (const l of Object.keys(looks)) SEA_LAYERS[l] = (SEA_LAYERS[l] || [0, 1, 2, 3, 4]).filter(k => k !== 2 && k !== 3);
+// the city looks, drawn by draw-sunken-city.js
+const SEA_CITY = new Set(Object.values(SEA_CITY_LOOKS).flatMap(Object.keys));
 for (const [type, looks] of Object.entries(SEA_CITY_LOOKS)) Object.assign(SEA_LOOKS[type], looks);
-Object.assign(SEA_LAYERS, SEA_CITY);
 // Sunken treasures collection (Ocean, v133): Static Hazards variants in the sunken city, each at most once per run
 const TREASURES = ['crown', 'scepter', 'coin', 'chalice', 'necklace', 'compass', 'musicbox', 'crystalkey'];
 const treasuresLeft = () => TREASURES.filter(n => !runCollected.has('treasure-' + n));
@@ -833,14 +824,14 @@ function spawnFromPool(y, d, pool) {
       o.layer = seaLayer(o.y);
       const looks = SEA_LOOKS[o.type];
       if (looks && !rowSea[o.type]) {
-        const all = Object.keys(looks), fit = all.filter(l => !SEA_LAYERS[l] || SEA_LAYERS[l].includes(o.layer));
-        const names = fit.length ? fit : all, look = names[ri(0, names.length - 1)], cols = looks[look];
+        const fit = MAP_REGIONS.sea[o.layer].skins[o.type] || [];   // the region's skins for this obstacle
+        const names = fit.length ? fit : Object.keys(looks), look = names[ri(0, names.length - 1)], cols = looks[look];
         rowSea[o.type] = [look, cols[ri(0, cols.length - 1)]];
       }
       if (looks) [o.look, o.seaCol] = rowSea[o.type];
       if (o.type === 'compass') o.hh = 7;        // an anchor chain is thicker than a compass leg
       if (o.type === 'blot') {                   // in the city a treasure not yet seen this run first, otherwise a seashell
-        const gold = o.layer === 2 || o.layer === 3 ? treasuresLeft() : [], left = shellsLeft();
+        const gold = MAP_REGIONS.sea[o.layer].collections.includes('treasures') ? treasuresLeft() : [], left = shellsLeft();
         if (gold.length && Math.random() < 0.4) { o.treasure = gold[ri(0, gold.length - 1)]; runCollected.add('treasure-' + o.treasure); }
         else if (left.length && Math.random() < 0.4) { o.shell = left[ri(0, left.length - 1)]; runCollected.add('shell-' + o.shell); }
       }

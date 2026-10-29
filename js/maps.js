@@ -136,10 +136,9 @@ function drawBestLine() {
 }
 
 // under each depth marker, the name of the region below it, one per depth-art layer (ART_BOUNDS): the Ocean since v166,
-// every map since v168
+// every map since v168. The Ocean's names are in MAP_REGIONS (js/regions.js) since v170.
 const REGIONS = {
   notebook: ['Notebook page', 'Graph paper', 'Dot grid', 'Sheet music', 'Blueprint'],
-  sea: ['Sunlit reef', 'Twilight zone', 'Sunken ruins', 'Dome city', 'The abyss'],
   space: ['Low orbit', 'Moon orbit', 'The planets', 'Deep space', 'Far galaxies'],
   dungeon: ['The well', 'Torch halls', 'The crypt', 'Crystal caves', 'The underworld'],
   city: ['Rooftops', 'The streets', 'The subway', 'The arcade', 'The data core'],
@@ -158,7 +157,9 @@ function drawDepthMarkers() {
     ctx.fillStyle = col; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = 'center';   // centred since v167 (right before)
     ctx.fillText(fmt(k * PAGE_M) + ' m', W / 2, y - 6);
     ctx.font = '700 13px Kalam, cursive';
-    ctx.fillText(REGIONS[mapId][ART_BOUNDS.filter(b => b <= k * PAGE_M).length], W / 2, y + 16);
+    const region = hasRegions(mapId) ? MAP_REGIONS[mapId][regionIndexAtM(mapId, k * PAGE_M)].name
+                                     : REGIONS[mapId][ART_BOUNDS.filter(b => b <= k * PAGE_M).length];
+    ctx.fillText(region, W / 2, y + 16);
     ctx.restore();
   }
 }

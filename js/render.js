@@ -198,11 +198,12 @@ const ART_BASE = { notebook: 'all', sea: 'all', space: 'all', forest: 'all', dun
 const ART_NONE = { space: [1], forest: [4] };
 let artKey = '', artClip = '';
 const artClass = (k) => {
+  if (hasRegions(mapId)) return (MAP_REGIONS[mapId][k] || {}).art || '';   // a map with regions names its art (v170)
   const base = ART_BASE[mapId], none = ART_NONE[mapId];
   return (base !== 'all' && base && base.includes(k)) || (none && none.includes(k)) ? '' : 'art-' + mapId + '-' + k;
 };
 function syncDepthArt(px) {
-  const bounds = ART_BOUNDS, edgeY = b => b * PX_PER_M + planeScreenY() - dist;
+  const bounds = hasRegions(mapId) ? MAP_REGIONS[mapId].slice(1).map(r => r.from) : ART_BOUNDS, edgeY = b => b * PX_PER_M + planeScreenY() - dist;
   let L = 0; while (L < bounds.length && edgeY(bounds[L]) <= 0) L++;   // the layer at the top of the screen
   const edge = L < bounds.length ? edgeY(bounds[L]) : Infinity;        // where the next layer starts on screen
   const split = edge < H;

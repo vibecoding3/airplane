@@ -506,12 +506,36 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
       obstacles.length = 0; lastType = '';
       spawnFromPool(m * PX_PER_M, 0.5, [[['coral', 'urchins', 'jellies', 'swordfish', 'bigRock', 'sub', 'zap', 'anchor', 'fishline', 'crab'][k % 10], 1]]);
       const inCity = m >= 400 && m < 1500;
-      for (const o of obstacles) if (o.look && SEA_LAYERS[o.look] && !!SEA_CITY[o.look] !== inCity) bad.push(o.look + '@' + m);
+      for (const o of obstacles) if (o.look && SEA_CITY.has(o.look) !== inCity) bad.push(o.look + '@' + m);
     }
     gameOver();
     return bad;
   });
   check(city.length === 0, 'Ocean sunken city: city looks only from 400 to 1,500 m, sea looks only outside' + (city.length ? ': ' + city.slice(0, 5).join(', ') : ''));
+
+  // the Ocean's regions table (js/regions.js, design/regions.md): lines on whole hundreds, every obstacle has skins in every
+  // region and they exist, no scenery fish is an obstacle look, and the line names, looks and specks follow the table
+  const regions = await page.evaluate(() => {
+    const bad = [], list = MAP_REGIONS.sea, looks = new Set(Object.values(SEA_LOOKS).flatMap(Object.keys));
+    list.forEach((r, i) => {
+      if (r.from % 100 || (i && r.from <= list[i - 1].from)) bad.push(r.id + ' starts at ' + r.from);
+      for (const type of Object.keys(SEA_LOOKS)) {
+        const skins = r.skins[type] || [];
+        if (!skins.length) bad.push(r.id + ' has no ' + type);
+        for (const l of skins) if (!SEA_LOOKS[type][l]) bad.push(r.id + ': ' + l + ' is not a ' + type + ' look');
+      }
+      for (const f of r.scenery) if (looks.has(f) || !FISH[f]) bad.push(r.id + ' scenery ' + f);
+    });
+    mapId = 'sea'; applyMap(); start();
+    for (const r of list) for (const m of [r.from + 1, r.from + 99]) {
+      if (regionIndexAtM('sea', m) !== list.indexOf(r)) bad.push(m + ' m is not ' + r.id);
+      obstacles.length = 0; lastType = ''; spawnRow(m * PX_PER_M + planeScreenY(), 0.5);
+      for (const o of obstacles) if (o.look && !(r.skins[o.type] || []).includes(o.look)) bad.push(o.look + '@' + m);
+    }
+    gameOver();
+    return { bad, names: list.map(r => r.name).join(', ') };
+  });
+  check(regions.bad.length === 0, `Ocean regions (${regions.names}): table and spawned looks match` + (regions.bad.length ? ': ' + regions.bad.slice(0, 5).join(', ') : ''));
 
   // the Minecraft minerals collection (v150, ores in v148): minerals among the Volcano's bombs, each once per run, plain bombs once all 10 have appeared
   const ores = await page.evaluate(() => {
