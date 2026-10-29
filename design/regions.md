@@ -309,7 +309,17 @@ Each step is its own version. Steps 1–3 change spawning, so each needs a `SIM_
 
 ---
 
-## 11. Open questions
+## 11. Decisions (2026-10-29)
+
+- **Ocean only for now.** The Regions system is built on the Ocean first; every other map stays as it is until asked.
+- **Step 1 done on the Ocean (v169):** the first change moved from 150 m to 200 m, and the specks moved to the region lines (clear to 200 m, plankton to 400 m, marine snow to 1,500 m, then bioluminescence). Whale and shipwreck silhouettes keep their own depths.
+- 1. A sixth region: undecided.
+- 2. No entry moment: the name on the line is enough.
+- 3. No region discovery for now.
+- 4. The Dungeon's Halloween looks stay.
+- 5. The first step was aligning the change depths.
+
+## 12. Open questions (as first asked)
 
 1. **More than five regions?** Is a sixth region from 2,500 m (section 4) worth drawing, given how few players get that deep?
 2. **An entry moment** (section 9): yes, or is the name on the line enough?

@@ -281,9 +281,11 @@ const SEA_LOOKS = {
   compass: { anchor: ['#5a5f68'], tentacle: ['#c0392b', '#a04ab0'] },
   scissors: { crab: ['#e0503a', '#f08a3a'], lobster: ['#b02a2a', '#3a5aa8'] }
 };
-// the sea gets darker as you sink: sunlit (0–150 m), twilight (150–400 m), dark (400–800 m), midnight (800–1,500 m),
-// the abyss (1,500 m +); some looks only live at some depths
-const seaLayer = y => { const m = y / PX_PER_M; return m < 150 ? 0 : m < 400 ? 1 : m < 800 ? 2 : m < 1500 ? 3 : 4; };
+// the sea gets darker as you sink: sunlit (0–200 m), twilight (200–400 m), dark (400–800 m), midnight (800–1,500 m),
+// the abyss (1,500 m +); some looks only live at some depths. These are the Ocean's regions (design/regions.md): since
+// v169 the first change is at 200 m (150 m before), on the same line as the background art and the region name: depth
+// lines sit planeScreenY() below k × 100 m in world units (pageTop), so the depth is measured from there
+const seaLayer = y => { const m = (y - planeScreenY()) / PX_PER_M; return m < 200 ? 0 : m < 400 ? 1 : m < 800 ? 2 : m < 1500 ? 3 : 4; };
 const SEA_LAYERS = { anglerfish: [2, 3, 4], vent: [2, 3, 4], whale: [3, 4], lanternfish: [3, 4], mast: [1, 2, 3, 4], tentacle: [2, 3, 4],
                      braincoral: [0, 1, 2], driftwood: [0, 1], butterfly: [0, 1, 2], sardines: [0, 1, 2], turtle: [0, 1, 2],
                      fishline: [0, 1, 2], anemone: [0, 1, 2, 3], drift: [0, 1] };

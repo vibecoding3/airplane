@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v168** (2026-10-29)
+Current version: **v169** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -119,10 +119,12 @@ The patterns live in `depth-art.css` (made by `python tools/depth-art.py depth-a
 
 | Depth | Background |
 |---|---|
-| 0–100 m | Clear water: only the fish and bubbles (the sun rays were removed in v39) |
-| 100–400 m | Tiny green plankton specks |
-| 400–1,000 m | White "marine snow" sinking slowly |
-| 1,000 m + | Bioluminescence: twinkling blue and green lights |
+| 0–200 m | Clear water: only the fish and bubbles (the sun rays were removed in v39) |
+| 200–400 m | Tiny green plankton specks |
+| 400–1,500 m | White "marine snow" sinking slowly |
+| 1,500 m + | Bioluminescence: twinkling blue and green lights |
+
+Since v169 the specks, the fish levels and the obstacle looks change on the Ocean's region lines (200, 400, 800 and 1,500 m, like the background art and the region names; `design/regions.md`). Before, they changed at 100/150, 400 and 1,000 m.
 | 100–800 m | Now and then, a huge faded whale silhouette gliding far behind the fish |
 | 600 m + | Now and then, a faded shipwreck resting in the dark |
 
@@ -133,8 +135,8 @@ The patterns live in `depth-art.css` (made by `python tools/depth-art.py depth-a
 
 | Depth | Fish |
 |---|---|
-| 0–150 m | Clownfish, tang, seahorse |
-| 150–400 m | Angelfish, parrotfish |
+| 0–200 m | Clownfish, tang, seahorse |
+| 200–400 m | Angelfish, parrotfish |
 | 400–800 m | Lionfish, barracuda, tuna; far behind, the ruins of the sunken city (towers with a few lit windows, broken arches) |
 | 800–1,500 m | Reef shark, hammerhead shark, ocean sunfish; far behind, the glowing dome city (domes with lit windows, chimneys trailing bubbles, towers) |
 | 1,500–2,500 m | Great white shark, giant squid, oarfish |
@@ -326,7 +328,7 @@ The extra hazard next to desk fans deeper down is a small ink blot.
 **Looks (v129):** five obstacles got a second look, picked for a whole row (`PAPER_LOOKS` in `js/obstacles.js`, art at the end of `js/draw-paper.js`): a zipped pencil case for the rulers, a coffee-cup ring stain for the ink blots (only a look: nothing gets soggy), a ballpoint pen for the pencil, a ball of eraser crumbs for the paper wad, and lined index cards for the sticky notes (origami still appear among them).
 
 ### 5.2 Ocean map (19 obstacles on 19 mechanics; 12 until v123)
-Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in `js/obstacles.js`); four are mechanics the Ocean brought in (starfish, bubble column, naval mine, electric eel). Since v124 each obstacle has two or three looks sharing its hit box, in a few colours (`SEA_LOOKS`); a row of the same obstacle shares one look and colour. The first look is the original (art in `js/draw-sea.js`), the others are in `js/draw-ocean.js`. Some looks only live at some depths (`SEA_LAYERS`, by `seaLayer`: sunlit 0–150 m, twilight 150–400 m, dark 400–800 m, midnight 800–1,500 m, the abyss 1,500 m +): driftwood and the kelp-carrying current near the surface; brain coral, sardines, butterflyfish, sea turtles and fishing lines above 800 m; anemones above 1,500 m; anglerfish, warm vents and squid tentacles from 400 m; broken masts from 150 m; lanternfish and the sleeping whale from 800 m.
+Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reuse the movement and collision of a notebook obstacle with new art (see `SEA_MAKERS` in `js/obstacles.js`); four are mechanics the Ocean brought in (starfish, bubble column, naval mine, electric eel). Since v124 each obstacle has two or three looks sharing its hit box, in a few colours (`SEA_LOOKS`); a row of the same obstacle shares one look and colour. The first look is the original (art in `js/draw-sea.js`), the others are in `js/draw-ocean.js`. Some looks only live at some depths (`SEA_LAYERS`, by `seaLayer`: sunlit 0–200 m (0–150 m until v168), twilight 200–400 m, dark 400–800 m, midnight 800–1,500 m, the abyss 1,500 m +): driftwood and the kelp-carrying current near the surface; brain coral, sardines, butterflyfish, sea turtles and fishing lines above 800 m; anemones above 1,500 m; anglerfish, warm vents and squid tentacles from 400 m; broken masts from 200 m; lanternfish and the sleeping whale from 800 m.
 
 | Sea obstacle | Looks | Based on | Started at (until v124) |
 |---|---|---|---|
@@ -335,7 +337,7 @@ Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reus
 | Jellyfish (Drifting Swarm) | Pulsing jellyfish; see-through comb jellies with rainbow combs; anglerfish with a glowing lure (400 m on) | Sticky notes | 0 m |
 | Starfish (Spinning Drifter) | Starfish; a long-armed brittle star; a ship's wheel; sometimes a legendary fish (collectible) | New | 0 m |
 | Air bubble column (Effect Zone) | Slows the fall while inside and never hurts; deeper down also warm water shimmering up from a vent | New | 0 m |
-| Swordfish (Bouncing Slider, v124) | A swordfish (it faces the way it slides); bleached driftwood with barnacles (above 400 m); a wreck's broken mast with a rag of sail (150 m on) | Pencil | 0 m |
+| Swordfish (Bouncing Slider, v124) | A swordfish (it faces the way it slides); bleached driftwood with barnacles (above 400 m); a wreck's broken mast with a rag of sail (200 m on) | Pencil | 0 m |
 | Big rock (Wall Bulge, v124) | A brain coral (above 800 m); a mossy rock with an anemone and a starfish; the side of a sleeping whale (800 m on); slalom pairs deeper down | Protractor | 0 m |
 | Pufferfish (Rising Projectile, v124) | A spiky puffed-up pufferfish, or a sea turtle swimming up head first (above 800 m) | Paper wad | 0 m |
 | Fishing line (Spring Line, v124) | A fishing line between two red-and-white bobbers (above 800 m), or a strand of old net between two glass floats: the line bounces the plane, the floats hurt | Rubber band | ~30 m |

@@ -20,6 +20,9 @@ Anonymous: a random visitor id per browser, a row per visit and per run (`js/pla
 ## Replays (v157, `js/replay.js`, README 19.2)
 Every run is recorded (seed, world height, frame steps, inputs) and can be watched from the game-over screen. Since v158 only leaderboard runs are stored: a joined player's new best on a map uploads its replay after `lb_run` counts the run, one per player and map, a deeper run replacing it (user's choice; `tools/supabase-board-replays.sql`); map-board rows with a replay get a ▶ to watch. Replays only work if the game stays deterministic: in anything `update` runs, never read the wall clock or use `realRandom`; reset new per-run state in `reset()`/`start()`; route new inputs through `press`/`release` or `recInput`; and **bump `SIM_VERSION` in `js/replay.js` with any change to gameplay** (obstacles, spawning, physics, power-ups), or old board replays would play back wrong. `tools/test.js` replays 1,200 m runs and the board round trip and fails if they drift.
 
+## Regions (`design/regions.md`, since v169)
+Each map as a journey through regions, everything (colours, art, scenery, specks, obstacle skins, the name on the line) switching on the same 100 m line. **Ocean only for now** (user's decision, 2026-10-29): leave the other maps' depths and looks alone until asked. No region entry banner (the name on the line is enough) and no region discovery reward for now.
+
 ## Android app (`app/`, since v112)
 Capacitor 8 wrapper around the game in the repo root; README section 18 has the setup. Don't build or install the Android app for now, even after game changes (user's decision, 2026-10-20), until the user asks again. (`node app/build.js` copies the game into `app/www` and builds the debug APK; `--install` puts it on the USB-connected phone.) App-only code goes in `app/native.js`, never in `js/`. `app/www` is generated: never edit it. The app ID `io.github.vibecoding3.papernosedive` is permanent.
 
