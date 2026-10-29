@@ -58,7 +58,7 @@ The depth rules of some mechanics stay tied to the real depth too: no wind from 
 
 ### 3.3 Full coverage
 - Every mechanic the map uses has a skin in every region. Missing skins fall back to the map's **base skin** (the original look), so nothing breaks while a region is built.
-- Aim for **one or two skins per mechanic per region**. Fewer than that looks repetitive; more is hard to learn at speed.
+- **Exactly one design per mechanic per region** (user's decision, v183; "one or two" until then), with colour variants instead of more designs: within a region a shape always means the same thing, and crossing a line changes every shape.
 - A skin belongs to one region, or to two neighbouring ones when it truly fits both. It never skips a region.
 
 ### 3.4 Readability
@@ -327,4 +327,5 @@ Each step is its own version. Every step that changes spawning needs a `SIM_VERS
 - **v169 rewrite** (user's requests): music changes per region with a fade; every region has its own collection set.
 - **Sequential or looping (v175):** some maps have looping regions and others sequential ones. The Ocean is sequential, because the plane goes down the ocean (it looped in v171–v174).
 - **Twenty Thousand Leagues Under the Sea looks on the Ocean (v174):** allowed although not original designs; the novel is public domain.
+- **One design per obstacle per region (v183):** colours vary instead; the user picked the designs (README 5.2 lists them).
 - **Collectibles stay hard to find (v179):** region-only sets with their current chances; finding a whole set takes many runs on purpose.

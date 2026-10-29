@@ -267,26 +267,26 @@ const SEA_MAKERS = { coral: 'gate', urchins: 'blots', jellies: 'notes', clam: 'e
 // Each Ocean mechanic has a few looks sharing its hit box (v124), each with its colours; the first one is the original
 // look (art in draw-sea.js), the others are drawn in draw-ocean.js. A row of the same obstacle shares one look and colour.
 const SEA_LOOKS = {
-  gate: { coral: ['#f08a7e', '#f4a259', '#b07cc6', '#e9c46a', '#7fc8a9'], rockledge: ['#6b7a85', '#7a7068'], wreck: ['#8a6a4a', '#6f5236'], glasssponge: ['#cfe8f0'] },
+  gate: { coral: ['#f08a7e', '#f4a259', '#b07cc6', '#e9c46a', '#7fc8a9'], rockledge: ['#6b7a85', '#7a7068'], wreck: ['#8a6a4a', '#6f5236'], glasssponge: ['#cfe8f0', '#e0d0f0', '#d0f0e0'] },
   blot: { urchin: ['#3b2a52', '#1f3b4d', '#5a1f3a', '#2d2d2d'], anemone: ['#ff7a9a', '#ffa04a', '#b77cf0'], stonefish: ['#8a7a6a', '#7f6f5a'], glowurchin: ['#7fe8ff', '#b8ffcf', '#ff9ad8'] },
   note: { jelly: ['rgba(240,140,200,.85)', 'rgba(170,140,240,.85)', 'rgba(120,190,240,.85)', 'rgba(250,170,110,.85)'],
-          combjelly: ['rgba(215,235,255,.75)'], anglerfish: ['#4a3a58', '#3a4a5a'], diver: ['#8a9a7a', '#9a8a6a'], helmetjelly: ['#c0392b'] },
-  erasers: { clam: ['#e9d3c4', '#f2c6c2', '#d8c8e8', '#cfe3d0'], wreckhull: ['#7a5a3a', '#6a4e36'], gulper: ['#6a5a88'], giantoyster: ['#a8a090', '#9a9488'] },
-  cutter: { moray: ['#5f7f3a', '#6b8e23', '#4a6b3a'], mantis: ['#3fb07a', '#e05a8a', '#3a9ad8'], viperfish: ['#6a8098'], harpoon: ['#a8743e'] },
+          combjelly: ['rgba(215,235,255,.75)', 'rgba(255,200,230,.75)', 'rgba(200,255,220,.75)'], anglerfish: ['#4a3a58', '#3a4a5a'], diver: ['#8a9a7a', '#9a8a6a'], helmetjelly: ['#c0392b'] },
+  erasers: { clam: ['#e9d3c4', '#f2c6c2', '#d8c8e8', '#cfe3d0'], wreckhull: ['#7a5a3a', '#6a4e36'], gulper: ['#6a5a88', '#5a6a88', '#885a7a'], giantoyster: ['#a8a090', '#9a9488'] },
+  cutter: { moray: ['#5f7f3a', '#6b8e23', '#4a6b3a'], mantis: ['#3fb07a', '#e05a8a', '#3a9ad8'], viperfish: ['#6a8098', '#7a6a98', '#6a988a'], harpoon: ['#a8743e', '#8a5a32', '#c89a5a'] },
   paw: { kelp: ['#3f8f4f', '#2f7a5a', '#5a9a3a'], octopus: ['#d9534a', '#b05ac0', '#e08a3a'], kraken: ['#8a2a4a', '#6a2a6a'], wreckboom: ['#8a6a4a'] },
-  glue: { sub: ['#e0a21a', '#7f8fa1', '#c0392b', '#3a66c4'], shrimp: ['#ff7a5a', '#f0a040'], cannon: ['#4a4a52'], glowshrimp: ['#b03a4a'], riflediver: ['#7a8a6a', '#6a7a8a'] },
+  glue: { sub: ['#e0a21a', '#7f8fa1', '#c0392b', '#3a66c4'], shrimp: ['#ff7a5a', '#f0a040'], cannon: ['#4a4a52'], glowshrimp: ['#b03a4a', '#b05a3a', '#8a3ab0'], riflediver: ['#7a8a6a', '#6a7a8a'] },
   starfish: { starfish: ['#f28c28', '#e0503a', '#c75b9b', '#f2c84b', '#8a4fc2'], brittlestar: ['#c75b9b', '#e0503a', '#8a4fc2'], wheel: ['#8a5a32'], ammonite: ['#d8b890', '#c8a0a0'] },
-  zap: { eel: [''], ray: ['#c9a868', '#8a9aa8'], lure: ['#4a3a58'], searchlight: ['#c8a050'], wire: ['#b87333'] },
+  zap: { eel: [''], ray: ['#c9a868', '#8a9aa8'], lure: ['#4a3a58', '#3a4a58', '#5a4a3a'], searchlight: ['#c8a050'], wire: ['#b87333'] },
   mine: { navalmine: [''], barrel: ['#5a6a4a', '#7a4a3a'], glowpuff: ['#9fffd0', '#9fd8ff'], powderkeg: ['#8a5a32'] },
   bubbles: { bubbles: [''], vent: [''], airleak: [''] },
   fan: { current: [''], drift: [''], maelstrom: [''] },
-  clips: { sardines: ['#b8ccd8'], butterfly: ['#f4c430', '#f08a3a'], mackerel: ['#3a6a9a'] },
-  wad: { puffer: ['#e8c860', '#d8a860'], turtle: ['#6a9a5a', '#7a8a4a'], glowbell: ['#c89aff', '#9fd8ff', '#ff9ad8'], boxfish: ['#f4c430'] },
-  protractor: { braincoral: ['#e8a0b0', '#d8c070', '#b0d090'], rock: ['#6b7a85', '#7a7068'], whale: ['#5a6f88', '#4a5a70'], wreckbow: ['#7a5a3a'] },
-  pencil: { swordfish: ['#4a6a8a', '#5a7a9a'], driftwood: ['#a08a6a'], mast: ['#8a6a4a'], oarfish: ['#c8d4e0'], nautilus: ['#4a5260'] },
+  clips: { sardines: ['#b8ccd8', '#c8d0b0', '#a8b8d0'], butterfly: ['#f4c430', '#f08a3a'], mackerel: ['#3a6a9a'] },
+  wad: { puffer: ['#e8c860', '#d8a860'], turtle: ['#6a9a5a', '#7a8a4a'], glowbell: ['#c89aff', '#9fd8ff', '#ff9ad8'], boxfish: ['#f4c430', '#e8843a', '#7ab0e0'] },
+  protractor: { braincoral: ['#e8a0b0', '#d8c070', '#b0d090'], rock: ['#6b7a85', '#7a7068'], whale: ['#5a6f88', '#4a5a70'], wreckbow: ['#7a5a3a', '#5a4a3a', '#6a5a48'] },
+  pencil: { swordfish: ['#4a6a8a', '#5a7a9a'], driftwood: ['#a08a6a'], mast: ['#8a6a4a'], oarfish: ['#c8d4e0', '#d8d0c0'], nautilus: ['#4a5260', '#5a4a3a', '#3a5a50'] },
   band: { fishline: ['#e0403a', '#f4a020'], netline: ['#4fa88a', '#5a8ac8'], glowtentacle: ['#ff9ad8', '#9fd8ff'], lifering: ['#e0403a'] },
-  compass: { anchor: ['#5a5f68'], tentacle: ['#c0392b', '#a04ab0'], grapple: ['#6a6a72'] },
-  scissors: { crab: ['#e0503a', '#f08a3a'], lobster: ['#b02a2a', '#3a5aa8'], spidercrab: ['#e08a4a', '#d86a5a'], hermitcrab: ['#e07a4a'] }
+  compass: { anchor: ['#5a5f68', '#8a6a4a', '#4a6a6a'], tentacle: ['#c0392b', '#a04ab0'], grapple: ['#6a6a72', '#8a6a4a', '#5a7a8a'] },
+  scissors: { crab: ['#e0503a', '#f08a3a'], lobster: ['#b02a2a', '#3a5aa8'], spidercrab: ['#e08a4a', '#d86a5a'], hermitcrab: ['#e07a4a', '#c85a8a', '#d8a040'] }
 };
 // the sea gets darker as you sink, through its regions: the sunlit reef (0–200 m), the twilight zone (200–400 m), the
 // sunken ruins (400–800 m), the dome city (800–1,500 m) and the abyss (1,500 m +). Which looks live in which region is
@@ -295,25 +295,25 @@ const seaLayer = y => regionIndexAt('sea', y);
 // The sunken city (v133) takes over the dark and midnight layers: ruins and temples from 400 m, the glowing dome city from
 // 800 m to 1,500 m (art in draw-sunken-city.js). Its looks only live there, and the sea's own looks only above and below it.
 const SEA_CITY_LOOKS = {
-  gate: { columns: ['#e8e0d0'], tubewalk: ['#9fe0ff'], carvedbeam: ['#d8d0c0'], girder: ['#c8a050'] },
-  erasers: { templedoors: ['#c8b898'], hatch: ['#8aa0b8'], goldgate: ['#a89c88'], bulkhead: ['#8aa0b8'] },
+  gate: { columns: ['#e8e0d0', '#d8c8a8', '#c8ccd0'], tubewalk: ['#9fe0ff', '#b8f0d8', '#ffd8a0'], carvedbeam: ['#d8d0c0'], girder: ['#c8a050'] },
+  erasers: { templedoors: ['#c8b898', '#b8a888', '#d0c0a0'], hatch: ['#8aa0b8', '#a0a8b0', '#7a9088'], goldgate: ['#a89c88'], bulkhead: ['#8aa0b8'] },
   blot: { amphora: ['#d0784a', '#c89a5a'], orb: ['#7fe8ff', '#ffd07a'], idol: ['#c8c0b0'], gauge: ['#c8a050'] },
-  protractor: { stoneface: ['#c8c0b0'], domehouse: ['#9fe0ff'], atlantis: ['#c8bfa8'], clocktower: ['#c8a050'] },   // Atlantis (v174, from Twenty Thousand Leagues)
-  pencil: { oar: ['#c8a070'], tramcar: ['#ffc24a', '#7fd0ff'], beam: ['#d8d0c0'], minisub: ['#c8a050'] },
-  wad: { lanternfloat: ['#ffb04a'], capsule: ['#c9ced6'], flask: ['#c8784a'], divebot: ['#c8a050'] },
-  note: { lantern: ['#ff8a5a', '#ffd04a'], mailpod: ['#7fe8ff'], tablet: ['#d8d0c0'], bulb: ['#ffd07a'] },
-  clips: { msgcapsules: ['#d8c090'], trampods: ['#ffc24a', '#7fd0ff'], scrolls: [''], bubblecars: ['#c8a050'] },
-  starfish: { calendar: ['#c8c0b0'], coin: ['#f4c430'], gear: ['#c8a050'] },
-  scissors: { millwheel: ['#a8805a'], fanprop: ['#c9ced6'], bronzeblades: ['#b8864a'], gearblades: ['#c8a050'] },
-  compass: { clockhand: ['#2a2a30'], crane: ['#ffc24a'], bronzestaff: ['#b8864a'] },
-  cutter: { trident: ['#e0c060'], gangplank: ['#a8805a'], serpent: ['#b8b0a0'], piston: ['#c8a050'] },
-  glue: { fishfountain: ['#c8c0b0'], domecannon: ['#8aa0b8'], urnspout: ['#c89a5a'], steamspout: ['#c8a050'] },
-  zap: { glyph: ['#7fffd0'], cable: ['#ffe060'], crystal: ['#7fe8c0'], tesla: ['#ffc24a'] },
-  paw: { statuearm: ['#c8c0b0'], claw: ['#ffc24a'], stonetail: ['#c8c0b0'], robotarm: ['#c8a050'] },
-  mine: { bubblemine: ['#9fe0ff'], valve: ['#e04a3a'], sealedjar: ['#c8784a'], boiler: ['#8aa0b8'] },
+  protractor: { stoneface: ['#c8c0b0'], domehouse: ['#9fe0ff', '#b8f0d8', '#ffd8a0'], atlantis: ['#c8bfa8', '#d8c8a8', '#b8bcc0'], clocktower: ['#c8a050'] },   // Atlantis (v174, from Twenty Thousand Leagues)
+  pencil: { oar: ['#c8a070'], tramcar: ['#ffc24a', '#7fd0ff'], beam: ['#d8d0c0', '#c8b898', '#b8c0c8'], minisub: ['#c8a050'] },
+  wad: { lanternfloat: ['#ffb04a', '#ff8a5a', '#ffd04a'], capsule: ['#c9ced6', '#c8a050', '#9fb8d0'], flask: ['#c8784a'], divebot: ['#c8a050'] },
+  note: { lantern: ['#ff8a5a', '#ffd04a'], mailpod: ['#7fe8ff'], tablet: ['#d8d0c0'], bulb: ['#ffd07a', '#9fe0ff', '#ffa0c0'] },
+  clips: { msgcapsules: ['#d8c090'], trampods: ['#ffc24a', '#7fd0ff'], scrolls: [''], bubblecars: ['#c8a050', '#8aa0b8', '#d86a5a'] },
+  starfish: { calendar: ['#c8c0b0', '#d8c8a8', '#b8bcc0'], coin: ['#f4c430'], gear: ['#c8a050', '#b8864a', '#c9ced6'] },
+  scissors: { millwheel: ['#a8805a', '#8a6a4a', '#b8986a'], fanprop: ['#c9ced6', '#c8a050', '#8aa0b8'], bronzeblades: ['#b8864a'], gearblades: ['#c8a050'] },
+  compass: { clockhand: ['#2a2a30'], crane: ['#ffc24a', '#e0503a', '#8aa0b8'], bronzestaff: ['#b8864a', '#c8a050', '#9a7040'] },
+  cutter: { trident: ['#e0c060', '#c8a050', '#d8d0c0'], gangplank: ['#a8805a'], serpent: ['#b8b0a0'], piston: ['#c8a050', '#b8864a', '#c9ced6'] },
+  glue: { fishfountain: ['#c8c0b0', '#d8c8a8', '#b8bcc0'], domecannon: ['#8aa0b8', '#c8a050', '#7a9088'], urnspout: ['#c89a5a'], steamspout: ['#c8a050'] },
+  zap: { glyph: ['#7fffd0', '#9fd8ff', '#ffd07a'], cable: ['#ffe060'], crystal: ['#7fe8c0'], tesla: ['#ffc24a', '#9fe0ff', '#ffa0c0'] },
+  paw: { statuearm: ['#c8c0b0', '#d8c8a8', '#b8bcc0'], claw: ['#ffc24a'], stonetail: ['#c8c0b0'], robotarm: ['#c8a050', '#8aa0b8', '#d86a5a'] },
+  mine: { bubblemine: ['#9fe0ff', '#b8f0d8', '#ffd8a0'], valve: ['#e04a3a', '#3a8ad8', '#f4c430'], sealedjar: ['#c8784a'], boiler: ['#8aa0b8'] },
   fan: { pump: [''], conch: [''] },
   bubbles: { elevator: [''], templevent: [''], airvent: [''] },
-  band: { mooring: ['#c9a66b'], glowcable: ['#7fe8ff'], goldchain: [''], pipeline: ['#c8a050'] }
+  band: { mooring: ['#c9a66b', '#a8805a', '#d8c090'], glowcable: ['#7fe8ff', '#ffd07a', '#b8f0d8'], goldchain: [''], pipeline: ['#c8a050'] }
 };
 // the city looks, drawn by draw-sunken-city.js
 const SEA_CITY = new Set(Object.values(SEA_CITY_LOOKS).flatMap(Object.keys));

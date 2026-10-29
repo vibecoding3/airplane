@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v182** (2026-10-29)
+Current version: **v183** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -360,6 +360,15 @@ Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reus
 - **Twilight zone:** a crown jellyfish, a wreck's broken boom swinging out, a sparking wire, a powder keg, a school of mackerel, a boxfish, a shipwreck's bow, a rope between two life rings, a grappling hook, a hermit crab, and air leaking from a wreck's pipe.
 - **Sunken ruins:** a carved lintel with glowing symbols, a gilded gate, stone idols, glowing tablets, a stone sea-serpent lunging and its tail sweeping, a pouring urn, a crystal, a sealed jar, a temple grate, a stone conch blowing the current, scrolls, a clay flask, a carved beam, a gold chain, a bronze staff and bronze blades.
 - **Dome city:** a brass girder, pressure gauges, light bulbs, airlock doors, a steam piston, a robot arm, a steam pipe, a brass gear, a tesla coil, a boiler, an air vent, bubble cars, a diving robot, a clock face, a little submarine, an air hose and gear blades.
+
+**One design per obstacle per region** (v183, the user's decision and picks): in each region every obstacle has exactly one design, so a shape always means the same thing there, and its colours vary instead (2–5 colour variants each, except the harmless zones and the naval mine, whose colours are part of the art). 92 designs in all (the Push Zone stops at 700 m and the Conveyor at 1,500 m). The designs:
+- **Sunlit reef:** coral ledge, giant clam, sea anemone (with the seashells), brain coral, swordfish, pufferfish, jellyfish, butterflyfish, starfish, crab, anchor, moray eel, pistol shrimp, electric ray, kelp, naval mine, current, bubble column, fishing line.
+- **Twilight zone:** shipwreck planks, shipwreck hull, stonefish, shipwreck bow, the Nautilus ★, boxfish, comb jelly, sardines, brittle star (with the legendary fish), hermit crab, grappling hook, Ned Land's harpoon ★, submarine, electric eel, octopus arm, depth-charge barrel, the Maelstrom ★, air leak, net strand.
+- **Sunken ruins:** fallen columns, temple doors, amphora (with the treasures), ruins of Atlantis ★, carved beam, lantern float, paper lantern, scrolls, stone calendar, water-mill paddles, bronze staff, statue's trident, fish fountain, glowing glyph, statue arm, bubble mine, pump, temple grate, mooring rope.
+- **Dome city:** glass tube walkway, dome hatches, glass orb, dome house, tram car, air capsule (with the inventions), light bulb, bubble cars, brass gear, dome fan blades, harbour crane, steam piston, dome cannon, tesla coil, robot arm, steam valve, air vent, glowing cable.
+- **The abyss:** glass sponge ledge, gulper eel jaws, glowing urchin, sleeping whale, oarfish, glowing jelly bell, anglerfish (with the abyss lights), ammonite, spider crab, squid tentacle, viperfish, glowing shrimp, anglerfish lure, the kraken ★, puffball of light, warm vent, glowing tentacle.
+
+The other looks described above (the rest of v124's, v174's and v179's) are no longer used; their art stays in the code. ★ = Twenty Thousand Leagues.
 
 Also in v179, three looks that could never appear were taken out of the table: the dome city's pump and the abyss's current (there is no wind from 700 m) and the abyss's lanternfish (conveyors stop at 1,500 m). `tools/test.js` now fails if a region lists wind looks from 700 m or conveyor looks from 1,500 m.
 

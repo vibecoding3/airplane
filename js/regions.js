@@ -18,42 +18,43 @@ const MAP_REGIONS = {
   sea: [
     { id: 'reef', name: 'Sunlit reef', from: 0, art: 'art-sea-0', music: 'seaReef', specks: 'none', collections: ['shells'],
       scenery: ['clown', 'tang', 'seahorse'],
-      // bright life (v174: the reef and the twilight zone split the looks they shared); Nemo's divers walk the reef
-      skins: { gate: ['coral', 'rockledge'], blot: ['urchin', 'anemone'], note: ['jelly', 'combjelly', 'diver'],
-               erasers: ['clam'], cutter: ['moray'], paw: ['kelp'], glue: ['shrimp'],
-               starfish: ['starfish'], zap: ['ray'], mine: ['navalmine'], bubbles: ['bubbles'],
-               fan: ['current', 'drift'], clips: ['sardines', 'butterfly'], wad: ['puffer', 'turtle'], protractor: ['braincoral', 'rock'],
-               pencil: ['swordfish', 'driftwood'], band: ['fishline'], compass: ['anchor'], scissors: ['crab'] } },
+      // one design per obstacle (v183, the user's picks; the art of the dropped looks stays, unused), colours vary
+      skins: { gate: ['coral'], blot: ['anemone'], note: ['jelly'], erasers: ['clam'], cutter: ['moray'],
+               paw: ['kelp'], glue: ['shrimp'], starfish: ['starfish'], zap: ['ray'], mine: ['navalmine'],
+               bubbles: ['bubbles'], fan: ['current'], clips: ['butterfly'], wad: ['puffer'],
+               protractor: ['braincoral'], pencil: ['swordfish'], band: ['fishline'], compass: ['anchor'],
+               scissors: ['crab'] } },
     { id: 'twilight', name: 'Twilight zone', from: 200, art: 'art-sea-1', music: 'sea', specks: 'plankton', collections: ['fish'],
       scenery: ['angel', 'parrot'],
-      // wrecks and darker animals, and Twenty Thousand Leagues (v174): the Nautilus, Ned Land's harpoon, the giant pearl
-      // oyster, a diver's electric rifle and the Maelstrom
-      skins: { gate: ['wreck', 'rockledge'], blot: ['stonefish', 'urchin'], note: ['combjelly', 'helmetjelly'],
-               erasers: ['wreckhull', 'giantoyster'], cutter: ['mantis', 'harpoon'], paw: ['octopus', 'wreckboom'], glue: ['cannon', 'sub', 'riflediver'],
-               starfish: ['brittlestar', 'wheel'], zap: ['eel', 'wire'], mine: ['barrel', 'powderkeg'], bubbles: ['bubbles', 'airleak'],
-               fan: ['current', 'maelstrom'], clips: ['sardines', 'mackerel'], wad: ['puffer', 'boxfish'], protractor: ['rock', 'wreckbow'],
-               pencil: ['mast', 'swordfish', 'nautilus'], band: ['netline', 'lifering'], compass: ['anchor', 'grapple'], scissors: ['lobster', 'hermitcrab'] } },
+      // one design per obstacle (v183): wrecks, darker animals and Twenty Thousand Leagues (the Nautilus, Ned Land's
+      // harpoon, the Maelstrom)
+      skins: { gate: ['wreck'], blot: ['stonefish'], note: ['combjelly'], erasers: ['wreckhull'],
+               cutter: ['harpoon'], paw: ['octopus'], glue: ['sub'], starfish: ['brittlestar'], zap: ['eel'],
+               mine: ['barrel'], bubbles: ['airleak'], fan: ['maelstrom'], clips: ['sardines'], wad: ['boxfish'],
+               protractor: ['wreckbow'], pencil: ['nautilus'], band: ['netline'], compass: ['grapple'],
+               scissors: ['hermitcrab'] } },
     { id: 'ruins', name: 'Sunken ruins', from: 400, art: 'art-sea-2', music: 'seaRuins', specks: 'snow', collections: ['treasures'],
       scenery: ['lion', 'barracuda', 'tuna', 'ucArch', 'ucTowers'],
-      skins: { gate: ['columns', 'carvedbeam'], blot: ['amphora', 'idol'], note: ['lantern', 'tablet'], erasers: ['templedoors', 'goldgate'], cutter: ['trident', 'serpent'], paw: ['statuearm', 'stonetail'],
-               glue: ['fishfountain', 'urnspout'], starfish: ['calendar', 'coin'], zap: ['glyph', 'crystal'], mine: ['bubblemine', 'sealedjar'], bubbles: ['elevator', 'templevent'],
-               fan: ['pump', 'conch'], clips: ['msgcapsules', 'scrolls'], wad: ['lanternfloat', 'flask'], protractor: ['stoneface', 'atlantis'], pencil: ['oar', 'beam'], band: ['mooring', 'goldchain'],
-               compass: ['clockhand', 'bronzestaff'], scissors: ['millwheel', 'bronzeblades'] } },
+      // one design per obstacle (v183), with Atlantis
+      skins: { gate: ['columns'], blot: ['amphora'], note: ['lantern'], erasers: ['templedoors'],
+               cutter: ['trident'], paw: ['statuearm'], glue: ['fishfountain'], starfish: ['calendar'],
+               zap: ['glyph'], mine: ['bubblemine'], bubbles: ['templevent'], fan: ['pump'], clips: ['scrolls'],
+               wad: ['lanternfloat'], protractor: ['atlantis'], pencil: ['beam'], band: ['mooring'],
+               compass: ['bronzestaff'], scissors: ['millwheel'] } },
     { id: 'dome', name: 'Dome city', from: 800, art: 'art-sea-3', music: 'seaDome', specks: 'snow', collections: ['inventions'],
       scenery: ['reefshark', 'hammer', 'sunfish', 'ucDomes', 'ucChimney', 'ucTowers'],
-      skins: { gate: ['tubewalk', 'girder'], blot: ['orb', 'gauge'], note: ['mailpod', 'bulb'], erasers: ['hatch', 'bulkhead'], cutter: ['gangplank', 'piston'], paw: ['claw', 'robotarm'],
-               glue: ['domecannon', 'steamspout'], starfish: ['coin', 'gear'], zap: ['cable', 'tesla'], mine: ['valve', 'boiler'], bubbles: ['elevator', 'airvent'],
-               clips: ['trampods', 'bubblecars'], wad: ['capsule', 'divebot'], protractor: ['domehouse', 'clocktower'], pencil: ['tramcar', 'minisub'], band: ['glowcable', 'pipeline'],
-               compass: ['clockhand', 'crane'], scissors: ['fanprop', 'gearblades'] } },
+      // one design per obstacle (v183)
+      skins: { gate: ['tubewalk'], blot: ['orb'], note: ['bulb'], erasers: ['hatch'], cutter: ['piston'],
+               paw: ['robotarm'], glue: ['domecannon'], starfish: ['gear'], zap: ['tesla'], mine: ['valve'],
+               bubbles: ['airvent'], clips: ['bubblecars'], wad: ['capsule'], protractor: ['domehouse'],
+               pencil: ['tramcar'], band: ['glowcable'], compass: ['crane'], scissors: ['fanprop'] } },
     { id: 'abyss', name: 'The abyss', from: 1500, art: 'art-sea-4', music: 'seaAbyss', specks: 'bio', collections: ['abysslights'],
       // the oarfish, viperfish and gulper eel became obstacles in v174, so they left the scenery (v171–v173 they swam here)
       scenery: ['white', 'hatchet'],   // the giant squid left in v181: its tentacle and the kraken are obstacles here
-      // its own deep looks since v174 (it reused the reef's before; art in draw-ocean-deep.js), plus the Nautilus, its
-      // searchlight and the kraken from Twenty Thousand Leagues
-      skins: { gate: ['glasssponge'], blot: ['glowurchin'], note: ['anglerfish'],
-               erasers: ['gulper'], cutter: ['viperfish'], paw: ['kraken'], glue: ['glowshrimp'],
-               starfish: ['ammonite'], zap: ['lure', 'searchlight'], mine: ['glowpuff'], bubbles: ['vent'],
-               wad: ['glowbell'], protractor: ['whale'], pencil: ['oarfish', 'nautilus'],
+      // one design per obstacle (v183): its own deep looks (v174) and the kraken
+      skins: { gate: ['glasssponge'], blot: ['glowurchin'], note: ['anglerfish'], erasers: ['gulper'],
+               cutter: ['viperfish'], paw: ['kraken'], glue: ['glowshrimp'], starfish: ['ammonite'], zap: ['lure'],
+               mine: ['glowpuff'], bubbles: ['vent'], wad: ['glowbell'], protractor: ['whale'], pencil: ['oarfish'],
                band: ['glowtentacle'], compass: ['tentacle'], scissors: ['spidercrab'] } }
   ]
 };

@@ -403,22 +403,22 @@ function drawSunkTrident(o, sy) {
 
 // ---------- Wall Turret: a stone fish fountain spitting water bolts (ruins), or a dome cannon firing bubble shots (domes) ----------
 function drawSunkFountain(o, sy) {
-  const dir = inward(o), cannon = o.look === 'domecannon';
+  const dir = inward(o), cannon = o.look === 'domecannon', col = o.seaCol || (cannon ? '#8aa0b8' : UC_STONE);   // its colour (v183)
   for (const b of o.blobs) {
     ctx.fillStyle = 'rgba(200,240,255,.35)'; ctx.beginPath(); ctx.arc(b.x - dir * b.r, sy, b.r * 0.8, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = cannon ? 'rgba(220,245,255,.5)' : '#8ad0ff'; ctx.beginPath(); ctx.arc(b.x, sy, b.r * 0.9, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = cannon ? '#ffffff' : '#2a6a9a'; ctx.lineWidth = 1.6; ctx.stroke();
     ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(b.x - b.r * 0.3, sy - b.r * 0.3, b.r * 0.25, 0, Math.PI * 2); ctx.fill();
   }
-  const head = sharedSprite('ucfount' + o.look + dir, 176, 52, 88, 26, () => {
+  const head = sharedSprite('ucfount' + o.look + dir + col, 176, 52, 88, 26, () => {
     ctx.scale(dir, 1);
     if (cannon) {
-      ctx.fillStyle = '#8aa0b8'; ctx.beginPath(); ctx.arc(14, 0, 13, -Math.PI / 2, Math.PI / 2); ctx.lineTo(-4, 11); ctx.lineTo(-4, -11); ctx.closePath(); ctx.fill(); inkStroke(1.4);
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(14, 0, 13, -Math.PI / 2, Math.PI / 2); ctx.lineTo(-4, 11); ctx.lineTo(-4, -11); ctx.closePath(); ctx.fill(); inkStroke(1.4);
       ctx.fillStyle = '#c9ced6'; ctx.beginPath(); roundRectPath(22, -6, 56, 12, 4); ctx.fill(); inkStroke(1.3);
       ctx.fillStyle = UC_BRASS; for (const x of [34, 54, 70]) ctx.fillRect(x, -6, 3, 12);
       ctx.fillStyle = '#ffd07a'; ctx.beginPath(); ctx.arc(10, -3, 3, 0, Math.PI * 2); ctx.fill();
     } else {                                       // a carved fish, mouth open toward the middle, scales and a fin
-      ctx.fillStyle = UC_STONE; ctx.beginPath(); ctx.moveTo(-4, -11); ctx.lineTo(16, -11); ctx.quadraticCurveTo(54, -14, 72, -5); ctx.lineTo(78, -3); ctx.lineTo(78, 3); ctx.lineTo(72, 5); ctx.quadraticCurveTo(54, 14, 16, 11); ctx.lineTo(-4, 11); ctx.closePath(); ctx.fill(); inkStroke(1.4);
+      ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-4, -11); ctx.lineTo(16, -11); ctx.quadraticCurveTo(54, -14, 72, -5); ctx.lineTo(78, -3); ctx.lineTo(78, 3); ctx.lineTo(72, 5); ctx.quadraticCurveTo(54, 14, 16, 11); ctx.lineTo(-4, 11); ctx.closePath(); ctx.fill(); inkStroke(1.4);
       ctx.strokeStyle = UC_STONE_DARK; ctx.lineWidth = 1.2; ctx.beginPath(); for (let x = 22; x < 56; x += 8) for (const y of [-4, 4]) { ctx.moveTo(x, y - 3); ctx.arc(x, y, 3, -Math.PI / 2, Math.PI / 2); } ctx.stroke();
       ctx.fillStyle = '#2a2420'; ctx.beginPath(); ctx.arc(64, -5, 2.4, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = 'rgba(80,160,110,.5)'; ctx.beginPath(); ctx.ellipse(10, -9, 8, 3, 0, 0, Math.PI * 2); ctx.fill();
