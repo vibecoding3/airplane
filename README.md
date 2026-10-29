@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v164** (2026-10-29)
+Current version: **v165** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -52,7 +52,7 @@ There are no on-screen steering arrows (removed in v44).
 | Sideways speed | `300 + 0.4 × (fall speed − 150)`, so steering keeps up at depth |
 | Sideways slowdown | Gliding sideways at full speed makes the plane fall up to 40% slower |
 | Difficulty | `1 − e^(−depth / 600)`. It controls when obstacles unlock, gap sizes, row spacing and obstacle speeds, and is nearly maxed by about 2,000 m. |
-| Obstacle rows | Rows spawn ahead of the plane. The same obstacle type never appears twice in a row. |
+| Obstacle rows | Rows spawn ahead of the plane. The same obstacle type never comes back within 3 rows (v165, `REPEAT_GAP` in `js/obstacles.js`; until then it only couldn't appear twice in a row). Every obstacle still has the same overall share. |
 | Pickup pull | Since v51, any star or power-up that comes within 60 units (2 m) of the plane is pulled in, so near misses still count. The magnet power-up extends this for stars and (since v54) power-ups. The squid (a debuff, v109) is never pulled in |
 | Stars | About 28% of rows carry a gold star. Stars are a collected total (shown in the menu and top bar) and add nothing to the score. |
 | Fast-fall safety | At high speed each frame is split into sub-steps, so the plane can't skip through thin obstacles |

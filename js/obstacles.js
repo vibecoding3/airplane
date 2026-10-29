@@ -247,6 +247,10 @@ function clipXs(o) {
 // which obstacles can appear; since v125 every obstacle can appear at any depth (wind stops at 700 m, conveyors at
 // 1,500 m) and since v127 they all have the same weight, so each is equally likely on its map
 let lastType = '';
+// the last few obstacle types, oldest first: a type can't come back within REPEAT_GAP rows (v165; until then only the
+// row right before was blocked). Setting lastType to '' (a new run, a test) clears it on the next spawn.
+const REPEAT_GAP = 3;
+let recentTypes = [];
 // Ocean obstacles. Most reuse a notebook obstacle's movement and collision with an underwater look
 // (the generator named on the right); mines, electric eels, bubble columns and starfish are their own.
 const SEA_MAKERS = { coral: 'gate', urchins: 'blots', jellies: 'notes', clam: 'erasers', moray: 'cutter',
@@ -807,11 +811,15 @@ const makerOf = type => SEA_MAKERS[type] || SPACE_MAKERS[type] || DUNGEON_MAKERS
 // sitting in its gap when the plane gets there
 const WALL_MAKERS = new Set(['gate', 'erasers']);
 function spawnFromPool(y, d, pool) {
-  let choices = pool.filter(p => p[0] !== lastType);   // never the same obstacle twice in a row
+  if (!lastType) recentTypes = [];
+  let choices = pool.filter(p => !recentTypes.includes(p[0]));   // no obstacle again within REPEAT_GAP rows
+  if (!choices.length) choices = pool.filter(p => p[0] !== lastType);
   if (makerOf(lastType) === 'notes') { const open = choices.filter(p => !WALL_MAKERS.has(makerOf(p[0]))); if (open.length) choices = open; }
   let r = Math.random() * choices.reduce((s, p) => s + p[1], 0), type = choices[0][0];
   for (const [t, w] of choices) { if ((r -= w) < 0) { type = t; break; } }
   lastType = type;
+  recentTypes.push(type);
+  if (recentTypes.length > REPEAT_GAP) recentTypes.shift();
   const before = obstacles.length;
   const extra = make[makerOf(type)](y, d) || 0;
   const rowPal = {}, rowSea = {};    // obstacles of the same kind in one row share a colour
