@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v166** (2026-10-29)
+Current version: **v167** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -113,7 +113,7 @@ The patterns live in `depth-art.css` (made by `python tools/depth-art.py depth-a
 | 600 m + | Now and then, a faded shipwreck resting in the dark |
 
   The specks are placed by a hash of the page position, so nothing is stored per speck. Whales and wrecks are kept at least about 30 m apart, so two never share the screen.
-- **Region names** (v166, Ocean only): under every 100 m depth marker, a smaller label names the region below it: Sunlit reef (0–200 m), Twilight zone (200–400 m), Sunken ruins (400–800 m), Dome city (800–1,500 m), The abyss (1,500 m +), the same layers as the background art (`SEA_REGIONS` in `js/maps.js`).
+- **Region names** (v166, Ocean only): under every 100 m depth marker, a smaller label names the region below it (since v167 both the depth and the region are centred on the line; other maps keep the depth on the right): Sunlit reef (0–200 m), Twilight zone (200–400 m), Sunken ruins (400–800 m), Dome city (800–1,500 m), The abyss (1,500 m +), the same layers as the background art (`SEA_REGIONS` in `js/maps.js`).
 - **Readability:** on dark water, the top bar and the depth markers switch to light colours.
 - **Background decoration:** fish instead of formulas. They are faded, never collide with the plane, swim slowly sideways, and get more dangerous with depth:
 

@@ -144,11 +144,12 @@ function drawDepthMarkers() {
     ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.3; ctx.setLineDash([8, 6]);
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = col; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = 'right';
-    ctx.fillText(fmt(k * PAGE_M) + ' m', W - 10, y - 6);
-    if (mapId === 'sea') {
+    const sea = mapId === 'sea', x = sea ? W / 2 : W - 10;   // the Ocean centres its depth and region (v167)
+    ctx.fillStyle = col; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = sea ? 'center' : 'right';
+    ctx.fillText(fmt(k * PAGE_M) + ' m', x, y - 6);
+    if (sea) {
       ctx.font = '700 13px Kalam, cursive';
-      ctx.fillText(SEA_REGIONS[ART_BOUNDS.filter(b => b <= k * PAGE_M).length], W - 10, y + 16);
+      ctx.fillText(SEA_REGIONS[ART_BOUNDS.filter(b => b <= k * PAGE_M).length], x, y + 16);
     }
     ctx.restore();
   }
