@@ -151,6 +151,16 @@ body {
 .hud .icon-btn { display: grid; place-items: center; width: 38px; height: 32px; padding: 0; }
 .hud .icon-btn svg { width: 20px; height: 20px; }
 @media (hover: hover) and (pointer: fine) { #pauseBtn { display: none; } }   /* computers pause with Space / Esc (v151) */
+/* full-screen toggle (v163): bottom-right corner of the window, start menu only, computers only */
+.full-btn {
+  position: fixed; right: 16px; bottom: 16px; z-index: 5; display: none; place-items: center;
+  width: 44px; height: 44px; padding: 0; cursor: pointer; color: var(--ink);
+  background: #ffffff; border: 2px solid var(--ink); border-bottom-width: 4px; border-radius: 12px;
+}
+.full-btn svg { width: 24px; height: 24px; }
+.full-btn:hover { filter: brightness(1.06); }
+.full-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+@media (hover: hover) and (pointer: fine) { .full-btn { display: grid; } }
 #world canvas { display: block; height: 100%; cursor: crosshair; -webkit-touch-callout: none; will-change: auto; }
 .opt { display: flex; align-items: center; gap: 8px; font-size: 16px; cursor: pointer; }
 .opt input { width: 18px; height: 18px; margin: 0; accent-color: var(--ink); }

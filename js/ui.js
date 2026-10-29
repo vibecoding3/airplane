@@ -7,7 +7,7 @@ const ui = {
   overlay: $('overlay'), title: $('titleCard'), pause: $('pauseCard'), over: $('overCard'), coll: $('collCard'), lb: $('lbCard'),
   overBank: $('overBank'),
   overTitle: $('overTitle'), overBest: $('overBest'), stamp: $('recordStamp'),
-  muteBtn: $('muteBtn'), pauseBtn: $('pauseBtn'), hint: $('hint')
+  muteBtn: $('muteBtn'), pauseBtn: $('pauseBtn'), fullBtn: $('fullBtn'), hint: $('hint')
 };
 let hudDepth = -1, hudStars = -1, hudBest = -1;
 // control tips for the first 100 m of a run, left of the sound button: one at a time, changing every 3 seconds,
@@ -105,6 +105,7 @@ function showCard(which) {
   ui.over.hidden = which !== 'over';
   ui.coll.hidden = which !== 'coll';
   ui.lb.hidden = which !== 'lb';
+  ui.fullBtn.hidden = which !== 'title' || !document.fullscreenEnabled;   // start menu only (CSS: computers only)
   // the start menu sits on the sky picture instead of the map
   ui.overlay.classList.toggle('menu-bg', !!which && state === 'title');
   ui.overlay.classList.toggle('dim', !!which && state !== 'title');   // pause / game over: dim the game behind
@@ -119,7 +120,9 @@ const SPEAKER = '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" st
 const ICONS = {
   sound: svg(SPEAKER + '<path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/>'),
   muted: svg(SPEAKER + '<path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
-  pause: svg('<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>')
+  pause: svg('<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>'),
+  fullOn: svg('<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>'),
+  fullOff: svg('<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>')
 };
 function setMuteLabel() {
   ui.muteBtn.innerHTML = muted ? ICONS.muted : ICONS.sound;
@@ -219,6 +222,20 @@ $('overMenuBtn').addEventListener('click', toMainMenu);
 // computers). While paused the pause card covers it and Resume takes over.
 ui.pauseBtn.innerHTML = ICONS.pause;
 ui.pauseBtn.addEventListener('click', pause);
+// the full-screen button (v163): computers, start menu only; Esc also leaves full screen (the browser's own key)
+function setFullLabel() {
+  const on = !!document.fullscreenElement;
+  ui.fullBtn.innerHTML = on ? ICONS.fullOff : ICONS.fullOn;
+  ui.fullBtn.title = on ? 'Exit full screen' : 'Full screen';
+  ui.fullBtn.setAttribute('aria-label', ui.fullBtn.title);
+}
+setFullLabel();
+document.addEventListener('fullscreenchange', setFullLabel);
+ui.fullBtn.addEventListener('click', () => {
+  ui.fullBtn.blur();   // so Space and Enter go back to starting the game
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  else document.documentElement.requestFullscreen().catch(() => {});
+});
 ui.muteBtn.addEventListener('click', () => {
   muted = !muted;
   store.set('nosedive-muted', muted ? '1' : '0');
