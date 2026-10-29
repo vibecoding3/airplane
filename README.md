@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v185** (2026-10-29)
+Current version: **v186** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -136,11 +136,13 @@ Since v169 the specks, the fish levels and the obstacle looks change on the Ocea
 
 | Depth | Fish |
 |---|---|
-| 0–200 m | Clownfish, tang, seahorse |
-| 200–400 m | Angelfish, parrotfish |
-| 400–800 m | Lionfish, barracuda, tuna; far behind, the ruins of the sunken city (towers with a few lit windows, broken arches) |
-| 800–1,500 m | Reef shark, hammerhead shark, ocean sunfish; far behind, the glowing dome city (domes with lit windows, chimneys trailing bubbles, towers) |
-| 1,500–2,500 m (the abyss) | Great white shark, hatchetfish (the giant squid until v180) (also the oarfish, viperfish and gulper eel in v171–v173, before they became abyss obstacles in v174) |
+| 0–200 m (sunlit reef) | Clownfish, tang, seahorse, angelfish, parrotfish, lionfish, triggerfish, grouper, barracuda, dolphins, reef sharks |
+| 200–400 m (twilight zone) | Tuna, hammerhead shark, ocean sunfish, opah (moonfish), cutlassfish, lanternfish |
+| 400–800 m (sunken ruins) | Hatchetfish, lanternfish, goblin shark, chimaera (ghost shark); far behind, the ruins of the sunken city (towers with a few lit windows, broken arches) |
+| 800–1,500 m (dome city) | Great white shark, bluntnose sixgill shark, frilled shark, blobfish; far behind, the glowing dome city (domes with lit windows, chimneys trailing bubbles, towers) |
+| 1,500 m + (the abyss) | Grenadier (rattail), tripod fish, snailfish, fangtooth |
+
+Since v186 every background fish lives in the region that matches its real depth range (15 species added: triggerfish, grouper, dolphin, opah, cutlassfish, lanternfish, goblin shark, chimaera, sixgill shark, frilled shark, blobfish, rattail, tripod fish, snailfish, fangtooth; `Object.assign(FISH, …)` in `js/sea-background.js`, each region's `scenery` in `js/regions.js`). Before, the reef fish, lionfish, barracuda, tuna, reef sharks and the great white sat deeper than they really live, and the hatchetfish too shallow or deep. The giant squid (until v180) and the oarfish, viperfish and gulper eel (v171–v173) are out, as obstacles.
 
 Since v124 the scenery leaves out the species that became obstacles (the school of fish, butterflyfish, pufferfish, sea turtle, octopus, stingray, swordfish, anglerfish and lanternfish; since v128 also the jellyfish and moray eel), so a harmless background fish never looks like one that hurts.
 

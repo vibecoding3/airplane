@@ -184,6 +184,89 @@ const FISH = {
     fishEye(6, -2, 3, '#0e1218');
   } }
 };
+// more background species (v186), each placed in the region that matches where it really lives (the regions in
+// js/regions.js: 0–200 m sunlit, 200–400 m twilight, 400–1,500 m deeper mid-water, 1,500 m + the deep). In play they are
+// flat silhouettes (fishSilhouette), so each one is drawn to have a shape of its own.
+const fishBody = (pts, col, ol = COL.ink) => { ctx.fillStyle = col; ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fill(); fishOutline(ol); };
+Object.assign(FISH, {
+  triggerfish: { w: 56, h: 44, cols: [{ body: '#4a5a8a', mark: '#f2c84b' }, { body: '#7a6a4a', mark: '#e8742a' }], paint(c) {   // reefs, 0–50 m
+    fishTail(-16, 7, 9, c.body, COL.ink);
+    fishBody([[20, 2], [6, -14], [0, -20], [-4, -12], [-16, -6], [-18, 6], [-4, 14], [0, 20], [6, 14]], c.body);
+    ctx.fillStyle = c.mark; ctx.beginPath(); ctx.ellipse(-4, 3, 7, 4, 0.3, 0, Math.PI * 2); ctx.fill();
+    fishEye(8, -3, 1.8);
+  } },
+  dolphin: { w: 120, h: 50, paint() {                                // bottlenose dolphins, 0–300 m
+    fishBody([[58, 2], [44, -2], [38, -9], [10, -12], [0, -24], [-6, -11], [-38, -6], [-52, -14], [-48, 0], [-52, 12], [-38, 5], [-6, 9], [6, 18], [12, 9], [38, 8], [44, 4]], '#8a9aa8');
+    ctx.fillStyle = '#d4dbe2'; ctx.beginPath(); ctx.ellipse(8, 5, 28, 4, 0, 0, Math.PI * 2); ctx.fill();
+    fishEye(32, -3, 1.6);
+  } },
+  grouper: { w: 92, h: 52, cols: [{ body: '#8a6a4a', spot: '#5a4028' }, { body: '#6a7a5a', spot: '#404a30' }], paint(c) {   // reefs, 0–200 m
+    fishTail(-34, 12, 10, c.body, COL.ink);
+    fishBody([[42, 4], [36, -10], [10, -18], [-14, -16], [-34, -8], [-36, 8], [-14, 16], [10, 18], [34, 12]], c.body);
+    ctx.fillStyle = c.spot; for (const [x, y] of [[-20, -4], [-8, 6], [4, -8], [16, 4], [-26, 6]]) { ctx.beginPath(); ctx.arc(x, y, 2.6, 0, Math.PI * 2); ctx.fill(); }
+    fishEye(28, -4, 2.2);
+  } },
+  opah: { w: 80, h: 76, cols: [{ body: '#c86a7a', fin: '#e04a3a' }], paint(c) {                  // the moonfish, 50–500 m
+    ctx.fillStyle = c.fin; fishBody([[-4, -26], [6, -36], [10, -24]], c.fin); fishBody([[-4, 26], [4, 34], [10, 24]], c.fin);
+    fishTail(-28, 12, 10, c.fin, COL.ink);
+    ctx.fillStyle = c.body; ctx.beginPath(); ctx.ellipse(0, 0, 30, 26, 0, 0, Math.PI * 2); ctx.fill(); fishOutline(COL.ink);
+    ctx.fillStyle = '#f4e8e0'; for (const [x, y] of [[-10, -8], [2, 6], [-14, 10], [10, -12]]) { ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill(); }
+    fishEye(20, -4, 3);
+  } },
+  cutlass: { w: 150, h: 26, paint() {                                // cutlassfish, a long silver ribbon, 100–400 m
+    fishBody([[70, 0], [60, -5], [20, -7], [-30, -5], [-70, 0], [-30, 4], [20, 6], [60, 5]], '#c9d6e2');
+    ctx.strokeStyle = '#8a9aa8'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(56, -5); ctx.lineTo(-40, -5); ctx.stroke();
+    fishEye(60, -1, 1.6);
+  } },
+  lanternfish: { w: 40, h: 18, paint() {                             // small, with rows of light organs, 200–1,000 m
+    fishTail(-11, 5, 7, '#2a3a5a', PALE);
+    ctx.fillStyle = '#2a3a5a'; ctx.beginPath(); ctx.ellipse(1, 0, 13, 5.5, 0, 0, Math.PI * 2); ctx.fill(); fishOutline(PALE);
+    ctx.fillStyle = '#9ff0ff'; for (const x of [-8, -4, 0, 4, 8]) { ctx.beginPath(); ctx.arc(x, 3, 1, 0, Math.PI * 2); ctx.fill(); }
+    fishEye(9, -1, 2);
+  } },
+  goblin: { w: 150, h: 64, paint() {                                 // goblin shark, a long flat snout, 270–1,300 m
+    sharkBody(1, '#c89aa0', '#e8d0d0', PALE, false);
+    fishBody([[52, -4], [74, -6], [74, -2], [52, 2]], '#c89aa0', PALE);
+  } },
+  chimaera: { w: 120, h: 56, paint() {                               // a ghost shark: big wing fins and a whip tail, 200–2,600 m
+    ctx.strokeStyle = '#9aa8b8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-20, 0); ctx.quadraticCurveTo(-40, 6, -58, 2); ctx.stroke();
+    fishBody([[2, 6], [-10, 26], [-22, 8]], '#9aa8b8', PALE);
+    fishBody([[34, 0], [28, -10], [10, -14], [4, -24], [-2, -12], [-20, -5], [-22, 3], [0, 9], [24, 8]], '#b8c4d0', PALE);
+    fishEye(24, -4, 3, '#2a4a6a');
+  } },
+  sixgill: { w: 180, h: 78, paint() { sharkBody(1.25, '#5a5a62', '#9a9aa2', PALE, false); } },   // bluntnose sixgill shark, 200–2,500 m
+  frilled: { w: 170, h: 36, paint() {                                // frilled shark, eel-like, 500–1,500 m
+    fishBody([[80, 0], [70, -8], [20, -9], [-40, -6], [-80, -2], [-60, 4], [-20, 7], [30, 8], [70, 7]], '#7a6a5a', PALE);
+    ctx.strokeStyle = '#c86a6a'; ctx.lineWidth = 1.4; ctx.beginPath(); for (const x of [56, 50, 44, 38, 32, 26]) { ctx.moveTo(x, -7); ctx.quadraticCurveTo(x - 3, 0, x, 7); } ctx.stroke();
+    fishEye(72, -3, 1.6);
+  } },
+  fangtooth: { w: 60, h: 46, paint() {                               // a big head of fangs on a small body, 500–5,000 m
+    fishTail(-20, 7, 8, '#3a2a30', PALE);
+    fishBody([[24, -2], [16, -18], [-4, -16], [-20, -6], [-20, 6], [-4, 14], [16, 16], [24, 6]], '#4a3a40', PALE);
+    ctx.fillStyle = '#f4f0e8'; for (const x of [12, 17, 21]) { ctx.beginPath(); ctx.moveTo(x, 2); ctx.lineTo(x + 1.5, -6); ctx.lineTo(x + 3, 2); ctx.closePath(); ctx.fill(); }
+    fishEye(10, -8, 2.2, '#0e1218');
+  } },
+  blobfish: { w: 58, h: 40, paint() {                                // a soft pink blob with a droopy nose, 600–1,200 m
+    fishTail(-20, 5, 7, '#e8a8b0', PALE);
+    ctx.fillStyle = '#e8a8b0'; ctx.beginPath(); ctx.ellipse(2, 0, 22, 16, 0, 0, Math.PI * 2); ctx.fill(); fishOutline(PALE);
+    ctx.beginPath(); ctx.ellipse(20, 4, 6, 7, 0, 0, Math.PI * 2); ctx.fill(); fishOutline(PALE);
+    fishEye(12, -6, 1.6);
+  } },
+  rattail: { w: 120, h: 40, paint() {                                // a grenadier: a big head tapering to a rat's tail, 200–6,000 m
+    fishBody([[40, 2], [30, -12], [10, -16], [4, -24], [-2, -12], [-30, -4], [-58, 0], [-30, 4], [10, 14], [30, 10]], '#8a8478', PALE);
+    fishEye(26, -4, 4, '#2a3a4a');
+  } },
+  tripod: { w: 90, h: 70, paint() {                                  // a tripod fish standing on its long fin rays, 1,000–4,700 m
+    ctx.strokeStyle = '#c8c4b8'; ctx.lineWidth = 1.4; ctx.beginPath();
+    ctx.moveTo(10, 4); ctx.lineTo(16, 32); ctx.moveTo(-6, 4); ctx.lineTo(-10, 32); ctx.moveTo(-30, 0); ctx.lineTo(-40, 32); ctx.moveTo(14, -6); ctx.lineTo(20, -30); ctx.stroke();
+    fishBody([[34, 0], [24, -7], [-10, -7], [-40, -2], [-40, 2], [-10, 6], [24, 6]], '#a8a4a0', PALE);
+    fishEye(26, -2, 1.4);
+  } },
+  snailfish: { w: 70, h: 32, paint() {                               // a pale tadpole-shaped snailfish, the deepest fish
+    fishBody([[30, 2], [24, -10], [6, -12], [-20, -4], [-34, 0], [-20, 4], [6, 12], [24, 10]], 'rgba(232,220,224,.85)', PALE);
+    fishEye(20, -3, 1.8);
+  } }
+});
 // species that are also Ocean obstacles (school, butterflyfish, puffer, turtle, octopus, ray, swordfish, anglerfish,
 // lanternfish in v124; jellyfish and moray eel in v128) are not in the scenery, so a background fish never looks like one that hurts
 // the fish of each level: each Ocean region's scenery (MAP_REGIONS.sea in js/regions.js, since v170)

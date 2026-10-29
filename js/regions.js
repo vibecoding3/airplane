@@ -17,7 +17,8 @@
 const MAP_REGIONS = {
   sea: [
     { id: 'reef', name: 'Sunlit reef', from: 0, art: 'art-sea-0', music: 'seaReef', specks: 'none', collections: ['shells'],
-      scenery: ['clown', 'tang', 'seahorse'],
+      // background fish at the depths they really live (v186): reef fish, dolphins and reef sharks in the sunlit water
+      scenery: ['clown', 'tang', 'seahorse', 'angel', 'parrot', 'lion', 'triggerfish', 'grouper', 'barracuda', 'dolphin', 'reefshark'],
       // one design per obstacle (v183, the user's picks; the art of the dropped looks stays, unused), colours vary
       skins: { gate: ['coral'], blot: ['anemone'], note: ['jelly'], erasers: ['clam'], cutter: ['moray'],
                paw: ['kelp'], glue: ['shrimp'], starfish: ['starfish'], zap: ['ray'], mine: ['navalmine'],
@@ -25,7 +26,7 @@ const MAP_REGIONS = {
                protractor: ['braincoral'], pencil: ['swordfish'], band: ['fishline'], compass: ['anchor'],
                scissors: ['crab'] } },
     { id: 'twilight', name: 'Twilight zone', from: 200, art: 'art-sea-1', music: 'sea', specks: 'plankton', collections: ['fish'],
-      scenery: ['angel', 'parrot'],
+      scenery: ['tuna', 'hammer', 'sunfish', 'opah', 'cutlass', 'lanternfish'],   // open-water hunters and the first mid-water fish
       // one design per obstacle (v183): wrecks, darker animals and Twenty Thousand Leagues (the Nautilus, Ned Land's
       // harpoon, the Maelstrom)
       skins: { gate: ['wreck'], blot: ['stonefish'], note: ['combjelly'], erasers: ['wreckhull'],
@@ -34,7 +35,7 @@ const MAP_REGIONS = {
                protractor: ['wreckbow'], pencil: ['nautilus'], band: ['netline'], compass: ['grapple'],
                scissors: ['hermitcrab'] } },
     { id: 'ruins', name: 'Sunken ruins', from: 400, art: 'art-sea-2', music: 'seaRuins', specks: 'snow', collections: ['treasures'],
-      scenery: ['lion', 'barracuda', 'tuna', 'ucArch', 'ucTowers'],
+      scenery: ['hatchet', 'lanternfish', 'goblin', 'chimaera', 'ucArch', 'ucTowers'],   // mid-water fish, the city far behind
       // one design per obstacle (v183), with Atlantis and, since v184, one of Nemo's divers with his rifle
       skins: { gate: ['columns'], blot: ['amphora'], note: ['lantern'], erasers: ['templedoors'],
                cutter: ['trident'], paw: ['statuearm'], glue: ['riflediver'], starfish: ['calendar'],
@@ -42,7 +43,7 @@ const MAP_REGIONS = {
                wad: ['lanternfloat'], protractor: ['atlantis'], pencil: ['beam'], band: ['mooring'],
                compass: ['bronzestaff'], scissors: ['millwheel'] } },
     { id: 'dome', name: 'Dome city', from: 800, art: 'art-sea-3', music: 'seaDome', specks: 'snow', collections: ['inventions'],
-      scenery: ['reefshark', 'hammer', 'sunfish', 'ucDomes', 'ucChimney', 'ucTowers'],
+      scenery: ['white', 'sixgill', 'frilled', 'blobfish', 'ucDomes', 'ucChimney', 'ucTowers'],   // deep sharks and the blobfish
       // one design per obstacle (v183)
       skins: { gate: ['tubewalk'], blot: ['orb'], note: ['bulb'], erasers: ['hatch'], cutter: ['piston'],
                paw: ['robotarm'], glue: ['domecannon'], starfish: ['gear'], zap: ['tesla'], mine: ['valve'],
@@ -50,7 +51,7 @@ const MAP_REGIONS = {
                pencil: ['tramcar'], band: ['glowcable'], compass: ['crane'], scissors: ['fanprop'] } },
     { id: 'abyss', name: 'The abyss', from: 1500, art: 'art-sea-4', music: 'seaAbyss', specks: 'bio', collections: ['abysslights'],
       // the oarfish, viperfish and gulper eel became obstacles in v174, so they left the scenery (v171–v173 they swam here)
-      scenery: ['white', 'hatchet'],   // the giant squid left in v181: its tentacle and the kraken are obstacles here
+      scenery: ['rattail', 'tripod', 'snailfish', 'fangtooth'],   // the deep-sea floor and the deepest fish (the giant squid left in v181)
       // one design per obstacle (v183): its own deep looks (v174) and the kraken
       skins: { gate: ['glasssponge'], blot: ['glowurchin'], note: ['anglerfish'], erasers: ['gulper'],
                cutter: ['viperfish'], paw: ['kraken'], glue: ['glowshrimp'], starfish: ['ammonite'], zap: ['lure'],
