@@ -26,11 +26,9 @@ A[('notebook', 2)] = (pat(400, 250, 25, 25, '<circle cx="12.5" cy="12.5" r="1.6"
 A[('notebook', 3)] = (svg(400, 250, ''.join(f'<path d="M0 {y0 + k * 6} H400" stroke="rgba(60,60,80,.3)" stroke-width="1"/>' for y0 in range(12, 250, 50) for k in range(5))), 400, 250)
 A[('notebook', 4)] = (svg(400, 250, '<defs><pattern id="p" width="25" height="25" patternUnits="userSpaceOnUse"><path d="M0 0.5 H25 M0.5 0 V25" stroke="rgba(255,255,255,.35)" stroke-width="1"/></pattern></defs><rect width="400" height="250" fill="rgba(30,80,170,.22)"/><rect width="400" height="250" fill="url(#p)"/>' + ''.join(f'<path d="M0 {y} H400" stroke="rgba(255,255,255,.55)" stroke-width="1.6"/>' for y in (0, 125)) + ''.join(f'<path d="M{x} 0 V250" stroke="rgba(255,255,255,.55)" stroke-width="1.6"/>' for x in (0, 100, 200, 300))), 400, 250)
 
-# ---------- Ocean (over the bubbles): caustics, sand ripples, ruin blocks, dome glass, bioluminescence ----------
+# ---------- Ocean (over the bubbles): caustics, sand ripples, bioluminescence (the ruins and dome city scenes are below, v187) ----------
 A[('sea', 0)] = (svg(400, 250, ''.join(f'<path d="M{x} {y} q20 -12 40 0 t40 0 q-10 20 -40 18 t-40 -18" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2"/>' for x, y in [(10, 30), (190, 20), (300, 90), (60, 140), (230, 170), (130, 220), (340, 210)])), 400, 250)
 A[('sea', 1)] = (svg(400, 250, ''.join(f'<path d="M{(h(i) * 200 - 100):.0f} {12 + i * 25} q25 -8 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0" fill="none" stroke="rgba(255,240,200,.12)" stroke-width="1.6"/>' for i in range(10))), 400, 250)
-blocks = ''.join(f'<rect x="{x + (50 if r % 2 else 0) - 100}" y="{r * 50 + 1}" width="98" height="48" rx="3" fill="none" stroke="rgba(230,220,200,.1)" stroke-width="1.6"/>' for r in range(5) for x in range(0, 600, 100))
-A[('sea', 2)] = (svg(400, 250, blocks), 400, 250)
 def hexes(r, stroke, w=400, ht=250, dx=None):
     dx = dx or w / 8; hh = ht / 5; rr = dx / 1.5
     out = []
@@ -40,8 +38,55 @@ def hexes(r, stroke, w=400, ht=250, dx=None):
             pts = ' '.join(f'{cx + math.cos(i / 6 * 2 * math.pi) * (rr - 2):.1f},{cy + math.sin(i / 6 * 2 * math.pi) * (hh / 2 - 2):.1f}' for i in range(6))
             out.append(f'<polygon points="{pts}" fill="none" stroke="{stroke}" stroke-width="1.6"/>')
     return ''.join(out)
-A[('sea', 3)] = (pat(400, 250, 100, 50, ''.join(f'<polygon points="' + ' '.join(f'{cx + math.cos(i / 6 * 2 * math.pi) * 31:.1f},{cy + math.sin(i / 6 * 2 * math.pi) * 23:.1f}' for i in range(6)) + '" fill="none" stroke="rgba(220,180,90,.14)" stroke-width="1.6"/>' for cx, cy in [(0, 0), (0, 50), (100, 0), (100, 50), (50, 25)])), 400, 250)
 A[('sea', 4)] = (svg(400, 375, scatter(26, 400, 375, 4, lambda x, y, s, i: f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{1 + s * 1.6:.1f}" fill="{["rgba(120,255,220,.35)", "rgba(140,200,255,.3)", "rgba(200,140,255,.28)"][i % 3]}"/>')), 400, 375)
+
+# ---------- Ocean, v187: layered scenes for the sunken ruins (a carved temple wall) and the dome city (the transit hub) ----------
+# each one tall scene (400 x 750, one PAPER_REPEAT), faint and without outlines so it stays behind the obstacles
+SW, SH = 400, 750
+def scene(body, defs=''):
+    return f'<svg xmlns="http://www.w3.org/2000/svg" width="{SW}" height="{SH}"><defs>{defs}</defs>{body}</svg>'
+def rgba(c, a): return f'rgba({c},{a})'
+STONE, GLOW, GOLD, WEED = '232,222,200', '127,255,208', '240,200,90', '120,200,150'
+BRASS, WARM, GLASS, STEEL = '220,180,90', '255,206,120', '170,225,255', '170,190,215'
+RAYS = '<linearGradient id="ray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".09"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>'
+def rays(xs, a=1):
+    return ''.join(f'<path d="M{x} 0 L{x + 40} 0 L{x + 120} {SH} L{x + 60} {SH} Z" fill="url(#ray)" opacity="{a}"/>' for x in xs)
+def specks(n, seed, c, a):
+    return ''.join(f'<circle cx="{h(i * 3.1 + seed) * SW:.0f}" cy="{h(i * 7.7 + seed) * SH:.0f}" r="{1 + h(i * 1.3 + seed) * 1.4:.1f}" fill="{rgba(c, a)}"/>' for i in range(n))
+def kelp(x, base, ht, a, seed):
+    d = f'M{x} {base}'
+    for k in range(1, 7): d += f' Q{x + (10 if k % 2 else -10) + h(seed + k) * 6:.0f} {base - ht * (k - .5) / 6:.0f} {x + h(seed + k * 2) * 6 - 3:.0f} {base - ht * k / 6:.0f}'
+    return f'<path d="{d}" fill="none" stroke="{rgba(WEED, a)}" stroke-width="4" stroke-linecap="round"/>'
+def window_grid(x, y, w, ht, a, seed, lit=.3):
+    return ''.join(f'<rect x="{x + 4 + i * 11}" y="{y + 6 + j * 14}" width="6" height="8" rx="1" fill="{rgba(WARM, a * 1.6) if h(seed + i * 7 + j * 13) < lit else rgba(GLASS, a * .5)}"/>'
+                   for i in range(int((w - 6) // 11)) for j in range(int((ht - 8) // 14)))
+def ruins_wall():          # a huge carved temple wall: panels of reliefs, glowing glyph lines, cracks and vines
+    out = ''
+    for r in range(5):
+        y = 20 + r * 146
+        out += f'<rect x="8" y="{y}" width="384" height="130" rx="6" fill="{rgba(STONE, .04)}" stroke="{rgba(STONE, .09)}" stroke-width="2"/>'
+        for c in range(3):
+            x = 24 + c * 124
+            m = (r * 3 + c) % 4
+            if m == 0: out += f'<path d="M{x + 10} {y + 80} q40 -40 84 0 q-42 34 -84 0 Z M{x + 94} {y + 80} l14 -12 v24 Z" fill="{rgba(STONE, .08)}"/><circle cx="{x + 30}" cy="{y + 74}" r="3" fill="{rgba(GLOW, .2)}"/>'
+            elif m == 1: out += f'<circle cx="{x + 54}" cy="{y + 64}" r="34" fill="none" stroke="{rgba(GOLD, .1)}" stroke-width="2"/>' + ''.join(f'<path d="M{x + 54 + math.cos(a) * 40:.0f} {y + 64 + math.sin(a) * 40:.0f} L{x + 54 + math.cos(a) * 52:.0f} {y + 64 + math.sin(a) * 52:.0f}" stroke="{rgba(GOLD, .1)}" stroke-width="2"/>' for a in [k * math.pi / 4 for k in range(8)])
+            elif m == 2: out += f'<path d="M{x + 20} {y + 100} q30 -10 40 -60 q14 50 40 60 Z" fill="{rgba(STONE, .07)}"/><path d="M{x + 60} {y + 40} v-16" stroke="{rgba(STONE, .1)}" stroke-width="3"/>'
+            else: out += ''.join(f'<path d="M{x + 12} {y + 30 + k * 18} h84" stroke="{rgba(GLOW if k == 2 else STONE, .14 if k == 2 else .07)}" stroke-width="2" stroke-dasharray="6 5"/>' for k in range(5))
+    out += ''.join(f'<path d="M{x} {y} l12 30 l-8 22 l14 40" fill="none" stroke="{rgba("20,30,40", .25)}" stroke-width="1.6"/>' for x, y in [(130, 30), (260, 330), (60, 500)])
+    out += ''.join(kelp(x, y, 160, .11, x) for x, y in [(395, 300), (6, 740)])
+    return scene(out + rays([60, 260], .8) + specks(30, 9, '235,245,250', .2), RAYS)
+def dome_transit():        # the transit hub: glass tubes crossing at angles with pods inside, a station and signal lights
+    out = ''
+    for x1, y1, x2, y2 in [(-20, 120, 420, 260), (-20, 420, 420, 330), (120, -20, 220, 770), (420, 560, -20, 700)]:
+        out += f'<path d="M{x1} {y1} L{x2} {y2}" stroke="{rgba(GLASS, .08)}" stroke-width="26"/><path d="M{x1} {y1} L{x2} {y2}" stroke="{rgba(BRASS, .1)}" stroke-width="2"/>'
+        for t in (.25, .65):
+            px, py, ang = x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, math.degrees(math.atan2(y2 - y1, x2 - x1))
+            out += f'<rect x="{px - 18:.0f}" y="{py - 8:.0f}" width="36" height="16" rx="8" transform="rotate({ang:.0f} {px:.0f} {py:.0f})" fill="{rgba(BRASS, .12)}"/><circle cx="{px:.0f}" cy="{py:.0f}" r="2.5" fill="{rgba(WARM, .35)}"/>'
+    out += f'<rect x="230" y="420" width="150" height="90" rx="10" fill="{rgba(STEEL, .06)}" stroke="{rgba(BRASS, .12)}" stroke-width="2"/>' + window_grid(230, 430, 150, 70, .1, 41, .5)
+    out += ''.join(f'<circle cx="{x}" cy="{y}" r="3" fill="{rgba(c, .4)}"/>' for x, y, c in [(60, 160, '255,90,90'), (330, 290, '120,255,150'), (170, 600, WARM)])
+    return scene(out + specks(28, 29, GLASS, .16))
+A[('sea', 2)] = (ruins_wall(), SW, SH)      # stone blocks until v186
+A[('sea', 3)] = (dome_transit(), SW, SH)    # hexagon dome glass until v186
 
 # ---------- Space (over the stars): cloud bands, (plain stars), nebula, a spiral galaxy, distant galaxies ----------
 A[('space', 0)] = (svg(400, 750, ''.join(f'<ellipse cx="{x}" cy="{y}" rx="{rx}" ry="{ry}" fill="rgba(255,255,255,.06)"/>' for x, y, rx, ry in [(80, 90, 160, 18), (300, 240, 190, 22), (140, 420, 170, 16), (330, 580, 150, 20), (60, 700, 120, 14)])), 400, 750)

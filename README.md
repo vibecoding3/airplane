@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v186** (2026-10-29)
+Current version: **v187** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -77,7 +77,7 @@ Since v100–v101 the tiles show new icons (Paper: colourful sticky notes on a n
 | Map | 0–200 m | 200–400 m | 400–800 m | 800–1,500 m | 1,500 m + |
 |---|---|---|---|---|---|
 | Paper | Ruled lines | Graph paper | Dot grid | Music staff lines | A blueprint: white grid on blue |
-| Ocean | Sunlight ripples | Sand ripples | Ruin stone blocks | Hexagon dome glass | Bioluminescent dots |
+| Ocean | Sunlight ripples | Sand ripples | A carved temple wall: relief panels (fish, suns, waves, glowing glyph lines), cracks, vines and light shafts (v187; stone blocks before) | The transit hub: glass tubes crossing at angles with lit pods, a station with windows and signal lights (v187; hexagon dome glass before) | Bioluminescent dots |
 | Space | Thin cloud bands | (stars only) | Nebula clouds | A distant spiral galaxy | Far-away galaxies |
 | Dungeon | Stone bricks | Wooden planks | Crypt arches | Crystal cave facets | A band of carved runes |
 | Neon City | Distant skyline | Brick walls with posters | Subway tiles with a coloured line | Arcade carpet | Circuit-board traces |
