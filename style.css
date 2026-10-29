@@ -151,9 +151,9 @@ body {
 .hud .icon-btn { display: grid; place-items: center; width: 38px; height: 32px; padding: 0; }
 .hud .icon-btn svg { width: 20px; height: 20px; }
 @media (hover: hover) and (pointer: fine) { #pauseBtn { display: none; } }   /* computers pause with Space / Esc (v151) */
-/* full-screen toggle (v163): bottom-right corner of the window, start menu only, computers only */
+/* full-screen toggle (v163): bottom-right corner of the game (v164; the window's until then), start menu only, computers only */
 .full-btn {
-  position: fixed; right: 16px; bottom: 16px; z-index: 5; display: none; place-items: center;
+  position: absolute; right: 16px; bottom: max(16px, env(safe-area-inset-bottom, 0px)); z-index: 5; display: none; place-items: center;
   width: 44px; height: 44px; padding: 0; cursor: pointer; color: var(--ink);
   background: #ffffff; border: 2px solid var(--ink); border-bottom-width: 4px; border-radius: 12px;
 }

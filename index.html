@@ -23,7 +23,7 @@
       <canvas id="game" aria-label="Paper Nosedive playfield"></canvas>
     </div>
     <!-- bump on every change that gets pushed, to confirm GitHub Pages is serving the latest build -->
-    <div class="version" id="version">v163</div>
+    <div class="version" id="version">v164</div>
 
     <div class="hud">
       <div>
@@ -128,10 +128,10 @@
         <button class="menu-btn" id="overMenuBtn" type="button">Main Menu</button>
       </div>
     </div>
+    <!-- computers only, start menu only (v163): bottom-right corner of the game (v164) -->
+    <button id="fullBtn" class="full-btn" type="button" aria-label="Full screen" title="Full screen" hidden></button>
   </div>
 </div>
-<!-- computers only, start menu only (v163): bottom-right corner of the window -->
-<button id="fullBtn" class="full-btn" type="button" aria-label="Full screen" title="Full screen" hidden></button>
 <!-- the scripts share one global scope and run in this order: main.js must stay last -->
 <script src="js/core.js"></script>
 <script src="js/audio.js"></script>
