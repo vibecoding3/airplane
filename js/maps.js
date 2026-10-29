@@ -39,7 +39,7 @@ const KITCHEN = ['#fbf1dc', '#f8ecd4', '#f2dfc0', '#eed8b4', '#f8d4b8', '#f6ccac
 const SPACE = ['#2a5298', '#1a3570', '#10204a', '#0b1432', '#140f33', '#0a1b2e', '#1a0e2c', '#0c1533', '#120a28', '#0a1026', '#06070f'];
 const MAPS = {
   notebook: { name: 'Paper', colour: k => (k < 1 ? COL.paper : RAINBOW[(k - 1) % RAINBOW.length]), formulas: true },
-  sea: { name: 'Ocean', colour: k => SEA[clamp(Math.floor(diveDepth('sea', k * PAGE_M) / PAGE_M), 0, SEA.length - 1)], formulas: false },   // light again each dive (v171)
+  sea: { name: 'Ocean', colour: k => SEA[clamp(Math.floor(diveDepth('sea', k * PAGE_M) / PAGE_M), 0, SEA.length - 1)], formulas: false },   // light again each dive on a looping map (v171; the Ocean is sequential since v175)
   space: { name: 'Space', colour: k => SPACE[clamp(k, 0, SPACE.length - 1)], formulas: false },
   dungeon: { name: 'Dungeon', colour: k => DUNGEON[clamp(k, 0, DUNGEON.length - 1)], formulas: false },
   city: { name: 'Neon City', colour: k => CITY[clamp(k, 0, CITY.length - 1)], formulas: false },
@@ -157,7 +157,7 @@ function drawDepthMarkers() {
     ctx.fillStyle = col; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = 'center';   // centred since v167 (right before)
     ctx.fillText(fmt(k * PAGE_M) + ' m', W / 2, y - 6);
     ctx.font = '700 13px Kalam, cursive';
-    const m = k * PAGE_M, newDive = hasRegions(mapId) && diveDepth(mapId, m) === 0;   // a new dive's line says so (v171)
+    const m = k * PAGE_M, newDive = hasRegions(mapId) && loops(mapId) && diveDepth(mapId, m) === 0;   // a looping map's new dive says so (v171)
     const region = hasRegions(mapId) ? MAP_REGIONS[mapId][regionIndexAtM(mapId, m)].name + (newDive ? ' · Dive ' + diveAtM(mapId, m) : '')
                                      : REGIONS[mapId][ART_BOUNDS.filter(b => b <= m).length];
     ctx.fillText(region, W / 2, y + 16);

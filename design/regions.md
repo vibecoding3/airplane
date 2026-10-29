@@ -1,6 +1,6 @@
 # Regions: a design system for maps
 
-First written at v168, rewritten at v169 (2026-10-29) with three new parts: **music per region with a fade**, **regions that cycle** in an endless run, and **a collection set per region**. Built so far on the Ocean: aligned lines (v169), one region table (v170), looping dives (v171), region music (v172), a collection set per region (v173) and region looks (v174); see section 11. Everything else is a proposal.
+First written at v168, rewritten at v169 (2026-10-29) with three new parts: **music per region with a fade**, **regions in an endless run**, and **a collection set per region**. Updated at v175: a map's regions are either **sequential** or **looping** (section 4); the Ocean is sequential. Built so far on the Ocean: aligned lines (v169), one region table (v170), looping dives (v171, undone in v175), region music (v172), a collection set per region (v173), region looks (v174) and sequential regions (v175); see section 11. Everything else is a proposal.
 
 **The idea in one line:** a map is a journey through one place, made of **regions**. Inside a region, everything the player sees and hears (colours, background pattern, scenery, specks, obstacle skins, music, collectibles and the name on the depth line) belongs to the same theme. The player should always be able to answer "where am I?" by looking and listening.
 
@@ -48,7 +48,7 @@ A region changes how an obstacle **looks**, never how it **plays**: hit box, mov
 - every obstacle on a map has the same chance (v127);
 - difficulty only comes from speed, size and how often rows come, and it keeps going by the **real depth**, never by the region (section 4.3).
 
-The depth rules of some mechanics stay tied to the real depth too: no wind from 700 m, no conveyors from 1,500 m. So a reef visited a second time at 2,600 m has no current and no school of fish.
+The depth rules of some mechanics stay tied to the real depth too: no wind from 700 m, no conveyors from 1,500 m. So on a looping map, a first region visited a second time (say at 2,600 m) has no wind and no conveyor.
 
 ### 3.2 One set of lines
 - Every region starts on a 100 m line, so each change lands on a dotted line with the name under it.
@@ -68,7 +68,7 @@ The depth rules of some mechanics stay tied to the real depth too: no wind from 
 - **A mechanic keeps its silhouette.** A Gap Wall is always two barriers with a hole; a Wall Turret always has a mouth that flashes before it fires.
 
 ### 3.5 Theme
-- Original designs only: no famous places, characters or brands (Google Play rule).
+- Original designs only: no famous places, characters or brands (Google Play rule). Exceptions decided by the user: the Volcano's Minecraft minerals (temporary), and the Ocean's Twenty Thousand Leagues Under the Sea looks (v174; Verne's novel is public domain, drawn from the book, never from a film).
 - Each map keeps its own limits (Forest nature only, Volcano no dragons, Kitchen food and tools only…).
 
 ### 3.6 A checklist for a new region
@@ -78,41 +78,49 @@ The depth rules of some mechanics stay tied to the real depth too: no wind from 
 4. Do the skins stand out against its colours?
 5. Is anything in the scenery also an obstacle?
 6. Does it have its collection set, and do its items fit the place?
-7. Does the region still make sense when it comes round again (section 4)?
+7. On a looping map: does the region still make sense when it comes round again? On a sequential map: is the last region a believable "bottom" that can go on forever (section 4)?
 8. Is every design original?
 
 ---
 
-## 4. Cycles: the endless run
+## 4. The endless run: sequential or looping regions
 
-The game never ends, so a map's regions **repeat in a loop**. One pass through all the regions is a **dive**. When the last region ends, the first one starts again, and the loop goes on for as long as the plane survives.
+The game never ends, so every map needs an answer to "what comes after the last region?". There are two kinds of map (user's decision, v175):
 
-### 4.1 The Ocean's dive
+| Kind | What happens after the last region | Use it when | Example |
+|---|---|---|---|
+| **Sequential** | Nothing: the last region goes on forever | The map is a journey **down** through one place: each region is deeper, darker or older than the one before, so coming back to the first one would make no sense | The Ocean: you sink from the surface to the abyss, and the abyss is the bottom |
+| **Looping** | The first region starts again: one pass through all the regions is a **dive** | The map is a **cycle** in itself, so going round again is natural | The Forest's seasons: after the night, spring comes back |
 
-| # | Region | Length | 1st dive | 2nd dive | 3rd dive |
-|---|---|---|---|---|---|
-| 1 | Sunlit reef | 200 m | 0–200 m | 2,500–2,700 m | 5,000–5,200 m |
-| 2 | Twilight zone | 200 m | 200–400 m | 2,700–2,900 m | 5,200–5,400 m |
-| 3 | Sunken ruins | 400 m | 400–800 m | 2,900–3,300 m | 5,400–5,800 m |
-| 4 | Dome city | 700 m | 800–1,500 m | 3,300–4,000 m | 5,800–6,500 m |
-| 5 | The abyss | 1,000 m | 1,500–2,500 m | 4,000–5,000 m | 6,500–7,500 m |
+A map's kind is chosen once, with its theme, and is part of its region table (section 8).
 
-One dive is **2,500 m**. Every dive uses the same lengths, so the lines are easy to predict: a region comes back exactly 2,500 m later.
+### 4.1 Sequential maps (the Ocean, since v175)
 
-The first dive starts with short regions (new players see three or four places in their first runs) and ends with long ones (the abyss is a reward for good players). The 1,000 m abyss is long enough to feel like the bottom of the world before the loop.
+| # | Region | Depth |
+|---|---|---|
+| 1 | Sunlit reef | 0–200 m |
+| 2 | Twilight zone | 200–400 m |
+| 3 | Sunken ruins | 400–800 m |
+| 4 | Dome city | 800–1,500 m |
+| 5 | The abyss | 1,500 m and on, forever |
 
-### 4.2 Why the loop makes sense
-The cycle needs a reason, or a reef at 2,600 m feels like a mistake. For the Ocean: **the abyss ends in a deep trench, and the plane falls out of it into another sea**: a new reef with the same bright water. Each dive is a new ocean, deeper in the world but the same journey.
+- The regions get longer with depth: new players see three or four places in their first runs, and the endless last region is where good players spend their long runs.
+- **The last region must be a believable bottom** that can go on forever. The abyss works: total darkness with only living light, and nothing below it.
+- The water colour follows the real depth and stays near-black in the abyss.
+- **Collections:** each set is offered only in its one region; a long run is the way to see all of the abyss's set.
+- Wind and conveyors stop at their usual depths, as on every map.
 
-How the player sees it:
-- **The line at the start of a dive** names the dive as well as the region: "Sunlit reef · Dive 2". Only this line changes; all others show the region name as now.
-- **No other new signal.** The name on the line is enough (user's decision).
+The Ocean looped every 2,500 m in v171–v174: the abyss "ended in a trench", the reef came back, and the line said "Sunlit reef · Dive 2". The user reconsidered: the plane goes **down** the ocean, so a reef below the abyss made no sense. Since v175 the Ocean is sequential.
 
-### 4.3 What changes from dive to dive
-- **Looks, music and collections:** the same in every dive. A region looks and sounds the same each time.
-- **Difficulty:** keeps growing with the real depth, as now (speed is capped at the 600 m value; size and frequency keep going). A second reef is harder than the first one, not easier.
-- **Collections:** each item still appears at most once per run, so a set can't be found twice in one run (section 6.2).
-- **Water colour:** follows the region, not the real depth, so the second reef is bright turquoise again. Today the water darkens every 100 m until about 1,000 m and then stays near-black; with cycles it has to come back to light at each new dive.
+### 4.2 Looping maps (none yet)
+- One pass through all the regions is a **dive**, of a fixed length in metres (`REGION_DIVE`), so a region comes back at the same depth each time.
+- **The loop needs a reason** the player can feel, or the first region coming back looks like a mistake (the Forest: the year turns).
+- **The line at the start of a dive** names the dive as well as the region: "Spring · Dive 2". All other lines show only the region name.
+- **The same in every dive:** looks, music, colours, scenery and collections. The colour goes back to the first region's at each new dive.
+- **Still by the real depth:** difficulty keeps growing, so a second pass is harder than the first; wind and conveyors stop at their usual depths, so a second first region may have neither.
+- **Collections:** in the second dive a region offers only the items that haven't appeared yet in this run.
+
+The code for looping maps stays in `js/regions.js` (built and tested on the Ocean in v171): a map listed in `REGION_DIVE` loops, any other map is sequential.
 
 ---
 
@@ -163,7 +171,7 @@ The two new sets need their art, their names in the Collections screen, and thei
 
 ### 6.2 Rules
 - **Once per run:** each item appears at most once per run. When a region's whole set has appeared in a run, that obstacle goes back to its region's regular skins (the existing rule: "rings become skulls").
-- **Cycles:** in the second dive, a region offers only the items that haven't appeared yet in this run. A long run is the only way to see a whole set in one go, which rewards going deep.
+- **Looping maps:** in the second dive, a region offers only the items that haven't appeared yet in this run. On a sequential map each set is offered only in its one region.
 - **Save ids never change.** Items found today stay found: `shell-*`, `fish-*` and `treasure-*` keep their ids. New sets get new ids (`invention-*`, `abysslight-*`).
 - **Collections screen:** the Ocean's sets are listed in region order (reef → abyss), with the region name above each.
 
@@ -179,11 +187,11 @@ The two new sets need their art, their names in the Collections screen, and thei
 | Twilight zone | The reef's edge drops away; old shipwrecks rest on the slope | Blue | Sand ripples | Angelfish, parrotfish; a whale far away | Green plankton |
 | Sunken ruins | The flooded temples of a lost city | Deep blue | Ruin stone blocks | Lionfish, barracuda, tuna; far-off towers and broken arches | Marine snow |
 | Dome city | A city still alive under glass domes, warm windows in the dark | Navy | Hexagon dome glass | Reef sharks, hammerheads, sunfish; far-off domes and chimneys | Marine snow |
-| The abyss | Total darkness, only living light; it ends in a trench to the next sea | Near-black | Bioluminescent dots | Great white, giant squid, oarfish; deeper: viperfish, gulper eel, hatchetfish | Bioluminescence |
+| The abyss | Total darkness, only living light; the bottom, going on forever | Near-black | Bioluminescent dots | Great white, giant squid, hatchetfish | Bioluminescence |
 
 ### 7.2 Skins per region
 
-**new** = to be drawn. Everything else exists in `SEA_LOOKS` / `SEA_CITY_LOOKS`.
+The plan as first written. All the **new** looks were drawn in v174 (`js/draw-ocean-deep.js`), which also added nine Twenty Thousand Leagues looks (section 11, step 6). The live table is `MAP_REGIONS.sea` in `js/regions.js`.
 
 | Mechanic | Sunlit reef | Twilight zone | Sunken ruins | Dome city | The abyss |
 |---|---|---|---|---|---|
@@ -219,7 +227,8 @@ Notes:
 One table per map replaces the depth functions and look tables spread over the code today.
 
 ```js
-// js/regions.js (new): a map's regions in order; the list repeats forever (one pass = a dive)
+// js/regions.js: a map's regions in order. A sequential map's last region goes on forever; a looping map, listed in
+// REGION_DIVE with its dive length in metres, starts again with its first region
 const MAP_REGIONS = {
   sea: [
     { id: 'reef', name: 'Sunlit reef', length: 200, art: 'sea-ripples', music: 'seaReef', collection: 'shells',
@@ -257,8 +266,8 @@ function regionAt(map, y) {
 
 ## 9. Ideas for later
 - **Region music on the title screen:** the menu could play the theme of the region of the player's best depth on the picked map.
-- **A region log on the game-over screen:** "You reached the Dome city, dive 2" reads better than only "3,412 m".
-- **A sixth Ocean region** inside the dive (undecided, see section 12).
+- **A region log on the game-over screen:** "You reached the Dome city" reads better than only "1,012 m".
+- **A sixth Ocean region** (undecided, see section 12): with the abyss endless, a deeper region (for example hydrothermal vents from 2,500 m) would break up the long abyss for the best players.
 
 ---
 
@@ -266,16 +275,18 @@ function regionAt(map, y) {
 
 Kept for later; the Ocean comes first. Region names are the ones already shown in the game (v168).
 
-| Map | Regions | Possible loop reason |
-|---|---|---|
-| Paper | Notebook page · Graph paper · Dot grid · Sheet music · Blueprint | A new notebook starts |
-| Space | Low orbit · Moon orbit · The planets · Deep space · Far galaxies | A wormhole drops you near another planet |
-| Dungeon | The well · Torch halls · The crypt · Crystal caves · The underworld | A portal back to another castle's well |
-| Neon City | Rooftops · The streets · The subway · The arcade · The data core | The core uploads you to another city's roof |
-| Forest | Spring · Summer · Autumn · Winter · Night | The year turns: spring again |
-| Desert | The dunes · The canyon · The oasis · Fossil beds · Amber | A sinkhole opens onto another desert |
-| Volcano | Jungle slope · Ash cloud · The crater · Lava tubes · Magma chamber | An eruption throws you out onto another island |
-| Kitchen | Top shelf · The countertop · The stove · The sink · The fridge | The fridge door opens onto another kitchen's shelf |
+Suggested kind for each map (section 4); the user decides when a map's regions are built.
+
+| Map | Regions | Suggested kind | Why |
+|---|---|---|---|
+| Paper | Notebook page · Graph paper · Dot grid · Sheet music · Blueprint | Looping | Pages of a notebook: a new notebook starts |
+| Space | Low orbit · Moon orbit · The planets · Deep space · Far galaxies | Sequential | Further and further from Earth; the far galaxies never end |
+| Dungeon | The well · Torch halls · The crypt · Crystal caves · The underworld | Sequential | Deeper under the castle; the underworld is the bottom |
+| Neon City | Rooftops · The streets · The subway · The arcade · The data core | Sequential | Down through the city's layers; the data core is its heart |
+| Forest | Spring · Summer · Autumn · Winter · Night | Looping | The year turns: spring again |
+| Desert | The dunes · The canyon · The oasis · Fossil beds · Amber | Sequential | Older and older rock; the amber is the deepest layer |
+| Volcano | Jungle slope · Ash cloud · The crater · Lava tubes · Magma chamber | Sequential | Into the volcano; the magma chamber is the bottom |
+| Kitchen | Top shelf · The countertop · The stove · The sink · The fridge | Sequential | Down the kitchen and into the fridge |
 
 Skin ideas per region, from the first version of this document:
 - **Paper:** stationery, then maths tools (set squares, calculators), art tools (paint, crayons, origami), music (notes, metronome, piano keys), engineering (T-squares, bolts, a desk lamp arm).
@@ -295,15 +306,12 @@ Each step is its own version. Every step that changes spawning needs a `SIM_VERS
 
 1. ~~**Align the lines**~~ (done in v169): looks, fish and specks change at 200/400/800/1,500 m, measured like the depth lines.
 2. ~~**One table**~~ (done in v170): `js/regions.js` holds the Ocean's `MAP_REGIONS` (name, line, art, specks, background fish, the looks of every obstacle and the collections of each region) and `regionAt`. `SEA_LAYERS`, `SEA_CITY` as a depth table, `SEA_FISH_DEPTHS` and the Ocean's names list are gone. No visible change: 400 seeded rows and 400 fish came out identical before and after, so no `SIM_VERSION` bump. The fish deeper than 2,500 m (`SEA_DEEP_FISH`) wait for step 3. `tools/test.js` checks the table.
-3. ~~**Cycles**~~ (done in v171): the Ocean loops every 2,500 m (`REGION_DIVE`); the water colour, art, looks, fish, whale and wreck silhouettes, specks, collections and names follow the dive depth; the line at a new dive reads "Sunlit reef · Dive 2". The deepest fish (viperfish, gulper eel, hatchetfish) joined the abyss scenery. `SIM_VERSION` 4.
+3. ~~**Cycles**~~ (done in v171, undone for the Ocean in v175): the Ocean looped every 2,500 m (`REGION_DIVE`), with "Sunlit reef · Dive 2" on the line. The deepest fish (viperfish, gulper eel, hatchetfish) joined the abyss scenery. `SIM_VERSION` 4. The looping code stays for looping maps.
 4. ~~**Music**~~ (done in v172): four new Ocean themes (`seaReef`, `seaRuins`, `seaDome`, `seaAbyss`; the twilight keeps `sea`), each region's `music` in the table, and a 4-second linear cross-fade when the plane crosses a line. The music never touches the run's random numbers, so no `SIM_VERSION` bump. `tools/test.js` checks every theme's bars and that the run's theme follows the region in both dives.
 5. ~~**Collections**~~ (done in v173): the Seashells, Legendary fish and Sunken treasures each live in one region now (reef, twilight, ruins), and two new sets were added: Dome inventions (8, on the dome city's air capsules) and Abyss lights (8, on the abyss's swarms). The Collections screen shows the Ocean's sets in region order, named with their region. One test spawns 300 rows in each set's region (both dives) and checks every item appears once, then 100 rows in each other region where none may appear. `SIM_VERSION` 5.
 6. ~~**Skins**~~ (done in v174): the reef and the twilight zone split their shared looks, and the abyss got 12 looks of its own (`js/draw-ocean-deep.js`). Also added at the user's request: 9 looks from Jules Verne's *Twenty Thousand Leagues Under the Sea* (the Nautilus, Ned Land's harpoon, Nemo's divers and their electric rifles, the giant pearl oyster, the Maelstrom, Atlantis, the kraken, the Nautilus's searchlight), placed in the regions they fit. The oarfish, viperfish and gulper eel left the abyss scenery. `SIM_VERSION` 6.
-7. **Tests** in `tools/test.js`:
-   - every mechanic has a skin in every region (or a declared fallback);
-   - in a deep run past 2,500 m, every obstacle's skin and collectible belongs to its region, and the second dive matches the first;
-   - nothing in the scenery is also an obstacle skin;
-   - the music theme follows the region (checked by name, not by sound).
+7. ~~**Sequential**~~ (done in v175, the user's decision): the Ocean no longer loops (`REGION_DIVE` is empty); the abyss goes on forever, the water stays dark, and no line says "Dive 2". `SIM_VERSION` 7.
+8. **Tests** in `tools/test.js` (built): every mechanic has a skin in every region and every skin exists; spawned obstacles use their region's looks; the Ocean doesn't loop and its abyss is endless (checked at 2,600, 5,100 and 9,000 m); each collection set appears only in its region; no scenery fish is an obstacle; the music theme follows the region (checked by name, not by sound).
 
 ---
 
@@ -315,4 +323,6 @@ Each step is its own version. Every step that changes spawning needs a `SIM_VERS
 - **No region discovery reward** for now.
 - **The Dungeon's Halloween looks stay.**
 - **A sixth region:** undecided.
-- **New in this version** (user's requests): music changes per region with a fade; the regions loop forever; every region has its own collection set.
+- **v169 rewrite** (user's requests): music changes per region with a fade; every region has its own collection set.
+- **Sequential or looping (v175):** some maps have looping regions and others sequential ones. The Ocean is sequential, because the plane goes down the ocean (it looped in v171–v174).
+- **Twenty Thousand Leagues Under the Sea looks on the Ocean (v174):** allowed although not original designs; the novel is public domain.

@@ -207,7 +207,7 @@ function syncDepthArt(px) {
   let L = 0, next, edge;
   if (hasRegions(mapId)) {                                // regions loop, so the next one after the last is the first (v171)
     const top = (dist - planeScreenY()) / PX_PER_M;       // the depth at the top of the screen, measured like the lines
-    L = regionIndexAtM(mapId, top); next = (L + 1) % MAP_REGIONS[mapId].length; edge = edgeY(regionEndM(mapId, top));
+    L = regionIndexAtM(mapId, top); next = (L + 1) % MAP_REGIONS[mapId].length; edge = edgeY(regionEndM(mapId, top));   // Infinity: no next one
   } else {
     const bounds = ART_BOUNDS;
     while (L < bounds.length && edgeY(bounds[L]) <= 0) L++;   // the layer at the top of the screen

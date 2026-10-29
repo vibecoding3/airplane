@@ -444,10 +444,10 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   });
   check(artLine.length === 0, 'Depth art changes on the dotted 200 m line on every map' + (artLine.length ? ': ' + artLine.join(', ') : ''));
 
-  // the Ocean's collections, one set per region (v173): each set's items appear only in its own region (in every dive),
+  // the Ocean's collections, one set per region (v173): each set's items appear only in its own region,
   // each at most once per run, and the obstacle goes back to its regular looks once the whole set has appeared. Rows are
   // spawned directly (a natural run meets only a few rows of one obstacle in one region): 300 rows spread over the region,
-  // in the first and second dives, then 100 rows in every other region where nothing may appear
+  // (in both dives on a looping map), then 100 rows in every other region where nothing may appear
   const oceanSets = await page.evaluate(() => {
     const SETS = [['shells', 'urchins', 'shell', SHELLS], ['fish', 'starfish', 'fish', LEGEND_FISH], ['treasures', 'urchins', 'treasure', TREASURES],
                   ['inventions', 'puffer', 'invention', INVENTIONS], ['abysslights', 'jellies', 'abyssLight', ABYSS_LIGHTS]];
@@ -455,11 +455,11 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     for (const [set, pool, key, items] of SETS) {
       mapId = 'sea'; applyMap(); start();
       const ri = MAP_REGIONS.sea.findIndex(r => r.collections.includes(set)), r = MAP_REGIONS.sea[ri];
-      const end = ri + 1 < MAP_REGIONS.sea.length ? MAP_REGIONS.sea[ri + 1].from : REGION_DIVE.sea;
+      const end = ri + 1 < MAP_REGIONS.sea.length ? MAP_REGIONS.sea[ri + 1].from : REGION_DIVE.sea || 4000;   // the endless abyss: up to 4,000 m
       const seen = new Map(); let allAt = 0, afterAll = 0, outside = 0;
       const spawnAt = m => { const k = obstacles.length; lastType = ''; spawnFromPool(m * PX_PER_M + planeScreenY(), 0.5, [[pool, 1]]); const os = obstacles.slice(k); obstacles.length = 0; return os; };
       for (let i = 0; i < 300; i++) {
-        const m = (i % 2 ? REGION_DIVE.sea : 0) + r.from + (i + 0.5) / 300 * (end - r.from);
+        const m = (i % 2 && REGION_DIVE.sea ? REGION_DIVE.sea : 0) + r.from + (i + 0.5) / 300 * (end - r.from);   // both dives on a looping map
         for (const o of spawnAt(m)) {
           if (!o[key]) continue;
           if (!seen.has(o[key])) seen.set(o[key], new Set()); seen.get(o[key]).add(o);
@@ -470,7 +470,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
       runCollected.clear();                        // a fresh run's worth of items, offered only in their own region
       MAP_REGIONS.sea.forEach((other, oi) => {
         if (oi === ri) return;
-        const oe = oi + 1 < MAP_REGIONS.sea.length ? MAP_REGIONS.sea[oi + 1].from : REGION_DIVE.sea;
+        const oe = oi + 1 < MAP_REGIONS.sea.length ? MAP_REGIONS.sea[oi + 1].from : REGION_DIVE.sea || 4000;
         for (let i = 0; i < 100; i++) for (const o of spawnAt(other.from + (i + 0.5) / 100 * (oe - other.from))) if (o[key] && o.layer !== ri) outside++;   // a row on a line can reach over it
       });
       gameOver();
@@ -510,11 +510,13 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
       for (const f of r.scenery) if (looks.has(f) || !FISH[f]) bad.push(r.id + ' scenery ' + f);
     });
     mapId = 'sea'; applyMap(); start();
-    // the regions loop: the second dive (from 2,500 m) has the same regions, looks and water colours as the first
-    const dive = REGION_DIVE.sea;
-    for (const k of [0, 1, 2, 5, 10, 15]) if (MAPS.sea.colour(k) !== MAPS.sea.colour(k + dive / 100)) bad.push('colour of band ' + k);
-    if (regionIndexAtM('sea', dive + 1) !== 0 || diveAtM('sea', dive + 1) !== 2) bad.push('2,501 m is not the reef of dive 2');
-    for (const r of list) for (const m of [r.from + 1, r.from + 99, dive + r.from + 1, dive + r.from + 99]) {
+    // the Ocean's regions are sequential (v175; they looped every 2,500 m in v171–v174): the abyss goes on forever, the
+    // water stays dark, and no line says "Dive 2"
+    if (loops('sea')) bad.push('the Ocean loops');
+    const last = list.length - 1, deep = [2600, 5100, 9000];
+    for (const m of deep) if (regionIndexAtM('sea', m) !== last || regionEndM('sea', m) !== Infinity) bad.push(m + ' m is not the endless abyss');
+    if (MAPS.sea.colour(26) !== MAPS.sea.colour(90) || MAPS.sea.colour(26) === MAPS.sea.colour(0)) bad.push('water colour past 2,500 m');
+    for (const r of list) for (const m of [r.from + 1, r.from + 99, ...(r === list[last] ? deep : [])]) {
       if (regionIndexAtM('sea', m) !== list.indexOf(r)) bad.push(m + ' m is not ' + r.id);
       obstacles.length = 0; lastType = ''; spawnRow(m * PX_PER_M + planeScreenY(), 0.5);
       for (const o of obstacles) if (o.look && !(r.skins[o.type] || []).includes(o.look)) bad.push(o.look + '@' + m);
@@ -525,7 +527,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(regions.bad.length === 0, `Ocean regions (${regions.names}): table and spawned looks match` + (regions.bad.length ? ': ' + regions.bad.slice(0, 5).join(', ') : ''));
 
   // music: every theme is whole (8 known chords, 4 beats a bar), and on the Ocean the run's theme follows the region,
-  // in every dive (checked by name: headless Chrome plays no sound)
+  // (checked by name: headless Chrome plays no sound)
   const tunes = await page.evaluate(() => {
     const bad = [];
     for (const [name, th] of Object.entries(THEMES)) {
