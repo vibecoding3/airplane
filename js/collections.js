@@ -15,12 +15,17 @@ const COLLECTIONS = [
     items: SWORDS.map(n => ({ id: 'sword-' + n, name: { flame: 'Flame sword', frost: 'Frost blade', crystal: 'Crystal sword', scimitar: 'Desert scimitar', rune: 'Rune blade', bone: 'Bone sword' }[n], sword: n })) },
   { id: 'origami', name: 'Origami', map: 'Paper', bg: '#fbf9f1',
     items: ORIGAMI.map(n => ({ id: 'origami-' + n, name: n[0].toUpperCase() + n.slice(1), origami: n })) },
-  { id: 'shells', name: 'Seashells', map: 'Ocean', bg: '#3f92c0',
+  // the Ocean's sets in region order, each found only in its region (v173), named with it
+  { id: 'shells', name: 'Seashells', map: 'Ocean · Sunlit reef', bg: '#3f92c0',
     items: SHELLS.map(n => ({ id: 'shell-' + n, name: { sanddollar: 'Sand dollar', pearl: 'Pearl oyster' }[n] || n[0].toUpperCase() + n.slice(1), shell: n })) },
-  { id: 'treasures', name: 'Sunken treasures', map: 'Ocean', bg: '#2a4a6a',
-    items: TREASURES.map(n => ({ id: 'treasure-' + n, name: TREASURE_NAMES[n], treasure: n })) },
-  { id: 'fish', name: 'Legendary fish', map: 'Ocean', bg: '#3f92c0',
+  { id: 'fish', name: 'Legendary fish', map: 'Ocean · Twilight zone', bg: '#2c76a6',
     items: LEGEND_FISH.map(n => ({ id: 'fish-' + n, name: { golden: 'Golden fish', narwhal: 'Narwhal', coelacanth: 'Coelacanth', squideye: 'Giant squid eye', ghostshark: 'Ghost shark' }[n], fish: n })) },
+  { id: 'treasures', name: 'Sunken treasures', map: 'Ocean · Sunken ruins', bg: '#2a4a6a',
+    items: TREASURES.map(n => ({ id: 'treasure-' + n, name: TREASURE_NAMES[n], treasure: n })) },
+  { id: 'inventions', name: 'Dome inventions', map: 'Ocean · Dome city', bg: '#18456b',
+    items: INVENTIONS.map(n => ({ id: 'invention-' + n, name: INVENTION_NAMES[n], invention: n })) },
+  { id: 'abysslights', name: 'Abyss lights', map: 'Ocean · The abyss', bg: '#091a2c',
+    items: ABYSS_LIGHTS.map(n => ({ id: 'abysslight-' + n, name: ABYSS_LIGHT_NAMES[n], abyssLight: n })) },
   { id: 'neonsigns', name: 'Neon signs', map: 'Neon City', bg: '#1a1530',
     items: NEON_SIGNS.map(n => ({ id: 'neon-' + n, name: NEON_ICONS[n].name, neon: n })) },
   { id: 'birds', name: 'Forest birds', map: 'Forest', bg: '#9fcf78',
@@ -55,7 +60,9 @@ function collectionId(o) {
        : o.stone ? 'stone-' + o.stone
        : o.mineral ? 'ore-' + o.mineral
        : o.pastry ? 'pastry-' + o.pastry
-       : o.treasure ? 'treasure-' + o.treasure : null;
+       : o.treasure ? 'treasure-' + o.treasure
+       : o.invention ? 'invention-' + o.invention
+       : o.abyssLight ? 'abysslight-' + o.abyssLight : null;
 }
 
 // called for every obstacle drawn during a run (render.js)
@@ -160,6 +167,12 @@ function paintCollectionItem(canvas, item, locked, wide) {
     } else if (item.treasure) {
       const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintTreasure(item.treasure);
+    } else if (item.invention) {
+      const k = Hc / 52; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintInvention(item.invention);
+    } else if (item.abyssLight) {
+      const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
+      paintAbyssLight(item.abyssLight);
     } else if (item.pastry) {
       const k = Hc / 50; g.setTransform(k, 0, 0, k, Wc / 2, Hc / 2);
       paintPastry(item.pastry);

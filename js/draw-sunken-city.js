@@ -200,8 +200,78 @@ function drawSunkBar(o, sy) {
   }), o.x, sy, o.a, o.vx < 0 && tram ? -1 : 1, 1);
 }
 
+// the Dome inventions (v173): brass-and-glass gadgets of the dome city, riding up like its air capsules, each drawn
+// inside a 20-unit circle (also used by the Collections screen)
+const INVENTION_NAMES = { helmet: 'Diving helmet', watch: 'Pocket watch', spyglass: 'Spyglass', snowglobe: 'Snow globe',
+                          toysub: 'Toy submarine', lantern: 'Glass lantern', windupfish: 'Wind-up fish', gramophone: 'Gramophone' };
+function paintInvention(name) {
+  const brass = UC_BRASS, dark = '#8a6a30', glass = 'rgba(170,235,255,.85)', shine = () => { ctx.fillStyle = 'rgba(255,255,255,.7)'; };
+  const circle = (x, y, r, c, w = 1.3) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); inkStroke(w); };
+  if (name === 'helmet') {                         // a round brass diving helmet with a front porthole and bolts
+    ctx.fillStyle = dark; ctx.beginPath(); roundRectPath(-14, 9, 28, 8, 3); ctx.fill(); inkStroke(1.3);
+    circle(0, -2, 15, brass, 1.5);
+    circle(0, -1, 8, glass, 1.3);
+    ctx.strokeStyle = dark; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-8, -1); ctx.lineTo(8, -1); ctx.moveTo(0, -9); ctx.lineTo(0, 7); ctx.stroke();
+    for (const [x, y] of [[-12, -9], [12, -9], [-13, 5], [13, 5]]) circle(x, y, 1.6, dark, 0.7);
+    shine(); ctx.beginPath(); ctx.ellipse(-3, -4, 2, 3, -0.5, 0, Math.PI * 2); ctx.fill();
+  } else if (name === 'watch') {                   // an open pocket watch on a short chain
+    ctx.strokeStyle = brass; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(-6, -18, 4, 0, Math.PI * 2); ctx.stroke();
+    circle(0, -15, 3, brass, 1);
+    circle(0, 2, 16, brass, 1.5);
+    circle(0, 2, 12.5, '#fbf6ee', 1);
+    ctx.fillStyle = COL.ink; for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; ctx.fillRect(Math.cos(a) * 10.5 - 0.6, 2 + Math.sin(a) * 10.5 - 0.6, 1.2, 1.2); }
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(0, 2); ctx.lineTo(0, -6); ctx.moveTo(0, 2); ctx.lineTo(6, 4); ctx.stroke();
+  } else if (name === 'spyglass') {                // a telescope pulled out in three brass sections, on the diagonal
+    ctx.save(); ctx.rotate(-0.6);
+    ctx.fillStyle = '#7a4a2a'; ctx.beginPath(); roundRectPath(-18, -5, 14, 10, 2); ctx.fill(); inkStroke(1.3);
+    ctx.fillStyle = brass; ctx.beginPath(); roundRectPath(-5, -4, 12, 8, 2); ctx.fill(); inkStroke(1.2);
+    ctx.beginPath(); roundRectPath(6, -3, 12, 6, 2); ctx.fill(); inkStroke(1.2);
+    ctx.fillStyle = dark; ctx.fillRect(-6, -5, 2, 10); ctx.fillRect(5, -4, 2, 8);
+    circle(18.5, 0, 2.6, glass, 1);
+    ctx.restore();
+  } else if (name === 'snowglobe') {               // a glass globe with a tiny dome house inside, on a brass base
+    ctx.fillStyle = brass; ctx.beginPath(); ctx.moveTo(-13, 17); ctx.lineTo(13, 17); ctx.lineTo(10, 9); ctx.lineTo(-10, 9); ctx.closePath(); ctx.fill(); inkStroke(1.3);
+    circle(0, -3, 14, 'rgba(200,240,255,.7)', 1.5);
+    ctx.fillStyle = '#9fe0ff'; ctx.beginPath(); ctx.arc(0, 6, 7, Math.PI, 0); ctx.closePath(); ctx.fill(); inkStroke(1);
+    ctx.fillStyle = '#ffd07a'; ctx.fillRect(-1.5, 2, 3, 4);
+    ctx.fillStyle = '#ffffff'; for (const [x, y] of [[-7, -9], [5, -11], [8, -3], [-4, -3], [1, -6]]) { ctx.beginPath(); ctx.arc(x, y, 1.1, 0, Math.PI * 2); ctx.fill(); }
+    shine(); ctx.beginPath(); ctx.ellipse(-7, -8, 2, 4, 0.4, 0, Math.PI * 2); ctx.fill();
+  } else if (name === 'toysub') {                  // a little yellow wind-up submarine with a key and a periscope
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(3, -8); ctx.lineTo(3, -15); ctx.lineTo(8, -15); ctx.stroke();
+    ctx.fillStyle = '#f4c430'; ctx.beginPath(); roundRectPath(-6, -10, 12, 6, 2); ctx.fill(); inkStroke(1.1);
+    ctx.beginPath(); ctx.ellipse(0, 0, 17, 9, 0, 0, Math.PI * 2); ctx.fill(); inkStroke(1.5);
+    for (const x of [-7, 0, 7]) circle(x, 0, 2.6, glass, 1);
+    ctx.fillStyle = brass; ctx.beginPath(); ctx.moveTo(-17, 0); ctx.lineTo(-22, -5); ctx.lineTo(-22, 5); ctx.closePath(); ctx.fill(); inkStroke(1);   // the propeller
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(0, 9); ctx.lineTo(0, 13); ctx.stroke();
+    ctx.fillStyle = brass; ctx.beginPath(); ctx.ellipse(-4, 14, 4, 2.2, 0, 0, Math.PI * 2); ctx.ellipse(4, 14, 4, 2.2, 0, 0, Math.PI * 2); ctx.fill(); inkStroke(1);   // the key
+  } else if (name === 'lantern') {                 // a glass storm lantern with a brass cap, a ring and a warm flame
+    ctx.fillStyle = 'rgba(255,200,100,.35)'; ctx.beginPath(); ctx.arc(0, 2, 16, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(0, -16, 4, Math.PI, 0); ctx.stroke();
+    ctx.fillStyle = brass; ctx.beginPath(); ctx.moveTo(-9, -8); ctx.lineTo(0, -15); ctx.lineTo(9, -8); ctx.closePath(); ctx.fill(); inkStroke(1.2);
+    ctx.fillStyle = 'rgba(220,245,255,.75)'; ctx.beginPath(); roundRectPath(-8, -8, 16, 18, 4); ctx.fill(); inkStroke(1.3);
+    ctx.fillStyle = '#ffb04a'; ctx.beginPath(); ctx.moveTo(0, -4); ctx.quadraticCurveTo(5, 3, 0, 6); ctx.quadraticCurveTo(-5, 3, 0, -4); ctx.fill();
+    ctx.fillStyle = '#fff2b0'; ctx.beginPath(); ctx.ellipse(0, 3, 1.6, 2.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = brass; ctx.beginPath(); roundRectPath(-10, 10, 20, 5, 2); ctx.fill(); inkStroke(1.2);
+  } else if (name === 'windupfish') {              // a tin fish with riveted plates, a glass eye and a wind-up key
+    ctx.fillStyle = '#c9ced6'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-19, -8); ctx.lineTo(-17, 0); ctx.lineTo(-19, 8); ctx.closePath(); ctx.fill(); inkStroke(1.2);
+    ctx.beginPath(); ctx.ellipse(1, 0, 14, 9, 0, 0, Math.PI * 2); ctx.fill(); inkStroke(1.5);
+    ctx.strokeStyle = '#8a94a0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-3, -8); ctx.lineTo(-3, 8); ctx.moveTo(4, -9); ctx.lineTo(4, 9); ctx.stroke();
+    ctx.fillStyle = '#8a94a0'; for (const [x, y] of [[-3, -5], [-3, 5], [4, -6], [4, 6]]) { ctx.beginPath(); ctx.arc(x, y, 0.9, 0, Math.PI * 2); ctx.fill(); }
+    circle(9, -2, 2.8, '#7fe8ff', 1);
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(0, -9); ctx.lineTo(0, -13); ctx.stroke();
+    ctx.fillStyle = brass; ctx.beginPath(); ctx.ellipse(-4, -14, 4, 2.2, 0, 0, Math.PI * 2); ctx.ellipse(4, -14, 4, 2.2, 0, 0, Math.PI * 2); ctx.fill(); inkStroke(1);
+  } else {                                         // a gramophone: a wooden box, a turntable and a big brass horn
+    ctx.fillStyle = '#a8603a'; ctx.beginPath(); roundRectPath(-15, 6, 22, 11, 2); ctx.fill(); inkStroke(1.3);
+    ctx.fillStyle = '#2a2a30'; ctx.beginPath(); ctx.ellipse(-4, 6, 10, 2.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(3, 6); ctx.quadraticCurveTo(6, -2, 2, -6); ctx.stroke();
+    ctx.fillStyle = brass; ctx.beginPath(); ctx.moveTo(2, -4); ctx.lineTo(-2, -8); ctx.quadraticCurveTo(4, -20, 19, -16); ctx.quadraticCurveTo(14, -6, 18, 4); ctx.quadraticCurveTo(8, -2, 2, -4); ctx.closePath(); ctx.fill(); inkStroke(1.4);
+    ctx.fillStyle = dark; ctx.beginPath(); ctx.ellipse(18.5, -6, 2.4, 10, 0.15, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
 // ---------- Rising Projectile: a lantern float bobbing up (ruins), or an air capsule shooting up (domes) ----------
 function drawSunkRiser(o, sy) {
+  if (o.invention) { const k = o.r * 0.95 / 20; blit(sharedSprite('invention-' + o.invention, 48, 48, 24, 24, () => paintInvention(o.invention)), o.x, sy, 0, k, k); return; }
   const s = o.r / 16, capsule = o.look === 'capsule', col = o.seaCol || '#ffb04a';
   blit(sharedSprite('ucrise' + o.look + col, 40, 40, 20, 20, () => {
     if (capsule) {                                 // a steel capsule with a porthole and a bubble trail

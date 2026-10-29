@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v172** (2026-10-29)
+Current version: **v173** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -681,9 +681,13 @@ There is no Shop (removed in v46). Instead, power-ups appear in the map during a
   | Mage staffs | Crescent staff, twisted staff (Dungeon, Bouncing Slider looks). Called "Frieren" until v110; the save ids `staff-frieren` and `staff-fern` were kept so found items stay found (`COLLECTIBLE_LOOKS` in `js/obstacles.js`) |
   | Enchanted rings | The 9 Dungeon magic rings: emerald, sapphire, ruby, crystal, amethyst, amber, skull, zigzag, leaf (called "Rings of Power" until v110) |
   | Origami (v102) | Six folded-paper figures on the Paper map: crane, frog, boat, star, fox, butterfly (Drifting Swarm variants of the sticky notes, faceted in three paper tones). In a sticky-note row each note has a 50% chance to be an origami not yet seen this run; once all 6 have appeared the notes are plain sticky notes again |
-  | Seashells (v103) | Six shells in the Ocean: conch, scallop, nautilus, cowrie, sand dollar, pearl oyster (Static Hazards variants of the sea urchins, scaled to the urchin's hit circle). Each urchin has a 40% chance to be a shell not yet seen this run; once all 6 have appeared the urchins are plain again |
-  | Sunken treasures (v133) | Eight treasures in the Ocean's sunken city (400–1,500 m only): crown, sceptre, gold coin, chalice, pearl necklace, brass compass, music box, crystal key (Static Hazards variants of the city relics, scaled to their hit circle; save ids `treasure-crown` …). In the city each relic has a 40% chance to be a treasure not yet seen this run (and otherwise may still be a seashell); once all 8 have appeared the relics are plain again (`TREASURES`, `paintTreasure`) |
-  | Legendary fish (v106) | Five fish in the Ocean: golden fish, narwhal, coelacanth, giant squid eye, ghost shark (Spinning Drifter variants of the starfish: they spin and drift like a starfish and are drawn inside its hit circle). Each starfish has a 50% chance to be a fish not yet seen this run; once all 5 have appeared the starfish are plain again. Unlike the background fish, these collide |
+  | Seashells (v103) | Six shells on the Ocean's sunlit reef (0–200 m of each dive since v173; at any depth outside the city before): conch, scallop, nautilus, cowrie, sand dollar, pearl oyster (Static Hazards variants of the sea urchins, scaled to the urchin's hit circle). Each urchin has a 40% chance to be a shell not yet seen this run; once all 6 have appeared the urchins are plain again |
+  | Sunken treasures (v133) | Eight treasures in the Ocean's sunken ruins (400–800 m of each dive since v173; the whole city, 400–1,500 m, before): crown, sceptre, gold coin, chalice, pearl necklace, brass compass, music box, crystal key (Static Hazards variants of the city relics, scaled to their hit circle; save ids `treasure-crown` …). In the ruins each amphora has a 40% chance to be a treasure not yet seen this run; once all 8 have appeared the relics are plain again (`TREASURES`, `paintTreasure`) |
+  | Legendary fish (v106) | Five fish in the Ocean's twilight zone (200–400 m of each dive since v173; at any depth outside the city before): golden fish, narwhal, coelacanth, giant squid eye, ghost shark (Spinning Drifter variants of the starfish: they spin and drift like a starfish and are drawn inside its hit circle). Each starfish has a 50% chance to be a fish not yet seen this run; once all 5 have appeared the starfish are plain again. Unlike the background fish, these collide |
+  | Dome inventions (v173) | Eight brass-and-glass gadgets in the Ocean's dome city (800–1,500 m of each dive): diving helmet, pocket watch, spyglass, snow globe, toy submarine, glass lantern, wind-up fish, gramophone (Rising Projectile variants of the air capsules, scaled to their hit circle; save ids `invention-helmet` …). Each capsule has a 40% chance to be an invention not yet seen this run; once all 8 have appeared the capsules are plain again (`INVENTIONS`, `paintInvention` in `js/draw-sunken-city.js`) |
+  | Abyss lights (v173) | Eight glowing deep-sea animals in the Ocean's abyss (1,500–2,500 m of each dive), original cartoon designs: vampire squid, barreleye fish, dumbo octopus, sea angel, firefly squid, glass squid, sea pig, giant isopod (Drifting Swarm variants, drawn inside the swarm's square with a soft glow; save ids `abysslight-vampiresquid` …). Each swarm piece has a 40% chance to be one not yet seen this run; once all 8 have appeared the swarm is plain again (`ABYSS_LIGHTS`, `paintAbyssLight` in `js/draw-ocean.js`) |
+
+  Since v173 every Ocean region has its own set, found only there (each region's `collections` in `js/regions.js`), and the Collections screen lists the Ocean's five sets in region order with the region's name.
   | Legendary swords (v105) | Six original swords in the Dungeon: flame sword, frost blade, crystal sword, desert scimitar, rune blade, bone sword (Spinning Blades variants of the crossed swords; both blades of the pair are the same sword, drawn inside the blade hit shape). Each Spinning Blades obstacle has a 70% chance to be a sword not yet seen this run; once all 6 have appeared it uses its regular looks again |
   | Neon signs (v113) | Eight big round neon signs in Neon City: ramen bowl, neon cat, cassette, lightning bolt, heart, music notes, coffee cup, palm tree (Wall Bulge, their own obstacle in the pool, save ids `neon-ramen` …). Each appears at most once per run; once all 8 have, a sign spawn becomes a regular Wall Bulge (dish, AC unit or clock). In the menu they are drawn whole with the icon in the middle |
   | Forest birds (v114) | Eight round cartoon birds in the Forest: robin, blue jay, kingfisher, cardinal, hummingbird, goldfinch, snowy owl, magpie (Drifting Swarm variants of the bees, drawn inside their 42-unit square; save ids `bird-robin` …). Each swarm member has a 50% chance to be a bird not yet seen this run; once all 8 have appeared the swarms are plain again (`FOREST_BIRDS`, `paintForestBird`) |
@@ -939,7 +943,7 @@ Suggestions; only the ones marked ✅ are built. They respect the decisions reco
 ### 12.3 Goals between runs
 - **Missions:** three small goals at a time, replaced when done ("Pass 3 mines in one run", "Collect 10 stars", "Reach 300 m in Ocean"). They pay stars and point players at things they would not try on their own. (Worked out as daily quests in section 16, on hold.)
 - **Leaderboards** ✅ built in v144 (section 19.1): Total score, Level, Time played and per-map boards, with a nickname.
-- **Collections** ✅ built in v88 (section 7): 13 sets, 100 items.
+- **Collections** ✅ built in v88 (section 7): 15 sets, 116 items (Dome inventions and Abyss lights added in v173).
 - **Medals per map** ✅ built in v49 (see section 3): bronze / silver / gold at 250 / 750 / 1,500 m, shown on the map tiles.
 - **A use for stars** now that the Shop is gone: for example unlocking maps, or medals at star totals.
 
@@ -1185,7 +1189,7 @@ A planned "Daily quests" section in the main menu. The ideas below use things th
 
 ## 17. More collection sets — ideas
 
-Ideas for new Collections sets (see Collections in section 7, which lists the 13 sets built so far). Every map now has at least one set: besides the ones marked ✅ below, Neon signs (v113), Forest birds (v114), Fossils (v120), Volcanic stones (v121), Pastries (v130), Sunken treasures (v133) and Minecraft minerals (v148/v150) were built. Like the current sets, these items would be collectibles: each appears at most once per run, and is found the first time it shows on screen.
+Ideas for new Collections sets (see Collections in section 7, which lists the 15 sets built so far). Every map now has at least one set: besides the ones marked ✅ below, Neon signs (v113), Forest birds (v114), Fossils (v120), Volcanic stones (v121), Pastries (v130), Sunken treasures (v133) and Minecraft minerals (v148/v150) were built. Like the current sets, these items would be collectibles: each appears at most once per run, and is found the first time it shows on screen.
 
 ### 17.1 Cheap: the art already exists
 

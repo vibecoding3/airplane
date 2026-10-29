@@ -418,6 +418,12 @@ const swordsLeft = () => SWORDS.filter(n => !runCollected.has('sword-' + n));
 // Legendary fish collection (Ocean map): starfish variants, each at most once per run
 const LEGEND_FISH = ['golden', 'narwhal', 'coelacanth', 'squideye', 'ghostshark'];
 const fishLeft = () => LEGEND_FISH.filter(n => !runCollected.has('fish-' + n));
+// Dome inventions (Ocean, dome city, v173): Rising Projectile variants; Abyss lights (Ocean, the abyss, v173): Drifting
+// Swarm variants. Each at most once per run, like every set (art in draw-sunken-city.js and draw-ocean.js)
+const INVENTIONS = ['helmet', 'watch', 'spyglass', 'snowglobe', 'toysub', 'lantern', 'windupfish', 'gramophone'];
+const inventionsLeft = () => INVENTIONS.filter(n => !runCollected.has('invention-' + n));
+const ABYSS_LIGHTS = ['vampiresquid', 'barreleye', 'dumbo', 'seaangel', 'fireflysquid', 'glasssquid', 'seapig', 'isopod'];
+const abyssLightsLeft = () => ABYSS_LIGHTS.filter(n => !runCollected.has('abysslight-' + n));
 // collectibles appear at most once per run: the ring designs and the two mage staffs not yet seen this run
 const ringsLeft = () => DUNGEON_SOLO.rings.cols.filter(d => !runCollected.has('ring-' + d));
 // staff look → collection id; the ids are older than the looks' names (v111) and must not change, saves use them
@@ -830,15 +836,18 @@ function spawnFromPool(y, d, pool) {
       }
       if (looks) [o.look, o.seaCol] = rowSea[o.type];
       if (o.type === 'compass') o.hh = 7;        // an anchor chain is thicker than a compass leg
-      if (o.type === 'blot') {                   // in the city a treasure not yet seen this run first, otherwise a seashell
-        const gold = MAP_REGIONS.sea[o.layer].collections.includes('treasures') ? treasuresLeft() : [], left = shellsLeft();
-        if (gold.length && Math.random() < 0.4) { o.treasure = gold[ri(0, gold.length - 1)]; runCollected.add('treasure-' + o.treasure); }
-        else if (left.length && Math.random() < 0.4) { o.shell = left[ri(0, left.length - 1)]; runCollected.add('shell-' + o.shell); }
+      // each region has its own collection set (v173; MAP_REGIONS.sea[…].collections): an item not yet seen this run
+      const sets = MAP_REGIONS.sea[o.layer].collections, pick = (has, left, chance) => {
+        const l = sets.includes(has) ? left() : [];
+        return l.length && Math.random() < chance ? l[ri(0, l.length - 1)] : null;
+      };
+      if (o.type === 'blot') {                   // a treasure in the ruins, a seashell on the reef
+        if ((o.treasure = pick('treasures', treasuresLeft, 0.4))) runCollected.add('treasure-' + o.treasure);
+        else if ((o.shell = pick('shells', shellsLeft, 0.4))) runCollected.add('shell-' + o.shell);
       }
-      if (o.type === 'starfish') {               // a legendary fish not yet seen this run (each once per run)
-        const left = fishLeft();
-        if (left.length && Math.random() < 0.5) { o.fish = left[ri(0, left.length - 1)]; runCollected.add('fish-' + o.fish); }
-      }
+      if (o.type === 'starfish' && (o.fish = pick('fish', fishLeft, 0.5))) runCollected.add('fish-' + o.fish);   // twilight zone
+      if (o.type === 'wad' && (o.invention = pick('inventions', inventionsLeft, 0.4))) runCollected.add('invention-' + o.invention);   // dome city
+      if (o.type === 'note' && (o.abyssLight = pick('abysslights', abyssLightsLeft, 0.4))) runCollected.add('abysslight-' + o.abyssLight);   // abyss
     } else if (mapId === 'space') {
       o.space = true;
       o.look = o.look || type;                   // which space obstacle this is (several share a mechanic)

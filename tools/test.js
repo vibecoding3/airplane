@@ -195,8 +195,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { found, saved, total: COLLECTION_TOTAL };
   });
-  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 100,
-    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 13 sets`);
+  check(coll.found === 'ring-ruby,staff-frieren' && coll.saved === 2 && coll.total === 116,
+    `Collections: on-screen items unlock (${coll.found}), saved ${coll.saved}, ${coll.total} items in 15 sets`);
   await page.evaluate(() => { state = 'title'; showCard('title'); });
   await page.click('#collBtn'); await wait(150);
   const collOpen = await page.evaluate(() => ({ shown: !$('collCard').hidden, tiles: document.querySelectorAll('.coll-item').length }));
@@ -204,7 +204,7 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   const stillTitle = await page.evaluate(() => state);
   await page.keyboard.press('Escape'); await wait(150);
   const closed = await page.evaluate(() => !$('titleCard').hidden && $('collCard').hidden);
-  check(collOpen.shown && collOpen.tiles === 100 && stillTitle === 'title' && closed,
+  check(collOpen.shown && collOpen.tiles === 116 && stillTitle === 'title' && closed,
     `Collections menu: opens with ${collOpen.tiles} tiles, Space keeps it on the ${stillTitle} screen, Esc goes back ${closed}`);
 
   // control tips in the top bar: shown for the first 200 m of a run, gone after and outside a run; no pause button
@@ -276,22 +276,6 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   check(orig.repeats === 0 && orig.seen >= 3 && (orig.seen < 6 || orig.after === 'plain notes'),
     `Origami collection: ${orig.seen}/6 seen in a run to 2,500 m, repeats ${orig.repeats}, a note row after all 6 is ${orig.after}`);
 
-  // the Seashells collection: sea-urchin variants in the Ocean, each once per run, plain urchins once all 6 have appeared
-  const shells = await page.evaluate(() => {
-    mapId = 'sea'; applyMap(); start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
-      for (const o of obstacles) if (o.shell) { if (!seen.has(o.shell)) seen.set(o.shell, new Set()); seen.get(o.shell).add(o); }
-    }
-    const repeats = [...seen.values()].filter(x => x.size > 1).length;
-    let after = 'n/a';
-    if (seen.size === 6) { const i = obstacles.length; lastType = ''; spawnFromPool(dist + 900, 0.9, [['urchins', 1]]); after = obstacles.slice(i).every(o => !o.shell) ? 'plain urchins' : 'shells'; }
-    gameOver();
-    return { seen: seen.size, repeats, after };
-  });
-  check(shells.repeats === 0 && shells.seen >= 3 && (shells.seen < 6 || shells.after === 'plain urchins'),
-    `Seashells collection: ${shells.seen}/6 seen in a run to 2,500 m, repeats ${shells.repeats}, an urchin row after all 6 is ${shells.after}`);
-
   // the Legendary swords collection: Spinning Blades variants in the Dungeon, each once per run, regular blades once all 6 have appeared
   const swords = await page.evaluate(() => {
     mapId = 'dungeon'; applyMap(); start(); const seen = new Map();
@@ -307,22 +291,6 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   });
   check(swords.repeats === 0 && swords.seen >= 2 && (swords.seen < 6 || swords.after === 'regular blades'),
     `Legendary swords collection: ${swords.seen}/6 seen in a run to 2,500 m, repeats ${swords.repeats}, a blades row after all 6 is ${swords.after}`);
-
-  // the Legendary fish collection: starfish variants in the Ocean, each once per run, plain starfish once all 5 have appeared
-  const fish = await page.evaluate(() => {
-    mapId = 'sea'; applyMap(); start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
-      for (const o of obstacles) if (o.fish) { if (!seen.has(o.fish)) seen.set(o.fish, new Set()); seen.get(o.fish).add(o); }
-    }
-    const repeats = [...seen.values()].filter(x => x.size > 1).length;
-    let after = 'n/a';
-    if (seen.size === 5) { const i = obstacles.length; lastType = ''; spawnFromPool(dist + 900, 0.9, [['starfish', 1]]); after = obstacles.slice(i).every(o => !o.fish) ? 'plain starfish' : 'fish'; }
-    gameOver();
-    return { seen: seen.size, repeats, after };
-  });
-  check(fish.repeats === 0 && fish.seen >= 2 && (fish.seen < 5 || fish.after === 'plain starfish'),
-    `Legendary fish collection: ${fish.seen}/5 seen in a run to 2,500 m, repeats ${fish.repeats}, a starfish row after all 5 is ${fish.after}`);
 
   // the Neon signs collection: Wall Bulge signs in Neon City, each once per run, unlocked when seen on screen;
   // once all 8 have appeared a sign spawn is a regular Wall Bulge
@@ -476,28 +444,43 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   });
   check(artLine.length === 0, 'Depth art changes on the dotted 200 m line on every map' + (artLine.length ? ': ' + artLine.join(', ') : ''));
 
-  // the Sunken treasures collection: treasures among the Ocean's city relics (400–1,500 m), each once per run, plain
-  // relics once all 8 have appeared. A natural run only meets a handful of urchin rows in the city (about 3 in 10 runs
-  // see fewer than 4 treasures), so the rows are spawned directly: 300 urchin rows from 0 to 2,500 m in one run.
-  const treasures = await page.evaluate(() => {
-    mapId = 'sea'; applyMap(); start(); const seen = new Map(); let outside = 0, allAt = 0, afterAll = 0;
-    for (let i = 0; i < 300; i++) {
-      const md = (i + 0.5) / 300 * 2500, k = obstacles.length;
-      lastType = ''; spawnFromPool(md * PX_PER_M, 1 - Math.exp(-md / 600), [['urchins', 1]]);
-      for (const o of obstacles.slice(k)) {
-        if (!o.treasure) continue;
-        if (!seen.has(o.treasure)) seen.set(o.treasure, new Set()); seen.get(o.treasure).add(o);
-        if (o.layer !== 2 && o.layer !== 3) outside++;
-        if (allAt) afterAll++;
+  // the Ocean's collections, one set per region (v173): each set's items appear only in its own region (in every dive),
+  // each at most once per run, and the obstacle goes back to its regular looks once the whole set has appeared. Rows are
+  // spawned directly (a natural run meets only a few rows of one obstacle in one region): 300 rows spread over the region,
+  // in the first and second dives, then 100 rows in every other region where nothing may appear
+  const oceanSets = await page.evaluate(() => {
+    const SETS = [['shells', 'urchins', 'shell', SHELLS], ['fish', 'starfish', 'fish', LEGEND_FISH], ['treasures', 'urchins', 'treasure', TREASURES],
+                  ['inventions', 'puffer', 'invention', INVENTIONS], ['abysslights', 'jellies', 'abyssLight', ABYSS_LIGHTS]];
+    const out = [];
+    for (const [set, pool, key, items] of SETS) {
+      mapId = 'sea'; applyMap(); start();
+      const ri = MAP_REGIONS.sea.findIndex(r => r.collections.includes(set)), r = MAP_REGIONS.sea[ri];
+      const end = ri + 1 < MAP_REGIONS.sea.length ? MAP_REGIONS.sea[ri + 1].from : REGION_DIVE.sea;
+      const seen = new Map(); let allAt = 0, afterAll = 0, outside = 0;
+      const spawnAt = m => { const k = obstacles.length; lastType = ''; spawnFromPool(m * PX_PER_M + planeScreenY(), 0.5, [[pool, 1]]); const os = obstacles.slice(k); obstacles.length = 0; return os; };
+      for (let i = 0; i < 300; i++) {
+        const m = (i % 2 ? REGION_DIVE.sea : 0) + r.from + (i + 0.5) / 300 * (end - r.from);
+        for (const o of spawnAt(m)) {
+          if (!o[key]) continue;
+          if (!seen.has(o[key])) seen.set(o[key], new Set()); seen.get(o[key]).add(o);
+          if (allAt) afterAll++;
+        }
+        if (seen.size === items.length && !allAt) allAt = i + 1;
       }
-      if (seen.size === 8 && !allAt) allAt = md;
-      obstacles.length = 0;
+      runCollected.clear();                        // a fresh run's worth of items, offered only in their own region
+      MAP_REGIONS.sea.forEach((other, oi) => {
+        if (oi === ri) return;
+        const oe = oi + 1 < MAP_REGIONS.sea.length ? MAP_REGIONS.sea[oi + 1].from : REGION_DIVE.sea;
+        for (let i = 0; i < 100; i++) for (const o of spawnAt(other.from + (i + 0.5) / 100 * (oe - other.from))) if (o[key] && o.layer !== ri) outside++;   // a row on a line can reach over it
+      });
+      gameOver();
+      out.push({ set, region: r.name, seen: seen.size, of: items.length, repeats: [...seen.values()].filter(x => x.size > 1).length, allAt, afterAll, outside });
     }
-    gameOver();
-    return { seen: seen.size, repeats: [...seen.values()].filter(x => x.size > 1).length, outside, allAt: Math.round(allAt), afterAll };
+    return out;
   });
-  check(treasures.seen === 8 && treasures.repeats === 0 && treasures.outside === 0 && treasures.afterAll === 0,
-    `Sunken treasures collection: ${treasures.seen}/8 seen in 300 urchin rows (all by ${treasures.allAt} m), repeats ${treasures.repeats}, outside the city ${treasures.outside}, treasures after all 8 ${treasures.afterAll}`);
+  for (const c of oceanSets)
+    check(c.seen === c.of && c.repeats === 0 && c.afterAll === 0 && c.outside === 0,
+      `${c.set} (${c.region}): ${c.seen}/${c.of} seen in 300 rows (all by row ${c.allAt}), repeats ${c.repeats}, after all ${c.afterAll}, outside the region ${c.outside}`);
 
   // the Ocean's sunken city: from 400 to 1,500 m every look is a city look, and no city look appears outside it
   const city = await page.evaluate(() => {

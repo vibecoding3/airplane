@@ -7,6 +7,7 @@
 // sea. Every drawing stays inside the mechanic's hit shape. Returns false for an original look, so render.js draws it.
 function drawOceanLook(o, sy) {
   const look = o.look;
+  if (o.abyssLight) { drawAbyssLight(o, sy); return true; }                  // the Abyss lights collection (v173)
   if (o.treasure || (SEA_CITY.has(look) && !o.shell && !o.fish)) { drawSunkenCity(o, sy); return true; }   // the sunken city (v133)
   switch (o.type) {
     case 'gate': {
@@ -136,6 +137,78 @@ function drawSeaHazard(o, sy) {
       ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.ellipse(0, R * 0.12, R * 0.4, R * 0.1, 0, 0, Math.PI * 2); ctx.fill();
     }
   }), o.x, sy);
+}
+
+// the Abyss lights (v173): glowing deep-sea animals drifting down with the abyss's swarms, original cartoon designs, each
+// inside a 42-unit square with a soft glow so it reads on the near-black water (also used by the Collections screen)
+const ABYSS_LIGHT_NAMES = { vampiresquid: 'Vampire squid', barreleye: 'Barreleye fish', dumbo: 'Dumbo octopus', seaangel: 'Sea angel',
+                            fireflysquid: 'Firefly squid', glasssquid: 'Glass squid', seapig: 'Sea pig', isopod: 'Giant isopod' };
+function paintAbyssLight(name) {
+  const glow = (r, c) => { const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r); g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); };
+  const dot = (x, y, r, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); };
+  if (name === 'vampiresquid') {                   // a deep red cloak of webbed arms, big blue eyes, two glowing tips
+    glow(22, 'rgba(120,200,255,.35)');
+    ctx.fillStyle = '#9a2a3a'; ctx.beginPath(); ctx.moveTo(0, -18);
+    ctx.quadraticCurveTo(12, -14, 11, -2); ctx.quadraticCurveTo(18, 8, 15, 16); ctx.quadraticCurveTo(8, 12, 5, 17); ctx.quadraticCurveTo(0, 12, -5, 17);
+    ctx.quadraticCurveTo(-8, 12, -15, 16); ctx.quadraticCurveTo(-18, 8, -11, -2); ctx.quadraticCurveTo(-12, -14, 0, -18); ctx.closePath(); ctx.fill(); inkStroke(1.4);
+    seaEye(-5, -5, 3.4); seaEye(5, -5, 3.4);
+    for (const x of [-15, 15]) { dot(x, 16, 3.2, 'rgba(140,220,255,.5)'); dot(x, 16, 1.6, '#e8faff'); }
+  } else if (name === 'barreleye') {               // a fish with a see-through dome head and two green eyes looking up
+    glow(22, 'rgba(140,255,200,.3)');
+    ctx.fillStyle = '#5a6a88'; ctx.beginPath(); ctx.moveTo(-12, 4); ctx.lineTo(-20, -2); ctx.lineTo(-19, 6); ctx.lineTo(-20, 12); ctx.closePath(); ctx.fill(); inkStroke(1.2);
+    ctx.beginPath(); ctx.ellipse(0, 5, 14, 8, 0, 0, Math.PI * 2); ctx.fill(); inkStroke(1.4);
+    ctx.fillStyle = 'rgba(200,245,255,.45)'; ctx.beginPath(); ctx.ellipse(4, -5, 10, 9, 0, Math.PI, 0); ctx.closePath(); ctx.fill(); inkStroke(1.2);
+    for (const x of [1, 7]) { dot(x, -4, 2.8, '#5aff9a'); dot(x, -4.8, 1, '#ffffff'); }
+    dot(12, 6, 1.2, COL.ink);
+  } else if (name === 'dumbo') {                   // a round pink octopus flapping two ear-like fins
+    glow(22, 'rgba(255,170,210,.3)');
+    ctx.fillStyle = '#f0a0c0';
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(s * 13, -8, 7, 4.5, s * -0.5, 0, Math.PI * 2); ctx.fill(); inkStroke(1.2); }
+    ctx.beginPath(); ctx.moveTo(-12, 2); ctx.quadraticCurveTo(-13, -16, 0, -16); ctx.quadraticCurveTo(13, -16, 12, 2);
+    for (let i = 0; i <= 4; i++) { const x = 12 - i * 6; ctx.quadraticCurveTo(x - 1, 14, x - 3, 8); }
+    ctx.closePath(); ctx.fill(); inkStroke(1.4);
+    seaEye(-4, -5, 2.6); seaEye(4, -5, 2.6);
+  } else if (name === 'seaangel') {                // a tiny see-through sea angel: a glowing body with two wing flaps
+    glow(22, 'rgba(255,190,140,.35)');
+    ctx.fillStyle = 'rgba(220,240,255,.75)';
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(s * 9, -5, 9, 4.5, s * 0.5, 0, Math.PI * 2); ctx.fill(); inkStroke(1.1); }
+    ctx.beginPath(); ctx.moveTo(0, -14); ctx.quadraticCurveTo(7, -6, 4, 6); ctx.quadraticCurveTo(1, 16, 0, 18); ctx.quadraticCurveTo(-1, 16, -4, 6); ctx.quadraticCurveTo(-7, -6, 0, -14); ctx.closePath(); ctx.fill(); inkStroke(1.3);
+    dot(0, 0, 3.4, '#ff8a4a'); dot(0, -10, 1.2, COL.ink);
+  } else if (name === 'fireflysquid') {            // a small squid covered in bright blue glowing dots
+    glow(22, 'rgba(90,170,255,.4)');
+    ctx.fillStyle = '#3a4a8a'; ctx.beginPath(); ctx.moveTo(0, -18); ctx.quadraticCurveTo(8, -10, 6, 4); ctx.lineTo(-6, 4); ctx.quadraticCurveTo(-8, -10, 0, -18); ctx.closePath(); ctx.fill(); inkStroke(1.3);
+    ctx.strokeStyle = '#3a4a8a'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.beginPath();
+    for (const x of [-5, -2, 1, 4]) { ctx.moveTo(x, 4); ctx.quadraticCurveTo(x * 1.6, 11, x * 1.2, 17); }
+    ctx.stroke();
+    for (const [x, y] of [[0, -12], [-3, -6], [3, -6], [0, -1], [-4, 1], [4, 1], [-7, 16], [6, 16]]) { dot(x, y, 2.2, 'rgba(120,200,255,.5)'); dot(x, y, 1.1, '#e0f6ff'); }
+    seaEye(0, 6, 2.2);
+  } else if (name === 'glasssquid') {              // a see-through round squid with its little organs showing
+    glow(22, 'rgba(200,240,255,.3)');
+    ctx.fillStyle = 'rgba(220,245,255,.5)'; ctx.beginPath(); ctx.ellipse(0, -3, 11, 14, 0, 0, Math.PI * 2); ctx.fill(); inkStroke(1.3);
+    ctx.strokeStyle = 'rgba(220,245,255,.8)'; ctx.lineWidth = 1.6; ctx.beginPath();
+    for (const x of [-6, -2, 2, 6]) { ctx.moveTo(x, 10); ctx.quadraticCurveTo(x * 1.4, 15, x, 19); }
+    ctx.stroke();
+    dot(0, -2, 3.4, '#ff7a9a'); dot(-3, 5, 1.8, '#ffd07a'); dot(3, 4, 1.6, '#7fe8ff');
+    seaEye(-4, 9, 2); seaEye(4, 9, 2);
+  } else if (name === 'seapig') {                  // a plump pink sea cucumber on little tube legs, with feelers on its back
+    glow(22, 'rgba(255,190,200,.3)');
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.4; ctx.beginPath(); for (const x of [-4, 3]) { ctx.moveTo(x, -6); ctx.quadraticCurveTo(x + 2, -14, x - 1, -17); } ctx.stroke();
+    ctx.fillStyle = '#f0b8c0'; for (const x of [-11, -5, 1, 7, 12]) { ctx.beginPath(); ctx.ellipse(x, 9, 2.2, 4, 0, 0, Math.PI * 2); ctx.fill(); inkStroke(1); }
+    ctx.beginPath(); ctx.ellipse(0, 1, 17, 9, 0, 0, Math.PI * 2); ctx.fill(); inkStroke(1.5);
+    seaEye(12, -1, 2.2);
+    ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.beginPath(); ctx.ellipse(-5, -3, 6, 2.4, -0.2, 0, Math.PI * 2); ctx.fill();
+  } else {                                         // a giant isopod: a grey-lilac shell of overlapping plates, seen from above
+    glow(22, 'rgba(200,190,255,.3)');
+    ctx.fillStyle = '#a8a0c0'; ctx.beginPath(); ctx.ellipse(0, 0, 12, 18, 0, 0, Math.PI * 2); ctx.fill(); inkStroke(1.5);
+    ctx.strokeStyle = '#6a6488'; ctx.lineWidth = 1.2; ctx.beginPath();
+    for (let y = -10; y <= 12; y += 4.4) { const w = Math.sqrt(1 - (y / 18) ** 2) * 12; ctx.moveTo(-w, y); ctx.quadraticCurveTo(0, y + 2.4, w, y); }
+    ctx.stroke();
+    ctx.strokeStyle = COL.ink; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(-3, -17); ctx.quadraticCurveTo(-8, -22, -12, -20); ctx.moveTo(3, -17); ctx.quadraticCurveTo(8, -22, 12, -20); ctx.stroke();
+    dot(-5, -13, 1.6, '#e0e8ff'); dot(5, -13, 1.6, '#e0e8ff');
+  }
+}
+function drawAbyssLight(o, sy) {
+  blit(sharedSprite('abysslight-' + o.abyssLight, 48, 48, 24, 24, () => paintAbyssLight(o.abyssLight)), o.x, sy, o.rot * 0.3);
 }
 
 // ---------- Drifting Swarm: a rainbow comb jelly, or a deep-sea anglerfish with a glowing lure, in a 42-unit square ----------
