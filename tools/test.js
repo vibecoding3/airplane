@@ -257,8 +257,9 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     make.planet(dist + 400, 0.5); render();
     const unlocked = [...collectionFound].filter(id => id.startsWith('planet-')).length;
     start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
+    for (let i = 0; i < 400; i++) {               // rows spawned directly (v178; until then one run to 2,500 m, which now and then met too few)
+      const md = 40 + (i + 0.5) / 400 * 2460; obstacles.length = 0; lastType = '';
+      spawnFromPool(md * PX_PER_M + planeScreenY(), 1 - Math.exp(-md / 600), [['planet', 1]]);
       for (const o of obstacles) if (o.look === 'planet') { if (!seen.has(o.planet)) seen.set(o.planet, new Set()); seen.get(o.planet).add(o); }
     }
     const repeats = [...seen.values()].filter(x => x.size > 1).length;
@@ -268,14 +269,15 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { unlocked, seen: seen.size, repeats, after };
   });
-  check(planets.unlocked === 1 && planets.repeats === 0 && (planets.seen < 8 || planets.after === 'moon'),
-    `Planets collection: a planet on screen unlocks (${planets.unlocked}), ${planets.seen}/8 seen in a run, repeats ${planets.repeats}, a planet spawn after all 8 is a ${planets.after}`);
+  check(planets.unlocked === 1 && planets.repeats === 0 && planets.seen === 8 && (planets.seen < 8 || planets.after === 'moon'),
+    `Planets collection: a planet on screen unlocks (${planets.unlocked}), ${planets.seen}/8 seen in 400 rows, repeats ${planets.repeats}, a planet spawn after all 8 is a ${planets.after}`);
 
   // the Origami collection: sticky-note variants on Paper, each once per run, plain sticky notes once all 6 have appeared
   const orig = await page.evaluate(() => {
     mapId = 'notebook'; applyMap(); start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
+    for (let i = 0; i < 400; i++) {               // rows spawned directly (v178; until then one run to 2,500 m, which now and then met too few)
+      const md = 40 + (i + 0.5) / 400 * 2460; obstacles.length = 0; lastType = '';
+      spawnFromPool(md * PX_PER_M + planeScreenY(), 1 - Math.exp(-md / 600), [['notes', 1]]);
       for (const o of obstacles) if (o.origami) { if (!seen.has(o.origami)) seen.set(o.origami, new Set()); seen.get(o.origami).add(o); }
     }
     const repeats = [...seen.values()].filter(x => x.size > 1).length;
@@ -284,14 +286,15 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     gameOver();
     return { seen: seen.size, repeats, after };
   });
-  check(orig.repeats === 0 && orig.seen >= 3 && (orig.seen < 6 || orig.after === 'plain notes'),
-    `Origami collection: ${orig.seen}/6 seen in a run to 2,500 m, repeats ${orig.repeats}, a note row after all 6 is ${orig.after}`);
+  check(orig.repeats === 0 && orig.seen === 6 && (orig.seen < 6 || orig.after === 'plain notes'),
+    `Origami collection: ${orig.seen}/6 seen in 400 rows, repeats ${orig.repeats}, a note row after all 6 is ${orig.after}`);
 
   // the Legendary swords collection: Spinning Blades variants in the Dungeon, each once per run, regular blades once all 6 have appeared
   const swords = await page.evaluate(() => {
     mapId = 'dungeon'; applyMap(); start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
+    for (let i = 0; i < 400; i++) {               // rows spawned directly (v178; until then one run to 2,500 m, which now and then met too few)
+      const md = 40 + (i + 0.5) / 400 * 2460; obstacles.length = 0; lastType = '';
+      spawnFromPool(md * PX_PER_M + planeScreenY(), 1 - Math.exp(-md / 600), [['swords', 1]]);
       for (const o of obstacles) if (o.sword) { if (!seen.has(o.sword)) seen.set(o.sword, new Set()); seen.get(o.sword).add(o); }
     }
     const repeats = [...seen.values()].filter(x => x.size > 1).length;
@@ -300,8 +303,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     gameOver();
     return { seen: seen.size, repeats, after };
   });
-  check(swords.repeats === 0 && swords.seen >= 2 && (swords.seen < 6 || swords.after === 'regular blades'),
-    `Legendary swords collection: ${swords.seen}/6 seen in a run to 2,500 m, repeats ${swords.repeats}, a blades row after all 6 is ${swords.after}`);
+  check(swords.repeats === 0 && swords.seen === 6 && (swords.seen < 6 || swords.after === 'regular blades'),
+    `Legendary swords collection: ${swords.seen}/6 seen in 400 rows, repeats ${swords.repeats}, a blades row after all 6 is ${swords.after}`);
 
   // the Neon signs collection: Wall Bulge signs in Neon City, each once per run, unlocked when seen on screen;
   // once all 8 have appeared a sign spawn is a regular Wall Bulge
@@ -311,8 +314,9 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     make.neon(dist + 400, 0.5); for (const o of obstacles) o.city = true; render();
     const unlocked = [...collectionFound].filter(id => id.startsWith('neon-')).length;
     start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
+    for (let i = 0; i < 400; i++) {               // rows spawned directly (v178; until then one run to 2,500 m, which now and then met too few)
+      const md = 40 + (i + 0.5) / 400 * 2460; obstacles.length = 0; lastType = '';
+      spawnFromPool(md * PX_PER_M + planeScreenY(), 1 - Math.exp(-md / 600), [['neon', 1]]);
       for (const o of obstacles) if (o.neonSign) { if (!seen.has(o.neonSign)) seen.set(o.neonSign, new Set()); seen.get(o.neonSign).add(o); }
     }
     const repeats = [...seen.values()].filter(x => x.size > 1).length;
@@ -322,14 +326,15 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     collectionFound.clear(); for (const id of keep) collectionFound.add(id); store.set('nosedive-collection', JSON.stringify([...keep]));
     return { unlocked, seen: seen.size, repeats, after };
   });
-  check(signs.unlocked === 1 && signs.repeats === 0 && signs.seen >= 4 && (signs.seen < 8 || /^(dish|acunit|clock)(\+(dish|acunit|clock))?$/.test(signs.after)),
-    `Neon signs collection: one on screen unlocks ${signs.unlocked}, ${signs.seen}/8 seen in a run to 2,500 m, repeats ${signs.repeats}, a sign spawn after all 8 is ${signs.after}`);
+  check(signs.unlocked === 1 && signs.repeats === 0 && signs.seen === 8 && (signs.seen < 8 || /^(dish|acunit|clock)(\+(dish|acunit|clock))?$/.test(signs.after)),
+    `Neon signs collection: one on screen unlocks ${signs.unlocked}, ${signs.seen}/8 seen in 400 rows, repeats ${signs.repeats}, a sign spawn after all 8 is ${signs.after}`);
 
   // the Forest birds collection: Drifting Swarm variants in the Forest, each once per run, plain swarms once all 8 have appeared
   const birds = await page.evaluate(() => {
     mapId = 'forest'; applyMap(); start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
+    for (let i = 0; i < 400; i++) {               // rows spawned directly (v178; until then one run to 2,500 m, which now and then met too few)
+      const md = 40 + (i + 0.5) / 400 * 2460; obstacles.length = 0; lastType = '';
+      spawnFromPool(md * PX_PER_M + planeScreenY(), 1 - Math.exp(-md / 600), [['bees', 1]]);
       for (const o of obstacles) if (o.bird) { if (!seen.has(o.bird)) seen.set(o.bird, new Set()); seen.get(o.bird).add(o); }
     }
     const repeats = [...seen.values()].filter(x => x.size > 1).length;
@@ -338,8 +343,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     gameOver();
     return { seen: seen.size, repeats, after };
   });
-  check(birds.repeats === 0 && birds.seen >= 4 && (birds.seen < 8 || birds.after === 'plain swarm'),
-    `Forest birds collection: ${birds.seen}/8 seen in a run to 2,500 m, repeats ${birds.repeats}, a swarm row after all 8 is ${birds.after}`);
+  check(birds.repeats === 0 && birds.seen === 8 && (birds.seen < 8 || birds.after === 'plain swarm'),
+    `Forest birds collection: ${birds.seen}/8 seen in 400 rows, repeats ${birds.repeats}, a swarm row after all 8 is ${birds.after}`);
 
   // Forest looks follow the seasons: no snowballs or frosty looks in spring and summer, no bees in winter or at night
   const seasons = await page.evaluate(() => {
@@ -357,8 +362,9 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   // the Fossils collection: fossil stones among the Desert cacti, each once per run, plain cacti once all 8 have appeared
   const fossils = await page.evaluate(() => {
     mapId = 'desert'; applyMap(); start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
+    for (let i = 0; i < 400; i++) {               // rows spawned directly (v178; until then one run to 2,500 m, which now and then met too few)
+      const md = 40 + (i + 0.5) / 400 * 2460; obstacles.length = 0; lastType = '';
+      spawnFromPool(md * PX_PER_M + planeScreenY(), 1 - Math.exp(-md / 600), [['cacti', 1]]);
       for (const o of obstacles) if (o.fossil) { if (!seen.has(o.fossil)) seen.set(o.fossil, new Set()); seen.get(o.fossil).add(o); }
     }
     const repeats = [...seen.values()].filter(x => x.size > 1).length;
@@ -367,8 +373,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     gameOver();
     return { seen: seen.size, repeats, after };
   });
-  check(fossils.repeats === 0 && fossils.seen >= 4 && (fossils.seen < 8 || fossils.after === 'plain cacti'),
-    `Fossils collection: ${fossils.seen}/8 seen in a run to 2,500 m, repeats ${fossils.repeats}, a cactus row after all 8 is ${fossils.after}`);
+  check(fossils.repeats === 0 && fossils.seen === 8 && (fossils.seen < 8 || fossils.after === 'plain cacti'),
+    `Fossils collection: ${fossils.seen}/8 seen in 400 rows, repeats ${fossils.repeats}, a cactus row after all 8 is ${fossils.after}`);
 
   // Desert looks follow the rock layers: dunes only near the top, palm fronds only in the canyon and oasis, and so on
   const layers = await page.evaluate(() => {
@@ -399,8 +405,9 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   // the Volcanic stones collection: stones among the Volcano's lava bombs, each once per run, plain bombs once all 8 have appeared
   const stones = await page.evaluate(() => {
     mapId = 'volcano'; applyMap(); start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
+    for (let i = 0; i < 400; i++) {               // rows spawned directly (v178; until then one run to 2,500 m, which now and then met too few)
+      const md = 40 + (i + 0.5) / 400 * 2460; obstacles.length = 0; lastType = '';
+      spawnFromPool(md * PX_PER_M + planeScreenY(), 1 - Math.exp(-md / 600), [['lavaBombs', 1]]);
       for (const o of obstacles) if (o.stone) { if (!seen.has(o.stone)) seen.set(o.stone, new Set()); seen.get(o.stone).add(o); }
     }
     const repeats = [...seen.values()].filter(x => x.size > 1).length;
@@ -409,8 +416,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     gameOver();
     return { seen: seen.size, repeats, after };
   });
-  check(stones.repeats === 0 && stones.seen >= 4 && (stones.seen < 8 || stones.after === 'plain bombs'),
-    `Volcanic stones collection: ${stones.seen}/8 seen in a run to 2,500 m, repeats ${stones.repeats}, a bomb row after all 8 is ${stones.after}`);
+  check(stones.repeats === 0 && stones.seen === 8 && (stones.seen < 8 || stones.after === 'plain bombs'),
+    `Volcanic stones collection: ${stones.seen}/8 seen in 400 rows, repeats ${stones.repeats}, a bomb row after all 8 is ${stones.after}`);
 
   // Volcano looks follow the layers: vines only on the jungle slope, rope lava from the ash cloud on, and so on
   const vlayers = await page.evaluate(() => {
@@ -561,8 +568,9 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   // the Minecraft minerals collection (v150, ores in v148): minerals among the Volcano's bombs, each once per run, plain bombs once all 10 have appeared
   const ores = await page.evaluate(() => {
     mapId = 'volcano'; applyMap(); start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
+    for (let i = 0; i < 400; i++) {               // rows spawned directly (v178; until then one run to 2,500 m, which now and then met too few)
+      const md = 40 + (i + 0.5) / 400 * 2460; obstacles.length = 0; lastType = '';
+      spawnFromPool(md * PX_PER_M + planeScreenY(), 1 - Math.exp(-md / 600), [['bombs', 1]]);
       for (const o of obstacles) if (o.mineral) { if (!seen.has(o.mineral)) seen.set(o.mineral, new Set()); seen.get(o.mineral).add(o); }
     }
     const repeats = [...seen.values()].filter(x => x.size > 1).length, notHazard = [...seen.values()].some(x => [...x].some(o => o.type !== 'blot'));
@@ -572,14 +580,15 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     gameOver();
     return { seen: seen.size, repeats, notHazard, after };
   });
-  check(ores.repeats === 0 && !ores.notHazard && ores.seen >= 3 && ores.after === 'plain bombs',
-    `Minecraft minerals collection: ${ores.seen}/10 seen in a run to 2,500 m, repeats ${ores.repeats}, only on Static Hazards ${!ores.notHazard}, a bomb row once all 10 are found is ${ores.after}`);
+  check(ores.repeats === 0 && !ores.notHazard && ores.seen === 10 && ores.after === 'plain bombs',
+    `Minecraft minerals collection: ${ores.seen}/10 seen in 400 rows, repeats ${ores.repeats}, only on Static Hazards ${!ores.notHazard}, a bomb row once all 10 are found is ${ores.after}`);
 
   // the Pastries collection: pastries among the Kitchen's produce, each once per run, plain produce once all 8 have appeared
   const pastries = await page.evaluate(() => {
     mapId = 'kitchen'; applyMap(); start(); const seen = new Map();
-    for (let f = 0; f < 60 * 900 && dist / PX_PER_M < 2500; f++) {
-      plane.invuln = 1; update(1 / 60);
+    for (let i = 0; i < 400; i++) {               // rows spawned directly (v178; until then one run to 2,500 m, which now and then met too few)
+      const md = 40 + (i + 0.5) / 400 * 2460; obstacles.length = 0; lastType = '';
+      spawnFromPool(md * PX_PER_M + planeScreenY(), 1 - Math.exp(-md / 600), [['produce', 1]]);
       for (const o of obstacles) if (o.pastry) { if (!seen.has(o.pastry)) seen.set(o.pastry, new Set()); seen.get(o.pastry).add(o); }
     }
     const repeats = [...seen.values()].filter(x => x.size > 1).length;
@@ -588,8 +597,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
     gameOver();
     return { seen: seen.size, repeats, after };
   });
-  check(pastries.repeats === 0 && pastries.seen >= 4 && (pastries.seen < 8 || pastries.after === 'plain produce'),
-    `Pastries collection: ${pastries.seen}/8 seen in a run to 2,500 m, repeats ${pastries.repeats}, a produce row after all 8 is ${pastries.after}`);
+  check(pastries.repeats === 0 && pastries.seen === 8 && (pastries.seen < 8 || pastries.after === 'plain produce'),
+    `Pastries collection: ${pastries.seen}/8 seen in 400 rows, repeats ${pastries.repeats}, a produce row after all 8 is ${pastries.after}`);
 
   // Kitchen looks follow the layers: cakes on the top shelf, pizza by the stove, ice cubes in the fridge, and so on
   const klayers = await page.evaluate(() => {
