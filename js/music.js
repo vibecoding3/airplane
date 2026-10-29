@@ -97,7 +97,47 @@ const THEMES = {
       [[69, 0.5], [72, 0.5], [77, 1], [81, 1], [79, 1]], [[77, 1], [74, 1], [69, 1], [74, 1]], [[70, 1], [74, 0.5], [77, 0.5], [79, 1], [77, 1]], [[76, 1], [79, 1], [77, 2]]
     ]
   },
-  // Ocean: slow and dark, long echoing harp notes and a lonely low flute
+  // Ocean, sunlit reef (v172): bright and playful in A Dorian (a minor key with a raised 6th, F#): a flute over quick
+  // harp eighths and a soft shaker
+  seaReef: {
+    bpm: 76, lead: 'flute', harp: [0, 1, 2, 3, 4, 3, 2, 1], harpStep: 0.5, echo: 0.2, shaker: true,
+    chords: ['Am', 'D', 'G', 'Am', 'Am', 'D', 'C', 'E'],
+    melody: [
+      [[76, 1], [78, 0.5], [79, 0.5], [81, 2]], [[78, 1], [74, 1], [78, 1], [81, 1]], [[79, 1.5], [78, 0.5], [76, 1], [74, 1]], [[76, 3], [null, 1]],
+      [[81, 1], [83, 0.5], [84, 0.5], [81, 2]], [[78, 1], [76, 0.5], [74, 0.5], [78, 2]], [[79, 1], [76, 1], [72, 1], [76, 1]], [[71, 2], [68, 1], [null, 1]]
+    ]
+  },
+  // Ocean, sunken ruins (v172): ancient and mysterious in A Phrygian (a flat 2nd, Bb): a slow horn, temple-bell chimes
+  // and long echoes
+  seaRuins: {
+    bpm: 60, lead: 'horn', harp: [0, 2, 1, 3], harpStep: 1, echo: 0.5, bells: true,
+    chords: ['Am', 'Bb', 'Am', 'Gm', 'F', 'Gm', 'Bb', 'Am'],
+    melody: [
+      [[69, 2], [70, 1], [72, 1]], [[74, 3], [72, 1]], [[70, 1], [69, 1], [76, 2]], [[74, 3], [null, 1]],
+      [[72, 1], [74, 1], [77, 2]], [[79, 1.5], [77, 0.5], [74, 2]], [[74, 1], [72, 1], [70, 1], [72, 1]], [[69, 3], [null, 1]]
+    ]
+  },
+  // Ocean, dome city (v172): warm, magical and a little mechanical, A minor turning to C major: a music-box lead over
+  // string pads, with a soft clock tick on every beat
+  seaDome: {
+    bpm: 72, lead: 'musicbox', harp: [0, 1, 2, 3], harpStep: 1, echo: 0.3, tick: true,
+    chords: ['Am', 'Fmaj7', 'C', 'G', 'Cmaj7', 'Am7', 'Fmaj7', 'G'],
+    melody: [
+      [[69, 0.5], [72, 0.5], [76, 1], [74, 0.5], [72, 0.5], [71, 1]], [[72, 1], [69, 1], [65, 2]], [[67, 0.5], [72, 0.5], [76, 1], [79, 1], [76, 1]], [[74, 3], [null, 1]],
+      [[76, 0.5], [79, 0.5], [83, 1], [81, 0.5], [79, 0.5], [76, 1]], [[72, 1], [76, 1], [79, 2]], [[77, 1], [76, 0.5], [74, 0.5], [72, 1], [69, 1]], [[71, 2], [74, 1], [null, 1]]
+    ]
+  },
+  // Ocean, the abyss (v172): dark, vast and almost silent: a deep drone, slow single low-flute notes, one harp note a
+  // bar and a faint sonar ping every other bar
+  seaAbyss: {
+    bpm: 52, lead: 'deep', harp: [0], harpStep: 4, echo: 0.5, drone: true, sonar: true,
+    chords: ['Am', 'Am', 'F', 'F', 'Dm2', 'Dm2', 'E', 'E'],
+    melody: [
+      [[null, 2], [76, 2]], [[74, 4]], [[null, 2], [72, 2]], [[69, 4]],
+      [[null, 2], [77, 2]], [[76, 4]], [[null, 2], [74, 2]], [[71, 2], [null, 2]]
+    ]
+  },
+  // Ocean: slow and dark, long echoing harp notes and a lonely low flute (the twilight zone's theme since v172)
   sea: {
     bpm: 64, lead: 'deep', harp: [0, 2, 3, 4], harpStep: 1, echo: 0.45,
     chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'Dm2', 'E'],
@@ -134,21 +174,34 @@ function musicGraph() {
   return true;
 }
 
-// start a theme (cross-fading from the current one); calling it with the theme already playing does nothing
-function setMusic(name) {
+// start a theme (cross-fading from the current one); calling it with the theme already playing does nothing. `slow`
+// is a region change (v172): the old theme fades out while the new one fades in, both over REGION_FADE seconds
+const REGION_FADE = 4;
+function setMusic(name, slow) {
   if (name === music.name || !THEMES[name] || !musicGraph()) return;
   const a = actx, t = a.currentTime;
   if (music.bus) {                               // fade the old theme out, then drop it
     const old = music.bus;
-    old.gain.setTargetAtTime(0, t, 0.4);
-    setTimeout(() => old.disconnect(), 2500);
+    if (slow) { old.gain.cancelScheduledValues(t); old.gain.setValueAtTime(old.gain.value, t); old.gain.linearRampToValueAtTime(0, t + REGION_FADE); }
+    else old.gain.setTargetAtTime(0, t, 0.4);
+    setTimeout(() => old.disconnect(), slow ? REGION_FADE * 1000 + 500 : 2500);
   }
   music.bus = a.createGain();
-  music.bus.gain.setValueAtTime(0, t); music.bus.gain.setTargetAtTime(1, t + 0.1, 0.5);
+  music.bus.gain.setValueAtTime(0, t);
+  if (slow) music.bus.gain.linearRampToValueAtTime(1, t + REGION_FADE); else music.bus.gain.setTargetAtTime(1, t + 0.1, 0.5);
   music.bus.connect(music.master);
   music.name = name; music.theme = THEMES[name]; music.bar = 0; music.next = t + 0.15;
   if (!music.timer) music.timer = setInterval(scheduleMusic, 100);
   scheduleMusic();
+}
+
+// a run's theme: on a map with regions, the theme of the region the plane is in (v172), otherwise the map's own
+function runTheme() {
+  return hasRegions(mapId) ? MAP_REGIONS[mapId][regionIndexAtM(mapId, dist / PX_PER_M)].music || mapId : mapId;
+}
+// called every frame: crossing a region line fades slowly into the next region's theme
+function syncRegionMusic() {
+  if (hasRegions(mapId) && (state === 'play' || state === 'paused' || state === 'dying')) setMusic(runTheme(), true);
 }
 
 // keep about half a second of music scheduled ahead of the audio clock
@@ -175,7 +228,8 @@ function playBar(th, i, t0, bus) {
   // lead melody
   let s = 0;
   for (const [n, b] of th.melody[i]) {
-    if (n != null && th.lead === 'marimba') pluck(bus, hz(n), t0 + s * beat, Math.min(1.2, b * beat * 1.4), 0.09, 0.12);   // a struck, quickly fading note
+    if (n != null && th.lead === 'musicbox') pluck(bus, hz(n + 12), t0 + s * beat, Math.min(1.6, b * beat * 1.5), 0.05, 0.3);   // a bell-like music-box note
+    else if (n != null && th.lead === 'marimba') pluck(bus, hz(n), t0 + s * beat, Math.min(1.2, b * beat * 1.4), 0.09, 0.12);   // a struck, quickly fading note
     else if (n != null) lead(bus, th.lead, hz(th.lead === 'deep' ? n - 12 : n), t0 + s * beat, b * beat);
     s += b;
   }
@@ -192,6 +246,14 @@ function playBar(th, i, t0, bus) {
     hiss(bus, t0 + b * beat, 0.18, 3800, b % 2 ? 0.035 : 0.02);
     if (b === 0) drum(bus, t0, 0.35);
   }
+  if (th.shaker) for (let b = 0; b < 4; b++) hiss(bus, t0 + (b + 0.5) * beat, 0.06, 6000, 0.012);   // a soft shaker on the off-beats
+  if (th.bells) {                                 // temple bells: a high chime on 1 and a softer one on 3, ringing into the echo
+    pluck(bus, hz(chord[0] + 36), t0, 2.6, 0.03, 0.5);
+    pluck(bus, hz(chord[2] + 24), t0 + 2 * beat, 2, 0.018, 0.5);
+  }
+  if (th.tick) for (let b = 0; b < 4; b++) hiss(bus, t0 + b * beat, 0.02, 5000, b ? 0.01 : 0.016);   // a clock ticking
+  if (th.drone) note(bus, 'sawtooth', hz(chord[0] - 12), t0, barLen + 0.4, 0.012, 1, 1, { lp: 300 });   // a deep drone
+  if (th.sonar && i % 2 === 0) pluck(bus, hz(93), t0 + 2 * beat, 1.2, 0.02, 0.6);                      // a faint sonar ping
   if (th.ding && i === th.chords.length - 1) note(bus, 'sine', hz(96), t0 + 3 * beat, 1.2, 0.03, 0.005, 1.1);   // the oven timer
   if (th.birds) for (let b = 0; b < 4; b++) if (realRandom() < 0.3) chirp(bus, t0 + (b + realRandom() * 0.5) * beat);   // birdsong
   if (th.beat) for (let b = 0; b < 4; b++) {     // a dance beat: kick, off-beat hat, clap on 2 and 4

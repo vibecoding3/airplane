@@ -26,6 +26,7 @@ function syncHint() {
 }
 function updateHud() {
   syncHint();
+  syncRegionMusic();
   const playing = state === 'play' || state === 'paused' || state === 'dying' || state === 'over';
   const d = playing ? score() : 0;
   // total stars owned: the bank plus whatever this run has picked up so far
@@ -142,7 +143,7 @@ function start(d = null) {
   startRecording();
   showCard(null);
   sfx.throw();
-  setMusic(mapId);
+  setMusic(runTheme());             // a map with regions starts with its first region's theme (v172)
 }
 function pause() {
   if (state !== 'play') return;

@@ -92,7 +92,7 @@ function watchReplay(r = lastReplay, from = 'over') {
   showCard(null);
   $('replayBar').hidden = false;
   $('replaySpeed').textContent = '1×';
-  setMusic(mapId);
+  setMusic(runTheme());
   sfx.throw();
 }
 // one frame of the replay, at the recorded step, with the inputs that came on that frame

@@ -541,6 +541,27 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
   });
   check(regions.bad.length === 0, `Ocean regions (${regions.names}): table and spawned looks match` + (regions.bad.length ? ': ' + regions.bad.slice(0, 5).join(', ') : ''));
 
+  // music: every theme is whole (8 known chords, 4 beats a bar), and on the Ocean the run's theme follows the region,
+  // in every dive (checked by name: headless Chrome plays no sound)
+  const tunes = await page.evaluate(() => {
+    const bad = [];
+    for (const [name, th] of Object.entries(THEMES)) {
+      if (th.melody.length !== th.chords.length) bad.push(name + ' bars');
+      th.chords.forEach(c => { if (!CH[c]) bad.push(name + ' chord ' + c); });
+      th.melody.forEach((bar, i) => { const b = bar.reduce((s, n) => s + n[1], 0); if (Math.abs(b - 4) > 1e-9) bad.push(name + ' bar ' + (i + 1) + ': ' + b); });
+    }
+    mapId = 'sea'; applyMap(); start();
+    const heard = [];
+    for (const m of [10, 250, 500, 900, 2000, 2510, 3000]) {
+      dist = m * PX_PER_M; const want = MAP_REGIONS.sea[regionIndexAtM('sea', m)].music;
+      if (!THEMES[want] || runTheme() !== want) bad.push(m + ' m plays ' + runTheme());
+      heard.push(runTheme());
+    }
+    gameOver();
+    return { bad, heard: heard.join(' ') };
+  });
+  check(tunes.bad.length === 0, `music themes whole; Ocean region themes: ${tunes.heard}` + (tunes.bad.length ? ': ' + tunes.bad.slice(0, 5).join(', ') : ''));
+
   // the Minecraft minerals collection (v150, ores in v148): minerals among the Volcano's bombs, each once per run, plain bombs once all 10 have appeared
   const ores = await page.evaluate(() => {
     mapId = 'volcano'; applyMap(); start(); const seen = new Map();

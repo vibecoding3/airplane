@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v171** (2026-10-29)
+Current version: **v172** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -705,7 +705,11 @@ Background music is composed and played in code (`js/music.js`), in the style of
 |---|---|---|
 | Title | Start menu and game over | Slow, noble horn melody in E minor over strings, with a soft drum (72 bpm, about 27 s loop) |
 | Paper | During Paper runs | Light pastoral town theme in D minor: flute over flowing harp eighths (88 bpm, about 22 s loop) |
-| Ocean | During Ocean runs | Slow and dark in A minor: echoing harp, low lonely flute, deep bass (64 bpm, about 30 s loop) |
+| Ocean: Sunlit reef (v172) | Ocean runs, 0–200 m of each dive | Bright and playful in A Dorian (a raised 6th): a flute over quick harp eighths and a soft shaker (76 bpm, about 25 s loop) |
+| Ocean: Twilight zone | Ocean runs, 200–400 m of each dive (the whole Ocean run until v171) | Slow and dark in A minor: echoing harp, low lonely flute, deep bass (64 bpm, about 30 s loop) |
+| Ocean: Sunken ruins (v172) | Ocean runs, 400–800 m of each dive | Ancient and mysterious in A Phrygian (a flat 2nd): a slow horn, temple-bell chimes and long echoes (60 bpm, about 32 s loop) |
+| Ocean: Dome city (v172) | Ocean runs, 800–1,500 m of each dive | Warm and a little mechanical, A minor turning to C major: a music-box lead over string pads and a soft clock tick (72 bpm, about 27 s loop) |
+| Ocean: The abyss (v172) | Ocean runs, 1,500–2,500 m of each dive | Dark and almost silent: a deep drone, slow single low-flute notes, one harp note a bar and a faint sonar ping (52 bpm, about 37 s loop) |
 | Space | During Space runs | Dreamy and floating: shimmering echoing harp over soft major-seventh chords and a slow, high, wavering lead (70 bpm, about 27 s loop) |
 | Dungeon | During Dungeon runs | Slow and mysterious in D minor: a low horn melody over echoing harp, with a soft drum on the downbeats (66 bpm, about 29 s loop) |
 | Neon City | During Neon City runs | Synthwave in A minor: a bright square-wave lead over echoing arpeggios and string pads, a kick on every beat, off-beat hi-hats and a clap on 2 and 4 (100 bpm, about 19 s loop) |
@@ -715,6 +719,7 @@ Background music is composed and played in code (`js/music.js`), in the style of
 | Kitchen | During Kitchen runs | Cosy, bouncy café-jazz theme in F major: a plucked marimba lead over pizzicato chords and string pads, soft brushes on every beat, and a little oven-timer "ding" at the end of the loop (100 bpm, about 19 s loop) |
 
 - Themes cross-fade when they change. Pausing lowers the music to 30%; hiding the tab silences it.
+- **Region music** (v172, the Ocean only): when the plane crosses a region line, the old theme fades out while the next region's theme fades in from its first bar, both over 4 seconds (`REGION_FADE`, `runTheme`, `syncRegionMusic` in `js/music.js`; each region's `music` in `js/regions.js`). Replays and daily dives follow it too. Menu and game-over changes keep the quick fade.
 - The music sits below the sound effects (peaks about 0.08 against about 0.10 for a star chime).
 - Each theme is 8 bars; notes are scheduled half a second ahead of the audio clock, so the game loop is not involved.
 
