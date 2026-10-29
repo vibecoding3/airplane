@@ -9,6 +9,7 @@ function drawOceanLook(o, sy) {
   const look = o.look;
   if (o.abyssLight) { drawAbyssLight(o, sy); return true; }                  // the Abyss lights collection (v173)
   if (DEEP_LOOKS.has(look) && drawDeepLook(o, sy)) return true;               // the abyss's and the Verne looks (v174)
+  if (MORE_LOOKS.has(look) && drawMoreLook(o, sy)) return true;               // second looks in the middle regions (v179)
   if (o.treasure || (SEA_CITY.has(look) && !o.shell && !o.fish)) { drawSunkenCity(o, sy); return true; }   // the sunken city (v133)
   switch (o.type) {
     case 'gate': {
@@ -445,8 +446,6 @@ function drawSchoolFish(x, sy, dir, look, col) {
     if (look === 'butterfly') {                    // a yellow reef fish with a dark band through the eye and a fake eye-spot
       ctx.fillStyle = COL.ink; ctx.fillRect(8, -5, 2.4, 10);
       ctx.beginPath(); ctx.arc(-6, -2, 1.6, 0, Math.PI * 2); ctx.fill();
-    } else if (look === 'lanternfish') {           // a dark deep-sea fish with rows of glowing dots
-      ctx.fillStyle = '#9ff0ff'; for (const [px, py] of [[-6, 2.5], [-2, 3], [2, 3], [6, 2.5], [-4, -1], [1, -1]]) { ctx.beginPath(); ctx.arc(px, py, 1, 0, Math.PI * 2); ctx.fill(); }
     } else {                                       // sardines: a silver body, a dark blue back and a few spots
       ctx.fillStyle = '#4a6a8a'; ctx.beginPath(); ctx.moveTo(-11, 0); ctx.quadraticCurveTo(0, -6.5, 16.5, 0); ctx.quadraticCurveTo(0, -2.5, -11, 0); ctx.fill();
       ctx.fillStyle = COL.ink; for (const px of [-3, 1, 5]) { ctx.beginPath(); ctx.arc(px, -1.2, 0.8, 0, Math.PI * 2); ctx.fill(); }

@@ -11,7 +11,8 @@
 // Each region: `from` (metres, a multiple of 100), `art` (its depth-art.css class), `music` (its theme in js/music.js),
 // `specks` (none / plankton / snow / bio),
 // `scenery` (background fish and far-off silhouettes, never an obstacle species), `skins` (the looks each obstacle type
-// can take there, in the order they are picked from; colours live in SEA_LOOKS) and `collections` (the collection sets
+// can take there, in the order they are picked from; colours live in SEA_LOOKS; no wind looks from 700 m and no
+// conveyor looks from 1,500 m, since those never spawn there) and `collections` (the collection sets
 // found there and nowhere else; since v173 every Ocean region has its own).
 const MAP_REGIONS = {
   sea: [
@@ -27,23 +28,23 @@ const MAP_REGIONS = {
       scenery: ['angel', 'parrot'],
       // wrecks and darker animals, and Twenty Thousand Leagues (v174): the Nautilus, Ned Land's harpoon, the giant pearl
       // oyster, a diver's electric rifle and the Maelstrom
-      skins: { gate: ['wreck', 'rockledge'], blot: ['stonefish', 'urchin'], note: ['combjelly'],
-               erasers: ['wreckhull', 'giantoyster'], cutter: ['mantis', 'harpoon'], paw: ['octopus'], glue: ['cannon', 'sub', 'riflediver'],
-               starfish: ['brittlestar', 'wheel'], zap: ['eel'], mine: ['barrel'], bubbles: ['bubbles'],
-               fan: ['current', 'maelstrom'], clips: ['sardines'], wad: ['puffer'], protractor: ['rock'],
-               pencil: ['mast', 'swordfish', 'nautilus'], band: ['netline'], compass: ['anchor'], scissors: ['lobster'] } },
+      skins: { gate: ['wreck', 'rockledge'], blot: ['stonefish', 'urchin'], note: ['combjelly', 'helmetjelly'],
+               erasers: ['wreckhull', 'giantoyster'], cutter: ['mantis', 'harpoon'], paw: ['octopus', 'wreckboom'], glue: ['cannon', 'sub', 'riflediver'],
+               starfish: ['brittlestar', 'wheel'], zap: ['eel', 'wire'], mine: ['barrel', 'powderkeg'], bubbles: ['bubbles', 'airleak'],
+               fan: ['current', 'maelstrom'], clips: ['sardines', 'mackerel'], wad: ['puffer', 'boxfish'], protractor: ['rock', 'wreckbow'],
+               pencil: ['mast', 'swordfish', 'nautilus'], band: ['netline', 'lifering'], compass: ['anchor', 'grapple'], scissors: ['lobster', 'hermitcrab'] } },
     { id: 'ruins', name: 'Sunken ruins', from: 400, art: 'art-sea-2', music: 'seaRuins', specks: 'snow', collections: ['treasures'],
       scenery: ['lion', 'barracuda', 'tuna', 'ucArch', 'ucTowers'],
-      skins: { gate: ['columns'], blot: ['amphora'], note: ['lantern'], erasers: ['templedoors'], cutter: ['trident'], paw: ['statuearm'],
-               glue: ['fishfountain'], starfish: ['calendar', 'coin'], zap: ['glyph'], mine: ['bubblemine'], bubbles: ['elevator'],
-               fan: ['pump'], clips: ['msgcapsules'], wad: ['lanternfloat'], protractor: ['stoneface', 'atlantis'], pencil: ['oar'], band: ['mooring'],
-               compass: ['clockhand'], scissors: ['millwheel'] } },
+      skins: { gate: ['columns', 'carvedbeam'], blot: ['amphora', 'idol'], note: ['lantern', 'tablet'], erasers: ['templedoors', 'goldgate'], cutter: ['trident', 'serpent'], paw: ['statuearm', 'stonetail'],
+               glue: ['fishfountain', 'urnspout'], starfish: ['calendar', 'coin'], zap: ['glyph', 'crystal'], mine: ['bubblemine', 'sealedjar'], bubbles: ['elevator', 'templevent'],
+               fan: ['pump', 'conch'], clips: ['msgcapsules', 'scrolls'], wad: ['lanternfloat', 'flask'], protractor: ['stoneface', 'atlantis'], pencil: ['oar', 'beam'], band: ['mooring', 'goldchain'],
+               compass: ['clockhand', 'bronzestaff'], scissors: ['millwheel', 'bronzeblades'] } },
     { id: 'dome', name: 'Dome city', from: 800, art: 'art-sea-3', music: 'seaDome', specks: 'snow', collections: ['inventions'],
       scenery: ['reefshark', 'hammer', 'sunfish', 'ucDomes', 'ucChimney', 'ucTowers'],
-      skins: { gate: ['tubewalk'], blot: ['orb'], note: ['mailpod'], erasers: ['hatch'], cutter: ['gangplank'], paw: ['claw'],
-               glue: ['domecannon'], starfish: ['coin'], zap: ['cable'], mine: ['valve'], bubbles: ['elevator'], fan: ['pump'],
-               clips: ['trampods'], wad: ['capsule'], protractor: ['domehouse'], pencil: ['tramcar'], band: ['glowcable'],
-               compass: ['clockhand', 'crane'], scissors: ['fanprop'] } },
+      skins: { gate: ['tubewalk', 'girder'], blot: ['orb', 'gauge'], note: ['mailpod', 'bulb'], erasers: ['hatch', 'bulkhead'], cutter: ['gangplank', 'piston'], paw: ['claw', 'robotarm'],
+               glue: ['domecannon', 'steamspout'], starfish: ['coin', 'gear'], zap: ['cable', 'tesla'], mine: ['valve', 'boiler'], bubbles: ['elevator', 'airvent'],
+               clips: ['trampods', 'bubblecars'], wad: ['capsule', 'divebot'], protractor: ['domehouse', 'clocktower'], pencil: ['tramcar', 'minisub'], band: ['glowcable', 'pipeline'],
+               compass: ['clockhand', 'crane'], scissors: ['fanprop', 'gearblades'] } },
     { id: 'abyss', name: 'The abyss', from: 1500, art: 'art-sea-4', music: 'seaAbyss', specks: 'bio', collections: ['abysslights'],
       // the oarfish, viperfish and gulper eel became obstacles in v174, so they left the scenery (v171–v173 they swam here)
       scenery: ['white', 'squid', 'hatchet'],
@@ -52,7 +53,7 @@ const MAP_REGIONS = {
       skins: { gate: ['glasssponge'], blot: ['glowurchin'], note: ['anglerfish'],
                erasers: ['gulper'], cutter: ['viperfish'], paw: ['kraken'], glue: ['glowshrimp'],
                starfish: ['ammonite'], zap: ['lure', 'searchlight'], mine: ['glowpuff'], bubbles: ['vent'],
-               fan: ['current'], clips: ['lanternfish'], wad: ['glowbell'], protractor: ['whale'], pencil: ['oarfish', 'nautilus'],
+               wad: ['glowbell'], protractor: ['whale'], pencil: ['oarfish', 'nautilus'],
                band: ['glowtentacle'], compass: ['tentacle'], scissors: ['spidercrab'] } }
   ]
 };

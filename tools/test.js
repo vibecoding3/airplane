@@ -522,7 +522,8 @@ const EXPECTED = { notebook: 19, sea: 19, space: 17, dungeon: 19, city: 19, fore
       if (r.from % 100 || (i && r.from <= list[i - 1].from)) bad.push(r.id + ' starts at ' + r.from);
       for (const type of Object.keys(SEA_LOOKS)) {
         const skins = r.skins[type] || [];
-        if (!skins.length) bad.push(r.id + ' has no ' + type);
+        const never = (type === 'fan' && r.from >= 700) || (type === 'clips' && r.from >= 1500);   // no wind / conveyors there
+        if (never ? skins.length : !skins.length) bad.push(r.id + (never ? ' has looks that never spawn: ' : ' has no ') + type);
         for (const l of skins) if (!SEA_LOOKS[type][l]) bad.push(r.id + ': ' + l + ' is not a ' + type + ' look');
       }
       for (const f of r.scenery) if (looks.has(f) || !FISH[f]) bad.push(r.id + ' scenery ' + f);

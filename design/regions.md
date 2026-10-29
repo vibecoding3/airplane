@@ -218,7 +218,7 @@ The plan as first written. All the **new** looks were drawn in v174 (`js/draw-oc
 Notes:
 - Reef and twilight split today's shared looks: bright life on the reef, wrecks and darker animals in the twilight. The submarine moves to the twilight with the wrecks.
 - The abyss stops reusing reef looks. It needs about 11 new skins; until they are drawn it keeps today's abyss looks (whale, anglerfish, tentacle, vent) and falls back to the twilight skins for the rest.
-- The lanternfish school (today 800 m +) loses its place: the dome city is city skins only and conveyors stop at 1,500 m. It can become abyss scenery.
+- The lanternfish school (800 m +) lost its place: the dome city is city skins only and conveyors stop at 1,500 m. It was removed in v179.
 
 ---
 
@@ -311,7 +311,8 @@ Each step is its own version. Every step that changes spawning needs a `SIM_VERS
 5. ~~**Collections**~~ (done in v173): the Seashells, Legendary fish and Sunken treasures each live in one region now (reef, twilight, ruins), and two new sets were added: Dome inventions (8, on the dome city's air capsules) and Abyss lights (8, on the abyss's swarms). The Collections screen shows the Ocean's sets in region order, named with their region. One test spawns 300 rows in each set's region (both dives) and checks every item appears once, then 100 rows in each other region where none may appear. `SIM_VERSION` 5.
 6. ~~**Skins**~~ (done in v174): the reef and the twilight zone split their shared looks, and the abyss got 12 looks of its own (`js/draw-ocean-deep.js`). Also added at the user's request: 9 looks from Jules Verne's *Twenty Thousand Leagues Under the Sea* (the Nautilus, Ned Land's harpoon, Nemo's divers and their electric rifles, the giant pearl oyster, the Maelstrom, Atlantis, the kraken, the Nautilus's searchlight), placed in the regions they fit. The oarfish, viperfish and gulper eel left the abyss scenery. `SIM_VERSION` 6.
 7. ~~**Sequential**~~ (done in v175, the user's decision): the Ocean no longer loops (`REGION_DIVE` is empty); the abyss goes on forever, the water stays dark, and no line says "Dive 2". `SIM_VERSION` 7.
-8. **Tests** in `tools/test.js` (built): every mechanic has a skin in every region and every skin exists; spawned obstacles use their region's looks; the Ocean doesn't loop and its abyss is endless (checked at 2,600, 5,100 and 9,000 m); each collection set appears only in its region; no scenery fish is an obstacle; the music theme follows the region (checked by name, not by sound).
+8. ~~**Second looks**~~ (done in v179): every obstacle in the twilight zone, the ruins and the dome city has two looks there (45 new, `js/draw-ocean-more.js`), and the three looks that could never spawn (the dome city's pump, the abyss's current and lanternfish) were removed. `SIM_VERSION` 8. Collectibles stay hard to find (user's decision: no higher chances), and no sixth region (user's decision: the five stay).
+9. **Tests** in `tools/test.js` (built): every mechanic has a skin in every region and every skin exists; spawned obstacles use their region's looks; the Ocean doesn't loop and its abyss is endless (checked at 2,600, 5,100 and 9,000 m); each collection set appears only in its region; no scenery fish is an obstacle; the music theme follows the region (checked by name, not by sound).
 
 ---
 
@@ -322,7 +323,8 @@ Each step is its own version. Every step that changes spawning needs a `SIM_VERS
 - **The name on the line is enough:** no separate "Entering…" banner.
 - **No region discovery reward** for now.
 - **The Dungeon's Halloween looks stay.**
-- **A sixth region:** undecided.
+- **A sixth region:** no; the Ocean keeps its five regions (user's decision, v179).
 - **v169 rewrite** (user's requests): music changes per region with a fade; every region has its own collection set.
 - **Sequential or looping (v175):** some maps have looping regions and others sequential ones. The Ocean is sequential, because the plane goes down the ocean (it looped in v171–v174).
 - **Twenty Thousand Leagues Under the Sea looks on the Ocean (v174):** allowed although not original designs; the novel is public domain.
+- **Collectibles stay hard to find (v179):** region-only sets with their current chances; finding a whole set takes many runs on purpose.
