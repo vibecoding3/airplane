@@ -258,7 +258,6 @@ function steer(dt) {
   let target = 0;
   const maxV = maxSideSpeed();
   if (holdSide && (playClock - holdStart) * 1000 > HOLD_MS) {
-    if (!sharpPlayed) { sharpPlayed = true; sfx.sharp(); }
     drift = holdSide;
     target = holdSide * maxV;
     plane.vx += (target - plane.vx) * Math.min(1, 9 * dt);

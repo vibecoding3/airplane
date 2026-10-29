@@ -69,8 +69,7 @@ const sfx = {
   power: () => { tone(660, 990, 0.1, 'sine', 0.1); tone(990, 1480, 0.18, 'sine', 0.08, 0.09); },
   // v178: a sound for every action and event that had none. Obstacle sounds only play for obstacles on screen, and every
   // one of these waits a moment before it can play again (`ready`), so a busy screen never turns into a din
-  steer: () => ready('steer', 0.05) && swish(1800, 0.09, 0.05),                                         // a paper flick
-  sharp: () => ready('sharp', 0.2) && (swish(1200, 0.2, 0.05), tone(500, 760, 0.16, 'triangle', 0.025)),   // a hard bank
+  // (turning has no sound: the steer flick and the sharp-turn swish of v178 were removed in v180 as distracting)
   bump: () => ready('bump', 0.25) && (tone(160, 80, 0.12, 'sine', 0.1), swish(600, 0.06, 0.05)),       // the page edge
   shield: () => { tone(440, 880, 0.12, 'triangle', 0.08); tone(660, 1320, 0.25, 'sine', 0.06, 0.08); },
   magnet: () => { tone(300, 600, 0.12, 'square', 0.03); tone(600, 1200, 0.2, 'sine', 0.07, 0.06); },

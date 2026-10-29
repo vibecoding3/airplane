@@ -65,7 +65,7 @@ let lastMilestone = 0, flash = 0, flashCol = '';   // 100 m milestones and their
 const HOLD_MS = 220;
 let drift = 0, holdSide = 0, holdSource = null, holdStart = 0;
 let playClock = 0;                // seconds of the run so far, frame by frame (the hold timer uses it so replays match)
-let sharpPlayed = false, wallSide = 0;   // sound only (v178): the hard-turn swish once per hold, the edge bump once per arrival
+let wallSide = 0;                 // sound only (v178): the edge bump plays once per arrival
 
 function press(side, source) {
   if (state !== 'play' || !inputAllowed()) return;
@@ -74,8 +74,6 @@ function press(side, source) {
   holdSource = source;
   holdStart = playClock;
   drift = clamp(drift + side, -1, 1);
-  sharpPlayed = false;
-  sfx.steer();
 }
 function release(source) {
   if (!inputAllowed()) return;

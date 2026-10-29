@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v179** (2026-10-29)
+Current version: **v180** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -738,13 +738,11 @@ Background music is composed and played in code (`js/music.js`), in the style of
 
 ### 8a. Sound effects
 
-All generated in code (`sfx` in `js/audio.js`, Web Audio, no sound files): short tones, and since v178 soft "swishes" of filtered noise (`swish`). The sound button mutes them with the music.
+All generated in code (`sfx` in `js/audio.js`, Web Audio, no sound files): short tones, and since v178 soft "swishes" of filtered noise (`swish`). The sound button mutes them with the music. Steering makes no sound: the flick on every press and the sharp-turn swish (v178) were removed in v180 as distracting.
 
 | Sound | When |
 |---|---|
 | Throw (a falling whistle) | A run or a replay starts |
-| Steer (a paper flick, v178) | Every press left or right |
-| Sharp turn (a swish and a rising note, v178) | Once per hold, when the hold becomes a sharp turn |
 | Bump (v178) | The plane reaches a page edge |
 | Star chime | A gold star is caught |
 | Power-up | Magnet (a buzzing rise, v178), shield (a bright rise, v178), slow motion, invincibility star, speed boost, squid ink: each its own |
