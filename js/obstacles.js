@@ -219,12 +219,19 @@ const make = {
     return 20;
   },
   mine(y, d) {           // naval mines on chains: blink when the plane is close, then blow up
-    const n = d > 0.45 && Math.random() < 0.5 ? 2 : 1;
-    for (let i = 0; i < n; i++) {
-      const x = n === 1 ? rand(50, W - 50) : i ? rand(W * 0.55, W - 45) : rand(45, W * 0.45);
-      obstacles.push({ type: 'mine', y: y + i * 90, x, phase: 'idle', t: 0, blast: lerp(58, 72, d) });
+    const blast = lerp(58, 72, d), put = (x, dy) => obstacles.push({ type: 'mine', y: y + dy, x, phase: 'idle', t: 0, blast });
+    if (!(d > 0.45 && Math.random() < 0.5)) { put(rand(50, W - 50), 0); return 40; }
+    // a pair comes in one of five layouts (v182; until then always the first). Two blast circles cover at most about 290 of
+    // the 400 units, so there is always a way past
+    const left = () => rand(45, W * 0.45), right = () => rand(W * 0.55, W - 45);
+    switch (ri(0, 4)) {
+      case 0: put(left(), 0); put(right(), 90); return 100;               // left, then right lower down
+      case 1: put(right(), 0); put(left(), 90); return 100;               // right, then left lower down
+      case 2: put(rand(45, W * 0.35), 0); put(rand(W * 0.65, W - 45), 0); return 40;   // side by side, the middle open
+      case 3: { const x = Math.random() < 0.5 ? rand(45, W * 0.3) : rand(W * 0.7, W - 45);   // one above the other on one side
+        put(x, 0); put(clamp(x + rand(-25, 25), 45, W - 45), 120); return 130; }
+      default: { const x = rand(W * 0.35, W * 0.65); put(x, 0); put(x < W / 2 ? rand(W * 0.65, W - 45) : rand(45, W * 0.35), 150); return 160; }   // centre, then a far side
     }
-    return n === 2 ? 100 : 40;
   },
   bubbles(y, d) {        // a column of rising bubbles: flying through it slows the fall (never hurts)
     obstacles.push({ type: 'bubbles', y, x: rand(50, W - 50), h: rand(180, 240), w: 46, t: rand(0, 5) });

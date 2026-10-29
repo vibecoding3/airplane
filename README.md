@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v181** (2026-10-29)
+Current version: **v182** (2026-10-29)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -341,7 +341,7 @@ Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reus
 | Big rock (Wall Bulge, v124) | A brain coral (above 800 m); a mossy rock with an anemone and a starfish; the side of a sleeping whale (800 m on); slalom pairs deeper down | Protractor | 0 m |
 | Pufferfish (Rising Projectile, v124) | A spiky puffed-up pufferfish, or a sea turtle swimming up head first (above 800 m) | Paper wad | 0 m |
 | Fishing line (Spring Line, v124) | A fishing line between two red-and-white bobbers (above 800 m), or a strand of old net between two glass floats: the line bounces the plane, the floats hurt | Rubber band | ~30 m |
-| Naval mine (Proximity Blast) | On a chain, or an old depth-charge barrel with hazard stripes. When the plane approaches it blinks and shows a dashed blast circle, then explodes so the blast lands as the plane arrives. The explosion is a cartoon burst (a spiky yellow and orange star) with speed lines and puffs of smoke | New | ~50 m |
+| Naval mine (Proximity Blast) | On a chain, or an old depth-charge barrel with hazard stripes. When the plane approaches it blinks and shows a dashed blast circle, then explodes so the blast lands as the plane arrives. Deeper down a row can hold two; since v182 (on every map) a pair comes in one of five layouts: left then right lower down, right then left lower down, side by side with the middle open, one above the other on one side, or one in the centre and one lower on a far side (until v182 always the first). The explosion is a cartoon burst (a spiky yellow and orange star) with speed lines and puffs of smoke | New | ~50 m |
 | School of fish (Conveyor, v124) | A row of sardines, butterflyfish or mackerel crossing, heads the way they swim (glowing lanternfish in v124–v178, removed in v179: conveyors stop at 1,500 m, so the abyss never showed them) | Paper clips | ~50 m |
 | Moray eel (Wall Piston) | Lunges out of a hole in the rock wall; or a mantis shrimp punching its club out of its burrow | Cutter | ~65 m |
 | Ocean current (Push Zone) | Moving water pushes the plane sideways (no body to hit), sometimes carrying bits of kelp near the surface. Only appears before 700 m (since v55) | Desk fan | ~75 m |
