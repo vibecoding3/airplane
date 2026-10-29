@@ -135,6 +135,8 @@ function drawBestLine() {
   ctx.restore();
 }
 
+// Ocean only (v166): under each depth marker, the name of the region below it, one per depth-art layer (ART_BOUNDS)
+const SEA_REGIONS = ['Sunlit reef', 'Twilight zone', 'Sunken ruins', 'Dome city', 'The abyss'];
 function drawDepthMarkers() {
   for (let k = Math.max(1, pageIndexAt(dist - 20) + 1), y; (y = pageTop(k) - dist) < H + 20; k++) {
     const col = mapId === 'city' ? NEON_MARKS[(k - 1) % NEON_MARKS.length] : isDark(pageColor(k)) ? '#d8eefa' : COL.graphite;
@@ -144,6 +146,10 @@ function drawDepthMarkers() {
     ctx.setLineDash([]);
     ctx.fillStyle = col; ctx.font = '700 15px Kalam, cursive'; ctx.textAlign = 'right';
     ctx.fillText(fmt(k * PAGE_M) + ' m', W - 10, y - 6);
+    if (mapId === 'sea') {
+      ctx.font = '700 13px Kalam, cursive';
+      ctx.fillText(SEA_REGIONS[ART_BOUNDS.filter(b => b <= k * PAGE_M).length], W - 10, y + 16);
+    }
     ctx.restore();
   }
 }
