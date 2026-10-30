@@ -153,17 +153,25 @@ function drawMoray(o, sy) {
   ctx.restore();
 }
 
+// the Ocean's Charged Beam warning (v188): a bright orange dashed line on a dark edge, so it reads on the pale reef
+// water and in the black abyss alike (the pale line in each look's own colour was barely visible)
+function seaBeamWarn(x0, L, t) {
+  const k = Math.min(1, t / 0.7);
+  ctx.save(); ctx.setLineDash([8, 6]); ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + L, 0);
+  ctx.globalAlpha = 0.55 + 0.45 * k;
+  ctx.strokeStyle = 'rgba(20,10,30,.75)'; ctx.lineWidth = 5; ctx.stroke();
+  ctx.strokeStyle = '#ff8a1a'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.restore();
+}
+
 // electric eel: lies along its wall; charging shows a dashed preview, then a lightning bolt crosses
 function drawZap(o, sy) {
   ctx.save();
   toolFrame(o, sy);
   const x0 = ZAP_BODY, L = o.len;
   if (o.phase === 'charge') {
-    const k = Math.min(1, o.t / 0.7);
-    ctx.save();
-    ctx.strokeStyle = `rgba(255,236,120,${0.25 + 0.6 * k})`; ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
-    ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + L, 0); ctx.stroke();
-    ctx.restore();
+    seaBeamWarn(x0, L, o.t);
     ctx.strokeStyle = '#fff3a0'; ctx.lineWidth = 1.4; ctx.beginPath();
     for (let i = 0; i < 3; i++) { const a = rand(-1, 1); ctx.moveTo(x0, 0); ctx.lineTo(x0 + Math.cos(a) * 10, Math.sin(a) * 10); }
     ctx.stroke();

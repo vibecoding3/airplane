@@ -1,6 +1,6 @@
 # Paper Nosedive — Game Status
 
-Current version: **v187** (2026-10-29)
+Current version: **v188** (2026-10-30)
 Live game: https://vibecoding3.github.io/airplane/
 Repository: https://github.com/vibecoding3/airplane
 
@@ -350,7 +350,7 @@ Every mechanic in section 6 except the Telegraphed Slam. Most sea obstacles reus
 | Crab (Spinning Blades, v124) | A crab, or a lobster, spinning with its two claws snapping open and shut; the round shell covers the hit circles behind the pivot | Scissors | ~80 m |
 | Giant clam (Closing Jaws) | Two shell lips that snap shut and open; or the two halves of a sunken ship's hull with portholes | Erasers | ~100 m |
 | Submarine (Wall Turret) | Fires torpedoes across; or a pistol shrimp snapping bubble bullets; or a shipwreck cannon firing cannonballs. The bow light (claw, touch-hole) blinks just before | Glue tube | ~100 m |
-| Electric eel (Charged Beam) | Charges with a dashed preview line, then zaps a short lightning bolt out from the wall (14–22% of the width); or an electric ray (a sea animal) whose organs glow while it charges | New | ~135 m |
+| Electric eel (Charged Beam) | Charges with a dashed preview line (since v188 bright orange on a dark edge for every Ocean look, so it shows on any water), then zaps a short lightning bolt out from the wall (14–22% of the width); or an electric ray (a sea animal) whose organs glow while it charges | New | ~135 m |
 | Kelp (Telegraphed Sweep) | Seaweed frond sweeps out from the wall after a green dashed warning; or an octopus arm with suckers reaching out of a crevice | Cat paw | ~135 m |
 | Anchor (Sweeping Arm, v124) | An anchor on its chain swinging all the way round a ring bolt, or a giant squid's tentacle (400 m on) | Drawing compass | ~215 m |
 

@@ -268,9 +268,7 @@ function drawDeepBeam(o, sy) {
   ctx.save();
   toolFrame(o, sy);
   if (o.phase === 'charge') {
-    const k = Math.min(1, o.t / 0.7);
-    ctx.save(); ctx.strokeStyle = lamp ? `rgba(255,240,170,${0.25 + 0.6 * k})` : `rgba(170,255,220,${0.25 + 0.6 * k})`; ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
-    ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + L, 0); ctx.stroke(); ctx.restore();
+    seaBeamWarn(x0, L, o.t);
   } else if (o.phase === 'zap') {                  // a straight beam of light, wide and soft with a bright core
     const c = lamp ? [255, 240, 170] : [170, 255, 220], flick = 0.85 + Math.random() * 0.15;
     ctx.fillStyle = `rgba(${c},${0.22 * flick})`; ctx.beginPath(); ctx.moveTo(x0, -5); ctx.lineTo(x0 + L, -9); ctx.lineTo(x0 + L, 9); ctx.lineTo(x0, 5); ctx.closePath(); ctx.fill();

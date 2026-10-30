@@ -437,8 +437,7 @@ function drawSunkGlyph(o, sy) {
   ctx.save();
   toolFrame(o, sy);
   if (o.phase === 'charge') {
-    ctx.save(); ctx.strokeStyle = col; ctx.globalAlpha = 0.3 + 0.6 * Math.min(1, o.t / 0.7); ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
-    ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0 + L, 0); ctx.stroke(); ctx.restore();
+    seaBeamWarn(x0, L, o.t);
   } else if (o.phase === 'zap') {
     if (cable) {
       const pts = []; for (let x = x0; x < x0 + L; x += 10) pts.push([x, x === x0 ? 0 : rand(-5, 5)]); pts.push([x0 + L, 0]);
